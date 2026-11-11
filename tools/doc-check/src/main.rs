@@ -3,12 +3,7 @@
 //! What it promises is `docs/requirements/shared/doc-check.md`, and how it is built is
 //! `docs/spec/shared/doc-check.md`. Section numbers in comments are that specification's.
 
-mod markdown;
-mod rules;
-mod tables;
-mod vault;
-
-use rules::{Finding, capitalise};
+use doc_check::{Finding, capitalise};
 use std::collections::BTreeSet;
 use std::fs::OpenOptions;
 use std::io::Write;
@@ -115,11 +110,10 @@ fn main() -> ExitCode {
         Ok(o) => o,
         Err(reason) => return could_not_run(&reason, None),
     };
-    let vault = match vault::load(&opts.root) {
-        Ok(v) => v,
+    let findings = match doc_check::check(&opts.root) {
+        Ok(f) => f,
         Err(reason) => return could_not_run(&reason, opts.summary.as_ref()),
     };
-    let findings = rules::run(&vault);
     let (line, sentence) = outcome(&findings);
 
     let mut out = String::new();
@@ -143,29 +137,6 @@ fn main() -> ExitCode {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::path::Path;
-
-    /// §4.7, coverage: every rule has a breaking case and a keeping case, and every case
-    /// directory names a rule (SHR:DOC-CHECK-NFR6).
-    #[test]
-    fn every_rule_has_a_breaking_case_and_a_keeping_case() {
-        let cases = Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/rules");
-        let mut problems = Vec::new();
-        for (rule, _) in rules::RULES {
-            for kind in ["breaks", "keeps"] {
-                if !cases.join(rule).join(kind).join("docs").is_dir() {
-                    problems.push(format!("rule {rule} has no {kind} case"));
-                }
-            }
-        }
-        for entry in std::fs::read_dir(&cases).expect("tests/rules exists") {
-            let name = entry.unwrap().file_name().into_string().unwrap();
-            if !rules::RULES.iter().any(|(r, _)| *r == name) {
-                problems.push(format!("tests/rules/{name} names no rule"));
-            }
-        }
-        assert!(problems.is_empty(), "{}", problems.join("\n"));
-    }
 
     #[test]
     fn unknown_options_and_missing_values_are_refused() {

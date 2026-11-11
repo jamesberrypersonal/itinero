@@ -28,6 +28,7 @@ keeps:
 | [0003](0003-the-checker-is-built-in-rust-and-run-through-just.md) | The documentation checker is built in Rust and run through just | workspace | Accepted |
 | [0004](0004-a-trip-is-read-only-offline.md) | A trip can be read without a connection, but changed only with one | planner, web | Accepted |
 | [0005](0005-itinero-records-no-telemetry.md) | Itinero records no telemetry, so the documents reserve no place for it | workspace | Accepted |
+| [0006](0006-new-documents-start-from-skeletons.md) | New documents start from skeletons that a second program writes | shared/doc-check, shared/doc-scaffold | Accepted |
 
 ## By subject
 
@@ -56,3 +57,10 @@ keeps:
 | ADR | Title | Status |
 |---|---|---|
 | [0001](0001-the-checker-reads-documents-line-by-line.md) | The documentation checker reads each document line by line | Accepted |
+| [0006](0006-new-documents-start-from-skeletons.md) | New documents start from skeletons that a second program writes | Accepted |
+
+### shared/doc-scaffold
+
+| ADR | Title | Status |
+|---|---|---|
+| [0006](0006-new-documents-start-from-skeletons.md) | New documents start from skeletons that a second program writes | Accepted |

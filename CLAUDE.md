@@ -6,10 +6,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Itinero is a trip planner: build itineraries day by day, organise bookings, keep every detail in
 one place. The repository is documentation-first. The product itself is not built yet, and the only
-code is `tools/doc-check`, the checker that holds the documentation to its rules.
+code is `tools/doc-check`, the checker that holds the documentation to its rules, and
+`tools/doc-scaffold`, which starts new documents as skeletons that pass it.
 
 - `docs/` is the documentation, read both as an Obsidian vault and rendered on GitHub.
-- `tools/doc-check/` is a Rust package, run through `just`.
+- `tools/doc-check/` and `tools/doc-scaffold/` are Rust packages, run through `just`.
 - `tools/hooks/pre-commit` is an optional hook that runs the checker before each commit.
 
 ## Commands
@@ -19,19 +20,24 @@ repository root.
 
 ```
 just check-docs                 # check every document in docs/ (exit 0 clean, 1 findings, 2 could not run)
-just test-docs                  # doc-check's whole test suite
+just test-docs                  # the whole test suites of doc-check and doc-scaffold
 just install-hook               # install the pre-commit hook
+just new-component <system> <slug> <PREFIX> "<description>"   # start a component's documents and rows
+just new-system <slug> <PREFIX> "<description>" "<keeper>"     # register a system and start its roadmap
+just new-decision "<title>" <scope>... [--slug <slug>]        # start the next decision record
+just new-guide <group> <slug> "<title>" "<description>"       # start a guide
 ```
 
 Narrower test and development commands:
 
 ```
-cargo test -p doc-check --bin doc-check            # unit tests, including the rule-coverage test
-cargo test -p doc-check --bin doc-check <name>     # one unit test, by name or part of one
+cargo test -p doc-check --lib                      # unit tests, including the rule-coverage test
+cargo test -p doc-check --lib <name>               # one unit test, by name or part of one
 cargo test -p doc-check --test rules               # every rule case under tools/doc-check/tests/rules/
 cargo test -p doc-check --test behaviour <name>    # one behaviour test
 cargo test --release -p doc-check -- --ignored     # the 1,000-document speed test (NFR1)
-cargo clippy -p doc-check --all-targets            # lints; keep at zero warnings
+cargo test -p doc-scaffold                         # doc-scaffold's tests, which run doc-check on its output
+cargo clippy -p doc-check -p doc-scaffold --all-targets   # lints; keep at zero warnings
 cargo run -p doc-check -- --root tools/doc-check/tests/rules/links/breaks   # run against one case
 ```
 
@@ -52,7 +58,8 @@ How the vault is arranged:
   and `concerns/`. Documents sit at their component's address, such as
   `requirements/shared/doc-check.md`.
 - **The registry comes first.** `docs/components.md` declares every system, component and concern,
-  and its requirement prefix, before any document names it.
+  and its requirement prefix, before any document names it. The `just new-*` recipes add the rows
+  for a new component or system, and every index row, and mark what is left with "To be written".
 - **The live work list.** `docs/TODO.md` holds the work still owed.
 
 Rules that are easy to break, and that doc-check reports:
@@ -108,7 +115,8 @@ Rules about process, which doc-check cannot see:
    `RULES`: one entry for each row of the table of mechanical checks in `documentation-system.md`,
    with the heading of that document each finding cites.
 5. **`main.rs`** prints the findings, writes the optional `--summary` file for the CI job summary,
-   and sets the exit status.
+   and sets the exit status. `lib.rs` exposes the run as `doc_check::check`, which only
+   doc-scaffold's tests use.
 
 Constraints to keep:
 
@@ -131,6 +139,15 @@ Adding or changing a rule takes all of these together:
 
 The coverage test fails for any rule missing either case. The `case-collisions` breaking case needs a
 case-sensitive file system, so it is skipped on macOS and runs in CI, on Linux.
+
+## doc-scaffold
+
+`docs/spec/shared/doc-scaffold.md` specifies it, and ADR-0006 records why it is a separate program.
+It reads the registry and the index tables, refuses before writing anything, and edits existing
+files only by inserting lines. Its tests in `tools/doc-scaffold/tests/scaffold.rs` run each command
+on a copy of the real vault and require doc-check's findings to be unchanged afterwards. A change
+to what a new document must hold, in `documentation-system.md`, changes doc-scaffold's skeletons in
+`src/commands.rs` in the same pull request.
 
 ## Continuous integration
 

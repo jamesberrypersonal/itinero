@@ -58,6 +58,48 @@ Read it left to right:
 A finding is not a mistake to be embarrassed by. During this guide, most stages end with findings
 that the next stage clears.
 
+## Starting from skeletons
+
+The steps below write every document and every row by hand, so that you see what each rule asks
+for. Once you know them, one command does the mechanical part of steps 3 to 6. It registers the
+component, writes its requirements and its specification as skeletons, and adds every row the
+indexes and the live list need:
+
+```
+just new-component <system> <slug> <prefix> <description>
+```
+
+The scaffolder, doc-scaffold, was started with its own command:
+
+```
+just new-component shared doc-scaffold SHR:DOC-SCAFFOLD "Writes the skeleton documents and index rows for a new component, system, decision record or guide"
+```
+
+It printed:
+
+```
+doc-scaffold: created docs/requirements/shared/doc-scaffold.md
+doc-scaffold: created docs/spec/shared/doc-scaffold.md
+doc-scaffold: changed docs/TODO.md
+doc-scaffold: changed docs/components.md
+doc-scaffold: changed docs/requirements/shared/README.md
+doc-scaffold: changed docs/spec/shared/README.md
+doc-scaffold: next, replace each "To be written" in the files above, then run just check-docs.
+```
+
+The vault passes `just check-docs` straight away. The checker cannot tell a placeholder from a
+finished sentence, so search the files listed for "To be written", and replace each one as steps 4
+and 6 describe. A command that cannot be carried out, such as one naming a system that is not
+registered, writes nothing and says why.
+
+Three more commands start the other things an author adds:
+
+| Command | Starts |
+|---|---|
+| `just new-system <slug> <prefix> <description> <keeper>` | A system: its registry row, its tag, and its roadmap |
+| `just new-decision <title> <scope>...` | The next decision record, with its rows in both views of the decisions index. It takes `--slug` to shorten the filename, and `--date` to set the Date line |
+| `just new-guide <group> <slug> <title> <description>` | A guide, listed under `workspace` or a registered system in the guides index |
+
 ## The steps
 
 ### 1. Start a branch
@@ -416,8 +458,8 @@ address in your browser.
 
 ## Confirming the work
 
-On the pull request's page on GitHub, the check named check-docs runs on its own. It runs doc-check's
-tests and then doc-check itself, and the pull request can merge only once it passes. When it fails,
+On the pull request's page on GitHub, the check named check-docs runs on its own. It runs the tests
+of doc-check and doc-scaffold, and then doc-check itself, and the pull request can merge only once it passes. When it fails,
 open its summary, which lists every finding in the form you read in this guide. Fix them on your
 branch, commit, and push again.
 
