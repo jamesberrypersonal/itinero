@@ -10,8 +10,7 @@ rule. Each finding says where the problem is, which rule it breaks, and what wou
 
 ## 2. Scope
 
-doc-check covers the rules in the table of mechanical checks in `documentation-system.md`, and the
-three checks its requirements add: the claim check, the code-span check and the raw-HTML check. It
+doc-check covers the rules in the table of mechanical checks in `documentation-system.md`. It
 reads every markdown file under `docs/`, and the vault's directory structure. It never writes to
 the vault.
 
@@ -31,7 +30,9 @@ Deliberately absent:
 
 ### 3.1 User interface
 
-doc-check is a command-line program. An author runs it from any directory in the repository:
+doc-check is a command-line program, written in Rust and run through just (ADR-0003, the
+documentation checker is built in Rust and run through just). An author runs it from any directory
+in the repository:
 
 ```
 just check-docs [--summary <file>]
@@ -148,7 +149,9 @@ Within a heading, table cell or text line, doc-check finds these parts:
 - **Wikilinks.** `[[` outside code spans opens one, and it closes at `]]`.
 - **Bold text.** Text between a pair of `**` on the same line, outside code spans.
 - **Requirement identifiers.** A system or concern prefix of two to four capital letters, then
-  optionally a colon and a component name of three to twelve capitals, digits and hyphens, then a hyphen, a kind (`F`, `NFR` or `NR`) and a number. The kind and number are the last hyphen-joined part, so in `SHR:DOC-CHECK-F1` the component name is `DOC-CHECK`. An identifier is found in prose and in code spans, but not inside a link target.
+  optionally a colon and a component name of three to twelve capitals, digits and hyphens, then a hyphen, a kind (`F`, `NFR` or `NR`) and a number. The kind and number are the last hyphen-joined part, so in `SHR:DOC-CHECK-F1` the component name is `DOC-CHECK`. An identifier has no letter,
+  digit, colon or hyphen directly before it, so `PREFIX-F1` is not one. An identifier is found in
+  prose and in code spans, but not inside a link target.
 - **Unprefixed identifiers.** A kind and a number standing alone, such as a bare F7, with no
   hyphen, letter or digit directly before it.
 - **Decision citations.** `ADR-` and four digits, in prose or in code spans.
@@ -168,8 +171,9 @@ number, optionally followed by further dot-joined numbers, and then a full stop 
 ### 4.3 The rules
 
 Each rule has a name, which every finding prints. There is one rule for each row of the table of
-mechanical checks in `documentation-system.md`, and one for each of the three checks the
-requirements add. Each rule names the heading of `documentation-system.md` that states it.
+mechanical checks in `documentation-system.md`. The last three rows, `claims`, `code-spans` and
+`raw-html`, joined the table with ADR-0002 (the checker confirms requirement claims, one-line code
+spans and the absence of raw HTML). Each rule names the heading of `documentation-system.md` that states it.
 
 | Rule | Checks | Stated under |
 |---|---|---|
@@ -194,7 +198,7 @@ requirements add. Each rule names the heading of `documentation-system.md` that 
 | `live-list-shape` | The live list keeps its shape | The live work list and the changelog |
 | `tags` | The live list's Tags table and the registry agree | The live work list and the changelog |
 | `claims` | Every requirement is claimed by some specification | Requirements this satisfies |
-| `code-spans` | Every code span closes on the line it opens on | What is checked mechanically |
+| `code-spans` | Every code span closes on the line it opens on | Markdown rules |
 | `raw-html` | No HTML tag or comment appears outside code | Markdown rules |
 
 Three tables are read once and shared by the rules.

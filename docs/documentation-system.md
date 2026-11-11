@@ -61,6 +61,12 @@ These are not preferences. A document that breaks one renders wrongly for half i
   diagram with mermaid-cli before committing, never by eye. Sequence diagrams reject parentheses
   and `+` in participant aliases, and treat `;` as a statement separator that silently splits a
   message label.
+- **No raw HTML, comments included.** GitHub drops any tag it does not allow and shows the page
+  around it as normal. Obsidian renders the tag, and an unknown tag left open swallows the rest of
+  the document. A placeholder such as `<reason>` goes in a code span.
+- **A code span opens and closes on one line.** The checker reads a document line by line, so a
+  span wrapped across two lines is a fault in the document, even though both renderers accept it.
+  A hard-wrapped paragraph breaks its line before or after a span, never inside one.
 - **Prefer tables to prose.** Use a diagram only where it earns its space.
 - **Fenced code blocks are exempt from every check.** That is how a template can show a rule
   being broken without breaking it.
@@ -192,7 +198,7 @@ address against the component registry. The component registry holds four tables
 | [api](spec/planner/api.md) | planner | PLN:API | `@itinero/planner` | | The planner's HTTP API, and how it starts, runs and stops |
 | [itinerary](spec/planner/itinerary.md) | planner | PLN:ITINERARY | `@itinero/planner` | | How trips, their days and their items are stored and changed |
 | email-parser | bookings | BKG:PARSER | `@itinero/email-parser` | `packages/email-parser/docs/` | Reads a confirmation email and extracts the booking it confirms |
-| [doc-check](spec/shared/doc-check.md) | shared | SHR:DOC-CHECK | `@itinero/doc-check` | | The checker that holds every document in this vault to the documentation system |
+| [doc-check](spec/shared/doc-check.md) | shared | SHR:DOC-CHECK | `doc-check` | | The checker that holds every document in this vault to the documentation system |
 
 ## Booking kinds
 
@@ -221,9 +227,7 @@ address against the component registry. The component registry holds four tables
 | Is | One line saying what it is, in the reader's words |
 
 **Every kind of booking is a component of the system `bookings`**, at `bookings/<kind>`, so its
-table needs no System column. A kind's slug is the name after its prefix's colon, in lower case
-(ADR-0004, the booking model is a system of its own, and each kind of booking is one of its
-components).
+table needs no System column. A kind's slug is the name after its prefix's colon, in lower case.
 
 **A slug links only once its document exists.** A slug that is not yet a link names something
 documented only outside the vault, which makes the component registry the progress report for moving
@@ -348,14 +352,22 @@ component registry gives its system, component or concern. A bare "F7" is never 
 rejects an unprefixed identifier in heading, backtick, bold or parenthesis position.
 
 **A prefix says where its requirement belongs, so a reader who has never seen it can guess.** A
-system's or a concern's prefix stands alone: `PLN-F3` is the planner's, `OTEL-F2` the telemetry
-concern's. A component's names its system first, then a colon, then the component: `BKG:PARSER-F3`
-is the bookings system's email parser. The colon is the looser joint and the hyphen before the kind the tighter,
-which is why the two differ. The name after the colon is a word or two from the component's own
+system's or a concern's prefix stands alone. A component's names its system first, then a colon,
+then the component:
+
+```
+PLN-F3           the planner's third functional requirement
+OTEL-F2          the telemetry concern's second
+BKG:PARSER-F3    the third of the bookings system's email parser
+```
+
+The colon is the looser joint and the hyphen before the kind the tighter, which is why the two
+differ. The name after the colon is a word or two from the component's own
 name, shortened only as far as it stays guessable, as `BKG:PARSER` is for the email parser, with a
 number on the end for a later version of the same thing. A shared component's prefix opens with
 `SHR`, since `shared` is a folder and not a system. The checker holds the shape; a reviewer holds
-the guess. The examples below use `APP`, a system that does not exist.
+the guess. The template below uses `APP`, a system that does not exist. The examples in prose use
+the documentation checker's own prefix, `SHR:DOC-CHECK`.
 
 | Kind | Form | Means |
 |---|---|---|
@@ -368,9 +380,9 @@ by a table whose first column is the identifier in bold.
 
 **Every requirement carries a block ID, so a link can land on it.** A functional or non-functional
 requirement's body paragraph ends with its identifier in lower case, with the colon written as a
-hyphen because Obsidian allows nothing else in a block ID: `APP:SERVICE-F3` ends with
-` ^app-service-f3`. Obsidian can give a table only one block ID, so a document's non-requirements
-table is followed by a line holding `^app-service-nr`, and a link to any non-requirement lands on
+hyphen because Obsidian allows nothing else in a block ID: `SHR:DOC-CHECK-F3` ends with
+` ^shr-doc-check-f3`. Obsidian can give a table only one block ID, so a document's non-requirements
+table is followed by a line holding `^shr-doc-check-nr`, and a link to any non-requirement lands on
 the table. A non-requirement has an identifier because a requirement can otherwise depend on
 something that is secretly a non-goal, and the identifier is what makes that visible.
 
@@ -596,7 +608,7 @@ own words everything it relies on:
   plain words
 - each system, component and package is named, never "the old one", "the new model" or "the app
   this replaces"
-- each record or requirement cited comes with what it says, such as "ADR-0003 (a trip's dates are
+- each record or requirement cited comes with what it says, such as "ADR-NNNN (a trip's dates are
   those of its first and last items)". A citation is where to read the reasoning, never the only
   place a fact the record needs is stated
 - words that assume the reader knows what came before, such as "now", "still", "no longer" and "as
@@ -850,7 +862,8 @@ records do.
 **`TODO.md` is where the work stands**: the things that need active work, and the questions waiting
 on a decision. An item is the fourth level of a roadmap's work, below a milestone, when a milestone
 names it as a step. Every item is a `### TODO-NN — title` heading carrying a stable identifier,
-allocated in order and never reused, and the list names the next free number. Every item carries a
+allocated in order and never reused, and the list names the next free number in a `*Next free:*`
+line. Every item carries a
 `*Tags:*` line drawn from a Tags table the list defines, so "the list for one area" is a filter
 rather than a second document. Every registered address is a tag, such as `planner` or
 `planner/api`, and has a row in the table, added in the commit that registers it: the document
@@ -865,8 +878,8 @@ Reason can be overtaken by work finished after it was written, and without a dat
 nor a session can tell which changelog entries and which commits arrived afterwards. The identifier
 says the order items were written in but not when, and an item can sit through a release while the
 code moves under it. Every item states four things, each opening a paragraph with its label: the
-*Problem* in one sentence, the *Reason* it is that way, the *Proposal* in one or two sentences, and
-the *Releases* it is projected to move.
+`*Problem:*` in one sentence, the `*Reason:*` it is that way, the `*Proposal:*` in one or two
+sentences, and the `*Releases:*` it is projected to move.
 
 **Two people allocating items at once renumber on merge.** Several people work in this
 workspace, and each may add items on their own branch. Numbers merged to `main` first are final.
@@ -946,7 +959,7 @@ A citation names a stable address, and the checker resolves it.
 
 | Cite | As | Resolves against |
 |---|---|---|
-| A requirement | `APP:SERVICE-F3`, in backticks, prefixed; or a link carrying its block ID, `[APP:SERVICE-F3](../requirements/app/service.md#^app-service-f3)` | The heading or table row that defines it, in the document that owns the prefix |
+| A requirement | `SHR:DOC-CHECK-F3`, in backticks, prefixed; or a link carrying its block ID, `[SHR:DOC-CHECK-F3](../requirements/shared/doc-check.md#^shr-doc-check-f3)` | The heading or table row that defines it, in the document that owns the prefix |
 | A decision | `ADR-0001`, or a link to its file | The record on disk and the index |
 | A section of a specification | `§4`, `§3.2`, after naming the document | The numbered headings the cited document defines |
 | A system, component or concern | Its address, such as `planner/api`, or a link to its specification | The component registry |
@@ -963,21 +976,24 @@ document that numbers no sections is a finding, not a pass: a decision record ha
 
 **Cite by prefixed identifier or not at all.** In prose, a citation adds a source and never carries
 the claim; the sentence must survive the link's removal. In code, a cited requirement carries its
-meaning: `APP:SERVICE-F3 (the service survives loss of one node)`, not `APP:SERVICE-F3` alone.
+meaning: `SHR:DOC-CHECK-F3 (each finding says where, which rule, what was found, and what would pass)`,
+not `SHR:DOC-CHECK-F3` alone.
 The identifier makes it greppable; the gloss makes it readable.
 
 ---
 
 ## What is checked mechanically
 
-**The checker is `doc-check`, a package in this workspace.** An author runs it with
-`npm run check-docs`, and continuous integration runs it on every push. What it promises is
+**The checker is `doc-check`, a Rust package in this workspace at `tools/doc-check`.** An author
+runs it with `just check-docs`, from any directory in the repository. Continuous integration runs
+it on every push and every pull request, and a pull request with findings fails its check. What it promises is
 [requirements/shared/doc-check.md](requirements/shared/doc-check.md), and how it reads a document
 is [spec/shared/doc-check.md](spec/shared/doc-check.md).
 
 Most of the rules above are checkable, so they are checked rather than remembered. The checker
 runs over every markdown file in the vault, and over nothing outside it: documentation in package
-folders is never checked. It prints findings as `file:line`, and exits non-zero on any. A person may
+folders is never checked. It prints findings as `file:line`, and exits non-zero on any. Its exit
+status also tells a run with findings apart from one that could not run. A person may
 also run it from a pre-commit hook, which the guides say how to install. The hook fails hard when
 the checker cannot run rather than skipping: a check that quietly stops running is not a check.
 
@@ -1003,6 +1019,9 @@ the checker cannot run rather than skipping: a check that quietly stops running 
 | Only the rules file and the changelog link to the live list, and any other document cites an item only as `until TODO-NN is done`, naming an item the list holds or the changelog records | The list is live, and an item leaves it as soon as it is done. Only a condition stays true once it has |
 | The live list has the shape above: identifiers, tags from the table, four parts, a next number past every one ever used | A list edited in a hurry drifts back into prose |
 | The live list's Tags table has a row for every registered address, and every tag in it holding a slash is one | The document checker reads tags from the table alone, and a renamed component leaves its old address behind |
+| Every functional and non-functional requirement is cited by some specification's claim table | A requirement nothing claims is a promise nothing implements |
+| Every code span closes on the line it opens on | The checker reads line by line, so a wrapped span is misread silently |
+| No HTML tag or comment appears outside code | Obsidian renders an unknown tag, and one left open swallows the rest of the page, while GitHub shows nothing wrong |
 
 **Fenced code blocks are skipped for every check, and there is no suppression syntax.** That is
 what lets the templates in this document show a rule without breaking it, and it is deliberate: a
@@ -1012,14 +1031,13 @@ exception, narrow the rule. Drafts are excluded by their `-draft` suffix. Any di
 them, and `.gitignore` keeps it off every other machine.
 
 **A document the checker misreads is repaired, not the checker.** The checker reads a document
-line by line rather than parsing it (ADR-0001 records why). Markdown both renderers accept can
-still be read wrongly, as a code span wrapped across two lines is. The document is rewritten into
-the form the checker reads, which is a mechanical edit, and the checker stays small.
+line by line rather than parsing it (ADR-0001 records why). The forms it reads are part of these
+rules, so a document in any other form is at fault, even where both renderers accept it. A code
+span wrapped across two lines is the known case. The document is rewritten into the form the
+checker reads, which is a mechanical edit, and the checker stays small.
 
-**Two things it does not do.** Mermaid needs mermaid-cli, so diagrams are validated by hand before
-committing. And it does not answer "is every requirement claimed by some specification?" until
-every component has migrated, because a check that fails on everything gets switched off. Once they
-have, it is the cheapest way to find a requirement nothing implements.
+**One thing it does not do.** Mermaid needs mermaid-cli, so diagrams are validated by hand before
+committing.
 
 ---
 

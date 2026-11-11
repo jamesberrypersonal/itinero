@@ -24,8 +24,17 @@ keeps:
 | ADR | Title | Scope | Status |
 |---|---|---|---|
 | [0001](0001-the-checker-reads-documents-line-by-line.md) | The documentation checker reads each document line by line | shared/doc-check | Accepted |
+| [0002](0002-claims-code-spans-raw-html-and-list-labels-are-checked.md) | Requirement claims, one-line code spans, no raw HTML and the live list's labels are checked | workspace | Accepted |
+| [0003](0003-the-checker-is-built-in-rust-and-run-through-just.md) | The documentation checker is built in Rust and run through just | workspace | Accepted |
 
 ## By subject
+
+### workspace
+
+| ADR | Title | Status |
+|---|---|---|
+| [0002](0002-claims-code-spans-raw-html-and-list-labels-are-checked.md) | Requirement claims, one-line code spans, no raw HTML and the live list's labels are checked | Accepted |
+| [0003](0003-the-checker-is-built-in-rust-and-run-through-just.md) | The documentation checker is built in Rust and run through just | Accepted |
 
 ### shared/doc-check
 

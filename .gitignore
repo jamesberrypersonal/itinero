@@ -26,3 +26,6 @@ npm-debug.log*
 
 # Obsidian's local vault state (docs/ is the documentation vault)
 docs/.obsidian/
+
+# Documents an author sets aside while replacing them (documentation-system.md)
+graveyard/

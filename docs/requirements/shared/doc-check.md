@@ -4,9 +4,8 @@
 
 What the shared component `shared/doc-check` promises to the people who write the vault. doc-check
 reads every document in the vault and reports each place where a document breaks a rule. The rules
-it checks are those in the table of mechanical checks in `documentation-system.md`, and three
-more: every requirement is claimed by some specification, every code span stays on one line, and
-no document holds raw HTML. These requirements name each rule they cover, and leave its full
+it checks are exactly those in the table of mechanical checks in `documentation-system.md`. These
+requirements name each rule they cover, and leave its full
 statement to that document. The
 component registry, `components.md`, gives doc-check the prefix `SHR:DOC-CHECK`.
 
@@ -494,13 +493,11 @@ doc-check, using only the Rust standard library and fetching nothing. The comman
 
 ### SHR:DOC-CHECK-NFR6 — Every rule has a test that breaks it and a test that keeps it
 
-For every row of the table of mechanical checks, and for each check this document adds beyond it,
-doc-check's test suite holds a case that breaks the rule and a case that keeps it. The suite fails
+For every row of the table of mechanical checks, doc-check's test suite holds a case that breaks the rule and a case that keeps it. The suite fails
 while any of them lacks either case. ^shr-doc-check-nfr6
 
 - **Verification:** run doc-check's test suite, then
-    - confirm it passes, with at least one breaking case and one keeping case for every row, and
-      for each of the checks `SHR:DOC-CHECK-F13`, `SHR:DOC-CHECK-F15` and `SHR:DOC-CHECK-F16` make
+    - confirm it passes, with at least one breaking case and one keeping case for every row
     - confirm every breaking case is reported under its own rule, and every keeping case produces no
       finding
     - delete one rule's breaking case, and confirm the suite fails, naming the rule
@@ -522,7 +519,7 @@ while any of them lacks either case. ^shr-doc-check-nfr6
 
 | Identifier | doc-check does not | Because |
 |---|---|---|
-| **SHR:DOC-CHECK-NR1** | Check a rule of `documentation-system.md` outside its table of mechanical checks, other than the checks `SHR:DOC-CHECK-F13`, `SHR:DOC-CHECK-F15` and `SHR:DOC-CHECK-F16` make, such as a document's opening title, or a specification's eight numbered sections | The table is the list of rules the documentation system says are checked. A rule joins it through a decision record scoped `workspace`, which the rules keeper lands with the change to the table and to doc-check |
+| **SHR:DOC-CHECK-NR1** | Check a rule of `documentation-system.md` outside its table of mechanical checks, such as a document's opening title, or a specification's eight numbered sections | The table is the list of rules the documentation system says are checked. A rule joins it through a decision record scoped `workspace`, which the rules keeper lands with the change to the table and to doc-check |
 | **SHR:DOC-CHECK-NR2** | Check any rule of `style.md` | The style rules are applied by the author and the reviewer, and most need judgement a checker cannot make |
 | **SHR:DOC-CHECK-NR3** | Validate a Mermaid diagram | Validating a diagram needs mermaid-cli, so the author validates each diagram before committing it |
 | **SHR:DOC-CHECK-NR4** | Check documentation outside the vault | A package folder named in the registry's Outside the vault column stays authoritative for its component, under its own rules |
