@@ -1,0 +1,3 @@
+docs/a.md:3: identifiers: ABC-F1's prefix ABC is not registered. (documentation-system.md, "Identifiers")
+docs/a.md:3: identifiers: SHR:OTHER-F1 cites docs/requirements/shared/other.md, which does not exist. (documentation-system.md, "Identifiers")
+docs/a.md:3: identifiers: docs/requirements/shared/thing.md does not define SHR:THING-F9. (documentation-system.md, "Identifiers")

@@ -1,0 +1,24 @@
+# Holds every document in docs/ to the documentation system (docs/spec/shared/doc-check.md §3.4).
+name: check-docs
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  check-docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # rustup, preinstalled on the runner, installs the toolchain rust-toolchain.toml pins.
+      - name: Show the pinned toolchain
+        run: rustc --version
+
+      - uses: extractions/setup-just@v2
+
+      - name: Test doc-check
+        run: just test-docs
+
+      - name: Check the vault
+        run: just check-docs --summary "$GITHUB_STEP_SUMMARY"

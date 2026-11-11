@@ -1,0 +1,2 @@
+docs/requirements/shared/thing.md:5: block-ids: SHR:THING-F1's body paragraph does not end with its block ID. End the paragraph with " ^shr-thing-f1". (documentation-system.md, "Identifiers")
+docs/requirements/shared/thing.md:14: block-ids: the non-requirements table is not followed by its block ID line. Add the line ^shr-thing-nr after the table, with one blank line between them. (documentation-system.md, "Identifiers")

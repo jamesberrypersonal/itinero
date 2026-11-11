@@ -1,0 +1,3 @@
+docs/guides/README.md:1: indexes: docs/README.md does not link this index. Link it from docs/README.md. (documentation-system.md, "The layout")
+docs/guides/b.md:1: indexes: docs/guides/README.md does not link this document. Link it from docs/guides/README.md. (documentation-system.md, "The layout")
+docs/other/c.md:1: indexes: its directory has no index, docs/other/README.md. (documentation-system.md, "The layout")

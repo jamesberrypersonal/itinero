@@ -1,0 +1,1 @@
+docs/requirements/shared/thing.md:3: verification: SHR:THING-F1 has no verification clause. Add a "- **Verification:**" list of checks below its body. (documentation-system.md, "The shape of a requirement")

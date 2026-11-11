@@ -1,0 +1,4 @@
+docs/a.md:3: raw-html: raw HTML <reason>. Put it in a code span, or write its < as &lt;. (documentation-system.md, "Markdown rules")
+docs/a.md:5: raw-html: raw HTML </b>. Put it in a code span, or write its < as &lt;. (documentation-system.md, "Markdown rules")
+docs/a.md:5: raw-html: raw HTML <br/>. Put it in a code span, or write its < as &lt;. (documentation-system.md, "Markdown rules")
+docs/a.md:7: raw-html: raw HTML <!--. Put it in a code span, or write its < as &lt;. (documentation-system.md, "Markdown rules")

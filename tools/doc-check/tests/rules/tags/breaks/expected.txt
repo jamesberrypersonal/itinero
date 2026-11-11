@@ -1,0 +1,2 @@
+docs/TODO.md:5: tags: registered address planner has no row in the Tags table. Add a row for planner. (documentation-system.md, "The live work list and the changelog")
+docs/TODO.md:10: tags: tag planner/api holds a slash and is not a registered address. (documentation-system.md, "The live work list and the changelog")

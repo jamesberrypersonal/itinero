@@ -1,0 +1,1 @@
+docs/spec/shared/thing.md:1: concern-sections: it numbers no section 3.5, where the concern telemetry is covered. Add the numbered section. (documentation-system.md, "Cross-cutting concerns")

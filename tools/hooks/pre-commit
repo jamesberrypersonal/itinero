@@ -1,0 +1,14 @@
+#!/bin/sh
+# Runs doc-check before every commit. Installed by `just install-hook`, as
+# docs/guides/setting-up-the-repository.md describes.
+#
+# A commit is refused when the vault has findings, and also when doc-check cannot run at all:
+# a check that quietly stops running is not a check.
+if ! command -v just >/dev/null 2>&1; then
+    echo "pre-commit: just is not installed, so doc-check cannot run. The commit is refused." >&2
+    exit 1
+fi
+if ! just check-docs; then
+    echo "pre-commit: the commit is refused. Fix the findings above, then commit again." >&2
+    exit 1
+fi

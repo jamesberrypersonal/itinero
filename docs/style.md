@@ -196,7 +196,7 @@ blockquote blocks: a bold question label, one question per block, narrative pros
 discovered-the-hard-way consequence stays a callout, because a question would soften it.
 
 **STY-S4 — A citation names a stable address.** A document, a numbered section (`§4`) and an
-identifier (`SVC-F3`, `ADR-0001`) are stable addresses. A paragraph, a sentence and a point
+identifier (`SHR:DOC-CHECK-F3`, `ADR-0001`) are stable addresses. A paragraph, a sentence and a point
 partway through a section are not. Cite the smallest stable address that contains what you mean,
 and reiterate in place whatever the current section needs. The checker resolves every `§4`
 against the sections its target defines.

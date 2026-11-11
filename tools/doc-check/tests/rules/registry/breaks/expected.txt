@@ -1,0 +1,7 @@
+docs/components.md:1: registry: components.md has no Booking kinds table. (documentation-system.md, "The component registry")
+docs/components.md:8: registry: system planner is registered twice, first at line 7. (documentation-system.md, "The component registry")
+docs/components.md:9: registry: a system may not be named shared. (documentation-system.md, "The component registry")
+docs/components.md:10: registry: system prefix PLANR is not two to four capital letters. (documentation-system.md, "The component registry")
+docs/components.md:16: registry: component prefix PLN-API is not PLN, a colon, and three to twelve capitals, digits and hyphens. (documentation-system.md, "The component registry")
+docs/components.md:17: registry: component orphan's system nowhere is neither a registered system nor shared. (documentation-system.md, "The component registry")
+docs/components.md:23: registry: prefix PLN is used twice, first at line 7. (documentation-system.md, "The component registry")

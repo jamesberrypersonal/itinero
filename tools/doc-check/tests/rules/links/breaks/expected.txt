@@ -1,0 +1,5 @@
+docs/a.md:3: links: wikilink [[b]]. Write a standard link to the same document, by relative path. (documentation-system.md, "Markdown rules")
+docs/a.md:5: links: link target /b.md is absolute. Link to b.md. (documentation-system.md, "Markdown rules")
+docs/a.md:7: links: link target c.md does not resolve to a file or directory in the vault. (documentation-system.md, "Markdown rules")
+docs/a.md:9: links: link target b.md#b carries a heading anchor. Link to the document alone, or to a block ID. (documentation-system.md, "Markdown rules")
+docs/a.md:11: links: link target b.md#^nope names block ID nope, which docs/b.md does not define. (documentation-system.md, "Markdown rules")

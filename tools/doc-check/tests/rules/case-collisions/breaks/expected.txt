@@ -1,0 +1,2 @@
+docs/Notes.png:1: case-collisions: Notes.png differs from notes.png only in letter case. Rename one of them. (documentation-system.md, "What is checked mechanically")
+docs/notes.png:1: case-collisions: notes.png differs from Notes.png only in letter case. Rename one of them. (documentation-system.md, "What is checked mechanically")

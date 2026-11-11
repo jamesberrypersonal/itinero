@@ -1,0 +1,1 @@
+docs/a.md:3: adr-citations: ADR-0002 names no record in docs/decisions/. (documentation-system.md, "Citations")
