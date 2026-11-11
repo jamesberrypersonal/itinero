@@ -243,7 +243,7 @@ eight sections, numbered in their headings, so a reader knows where to look befo
 |---|---|
 | 1. Purpose | What it is for |
 | 2. Scope | What it covers, what acts on it, and what is deliberately left out |
-| 3. Interface | How it is used, in five parts: 3.1 user interface, 3.2 application interface, 3.3 programming interface, 3.4 the systems it drives, 3.5 telemetry |
+| 3. Interface | How it is used, in four parts: 3.1 user interface, 3.2 application interface, 3.3 programming interface, 3.4 the systems it drives |
 | 4. Behaviour | What it does: the section a reader builds from |
 | 5. Resources | What it creates or stores, and who owns it |
 | 6. Quality attributes | How fast, how safe and how reliable it is |

@@ -6,11 +6,11 @@ system, component or concern is added here before any document names it.
 
 ## Systems
 
-| System | Prefix | Telemetry namespace | Outside the vault | Is |
-|---|---|---|---|---|
-| planner | PLN | | | The trip planner: each trip, the stops it visits, the days spent at each, and the travel between them |
-| access | ACC | | | Accounts, invitations to a trip, and who may see and change each of its pages |
-| web | WEB | | | The app travellers use on a computer or a phone, including reading a trip with no connection |
+| System | Prefix | Outside the vault | Is |
+|---|---|---|---|
+| planner | PLN | | The trip planner: each trip, the stops it visits, the days spent at each, and the travel between them |
+| access | ACC | | Accounts, invitations to a trip, and who may see and change each of its pages |
+| web | WEB | | The app travellers use on a computer or a phone, including reading a trip with no connection |
 
 ## Components
 

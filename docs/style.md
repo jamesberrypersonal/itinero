@@ -261,7 +261,7 @@ through the command-line tool" tells a reader where to go; an absent heading lea
 wondering whether the question was ever put. An empty section is a question nobody asked, not a
 question with no answer.
 
-**Section 3 has five parts. The fourth is the outbound half, and the fifth is telemetry.**
+**Section 3 has four parts. The fourth is the outbound half.**
 
 | | Part | Answers |
 |---|---|---|
@@ -269,7 +269,6 @@ question with no answer.
 | 3.2 | Application interface | Who calls this |
 | 3.3 | Programming interface | Who calls this |
 | 3.4 | Systems this drives | What this calls, and what it creates there |
-| 3.5 | Telemetry | What this emits, by the names the telemetry specification registers |
 
 **Where 3.4 names a borrowed system, it teaches that system's vocabulary first.** `STY-S2` binds a
 borrowed vocabulary exactly as it binds the project's own, and a reader who has never written

@@ -2,8 +2,8 @@
 
 ## Systems
 
-| System | Prefix | Telemetry namespace | Outside the vault | Is |
-|---|---|---|---|---|
+| System | Prefix | Outside the vault | Is |
+|---|---|---|---|
 
 ## Components
 
@@ -20,4 +20,4 @@
 
 | Concern | Prefix | Covered in each specification at | Is |
 |---|---|---|---|
-| telemetry | OTEL | `§3.5` | A concern |
+| personal-data | PII | `§5.1` | A concern |
