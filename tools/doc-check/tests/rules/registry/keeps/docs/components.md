@@ -2,10 +2,10 @@
 
 ## Systems
 
-| System | Prefix | Telemetry namespace | Outside the vault | Is |
-|---|---|---|---|---|
-| planner | PLN | | | A system |
-| bookings | BKG | | | A system |
+| System | Prefix | Outside the vault | Is |
+|---|---|---|---|
+| planner | PLN | | A system |
+| bookings | BKG | | A system |
 
 ## Components
 
@@ -24,4 +24,4 @@
 
 | Concern | Prefix | Covered in each specification at | Is |
 |---|---|---|---|
-| telemetry | OTEL |  | A concern |
+| personal-data | PII |  | A concern |

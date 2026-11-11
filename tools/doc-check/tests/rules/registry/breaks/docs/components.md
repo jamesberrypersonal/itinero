@@ -2,12 +2,12 @@
 
 ## Systems
 
-| System | Prefix | Telemetry namespace | Outside the vault | Is |
-|---|---|---|---|---|
-| planner | PLN | | | A system |
-| planner | PLA | | | A system |
-| shared | SHD | | | A system |
-| web | PLANR | | | A system |
+| System | Prefix | Outside the vault | Is |
+|---|---|---|---|
+| planner | PLN | | A system |
+| planner | PLA | | A system |
+| shared | SHD | | A system |
+| web | PLANR | | A system |
 
 ## Components
 
@@ -20,4 +20,4 @@
 
 | Concern | Prefix | Covered in each specification at | Is |
 |---|---|---|---|
-| telemetry | PLN |  | A concern |
+| personal-data | PLN |  | A concern |

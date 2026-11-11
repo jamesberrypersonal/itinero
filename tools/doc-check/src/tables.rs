@@ -75,7 +75,7 @@ pub struct Component {
 pub struct Concern {
     pub slug: String,
     pub prefix: String,
-    /// The section number every component specification must have, such as `3.5`.
+    /// The section number every component specification must have, such as `5.1`.
     pub section: Option<String>,
     pub line: usize,
 }

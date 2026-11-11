@@ -202,7 +202,7 @@ names one agrees with that declaration. doc-check reports each disagreement. ^sh
 > declared, so renaming or splitting one is a mechanical change. doc-check reports every document
 > the change leaves behind, and the author fixes each one.
 
-> **Why does a concern's subsection belong here?** Registering a concern, such as telemetry,
+> **Why does a concern's subsection belong here?** Registering a concern, such as personal data,
 > obliges every component specification to cover it at the place the registry names. A concern
 > covered by some specifications and not others is not covered.
 

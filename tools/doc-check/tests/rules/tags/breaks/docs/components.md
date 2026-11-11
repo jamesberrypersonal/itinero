@@ -2,9 +2,9 @@
 
 ## Systems
 
-| System | Prefix | Telemetry namespace | Outside the vault | Is |
-|---|---|---|---|---|
-| planner | PLN | | | A system |
+| System | Prefix | Outside the vault | Is |
+|---|---|---|---|
+| planner | PLN | | A system |
 
 ## Components
 

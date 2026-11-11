@@ -62,8 +62,8 @@ pub const REGISTRY: &str = "# Components
 
 ## Systems
 
-| System | Prefix | Telemetry namespace | Outside the vault | Is |
-|---|---|---|---|---|
+| System | Prefix | Outside the vault | Is |
+|---|---|---|---|
 
 ## Components
 

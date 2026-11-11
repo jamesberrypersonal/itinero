@@ -9,7 +9,13 @@ rules. When an item is done, it leaves this list for `CHANGELOG.md` in the commi
 
 | Tag | Means |
 |---|---|
+| access | Accounts, invitations and permissions |
+| planner | The trip planner |
+| planner/itinerary | The itinerary model: trips, stops, days and the travel between them |
+| planner/pages | The pages of a trip |
 | shared/doc-check | The documentation checker |
+| shared/trip-time | Local dates and times, and time zones |
+| web | The web app, on a computer and on a phone |
 | docs | The documentation system, and the tools authors use with it |
 
 ## Items

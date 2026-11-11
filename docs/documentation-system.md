@@ -78,7 +78,7 @@ These are not preferences. A document that breaks one renders wrongly for half i
 | Any document | Lower-case words joined by hyphens | `restoring-from-backup.md` |
 | A system's document | The system's slug, in the system's folder | `requirements/planner/planner.md` |
 | A component's document | The component's slug, in its system's folder or in `shared/` | `requirements/planner/api.md`, `spec/shared/doc-check.md` |
-| A concern's document | The concern's slug, in `concerns/` | `requirements/concerns/telemetry.md` |
+| A concern's document | The concern's slug, in `concerns/` | `requirements/concerns/personal-data.md` |
 | An artefact's or format's specification | The artefact's name, in the folder of the system that writes it, or `shared/` | `spec/shared/trip-export.md` |
 | Directory index | `README.md` | One in every directory |
 | Decision record | `NNNN-short-slug.md`, four digits, zero-padded, allocated in order | `0007-times-are-stored-in-local-time.md` |
@@ -150,7 +150,7 @@ document names it:
 | A system | Its slug | `planner` |
 | A component of a system | The system's slug, a slash, the component's slug | `planner/api` |
 | A shared component | `shared/`, then the component's slug | `shared/doc-check` |
-| A cross-cutting concern | `concerns/`, then the concern's slug | `concerns/telemetry` |
+| A cross-cutting concern | `concerns/`, then the concern's slug | `concerns/personal-data` |
 
 The address is also where the documents live: `requirements/planner/api.md` and
 `spec/planner/api.md` are the planner API's. A system's own documents sit inside its folder,
@@ -159,22 +159,22 @@ never the slug of a system.
 
 ### Cross-cutting concerns
 
-**A cross-cutting concern is a subject every component must address the same way.** Telemetry is
-the first: an operator reading traces and metrics from the planner and from the email parser needs the
-same attribute names, the same units and the same rules for what is recorded, or the signals
-cannot be compared. A concern is not a component, because nothing is built for it alone. It is a
-contract every component that touches the subject keeps.
+**A cross-cutting concern is a subject every component must address the same way.** Personal data
+is the exemplar. A traveller's emergency contacts pass through the planner, the web app and the
+copy of a trip a phone keeps. Each of them must treat those details by the same rules, or the
+details are only as safe as the least careful of them. A concern is not a component, because
+nothing is built for it alone. It is a contract every component that touches the subject keeps.
 
 **A concern has a requirements document and a specification, like a component.** Its requirements
-say what every component promises about the subject: "every span an operator can see names the
-trip it concerns" is a telemetry requirement. Its specification is the shared contract, such
-as the naming rules, and the names still waiting for the conventions registry. Neither document
-describes any one component.
+say what every component promises about the subject: "a traveller's personal details are shown
+only to the people the trip's admin allows" is a personal-data requirement. Its specification is
+the shared contract, such as which details count as personal and how each is protected. Neither
+document describes any one component.
 
 **Each component's specification covers every concern in a fixed place**, so a reader finds a
-component's telemetry where they find every other component's. The concern's own specification
-names that place, and the section list under Specifications gives it a number. A component that
-has nothing to say about a concern says so there, and routes the reader.
+component's handling of personal data where they find every other component's. The registry names
+that place for each concern, as a numbered subsection of the eight sections under Specifications. A
+component that has nothing to say about a concern says so there, and routes the reader.
 
 ### The component registry
 
@@ -185,11 +185,11 @@ address against the component registry. The component registry holds four tables
 ```markdown
 ## Systems
 
-| System | Prefix | Telemetry namespace | Outside the vault | Is |
-|---|---|---|---|---|
-| [planner](requirements/planner/planner.md) | PLN | | | The trip planner: it holds each trip, its days, and what happens on each one |
-| [bookings](requirements/bookings/bookings.md) | BKG | `itinero.booking` | | The booking model, the importers that read bookings in, and how each booking is matched to a trip |
-| mobile | MOB | | `apps/mobile/docs/` | The mobile app, which shows a trip offline while travelling |
+| System | Prefix | Outside the vault | Is |
+|---|---|---|---|
+| [planner](requirements/planner/planner.md) | PLN | | The trip planner: it holds each trip, its days, and what happens on each one |
+| [bookings](requirements/bookings/bookings.md) | BKG | | The booking model, the importers that read bookings in, and how each booking is matched to a trip |
+| mobile | MOB | `apps/mobile/docs/` | The mobile app, which shows a trip offline while travelling |
 
 ## Components
 
@@ -211,7 +211,7 @@ address against the component registry. The component registry holds four tables
 
 | Concern | Prefix | Covered in each specification at | Is |
 |---|---|---|---|
-| [telemetry](requirements/concerns/telemetry.md) | OTEL | `§3.5` | The traces, metrics and logs every component emits, and the names they use |
+| [personal-data](requirements/concerns/personal-data.md) | PII | `§5.1` | The personal details travellers store, who may see them, and how they are protected |
 ```
 
 | Column | Holds |
@@ -219,7 +219,6 @@ address against the component registry. The component registry holds four tables
 | Slug | The name in lower-case words joined by hyphens. A system's slug is unique among systems, and a component's among the components of its system |
 | System | The system a component belongs to, or `shared` |
 | Prefix | The requirement identifier prefix it owns. A system's or a concern's is two to four capital letters, unique among them. A component's is its system's prefix, or `SHR` for a shared component, then a colon and a name: three to twelve capitals, digits and hyphens, unique within its system, such as `PLN:SHARING` for `planner/share-links` |
-| Telemetry namespace | For a system, the namespace of its own telemetry where it is not `itinero.` and the system's slug: `itinero.` and one name of lower-case letters, digits and underscores, unique among systems. Empty otherwise |
 | Packages | Every package whose code implements it today |
 | Imported, Manual | For a kind of booking, whether it can be imported from a confirmation email, and whether a traveller can enter it by hand: `yes` where it can, `planned` where it is to, and `no` where that is not planned yet. At least one of the two is not `no` |
 | In `@itinero/bookings` | For a kind of booking, the kind as the code names it, and anything that keeps it from being used |
@@ -330,7 +329,7 @@ reasoning behind a choice belongs in a decision record.
 |---|---|---|---|
 | System | What the whole system does for someone outside it | **Never** — the decomposition is mechanism at this level | End to end, against the running system |
 | Component | What one component does for its callers, at its own interface | Only itself | Against the component alone |
-| Concern | What every component promises about one subject, such as telemetry | **Never** — it binds them all alike | Against each component in turn |
+| Concern | What every component promises about one subject, such as personal data | **Never** — it binds them all alike | Against each component in turn |
 
 **A system requirement never names a component**, because which components keep a system's
 promise is a design choice that can change without the promise changing. **A component
@@ -357,7 +356,7 @@ then the component:
 
 ```
 PLN-F3           the planner's third functional requirement
-OTEL-F2          the telemetry concern's second
+PII-F2           the personal-data concern's second
 BKG:PARSER-F3    the third of the bookings system's email parser
 ```
 
@@ -491,7 +490,7 @@ reader who knows the shape knows where to look before opening the file.
 |---|---|---|
 | 1 | Purpose | What this is for |
 | 2 | Scope | What it covers, what acts on it, and what is deliberately absent |
-| 3 | Interface | The surface, in five parts: user, application and programming interfaces, the systems this drives, then its telemetry |
+| 3 | Interface | The surface, in four parts: user, application and programming interfaces, then the systems this drives |
 | 4 | Behaviour | What it does — the section a reader implements from |
 | 5 | Resources | What it creates or stores, how that is named, who owns it, what protects it |
 | 6 | Quality attributes | Performance, security, availability, robustness |
@@ -505,11 +504,11 @@ this through the command-line tool" tells a reader where to go, where an absent 
 wondering whether the question was ever put. What each section contains, and how it is written, is
 in [style.md](style.md).
 
-**Section 3.5 is where a component covers telemetry**, the first cross-cutting concern. It lists
-the signals the component emits by their registered names, citing the telemetry specification for
-what each name means, and never redefines one. A concern's own specification is the exception: it
-defines the contract, so its section 3.5 routes to its own section 4. A new concern is given a
-subsection of its own when it is registered.
+**A concern is covered in a subsection of its own, which the registry names when the concern is
+registered.** A personal-data concern covered at `§5.1` would add that subsection to every
+component specification. The subsection says what the component does about the subject, citing the
+concern's specification, and never redefines its contract. A concern's own specification is the
+exception. It defines the contract, so its subsection routes to its own section 4.
 
 **An open question that belongs to one specification lives in its Open section**, not in the live
 work list.

@@ -92,10 +92,6 @@ just check-docs --summary "$GITHUB_STEP_SUMMARY"
 
 doc-check never reads `GITHUB_STEP_SUMMARY` itself. The workflow passes the path, so a run behaves the same everywhere (`SHR:DOC-CHECK-NFR2`).
 
-### 3.5 Telemetry
-
-None. `components.md` registers no concern. doc-check emits nothing beyond its output and its exit status.
-
 ## 4. Behaviour
 
 ### 4.1 A run, end to end

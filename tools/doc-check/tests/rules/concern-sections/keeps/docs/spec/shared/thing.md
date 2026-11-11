@@ -1,7 +1,7 @@
 # The thing
 
-## 3. Interface
+## 5. Resources
 
-### 3.5 Telemetry
+### 5.1 Personal data
 
 None.
