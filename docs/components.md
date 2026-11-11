@@ -13,7 +13,7 @@ system, component or concern is added here before any document names it.
 
 | Component | System | Prefix | Packages | Outside the vault | Is |
 |---|---|---|---|---|---|
-| [doc-check](requirements/shared/doc-check.md) | shared | SHR:DOC-CHECK | | | The checker that holds every document in this vault to the documentation system |
+| [doc-check](spec/shared/doc-check.md) | shared | SHR:DOC-CHECK | | | The checker that holds every document in this vault to the documentation system |
 
 ## Booking kinds
 

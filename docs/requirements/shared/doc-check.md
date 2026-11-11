@@ -4,9 +4,10 @@
 
 What the shared component `shared/doc-check` promises to the people who write the vault. doc-check
 reads every document in the vault and reports each place where a document breaks a rule. The rules
-it checks are those in the table of mechanical checks in `documentation-system.md`, and one more:
-every requirement is claimed by some specification. These requirements name each rule they cover,
-and leave its full statement to that document. The
+it checks are those in the table of mechanical checks in `documentation-system.md`, and three
+more: every requirement is claimed by some specification, every code span stays on one line, and
+no document holds raw HTML. These requirements name each rule they cover, and leave its full
+statement to that document. The
 component registry, `components.md`, gives doc-check the prefix `SHR:DOC-CHECK`.
 
 Two roles appear below, as `requirements/README.md` defines them. The author adds a document or
@@ -22,7 +23,7 @@ One run of doc-check checks every markdown file in the vault, `docs/`, and no ot
 repository. It skips every file whose name ends in `-draft.md`, and every directory named
 `graveyard` with everything below it. ^shr-doc-check-f1
 
-- **Verification:** on a copy of the vault, run `just check-docs` from the repository root,
+- **Verification:** on a copy of the vault, run `just check-docs` from any directory in the repository,
   then
     - break one rule in a document at the vault root, and confirm it is reported
     - break the same rule in a document three directories below the root, and in a directory
@@ -91,8 +92,9 @@ that form. ^shr-doc-check-f3
 > guess printed as the fix would be followed as one. The finding then says what was found, and the
 > author chooses (`SHR:DOC-CHECK-NR7`).
 
-> **Why a path from the repository root?** The command runs from the repository root, so editors
-> and terminals open the path as printed.
+> **Why a path from the repository root?** A path from the repository root reads the same
+> whichever directory the author ran the command in. Editors and continuous integration logs both
+> resolve paths from the repository root, so either opens the path as printed.
 
 ### SHR:DOC-CHECK-F4 — Every citation in the vault resolves
 
@@ -304,7 +306,7 @@ when the run could not check the vault. ^shr-doc-check-f12
 > not run has quietly stopped being a check (`SHR:DOC-CHECK-F2`).
 
 > **Why one summary, rather than a note on each line?** The platform shows only a limited number
-> of line annotations, about ten per step. Annotations would show some findings and hide the rest,
+> of line annotations. Annotations would show some findings and hide the rest,
 > and the hidden ones would look like none (`SHR:DOC-CHECK-NR10`).
 
 ### SHR:DOC-CHECK-F13 — Every requirement is claimed by at least one specification
@@ -356,6 +358,50 @@ variable. ^shr-doc-check-f14
 > **Are drafts and graveyards not a way to silence findings?** They decide which files are
 > checked, and `SHR:DOC-CHECK-F1` states both. Neither works inside a checked document, and
 > neither hides anything a reader of the path cannot see.
+
+### SHR:DOC-CHECK-F15 — Every code span opens and closes on one line
+
+Every code span outside a fenced code block closes on the line it opens on. doc-check reports each
+run of backticks that has no matching run after it on the same line. ^shr-doc-check-f15
+
+- **Verification:** on a copy of the vault, confirm that
+    - a code span wrapped across two lines is reported, at the line it opens on
+    - the same span kept to one line passes
+    - a span opened and closed by two backticks, holding a single backtick, passes
+    - a single backtick standing alone in prose is reported
+    - the same unmatched backtick inside a fenced code block is not reported
+
+> **What does this buy?** doc-check reads each document one line at a time, so a code span that
+> continues onto the next line is a fault in the document, not in the checker. Both renderers
+> accept the wrapped form, so without this check the fault is silent. The text inside the broken
+> span is then checked as prose, and a citation in it can be reported, or missed, for the wrong
+> reason (ADR-0001, the checker reads each document line by line).
+
+> **How is a literal backtick written?** Inside a code span opened by a longer run of backticks,
+> such as two backticks around one.
+
+### SHR:DOC-CHECK-F16 — No document holds raw HTML
+
+No document holds an HTML tag or comment outside a code span or fenced code block. doc-check
+reports each one. ^shr-doc-check-f16
+
+- **Verification:** on a copy of the vault, confirm that
+    - a word in angle brackets in prose, such as the placeholder `<reason>`, is reported
+    - a closing tag and a self-closing tag are each reported
+    - an HTML comment is reported
+    - the same text inside a code span, or inside a fenced code block, passes
+    - an autolink, such as `<https://example.com>`, passes
+    - a less-than sign in prose followed by a space or a digit passes
+
+> **What does this buy?** The two renderers treat raw HTML differently. GitHub drops any tag it
+> does not allow, and shows the page around it as normal. Obsidian renders the tag, and an unknown
+> tag left open swallows the rest of the document. A reviewer reading on GitHub then sees nothing
+> wrong, while every Obsidian reader loses the end of the page. A placeholder written in angle
+> brackets, outside a code span, is the usual cause.
+
+> **Why comments too?** A comment is text that no reader of either renderer sees. One left unclosed
+> hides the rest of the document. A note meant for authors belongs in the document, where readers
+> can see it, or in the pull request.
 
 ---
 
@@ -448,13 +494,13 @@ doc-check, using only the Rust standard library and fetching nothing. The comman
 
 ### SHR:DOC-CHECK-NFR6 — Every rule has a test that breaks it and a test that keeps it
 
-For every row of the table of mechanical checks, and for the claim check `SHR:DOC-CHECK-F13`
-makes, doc-check's test suite holds a case that breaks the rule and a case that keeps it. The suite
-fails while any of them lacks either case. ^shr-doc-check-nfr6
+For every row of the table of mechanical checks, and for each check this document adds beyond it,
+doc-check's test suite holds a case that breaks the rule and a case that keeps it. The suite fails
+while any of them lacks either case. ^shr-doc-check-nfr6
 
 - **Verification:** run doc-check's test suite, then
-    - confirm it passes, with at least one breaking case and one keeping case for every row and for
-      the claim check
+    - confirm it passes, with at least one breaking case and one keeping case for every row, and
+      for each of the checks `SHR:DOC-CHECK-F13`, `SHR:DOC-CHECK-F15` and `SHR:DOC-CHECK-F16` make
     - confirm every breaking case is reported under its own rule, and every keeping case produces no
       finding
     - delete one rule's breaking case, and confirm the suite fails, naming the rule
@@ -476,14 +522,14 @@ fails while any of them lacks either case. ^shr-doc-check-nfr6
 
 | Identifier | doc-check does not | Because |
 |---|---|---|
-| **SHR:DOC-CHECK-NR1** | Check a rule of `documentation-system.md` outside its table of mechanical checks, other than the claim check `SHR:DOC-CHECK-F13` makes, such as a document's opening title, or a specification's eight numbered sections | The table is the list of rules the documentation system says are checked. A rule joins it through a decision record scoped `workspace`, which the rules keeper lands with the change to the table and to doc-check |
+| **SHR:DOC-CHECK-NR1** | Check a rule of `documentation-system.md` outside its table of mechanical checks, other than the checks `SHR:DOC-CHECK-F13`, `SHR:DOC-CHECK-F15` and `SHR:DOC-CHECK-F16` make, such as a document's opening title, or a specification's eight numbered sections | The table is the list of rules the documentation system says are checked. A rule joins it through a decision record scoped `workspace`, which the rules keeper lands with the change to the table and to doc-check |
 | **SHR:DOC-CHECK-NR2** | Check any rule of `style.md` | The style rules are applied by the author and the reviewer, and most need judgement a checker cannot make |
 | **SHR:DOC-CHECK-NR3** | Validate a Mermaid diagram | Validating a diagram needs mermaid-cli, so the author validates each diagram before committing it |
 | **SHR:DOC-CHECK-NR4** | Check documentation outside the vault | A package folder named in the registry's Outside the vault column stays authoritative for its component, under its own rules |
 | **SHR:DOC-CHECK-NR5** | Install or run a pre-commit hook | A guide says how to install one. The hook relies on `SHR:DOC-CHECK-F2` to fail when doc-check cannot run |
 | **SHR:DOC-CHECK-NR6** | Accept the earlier form of a changed rule beside its current form | No rule has changed yet. The first decision record that leaves documents in an earlier form adds the requirement, with the date the earlier form ends |
 | **SHR:DOC-CHECK-NR7** | Rewrite a document to fix a finding | The author chooses the fix. `SHR:DOC-CHECK-F3` says what would pass, where one form would |
-| **SHR:DOC-CHECK-NR8** | Read every Markdown form both renderers accept, such as a code span wrapped across two lines | A document doc-check misreads is rewritten into the form it reads. That rewrite is mechanical, and it keeps doc-check small |
+| **SHR:DOC-CHECK-NR8** | Read every Markdown form both renderers accept, such as a code span wrapped across two lines | The forms doc-check reads are part of the rules. A document in any other form is at fault, even where both renderers accept it, and its author rewrites it into a form doc-check reads. That rewrite is mechanical, and it keeps doc-check small |
 | **SHR:DOC-CHECK-NR9** | Check only some of the vault's files | Rules across documents, such as a link broken by a move elsewhere, need every file |
 | **SHR:DOC-CHECK-NR10** | Attach a finding to its line on a pull request | The platform shows a limited number of line annotations, so some findings would be hidden. `SHR:DOC-CHECK-F12` lists every finding in one summary instead |
 | **SHR:DOC-CHECK-NR11** | Check that a link to a web address resolves | Only relative links are among the documentation system's checks, and `SHR:DOC-CHECK-NFR4` keeps every run offline |
