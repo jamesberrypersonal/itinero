@@ -5,3 +5,10 @@ version = 4
 [[package]]
 name = "doc-check"
 version = "0.1.0"
+
+[[package]]
+name = "doc-scaffold"
+version = "0.1.0"
+dependencies = [
+ "doc-check",
+]

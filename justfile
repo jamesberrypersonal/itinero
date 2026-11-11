@@ -4,9 +4,25 @@ set positional-arguments
 check-docs *args:
     @cargo run --release --quiet --package doc-check -- "$@"
 
-# Run doc-check's test suite.
+# Run the test suites of doc-check and doc-scaffold.
 test-docs:
-    @cargo test --quiet --package doc-check
+    @cargo test --quiet --package doc-check --package doc-scaffold
+
+# Write the skeleton documents and index rows for a new component.
+new-component *args:
+    @cargo run --release --quiet --package doc-scaffold -- component "$@"
+
+# Register a new system, and write its roadmap's skeleton.
+new-system *args:
+    @cargo run --release --quiet --package doc-scaffold -- system "$@"
+
+# Write the skeleton of the next decision record, and its rows in both views of the index.
+new-decision *args:
+    @cargo run --release --quiet --package doc-scaffold -- decision "$@"
+
+# Write the skeleton of a new guide, and its row in the guides' index.
+new-guide *args:
+    @cargo run --release --quiet --package doc-scaffold -- guide "$@"
 
 # Install the pre-commit hook, which runs check-docs before every commit.
 install-hook:

@@ -66,7 +66,14 @@ None. doc-check has no network or service interface. Callers reach it through it
 
 ### 3.3 Programming interface
 
-None. The package `tools/doc-check` builds a binary only, and no other package depends on it.
+The package `tools/doc-check` builds a library beside its binary. The library holds one function,
+`check`, which takes a repository root and runs steps 2 to 6 of §4.1. It returns the findings in
+the order of §4.4, or the reason the run could not finish (§4.6). The binary is `check` with the
+options, the printing and the exit status of §3.1 around it.
+
+The library's one user is the test suite of doc-scaffold, `shared/doc-scaffold`, which runs `check`
+after every command to confirm that what doc-scaffold writes passes (ADR-0006, new documents start
+from skeletons that a second program writes). No other package depends on doc-check.
 
 ### 3.4 Systems this drives
 
@@ -84,7 +91,7 @@ doc-check drives three systems outside itself.
 
 The workflow `.github/workflows/check-docs.yml` runs on every push and every pull request. It
 installs just and the pinned Rust toolchain. It runs the test suite (§4.7) with `just test-docs`,
-so no rule lands without its cases, and then runs:
+which also runs doc-scaffold's, so no rule lands without its cases. It then runs:
 
 ```
 just check-docs --summary "$GITHUB_STEP_SUMMARY"
@@ -471,9 +478,9 @@ doc-check creates nothing in the repository. A run writes only the summary file 
 | Resource | Path | Owned by |
 |---|---|---|
 | The package | `tools/doc-check/` | The rules keeper |
-| The Cargo workspace | `Cargo.toml` and `Cargo.lock` at the repository root, listing `tools/doc-check` as a member | The rules keeper |
+| The Cargo workspace | `Cargo.toml` and `Cargo.lock` at the repository root, listing `tools/doc-check` and `tools/doc-scaffold` as members | The rules keeper |
 | The toolchain pin | `rust-toolchain.toml` at the repository root, pinning Rust 1.94.1 | The rules keeper |
-| The recipes | `check-docs` and `test-docs`, in the `justfile` at the repository root | The rules keeper |
+| The recipes | `check-docs`, and `test-docs`, which runs doc-scaffold's suite with doc-check's, in the `justfile` at the repository root | The rules keeper |
 | The workflow | `.github/workflows/check-docs.yml` | The rules keeper |
 | Build output | `target/` at the repository root, which `.gitignore` must exclude | Nobody: it is rebuilt at will |
 

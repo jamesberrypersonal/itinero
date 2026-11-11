@@ -12,6 +12,7 @@ written is [style.md](style.md).
 | [documentation-system.md](documentation-system.md) | Where each kind of document lives, what shape it takes, and which rules are checked |
 | [style.md](style.md) | How documents are written |
 | [components.md](components.md) | The component registry: every system, component and concern, and the prefix each owns |
+| [CHANGELOG.md](CHANGELOG.md) | What has been done, newest first, including each item of the live work list when it is finished |
 
 ## The trees
 

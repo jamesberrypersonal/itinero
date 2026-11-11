@@ -1,0 +1,14 @@
+[package]
+name = "doc-scaffold"
+version = "0.1.0"
+edition = "2024"
+description = "Writes the skeleton documents and index rows for a new component, system, decision record or guide"
+license = "MIT"
+publish = false
+
+# No dependencies: doc-scaffold builds with the Rust standard library alone (SHR:DOC-SCAFFOLD-NFR3).
+[dependencies]
+
+# Its tests run doc-check over what it writes, so they hold it to SHR:DOC-SCAFFOLD-F2.
+[dev-dependencies]
+doc-check = { path = "../doc-check" }

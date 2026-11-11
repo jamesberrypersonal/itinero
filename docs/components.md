@@ -19,6 +19,7 @@ system, component or concern is added here before any document names it.
 | itinerary | planner | PLN:ITINERARY | | | How a trip, its stops, its days and the travel between stops are stored and changed |
 | pages | planner | PLN:PAGES | | | The pages of a trip, where travellers write up their research by hand |
 | [doc-check](spec/shared/doc-check.md) | shared | SHR:DOC-CHECK | | | The checker that holds every document in this vault to the documentation system |
+| [doc-scaffold](spec/shared/doc-scaffold.md) | shared | SHR:DOC-SCAFFOLD | `doc-scaffold` | | The scaffolder that starts a new component, system, decision record or guide, with every row that names it |
 | trip-time | shared | SHR:TRIP-TIME | | | Dates and times in the local time of the place they happen, and the time zones between places |
 
 ## Booking kinds
