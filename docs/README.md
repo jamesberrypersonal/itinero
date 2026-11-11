@@ -20,3 +20,4 @@ written is [style.md](style.md).
 | [requirements/](requirements/README.md) | What each system, component and concern promises |
 | [spec/](spec/README.md) | What each thing built in this workspace does, and how |
 | [decisions/](decisions/README.md) | What was chosen, and why |
+| [guides/](guides/README.md) | How to do one task, step by step |

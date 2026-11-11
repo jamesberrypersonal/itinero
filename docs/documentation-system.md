@@ -26,9 +26,9 @@ Three Obsidian settings matter, and each person sets them in their own copy.
 
 | Setting | Value | Because |
 |---|---|---|
-| Use Markdown links | On | A link Obsidian inserts is then a standard link, which GitHub renders. A wikilink is literal text on GitHub |
-| New link format | Relative path to file | A link Obsidian inserts then names the path from the document, which GitHub resolves. A bare filename is ambiguous once two trees hold documents of the same name |
-| Strict line breaks | On | Prose is hard-wrapped at about a hundred columns. With this on, a single newline is a space in both renderers rather than a line break in one |
+| `Use [[Wikilinks]]`, under Files and links | Off | A link Obsidian inserts is then a standard link, which GitHub renders. A wikilink is literal text on GitHub |
+| New link format, under Files and links | Path from current file | A link Obsidian inserts then names the path from the document, which GitHub resolves. A bare filename is ambiguous once two trees hold documents of the same name |
+| Strict line breaks, under Editor | On | Prose is hard-wrapped at about a hundred columns. With this on, a single newline is a space in both renderers rather than a line break in one |
 
 **The same files render on GitHub**, which is where anyone without Obsidian reads them and where
 changes are reviewed. Nothing may depend on a feature only one renderer has.
