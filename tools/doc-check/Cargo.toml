@@ -1,0 +1,10 @@
+[package]
+name = "doc-check"
+version = "0.1.0"
+edition = "2024"
+description = "Holds every document in the docs/ vault to the documentation system"
+license = "MIT"
+publish = false
+
+# No dependencies: doc-check builds with the Rust standard library alone (SHR:DOC-CHECK-NFR5).
+[dependencies]

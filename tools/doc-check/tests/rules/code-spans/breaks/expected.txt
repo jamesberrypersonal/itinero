@@ -1,0 +1,3 @@
+docs/a.md:3: code-spans: a run of 1 backtick opens a code span that does not close on this line. Keep the span on one line, or write a literal backtick inside a span opened by a longer run. (documentation-system.md, "Markdown rules")
+docs/a.md:4: code-spans: a run of 1 backtick opens a code span that does not close on this line. Keep the span on one line, or write a literal backtick inside a span opened by a longer run. (documentation-system.md, "Markdown rules")
+docs/a.md:6: code-spans: a run of 1 backtick opens a code span that does not close on this line. Keep the span on one line, or write a literal backtick inside a span opened by a longer run. (documentation-system.md, "Markdown rules")

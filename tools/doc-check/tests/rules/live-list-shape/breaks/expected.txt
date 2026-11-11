@@ -1,0 +1,4 @@
+docs/TODO.md:3: live-list-shape: the next free number is not past TODO-2, the highest used. Write *Next free:* TODO-3. (documentation-system.md, "The live work list and the changelog")
+docs/TODO.md:13: live-list-shape: the item has no *Tags:* line. Add a *Tags:* line after its heading. (documentation-system.md, "The live work list and the changelog")
+docs/TODO.md:13: live-list-shape: the item has no paragraph opening with *Reason:*. Add its *Reason:* paragraph. (documentation-system.md, "The live work list and the changelog")
+docs/TODO.md:23: live-list-shape: item heading "Something without an identifier" is not TODO-<number> — <title>. Write the heading as ### TODO-<number> — <title>. (documentation-system.md, "The live work list and the changelog")

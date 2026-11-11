@@ -1,0 +1,4 @@
+docs/a.md:3: unprefixed: identifier F7 has no prefix. (documentation-system.md, "Identifiers")
+docs/a.md:5: unprefixed: identifier F8 has no prefix. (documentation-system.md, "Identifiers")
+docs/a.md:5: unprefixed: identifier NFR2 has no prefix. (documentation-system.md, "Identifiers")
+docs/a.md:5: unprefixed: identifier NR3 has no prefix. (documentation-system.md, "Identifiers")

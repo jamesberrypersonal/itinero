@@ -1,0 +1,2 @@
+docs/Bad_Name.md:1: filenames: Bad_Name.md is not lower-case words joined by hyphens. Rename it bad-name.md. (documentation-system.md, "Filenames")
+docs/has space.md:1: filenames: has space.md is not lower-case words joined by hyphens. Rename it has-space.md. (documentation-system.md, "Filenames")

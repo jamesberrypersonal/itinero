@@ -1,0 +1,2 @@
+docs/notes.png
+docs/Notes.png

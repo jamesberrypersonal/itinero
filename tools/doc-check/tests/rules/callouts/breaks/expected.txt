@@ -1,0 +1,2 @@
+docs/a.md:3: callouts: callout type [!INFO] is not one of the five both renderers share. Use NOTE, TIP, IMPORTANT, WARNING or CAUTION. (documentation-system.md, "Markdown rules")
+docs/a.md:6: callouts: callout type [!question] is not one of the five both renderers share. Use NOTE, TIP, IMPORTANT, WARNING or CAUTION. (documentation-system.md, "Markdown rules")

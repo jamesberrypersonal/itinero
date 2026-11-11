@@ -1,0 +1,2 @@
+docs/a.md:5: sections: §9 cites docs/a.md, which numbers no section 9. (documentation-system.md, "Citations")
+docs/a.md:7: sections: §1 cites docs/c.md, which numbers no sections. (documentation-system.md, "Citations")

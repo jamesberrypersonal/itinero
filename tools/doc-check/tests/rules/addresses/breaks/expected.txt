@@ -1,0 +1,3 @@
+docs/requirements/unknown/README.md:1: addresses: docs/requirements/unknown/ is not a registered system, shared or concerns. (documentation-system.md, "Systems and components")
+docs/requirements/x.md:1: addresses: requirements/x.md is not at a registered address. (documentation-system.md, "Systems and components")
+docs/spec/elsewhere/README.md:1: addresses: docs/spec/elsewhere/ is not a registered system, shared or concerns. (documentation-system.md, "Systems and components")

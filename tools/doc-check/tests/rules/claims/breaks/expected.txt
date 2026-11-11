@@ -1,0 +1,1 @@
+docs/requirements/shared/thing.md:3: claims: no specification's claim table cites SHR:THING-F1. Claim it in section 7 of the specification that contributes to it. (documentation-system.md, "Requirements this satisfies")

@@ -1,0 +1,5 @@
+docs/decisions/0001-a-choice.md:1: decision-index: the decision index does not list this record under workspace. Add a row for it under ### workspace in docs/decisions/README.md. (documentation-system.md, "The index")
+docs/decisions/0001-a-choice.md:1: decision-index: the decision index's ledger does not list this record. Add a row for it to docs/decisions/README.md. (documentation-system.md, "The index")
+docs/decisions/0002-another.md:1: decision-index: the decision index does not list this record under shared/doc-check. Add a row for it under ### shared/doc-check in docs/decisions/README.md. (documentation-system.md, "The index")
+docs/decisions/README.md:7: decision-index: the row for docs/decisions/0002-another.md has title "A different title" (the record says "Another"). Make the row match the record. (documentation-system.md, "The index")
+docs/decisions/README.md:15: decision-index: docs/decisions/0002-another.md is listed under workspace, which its scope does not name. (documentation-system.md, "The index")

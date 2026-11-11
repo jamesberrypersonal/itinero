@@ -82,7 +82,9 @@ doc-check drives three systems outside itself.
 - **GitHub Actions**, the continuous integration platform. A workflow is a file under
   `.github/workflows/` that lists jobs and their steps. A job summary is Markdown that a step appends to the file named by the environment variable `GITHUB_STEP_SUMMARY`. GitHub shows the summary on the pull request's run. A step that exits non-zero fails its job. A failed job fails the pull request's check.
 
-The workflow `.github/workflows/check-docs.yml` runs on every push and every pull request. It installs just and the pinned Rust toolchain, then runs:
+The workflow `.github/workflows/check-docs.yml` runs on every push and every pull request. It
+installs just and the pinned Rust toolchain. It runs the test suite (§4.7) with `just test-docs`,
+so no rule lands without its cases, and then runs:
 
 ```
 just check-docs --summary "$GITHUB_STEP_SUMMARY"
@@ -138,7 +140,8 @@ doc-check reads a document one line at a time (ADR-0001, the checker reads each 
 
 A paragraph is a run of consecutive text lines. A table is a run of consecutive table rows. A
 paragraph's block ID is a ` ^id` at the end of its last line. A table's block ID is a block ID line
-directly after it, with no blank line between them.
+after it, with one blank line between them. On GitHub, a line directly after a table is read as
+another row of it.
 
 Within a heading, table cell or text line, doc-check finds these parts:
 
@@ -240,7 +243,8 @@ lower case, with the colon written as a hyphen.
   reported. The passing form is that ending.
 - A non-requirements table is a table whose first body row's first cell holds a bold identifier of
   kind `NR`. A non-requirements table with no block ID line of `^<prefix>-nr` is reported. Here,
-  `<prefix>` is the document's prefix in lower case, with its colon written as a hyphen. The passing form is that line, directly after the table.
+  `<prefix>` is the document's prefix in lower case, with its colon written as a hyphen. The passing
+form is that line after the table, with one blank line between them.
 
 #### 4.3.3 callouts
 
@@ -408,7 +412,8 @@ A finding is one line:
 
 Findings are sorted by path, in byte order, then by line, then by rule name, then by text. Two
 identical findings are printed once. The outcome line is `doc-check: clean`, or
-`doc-check: <n> findings in <m> files`.
+`doc-check: <n> findings in <m> files`, with the singular for one.
+A finding's passing form opens with a capital letter, since it follows a full stop.
 
 ### 4.5 The summary
 
@@ -450,6 +455,10 @@ The suite runs with `cargo test --package doc-check`.
   the vault, `breaks/` holds `expected.txt`: the exact findings the run must print. The rule must
   appear in every one of those findings. `keeps/` must run clean. A rule may hold more cases, as
   further directories whose names begin with `breaks-` or `keeps-`.
+- **Created files.** A case may also hold `create.txt`, listing files the test creates in a copy of
+  the case before running it. Two names that differ only in letter case are the exemplar: git and a
+  case-insensitive file system cannot hold both. Where the file system cannot create them, the case
+  is skipped with a note, and a test of the rule over a vault built in memory still runs.
 - **Coverage.** One test reads doc-check's own list of rules, and fails for any rule that lacks
   either directory. It also fails for any rule directory whose rule is not in the list. A new rule
   cannot pass the suite without both cases (`SHR:DOC-CHECK-NFR6`).
@@ -468,7 +477,7 @@ doc-check creates nothing in the repository. A run writes only the summary file 
 | The package | `tools/doc-check/` | The rules keeper |
 | The Cargo workspace | `Cargo.toml` and `Cargo.lock` at the repository root, listing `tools/doc-check` as a member | The rules keeper |
 | The toolchain pin | `rust-toolchain.toml` at the repository root, pinning Rust 1.94.1 | The rules keeper |
-| The recipe | `check-docs`, in the `justfile` at the repository root | The rules keeper |
+| The recipes | `check-docs` and `test-docs`, in the `justfile` at the repository root | The rules keeper |
 | The workflow | `.github/workflows/check-docs.yml` | The rules keeper |
 | Build output | `target/` at the repository root, which `.gitignore` must exclude | Nobody: it is rebuilt at will |
 

@@ -1,0 +1,3 @@
+docs/a.md:3: live-list-citations: the document links to the live list. Say what is owed in the document itself, or cite an item as a condition. (documentation-system.md, "The live work list and the changelog")
+docs/a.md:5: live-list-citations: TODO-2 is cited other than as a condition. Write "until TODO-2 is done", or say what is owed in the document itself. (documentation-system.md, "The live work list and the changelog")
+docs/a.md:7: live-list-citations: TODO-7 names no item the live list holds or the changelog records. (documentation-system.md, "The live work list and the changelog")

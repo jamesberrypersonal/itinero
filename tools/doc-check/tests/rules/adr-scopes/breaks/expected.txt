@@ -1,0 +1,2 @@
+docs/decisions/0001-a-choice.md:5: adr-scopes: scope planner is not a registered address, or workspace. (documentation-system.md, "The shape of a record")
+docs/decisions/0002-another.md:1: adr-scopes: the record has no Scope line. Add a "- **Scope:**" line naming registered addresses, or workspace. (documentation-system.md, "The shape of a record")

@@ -1,0 +1,1 @@
+docs/decisions/0001-a-choice.md:17: back-citations: docs/spec/shared/thing.md does not cite ADR-0001 back. Cite ADR-0001 in docs/spec/shared/thing.md. (documentation-system.md, "The shape of a record")
