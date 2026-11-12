@@ -5,7 +5,7 @@
 ## 1. Purpose
 
 trip-time is the package that holds a trip's dates and times, in the local time of the place each
-one happens. Other components, such as the planner's itinerary and the web app, use it to create,
+one happens. Other components, such as the planner and the web app, use it to create,
 store, sort, measure and write those values. It works the same in a browser with no connection as
 on a server.
 
@@ -13,7 +13,8 @@ on a server.
 
 trip-time covers the six kinds of value its requirements define, spans between two values, the
 text form a value is stored in, and the rules file that holds every time zone's rules. It also
-covers the build script that makes the rules file from a release of the IANA time zone database.
+covers the build script that makes the rules file from a release of the IANA time zone database, the
+public record of every time zone's rules (§3.4).
 
 Two things act on it:
 
@@ -30,8 +31,8 @@ Deliberately absent:
   trip-time carries its own copy of the time-zone rules)
 - reading the device's clock or its time zone. The caller passes the current moment
 
-trip-time is written in TypeScript, as one package that runs unchanged in the browser and on Node
-(ADR-0007, trip-time is written in TypeScript).
+trip-time is written in TypeScript, as one package that runs unchanged in the browser and on
+Node.js, the JavaScript runtime servers use (ADR-0007, trip-time is written in TypeScript).
 
 ## 3. Interface
 
@@ -48,8 +49,8 @@ None. trip-time has no network or service interface. Callers reach it through it
 ### 3.3 Programming interface
 
 The package `@itinero/trip-time` exports the types and functions below. Every value is a frozen
-object, and no function changes its arguments. Every function except `loadRules` is pure, apart
-from reading the rules last loaded.
+object. No function changes its arguments. Every function but `loadRules` gives a result that
+depends only on its arguments and the rules last loaded.
 
 ```ts
 type Zone = string;                      // a time zone's IANA name, such as "Europe/Paris"
@@ -103,9 +104,9 @@ The kinds map to the six kinds of the requirements: `exact` is an exact time, `d
 | `out-of-range` | `create`, `parse` | A date before 1970-01-01 or after 9999-12-31 |
 | `invalid-date` | `create`, `parse` | A date that does not exist, such as 2026-02-30 |
 | `invalid-time` | `create`, `parse` | A clock time outside 00:00 to 23:59, or one holding seconds |
-| `unknown-zone` | `create`, `parse` | A zone that neither names a zone nor an alias in the rules file |
+| `unknown-zone` | `create`, `parse` | A zone the rules file names neither as a zone nor as an alias |
 | `no-rules` | `create`, `parse`, `span` | No rules file has been loaded |
-| `skipped-time` | `create` | A clock time that falls in a gap (§4.3). The details give `before` and `after` |
+| `skipped-time` | `create` | A clock time that falls in a gap (§4.2). The details give `before` and `after` |
 | `not-repeated` | `create` | A clock time marked `second` that does not happen twice on its date |
 | `window-order` | `create`, `parse` | A window whose end is not after its start |
 | `span-order` | `span` | A span that certainly ends before it starts (§4.7) |
@@ -135,14 +136,17 @@ At build time, the build script drives two things from the IANA time zone databa
 
 Behaviour crossing every operation:
 
-- **Moments are counted in seconds.** A moment is a count of seconds since 1970-01-01 00:00 UTC.
-  Offsets are held in seconds, because a few offsets after 1970 are not whole minutes, such as
-  Liberia's until 1972.
+- **Moments are counted in seconds.** A moment is a count of seconds since 1970-01-01 00:00 UTC,
+  Coordinated Universal Time, the time scale every zone's clocks are set against. An offset is the
+  number of seconds a zone's clocks are ahead of UTC, such as 3600 for Paris in winter and −18000
+  for New York. Offsets are held in seconds, because a few offsets after 1970 are not whole minutes,
+  such as Liberia's until 1972.
 - **The device's own time zone is never read.** trip-time never calls `Date` methods that use the
-  device's time zone, nor Intl, nor Temporal. Every date and offset is worked out from the loaded
-  rules, with the proleptic Gregorian calendar.
-- **Dates are counted in whole days.** A local date and clock time convert to a local count of
-  seconds as if the zone were UTC. §4.2 turns that count into a moment.
+  device's time zone, nor Intl or Temporal, the date tools built into browsers and Node.js. Every
+  date and offset is worked out from the loaded rules, with the Gregorian calendar.
+- **Local times are counted as if they were UTC.** A local date and clock time convert to a local
+  count: the seconds since 1970-01-01 00:00, counted on the zone's own clocks. §4.2 turns a local
+  count into a moment.
 
 ### 4.1 The text form
 
@@ -169,8 +173,9 @@ moment, which is what keeps the local time when a zone's rules change
 writes exactly one text for each value. The zone is written as the caller gave it, so an alias
 stays an alias.
 
-`parse` reads text that was stored, perhaps under older rules. It refuses no clock time for
-falling in a gap or for its marking, so a value stored once can always be read back:
+`parse` reads text that was stored, perhaps under older rules. A value stored once can always be
+read back, so `parse` refuses no clock time for falling in a gap or for its mark. Instead, under
+the loaded rules:
 
 - a clock time that falls in a gap under the loaded rules takes the moment it would have had at
   the offset before the gap, as §4.2 gives
@@ -184,9 +189,9 @@ falling in a gap or for its marking, so a value stored once can always be read b
 first change, the zone's initial offset applies. After the last, its POSIX TZ string gives the
 offset, from the rules for that year.
 
-A local count of seconds `L` in a zone becomes a moment as follows. Take every offset the zone uses
-in the 48 hours around `L`. Each offset `o` for which the offset at `L − o` is `o` gives one
-candidate moment, `L − o`.
+A local count `L` in a zone becomes a moment as follows. Take every offset the zone uses between
+the moments `L − 86400` and `L + 86400`, a day either side. Each offset `o` gives a candidate
+moment, `L − o`, which is kept when the zone's offset at that moment is `o`.
 
 | Candidates | Means | The moment |
 |---|---|---|
@@ -199,8 +204,8 @@ candidate moment, `L − o`.
 *Porcelain:* `create(fields)` checks a value's fields, and returns the value, frozen. A caller
 builds every new value with `create`, and uses `parse` only for text it stored.
 
-It refuses, in this order, the cases of §3.3 for `create`. Rules apply to every clock time in the
-value, the window's two ends included:
+It refuses each case that §3.3 lists for `create`. Three of them need more than the table says.
+Each of the three applies to every clock time in the value, a window's two ends included:
 
 - **A gap.** A clock time with no candidate (§4.2) is refused with `skipped-time`. The details
   give `before`, the last whole minute before the gap, and `after`, the first minute after it, both
@@ -208,10 +213,10 @@ value, the window's two ends included:
 - **A mark on a time that does not repeat.** A clock time marked `second` with one candidate is
   refused with `not-repeated` (`SHR:TRIP-TIME-F4`).
 - **A window out of order.** A window whose end's moment is not after its start's is refused with
-  `window-order`. A window whose `endDate` is its `date` writes no end date in its text form.
+  `window-order`.
 
 A whole date, a date with time to be decided, and a part of a day hold no clock time, so no gap
-refuses them. The zone must name a zone or an alias in the loaded rules (`SHR:TRIP-TIME-F1`).
+refuses them.
 
 ### 4.4 parse and toText
 
@@ -250,7 +255,7 @@ clocks go forward at midnight, it is the first moment after the gap.
 | `approx`, `window`, `part` | Its earliest moment | 2 |
 | `tbd` | The start of the next date | −1 |
 
-A whole date's rank puts it ahead of every other value at the start of its date. A date with time
+A whole date's rank puts it ahead of every other value on its date. A date with time
 to be decided sorts at the start of the next date, and its rank puts it ahead of anything there,
 so it comes after everything on its own date.
 
@@ -306,6 +311,9 @@ written as its two lengths around a spaced dash, as `2 h 30 min – 4 h`.
 *Porcelain:* `relativeTo(value, now)` says how a value relates to the moment `now`, which the
 caller reads from the device's clock (`SHR:TRIP-TIME-F9`). It works in one of two ways.
 
+`now` is in milliseconds, as JavaScript's `Date.now()` gives it. trip-time rounds it down to whole
+seconds before comparing it with a moment.
+
 **By time,** for an exact time, an approximate time, and a window, measured from the moment of its
 start. The distance is rounded to the nearest whole minute:
 
@@ -338,9 +346,10 @@ rules loaded before. It returns the file's version. It refuses a file not in the
 `bad-rules`, and keeps the rules loaded before. `rulesVersion()` gives the version loaded, or
 `undefined` before the first load.
 
-The web app calls `loadRules` with the copy bundled in its build when it starts, and again with
-any newer copy it fetches (ADR-0008). Two versions compare as text, since IANA release names sort
-in release order. trip-time does not compare them. The caller does.
+The web app calls `loadRules` with the copy bundled in its build when it starts, and again with any
+newer copy it fetches (ADR-0008). A server calls `loadRules` when it starts, with the newest file in
+the package's `rules/` folder. Two versions compare as text, since IANA release names sort in
+release order. trip-time does not compare them. The caller does.
 
 ### 4.11 The build script
 
@@ -402,10 +411,10 @@ The rules file is a JSON object, made by the build script (§4.11) and read by `
 
 | Resource | Path | Owned by |
 |---|---|---|
-| The package | `packages/trip-time/` | The keeper of the planner's roadmap |
-| The rules files | `packages/trip-time/rules/<release>.json`, one per release built, committed to the repository | The keeper of the planner's roadmap |
-| The npm workspace membership | `packages/trip-time` in the workspaces of `package.json` at the repository root | The keeper of the planner's roadmap |
-| The recipe | `test-trip-time`, in the `justfile` at the repository root | The keeper of the planner's roadmap |
+| The package | `packages/trip-time/` | Whoever keeps the planner's roadmap |
+| The rules files | `packages/trip-time/rules/<release>.json`, one per release built, committed to the repository | Whoever keeps the planner's roadmap |
+| The npm workspace membership | `packages/trip-time` in the workspaces of `package.json` at the repository root | Whoever keeps the planner's roadmap |
+| The recipe | `test-trip-time`, in the `justfile` at the repository root | Whoever keeps the planner's roadmap |
 | The served copy | A fixed path on the web app's own host, served as a static file | The web app (ADR-0008) |
 
 The package declares no runtime dependencies. Its development dependencies are TypeScript and
@@ -421,8 +430,8 @@ Node's type definitions.
 - **Deterministic.** Every function but `loadRules` gives the same result for the same arguments
   and the same rules. `sort` keeps tied values in the order given.
 - **Readable forever.** `parse` reads any text `toText` wrote, under any later rules (§4.1).
-- **Fast.** Finding an offset is a binary search of one zone's changes, so sorting a trip of a few
-  thousand values takes no noticeable time on a phone.
+- **Fast.** Finding an offset is a binary search of one zone's changes. `sort` works out each
+  value's sort key once, before it sorts.
 
 ## 7. Requirements this satisfies
 

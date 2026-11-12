@@ -1,17 +1,17 @@
 # Trip time
 
 What the shared component `shared/trip-time` promises to the components that use it, such as the
-planner's itinerary, and through them to travellers. trip-time holds the dates and times of a trip
-in the local time of the place each one happens. It sorts them, measures the time between them,
-and writes them as text. The component registry, `components.md`, gives it the prefix
-`SHR:TRIP-TIME`.
+planner, which holds each trip's itinerary, and through them to travellers. trip-time holds the
+dates and times of a trip in the local time of the place each one happens. It sorts them, measures
+the time between them, and writes them as text. The component registry, `components.md`, gives it
+the prefix `SHR:TRIP-TIME`.
 
 Two roles appear below. A caller is a component that uses trip-time. The traveller is the role
 `requirements/README.md` defines.
 
 A time zone is the set of clock rules a place follows, including the days its clocks go forward
-and back, such as Paris time. trip-time holds six kinds of value, and every value belongs to one
-time zone:
+and back, such as Paris time. trip-time holds six kinds of value. Every value belongs to one time
+zone:
 
 | Kind | Such as |
 |---|---|
@@ -22,8 +22,18 @@ time zone:
 | **Approximate time** | Around 14:00 on 3 June |
 | **Window** | Between 14:00 and 16:00 on 3 June, such as a check-in window |
 
+A moment is an instant in time, the same instant everywhere, whatever each place's clocks show. A
+value whose kind is not an exact time or a whole date is imprecise. An imprecise value covers a
+range of moments, such as the six hours of an afternoon. The parts of a day have fixed hours in
+every time zone:
+
+- morning, from 06:00 to 12:00
+- afternoon, from 12:00 to 18:00
+- evening, from 18:00 to 22:00
+- night, from 22:00 to 06:00 the next day
+
 A span is a start and an end, each one a value, such as a flight leaving Paris and landing in New
-York. A value whose kind is not an exact time or a whole date is imprecise.
+York.
 
 ---
 
@@ -32,8 +42,8 @@ York. A value whose kind is not an exact time or a whole date is imprecise.
 ### SHR:TRIP-TIME-F1 — Every value is held in the local time of its place, to the minute
 
 trip-time holds each of the six kinds of value in the local time of the time zone the caller gives
-it. An exact time is held to the minute. trip-time refuses a time zone it does not know, and says
-why. ^shr-trip-time-f1
+it. An exact time is held to the minute. trip-time refuses a time zone its rules do not name, and
+says why. ^shr-trip-time-f1
 
 - **Verification:** for each of the six kinds, with the time zones of Paris, New York and Tokyo,
     - create a value, read it back, and confirm its kind, local date, local times and time zone
@@ -43,7 +53,7 @@ why. ^shr-trip-time-f1
 > **What does this buy?** A ticket, a timetable and a booking all give times in the local time of
 > the place. A traveller copies them in as printed, and reads them back as printed.
 
-> **Who decides a value's time zone?** The caller does. The itinerary, for instance, knows that a
+> **Who decides a value's time zone?** The caller does. The planner, for instance, knows that a
 > train leaves from Lyon, and gives trip-time Paris time. trip-time does not look a place up
 > (`SHR:TRIP-TIME-NR1`).
 
@@ -53,7 +63,7 @@ why. ^shr-trip-time-f1
 ### SHR:TRIP-TIME-F2 — A value keeps its local clock time when its time zone's rules change
 
 When the rules of a value's time zone change after the value is created, the value keeps its local
-date and clock time. Its moment, as measured anywhere else, moves with the new rules. ^shr-trip-time-f2
+date and clock time. The moment it happens moves with the new rules. ^shr-trip-time-f2
 
 - **Verification:** create an exact time of 09:10 on a summer date, Paris time, then
     - replace Paris's rules with rules that end daylight saving, and confirm the value still reads
@@ -131,8 +141,8 @@ whose end only might come before its start is accepted. ^shr-trip-time-f6
     - leaving and arriving at 10:00, Paris time, on 3 June 2026: accepted
 
 > **What does this buy?** An end before its start is a mistake, most often a wrong date or a
-> wrong time zone, and it would give a negative duration. Refusing it then catches the mistake
-> while the traveller still has the booking in front of them.
+> wrong time zone. It would also give a negative duration. Refusing it catches the mistake while
+> the traveller still has the booking in front of them.
 
 ### SHR:TRIP-TIME-F7 — Values in any mix of time zones sort into one order
 
@@ -144,9 +154,9 @@ them. ^shr-trip-time-f7
 | Kind | Sorts at |
 |---|---|
 | **Exact time** | Its time |
-| **Whole date** | The start of its date, ahead of every other value at that moment |
+| **Whole date** | The start of its date, ahead of every other value on that date |
 | **Date with time to be decided** | The end of its date, after every other value on that date |
-| **Part of a day** | The start of its hours: morning from 06:00 to 12:00, afternoon from 12:00 to 18:00, evening from 18:00 to 22:00, and night from 22:00 to 06:00 the next day |
+| **Part of a day** | The start of its hours |
 | **Approximate time** | Its stated time |
 | **Window** | Its start |
 
@@ -168,7 +178,7 @@ them. ^shr-trip-time-f7
 > sorts exactly as the afternoon in Tokyo does.
 
 > **Which day of a trip does a value belong to?** trip-time does not say. An overnight bus could
-> belong to the day it leaves, or the day it arrives. The itinerary decides
+> belong to the day it leaves, or the day it arrives. The planner decides
 > (`SHR:TRIP-TIME-NR7`).
 
 ### SHR:TRIP-TIME-F8 — Every value is written as text in one form, in its local time, with its time zone
@@ -214,8 +224,9 @@ trip-time says how far a value is from the current moment, such as "in 3 hours",
 
 ### SHR:TRIP-TIME-NFR1 — trip-time works without a connection
 
-Everything trip-time promises works on a device with no connection, using the time zone rules the
-device holds. The device brings its rules up to date whenever it is online. ^shr-trip-time-nfr1
+Everything trip-time promises works on a device with no connection, using the copy of the time zone
+rules kept on the device for trip-time. That copy is brought up to date whenever the device is
+online. ^shr-trip-time-nfr1
 
 - **Verification:** on a phone,
     - disconnect it, and confirm each of `SHR:TRIP-TIME-F1` to `SHR:TRIP-TIME-F9` still holds
@@ -257,6 +268,6 @@ set to. ^shr-trip-time-nfr2
 | **SHR:TRIP-TIME-NR4** | Hold seconds, or anything finer | Tickets, timetables and bookings give minutes |
 | **SHR:TRIP-TIME-NR5** | Use any calendar but the Gregorian | Every booking and timetable a traveller copies in uses it |
 | **SHR:TRIP-TIME-NR6** | Warn that the device's time zone rules may be out of date | The rules change rarely, and are announced months ahead (`SHR:TRIP-TIME-NFR1`) |
-| **SHR:TRIP-TIME-NR7** | Decide which day of a trip a value belongs to | Which day an overnight bus belongs to is the itinerary's choice |
+| **SHR:TRIP-TIME-NR7** | Decide which day of a trip a value belongs to | Which day an overnight bus belongs to is the planner's choice |
 
 ^shr-trip-time-nr

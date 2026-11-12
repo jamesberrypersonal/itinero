@@ -6,27 +6,33 @@
 
 ## Problem
 
-trip-time needs each time zone's rules, such as the days Paris's clocks go forward and back, to
-sort values and measure spans across time zones. Every browser and operating system carries a copy
-of these rules, taken from the IANA time zone database. Each device updates its copy on its own
-schedule, so two devices can hold different versions. trip-time promises that a value reads and
-sorts the same on every device (`SHR:TRIP-TIME-NFR2`). With the device's own rules, two travellers
-on one trip could see the same train at different times, until both devices updated.
+trip-time, the shared component that holds a trip's dates and times, needs each time zone's rules,
+such as the days Paris's clocks go forward and back. Without them, it cannot sort a trip's times
+across time zones, or measure the time between two of them. Every browser and operating system
+carries a copy of these rules, taken from the IANA time zone database, the public record of every
+time zone's rules. Each device updates its copy on its own schedule, so two devices can hold
+different versions. trip-time promises that a date or time reads and sorts the same on every device
+(`SHR:TRIP-TIME-NFR2`). With the device's own rules, two travellers on one trip could see the same
+train at different times, until both devices updated.
 
 ## Decision
 
 trip-time carries its own copy of the time zone rules, in a rules file it defines. trip-time works
-out every offset from that file, and never from the browser's or the operating system's rules.
+out every offset from UTC with that file, and never from the browser's or the operating system's
+rules.
 
 The web app keeps the file up to date on each device:
 
 - every build of the web app bundles the newest rules file, so a device works offline from its
   first launch
 - the web app serves the newest rules file as a static file from its own host, at a fixed path
-- whenever a device is online, the web app fetches that file, keeps it if it is newer, and loads it
-  into trip-time
+- whenever a device is online, the web app fetches that file, keeps it if it was made from a later
+  IANA release, and loads it into trip-time
 
-A new IANA release reaches devices by building the rules file from it, and deploying the web app.
+A server running trip-time loads the newest rules file in trip-time's package when it starts.
+
+A new IANA release reaches devices when a maintainer builds the rules file from it with
+trip-time's build script, and deploys the web app.
 
 ## Consequences
 

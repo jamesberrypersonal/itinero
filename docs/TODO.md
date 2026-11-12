@@ -74,8 +74,8 @@ decision record that supersedes ADR-0004.
 *Tags:* shared/trip-time
 *Written:* 2026-11-12
 
-*Problem:* trip-time takes each value's time zone from its caller, and cannot find the time zone
-of a place such as Lyon or Narita airport.
+*Problem:* trip-time takes the time zone of each date and time from the component that gives it
+the date or time. It cannot find the time zone of a place such as Lyon or Narita airport.
 
 *Reason:* The first requirements for trip-time leave the lookup to the caller
 (`SHR:TRIP-TIME-NR1`). A lookup that works offline needs a list of places held on the phone.
@@ -124,7 +124,8 @@ other languages travellers need is not known yet.
 such as `shared/trip-time`, `planner/itinerary` or `planner/pages`.
 
 *Reason:* `just new-component` registers a component and writes its documents in one step, so it
-refuses an address that is already registered (`SHR:DOC-SCAFFOLD-F3`). Those three components were
+refuses an address that is already registered (`SHR:DOC-SCAFFOLD-F3`, a refused command writes
+nothing, and says why). Those three components were
 registered before doc-scaffold existed.
 
 *Proposal:* Add a command, such as `just new-docs`, that writes the skeleton requirements and

@@ -6,10 +6,10 @@
 
 ## Problem
 
-trip-time, the shared component that holds a trip's dates and times, is the first part of the
-product to be specified. No language had been chosen for the product. trip-time has to run in the
-web app on a phone with no connection (ADR-0004, a trip is read-only offline). It also has to run
-on whatever server holds trips, so that a value sorts and reads the same in both places.
+trip-time, the shared component that holds a trip's dates and times, is the first part of Itinero,
+the trip planner, to be specified. No language had been chosen for the product. trip-time has to run
+in the web app on a phone with no connection (ADR-0004, a trip is read-only offline). It also has to
+run on whatever server holds trips, so that a value sorts and reads the same in both places.
 
 ## Decision
 
@@ -20,12 +20,13 @@ package has no runtime dependencies.
 ## Consequences
 
 - `spec/shared/trip-time.md` describes trip-time's interface as TypeScript functions and types.
-- The repository gains a second toolchain beside Rust: Node and npm, with npm workspaces holding
-  the product's packages under `packages/`.
+- The repository gains a second toolchain, Node.js and npm, beside the Rust toolchain the
+  documentation tools use. npm workspaces hold the product's packages under `packages/`.
 - The web app and the server are likely to be written in TypeScript too, so they can use trip-time
   directly. This record does not bind them. Their own records choose their languages.
 - The documentation tools stay in Rust (ADR-0003, the checker is built in Rust and run through
-  just). A contributor to both needs both toolchains.
+  just). Someone who works on both the product and
+  the documentation tools needs both toolchains.
 
 ## Alternatives considered
 
