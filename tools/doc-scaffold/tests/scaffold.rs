@@ -204,7 +204,7 @@ fn a_shared_component_joins_the_registry_the_tags_and_both_indexes() {
     let reg = read(&root, "components.md");
     let at = |s: &str| reg.find(s).unwrap();
     assert!(at("| [doc-check]") < at("| [money](spec/shared/money.md)"));
-    assert!(at("| [money]") < at("| trip-time |"));
+    assert!(at("| [money]") < at("| [trip-time]"));
     let todo = read(&root, "TODO.md");
     assert!(todo.find("| shared/doc-check |") < todo.find("| shared/money |"));
     assert!(todo.find("| shared/money |") < todo.find("| shared/trip-time |"));
