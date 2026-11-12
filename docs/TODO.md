@@ -3,7 +3,7 @@
 What needs active work, and what waits on a decision. `documentation-system.md` gives the list's
 rules. When an item is done, it leaves this list for `CHANGELOG.md` in the commit that finishes it.
 
-*Next free:* TODO-9
+*Next free:* TODO-10
 
 ## Tags
 
@@ -115,21 +115,22 @@ other languages travellers need is not known yet.
 
 *Releases:* Nothing is planned for it yet.
 
-### TODO-8 — Start the documents of a component that is already registered
+### TODO-9 — Run the style guide's final pass with a Claude skill
 
-*Tags:* shared/doc-scaffold
+*Tags:* docs
 *Written:* 2026-11-12
 
-*Problem:* doc-scaffold cannot start the documents of a component that is registered but has none,
-such as `shared/trip-time`, `planner/itinerary` or `planner/pages`.
+*Problem:* The final pass at the end of `style.md` is run by hand, step by step, and nothing makes
+sure each step is done the same way every time.
 
-*Reason:* `just new-component` registers a component and writes its documents in one step, so it
-refuses an address that is already registered (`SHR:DOC-SCAFFOLD-F3`, a refused command writes
-nothing, and says why). Those three components were
-registered before doc-scaffold existed.
+*Reason:* The pass found real defects in two pull requests, #6 and #7, beyond what doc-check
+reports. Among them were a requirement that contradicted its own specification, and sentences a
+change had made untrue elsewhere in the same document. Its most useful step, reading as a newcomer,
+works best from a reader that has seen none of the work. The author cannot do that.
 
-*Proposal:* Add a command, such as `just new-docs`, that writes the skeleton requirements and
-specification for a registered component with neither, and their index rows. Change doc-scaffold's
-requirements and specification to promise it.
+*Proposal:* Add a project skill in `.claude/skills/` that runs the pass over the documents a branch
+changes. It does steps 1 to 3 itself, hands step 4 to a subagent with no other context, applies the
+fixes, rewraps only the paragraphs it changed, and runs `just check-docs` and `just test-docs`. It
+asks before editing an accepted decision record.
 
 *Releases:* Nothing is planned for it yet.

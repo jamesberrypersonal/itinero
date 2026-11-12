@@ -1,5 +1,6 @@
 //! The little Markdown doc-scaffold reads (`spec/shared/doc-scaffold.md` §4.2): headings and the
-//! tables under them, outside fenced code blocks. It edits a file only by inserting whole lines.
+//! tables under them, outside fenced code blocks. It edits a file by inserting whole lines, and
+//! changes one existing line only to link a registered component to its new specification.
 
 /// One file, as its lines, with whether it ended in a newline.
 pub struct File {
@@ -125,6 +126,12 @@ impl File {
     pub fn cell(&self, table: Table, row: usize, name: &str) -> Option<String> {
         let col = self.header(table).iter().position(|h| h == name)?;
         cells(&self.lines[row]).get(col).map(|c| value(c))
+    }
+
+    /// Replaces the line at `at`. doc-scaffold uses it for one change alone: linking a component's
+    /// slug in the registry to its new specification (§4.7).
+    pub fn replace(&mut self, at: usize, line: String) {
+        self.lines[at] = line;
     }
 
     /// Inserts lines before the line at `at`.

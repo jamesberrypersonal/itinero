@@ -1,9 +1,10 @@
-//! The four commands of §4.3 to §4.6. Each checks everything it refuses, then plans its changes.
+//! The five commands of §4.3 to §4.7. Each checks everything it refuses, then plans its changes.
 
 use crate::date;
 use crate::md::{File, Table};
 use crate::plan::{Plan, insert_block};
 use crate::registry::Registry;
+use std::path::Path;
 
 /// The marker every part an author still has to write opens with (§4.1).
 pub const MARK: &str = "To be written";
@@ -64,6 +65,46 @@ fn capitalise(s: &str) -> String {
 /// A prefix written as a block ID: lower case, with its colon as a hyphen.
 fn block_id(prefix: &str) -> String {
     prefix.to_lowercase().replace(':', "-")
+}
+
+/// Every accepted decision record whose Consequences name the specification at `spec`, such as
+/// `spec/shared/trip-time.md`, as `ADR-0007`. Each must be cited back by that specification, so a
+/// skeleton written for it cites them, and adds no finding (`SHR:DOC-SCAFFOLD-F2`).
+fn records_naming(root: &Path, spec: &str) -> Vec<String> {
+    let Ok(entries) = std::fs::read_dir(root.join("docs/decisions")) else {
+        return Vec::new();
+    };
+    let mut out = Vec::new();
+    for entry in entries.flatten() {
+        let name = entry.file_name().to_string_lossy().to_string();
+        let Some(number) = name
+            .get(..4)
+            .filter(|n| n.chars().all(|c| c.is_ascii_digit()))
+        else {
+            continue;
+        };
+        if !name.ends_with(".md") || name.as_bytes().get(4) != Some(&b'-') {
+            continue;
+        }
+        let Ok(text) = std::fs::read_to_string(entry.path()) else {
+            continue;
+        };
+        let file = File::parse(&text);
+        let accepted = file
+            .lines
+            .iter()
+            .any(|l| l.trim() == "- **Status:** Accepted");
+        let names = file.heading(2, "Consequences").is_some_and(|at| {
+            file.lines[at..file.section_end(at)]
+                .iter()
+                .any(|l| l.contains(spec))
+        });
+        if accepted && names {
+            out.push(format!("ADR-{number}"));
+        }
+    }
+    out.sort();
+    out
 }
 
 // ---- Edits shared by the commands ----
@@ -128,6 +169,15 @@ fn add_to_index(
         let table = file
             .table_between(0, file.lines.len())
             .ok_or(format!("docs/{folder_index} has no table"))?;
+        // A row the index already holds for the document is kept, and not added twice.
+        let listed = table.rows().any(|i| {
+            crate::md::cells(&file.lines[i])
+                .first()
+                .is_some_and(|c| crate::md::value(c) == doc_name)
+        });
+        if listed {
+            return Ok(());
+        }
         insert_row(file, table, doc_row, |line| {
             crate::md::cells(line)
                 .first()
@@ -182,6 +232,7 @@ fn add_to_index(
 pub fn component(
     plan: &mut Plan,
     reg: &Registry,
+    root: &Path,
     system: &str,
     slug_: &str,
     prefix: &str,
@@ -224,7 +275,8 @@ pub fn component(
     let req = format!("requirements/{system}/{slug_}.md");
     let spec = format!("spec/{system}/{slug_}.md");
     plan.create(&req, &requirements_text(&address, slug_, prefix))?;
-    plan.create(&spec, &spec_text(reg, system, slug_, prefix))?;
+    let records = records_naming(root, &spec);
+    plan.create(&spec, &spec_text(reg, system, slug_, prefix, &records))?;
 
     // The registry: grouped by system in the Systems table's order, then shared, and by slug
     // within a system.
@@ -309,12 +361,23 @@ observe. ^{id}-f1
     )
 }
 
-fn spec_text(reg: &Registry, system: &str, slug: &str, prefix: &str) -> String {
+fn spec_text(reg: &Registry, system: &str, slug: &str, prefix: &str, records: &[String]) -> String {
     let id = block_id(prefix);
+    // Accepted records that name this specification are cited back from the start.
+    let cite = match records {
+        [] => String::new(),
+        [one] => format!(
+            "\n{MARK}: cite {one} where this specification relies on it. {one} names this\nspecification in its Consequences, so the checker requires a citation of it to stay.\n"
+        ),
+        [rest @ .., last] => format!(
+            "\n{MARK}: cite {} and {last} where this specification relies on them. Each names\nthis specification in its Consequences, so the checker requires a citation of each to stay.\n",
+            rest.join(", ")
+        ),
+    };
     let mut sections: Vec<String> = vec![
         format!("## 1. Purpose\n\n{MARK}: what {slug} is for.\n"),
         format!(
-            "## 2. Scope\n\n{MARK}: what it covers, what acts on it, and what is deliberately absent.\n"
+            "## 2. Scope\n\n{MARK}: what it covers, what acts on it, and what is deliberately absent.\n{cite}"
         ),
         format!(
             "## 3. Interface
@@ -394,6 +457,133 @@ serves.
          what it promises.\n\n{}",
         sections.join("\n")
     )
+}
+
+// ---- §4.7: the documents of a registered component ----
+
+pub fn docs(
+    plan: &mut Plan,
+    reg: &Registry,
+    root: &Path,
+    system: &str,
+    slug_: &str,
+) -> Result<(), String> {
+    slug("component", slug_)?;
+    if system == "concerns" {
+        return Err(
+            "a concern is not a component, and doc-scaffold does not start its documents".into(),
+        );
+    }
+    let address = format!("{system}/{slug_}");
+    let component = reg
+        .components
+        .iter()
+        .find(|c| c.system == system && c.slug == slug_)
+        .ok_or(format!(
+            "the component {address} is not registered. Start a new component with just new-component"
+        ))?;
+    let (prefix, is) = (component.prefix.clone(), component.is.clone());
+    let id = block_id(&prefix);
+    let req = format!("requirements/{system}/{slug_}.md");
+    let spec = format!("spec/{system}/{slug_}.md");
+    let (has_req, has_spec) = (plan.exists(&req), plan.exists(&spec));
+    if has_req && has_spec {
+        return Err(format!(
+            "{address} already has both its documents, docs/{req} and docs/{spec}"
+        ));
+    }
+    // A skeleton beside a document that exists ties to it through F1: the specification's claim
+    // table claims F1, and the requirements document defines it. Without F1 in the existing
+    // document, the skeleton would add a finding (`SHR:DOC-SCAFFOLD-F2`).
+    if has_req && !plan.edit(&req)?.text().contains(&format!("^{id}-f1")) {
+        return Err(format!(
+            "docs/{req} holds no {prefix}-F1 for the new specification to claim"
+        ));
+    }
+    if has_spec && !plan.edit(&spec)?.text().contains(&format!("#^{id}-f1)")) {
+        return Err(format!(
+            "docs/{spec} claims no {prefix}-F1 for the new requirements document to define"
+        ));
+    }
+    line_of_text("description in the registry", &is)?;
+
+    if !has_req {
+        plan.create(&req, &requirements_text(&address, slug_, &prefix))?;
+        add_to_index(
+            plan,
+            reg,
+            "requirements",
+            system,
+            format!("| [{slug_}.md]({slug_}.md) | {is} | {MARK} |"),
+            &format!("{slug_}.md"),
+        )?;
+    }
+    if !has_spec {
+        let records = records_naming(root, &spec);
+        plan.create(&spec, &spec_text(reg, system, slug_, &prefix, &records))?;
+        add_to_index(
+            plan,
+            reg,
+            "spec",
+            system,
+            format!("| [{slug_}.md]({slug_}.md) | {is} | {MARK} |"),
+            &format!("{slug_}.md"),
+        )?;
+        link_in_registry(plan, system, slug_, &spec)?;
+    }
+
+    // Every registered address has a Tags row already, unless the vault broke that rule.
+    let has_tag = plan.exists("TODO.md") && {
+        let file = plan.edit("TODO.md")?;
+        file.table_under(2, "Tags").is_some_and(|t| {
+            t.rows().any(|i| {
+                crate::md::cells(&file.lines[i])
+                    .first()
+                    .is_some_and(|c| crate::md::value(c) == address)
+            })
+        })
+    };
+    if !has_tag {
+        add_tag(plan, &reg.addresses(), &address, &is)?;
+    }
+    Ok(())
+}
+
+/// Links a component's slug in the registry's Components table to its specification, where the
+/// slug is not linked already. It is the one existing line doc-scaffold changes
+/// (`SHR:DOC-SCAFFOLD-F4`).
+fn link_in_registry(plan: &mut Plan, system: &str, slug_: &str, spec: &str) -> Result<(), String> {
+    let file = plan.edit("components.md")?;
+    let Some(table) = file.table_under(2, "Components") else {
+        return Ok(()); // A booking kind sits in its own table, and stays unlinked.
+    };
+    let col = file
+        .header(table)
+        .iter()
+        .position(|h| h == "Component")
+        .ok_or("docs/components.md has no Component column")?;
+    let row = table.rows().find(|&i| {
+        file.cell(table, i, "System").as_deref() == Some(system)
+            && file.cell(table, i, "Component").as_deref() == Some(slug_)
+    });
+    let Some(row) = row else {
+        return Ok(());
+    };
+    let mut cells = crate::md::cells(&file.lines[row]);
+    if cells[col].contains("](") {
+        return Ok(());
+    }
+    cells[col] = format!("[{slug_}]({spec})");
+    let mut line = String::from("|");
+    for cell in cells {
+        if cell.is_empty() {
+            line.push_str(" |");
+        } else {
+            line.push_str(&format!(" {cell} |"));
+        }
+    }
+    file.replace(row, line);
+    Ok(())
 }
 
 // ---- §4.4: a system ----

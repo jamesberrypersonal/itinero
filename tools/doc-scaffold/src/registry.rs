@@ -12,6 +12,8 @@ pub struct Component {
     pub system: String,
     pub slug: String,
     pub prefix: String,
+    /// One line saying what it is, from the Is column.
+    pub is: String,
 }
 
 pub struct Concern {
@@ -57,6 +59,7 @@ impl Registry {
                         system: get("System"),
                         slug: get("Component"),
                         prefix: get("Prefix"),
+                        is: get("Is"),
                     }),
                     "Booking kinds" => {
                         let prefix = get("Prefix");
@@ -68,6 +71,7 @@ impl Registry {
                             system: "bookings".into(),
                             slug,
                             prefix,
+                            is: get("Is"),
                         });
                     }
                     _ => {

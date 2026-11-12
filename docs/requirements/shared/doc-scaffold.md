@@ -3,8 +3,9 @@
 **Assumes** [documentation-system.md](../../documentation-system.md) — the rules every document it writes keeps.
 
 What the shared component `shared/doc-scaffold` promises to the people who write the vault.
-doc-scaffold starts a new component, system, decision record or guide. It writes each new
-document's skeleton, and adds every registry, index and live-list row that names the new thing.
+doc-scaffold starts a new component, system, decision record or guide, and the missing documents of
+a component that is already registered. It writes each new document's skeleton, and adds every
+registry, index and live-list row that names the new thing.
 The component registry, `components.md`, gives it the prefix `SHR:DOC-SCAFFOLD`.
 
 One role appears below, as `requirements/README.md` defines it. The author adds a document or
@@ -16,8 +17,10 @@ changes one.
 
 ### SHR:DOC-SCAFFOLD-F1 — One command starts each kind of thing an author adds
 
-One command starts a component, a system, a decision record or a guide. Each command writes the
-new documents and every row the documentation system requires before the new thing can be named. ^shr-doc-scaffold-f1
+One command starts a component, a system, a decision record or a guide. Another starts the
+requirements or the specification that a registered component lacks, or both. Each command writes
+the new documents and every row the documentation system requires before the new thing can be
+named. ^shr-doc-scaffold-f1
 
 - **Verification:** on a copy of the vault, run each command, then confirm that
     - a new component of a registered system has its row in the registry and in the live list's
@@ -30,15 +33,22 @@ new documents and every row the documentation system requires before the new thi
     - a new decision record takes the next free number, and has a row in both views of the
       decision index
     - a new guide has a row in the guides' index, under its system or under the workspace
+    - a registered component with neither document gets both, with a row in each folder's index,
+      and its slug in the registry linked to its specification
+    - a registered component with one document gets the other, and the one it had is unchanged
 
 > **What does this buy?** Without it, an author starting a component writes two documents from
 > blank files, and adds up to six rows by hand, each in a different file. Each row forgotten is a
 > finding to fix, one run of the checker at a time. The command does the mechanical part, and the author starts on the part
 > that needs thought.
 
-> **Why these four, and not concerns or booking kinds?** They are what authors add most often.
-> Registering a concern obliges every component specification to add a subsection, which is
-> written by hand in each one (`SHR:DOC-SCAFFOLD-NR2`).
+> **Why start the documents of a registered component?** A component can be registered before
+> anyone writes about it, as the planner's itinerary was. The command for a new component refuses
+> an address that is already registered, so such a component needs a command of its own.
+
+> **Why components, systems, decision records and guides, and not concerns or booking kinds?** They
+> are what authors add most often. Registering a concern obliges every component specification to
+> add a subsection, which is written by hand in each one (`SHR:DOC-SCAFFOLD-NR2`).
 
 ### SHR:DOC-SCAFFOLD-F2 — What a command writes passes the checker
 
@@ -62,30 +72,41 @@ A command whose arguments the vault cannot take writes no file, and prints the r
 - **Verification:** on a copy of the vault, confirm that each of these is refused, with its
   reason, and that every file is unchanged afterwards
     - a component of a system that is not registered
-    - an address, or a prefix, that is already registered
+    - a new component or system whose address, or prefix, is already registered
     - a slug or prefix that is not in the form the registry requires
     - a description holding a pipe, a line break, an angle bracket or an unclosed code span
-    - a document that already exists
+    - a new document where one already exists
+
     - a decision record scoped to an address that is not registered, or to `workspace` and an
       address together
+    - the documents of a component that is not registered, or that has both its documents already
+    - one document of a registered component, beside an existing document that does not define or
+      claim the requirement the new skeleton ties to, its first, such as `SHR:DOC-CHECK-F1` for
+      doc-check
     - an unknown command, or a command given the wrong number of arguments
 
 > **What does this buy?** A command that wrote half its files and then stopped would leave the
 > author to find and undo the half. A refusal changes nothing, so the author fixes the arguments
 > and runs the command again.
 
-### SHR:DOC-SCAFFOLD-F4 — doc-scaffold never removes or changes what an author wrote
+### SHR:DOC-SCAFFOLD-F4 — doc-scaffold never removes what an author wrote, and changes one registry link at most
 
-A command never overwrites a file. In a file that exists, it only adds lines. Every line that was
-there before stays, unchanged and in the same order. ^shr-doc-scaffold-f4
+A command never overwrites a file. In a file that exists, it only adds lines, with one exception:
+it links a registered component's slug in the registry to the specification it has just written.
+Every other line that was there before stays, unchanged and in the same order. ^shr-doc-scaffold-f4
 
 - **Verification:** on a copy of the vault, run each command, then confirm that
-    - every line of every file that existed before is still in it, in the same order
+    - every line of every file that existed before is still in it, in the same order, apart from
+      a registry row whose slug is now linked to its new specification
     - a command naming a document that exists is refused
 
 > **What does this buy?** An author can run a command in a working copy holding unfinished work,
-> and lose none of it. A change the command made shows in the diff as added lines only, so a
-> reviewer reads it at a glance.
+> and lose none of it. A change the command made shows in the diff as added lines, and at most one
+> changed registry row, so a reviewer reads it at a glance.
+
+> **Why may a registry row change?** A component registered before its documents existed has an
+> unlinked slug. Linking it to the new specification keeps every registry row alike, and the change
+> is to one cell, which a reviewer sees in the diff.
 
 ### SHR:DOC-SCAFFOLD-F5 — Every part left to the author is marked, and the run lists every file it wrote
 

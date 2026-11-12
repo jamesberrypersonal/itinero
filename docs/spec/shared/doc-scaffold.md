@@ -5,16 +5,17 @@
 ## 1. Purpose
 
 doc-scaffold is the program that starts a new component, system, decision record or guide in the
-`docs/` vault. It writes each new document's skeleton, and adds every row that names the new
-thing to the registry, the indexes and the live work list. An author then fills in each part the
-skeleton marks, and runs the checker, doc-check.
+`docs/` vault, and the missing documents of a component that is already registered. It writes each
+new document's skeleton, and adds every row that names the new thing to the registry, the indexes
+and the live work list. An author then fills in each part the skeleton marks, and runs the checker,
+doc-check.
 
 ## 2. Scope
 
-doc-scaffold covers four commands: `component`, `system`, `decision` and `guide`. It reads and
-writes files under `docs/` alone.
+doc-scaffold covers five commands: `component`, `docs`, `system`, `decision` and `guide`. It reads
+and writes files under `docs/` alone.
 
-One thing acts on it: an author, through one of four just recipes, from any directory in the
+One thing acts on it: an author, through one of five just recipes, from any directory in the
 repository.
 
 Deliberately absent:
@@ -37,18 +38,19 @@ author runs one of these, from any directory in the repository:
 
 ```
 just new-component <system> <slug> <prefix> <description>
+just new-docs <system> <slug>
 just new-system <slug> <prefix> <description> <keeper>
 just new-decision <title> <scope>... [--slug <slug>] [--date <YYYY-MM-DD>]
 just new-guide <group> <slug> <title> <description>
 ```
 
 Each recipe runs `doc-scaffold <command>` with the arguments it is given, where the command is
-`component`, `system`, `decision` or `guide`.
+`component`, `docs`, `system`, `decision` or `guide`.
 
 | Argument | Holds |
 |---|---|
 | `<system>` | A registered system, or `shared` |
-| `<slug>` | The new thing's slug: lower-case letters and digits, in runs joined by single hyphens |
+| `<slug>` | The new thing's slug, or for `docs` the registered component's: lower-case letters and digits, in runs joined by single hyphens |
 | `<prefix>` | For a component, its system's prefix, or `SHR`, then a colon and three to twelve capitals, digits and hyphens. For a system, two to four capital letters |
 | `<description>` | One line saying what it is, for the registry's Is column and each index row |
 | `<keeper>` | Who keeps the new system's roadmap, for its Kept by line |
@@ -86,9 +88,11 @@ None. The package `tools/doc-scaffold` builds a binary only, and no other packag
 doc-scaffold drives three systems outside itself.
 
 - **The file system.** doc-scaffold reads the vault's `components.md`, its `TODO.md` and each index
-  it edits. It lists the vault's `decisions/` folder to find the next record number. It creates the new documents,
-  with any folders they need, and writes the indexes it changed.
-- **just**, the command runner doc-check also uses. Each of the four recipes runs
+  it edits. For `docs`, it also reads the document a component already has. It lists the vault's
+  `decisions/` folder to find the next record number, and reads each record to find those that
+  name a new specification. It creates the new documents, with any folders they need, and
+  writes each index, and the registry, that it changed.
+- **just**, the command runner doc-check also uses. Each of the five recipes runs
   `cargo run --release --quiet --package doc-scaffold -- <command> <arguments>`.
 - **doc-check**, through its library, in doc-scaffold's tests only. The package `tools/doc-check`
   builds a library holding one function, `check`, which runs every rule over a repository root and
@@ -99,20 +103,22 @@ doc-scaffold drives three systems outside itself.
 
 ### 4.1 A run, end to end
 
-*Invoked from:* one of the four recipes of §3.1, run by an author. Nothing runs doc-scaffold
+*Invoked from:* one of the five recipes of §3.1, run by an author. Nothing runs doc-scaffold
 automatically.
 
 1. doc-scaffold parses its options and its command's arguments. An unknown command or option, a
    missing value, the wrong number of arguments, or `--slug` or `--date` given to a command other
    than `decision` is refused.
 2. It confirms that the vault holds the component registry, and reads it (§4.2).
-3. It runs its command (§4.3 to §4.6). The command first checks everything it refuses, and then
+3. It runs its command (§4.3 to §4.7). The command first checks everything it refuses, and then
    plans each change in memory: a new file's text, or an existing file's lines with rows inserted.
+   The command of §4.7 may also link one registry cell.
 4. It writes every planned file whose text differs from what is on disk, creating folders as
    needed, and prints a line for each (§3.1).
 
 Any refusal stops the run before step 4, so a refused run writes nothing (`SHR:DOC-SCAFFOLD-F3`).
-A file that already exists is never planned as a new one, so nothing is overwritten
+A file that already exists is never planned as a new one, so nothing is overwritten. The one
+existing line a command changes is a registry row, when §4.7 links a slug to its new specification
 (`SHR:DOC-SCAFFOLD-F4`).
 
 Every part of a skeleton the author still has to write opens with the marker "To be written"
@@ -146,7 +152,7 @@ Every command applies two checks to its arguments:
   HTML or leave a code span unclosed, and the checker would report the result
   (`SHR:DOC-SCAFFOLD-F2`).
 
-A row is added to a table by inserting one line. Where §4.3 to §4.6 give an order, the row goes
+A row is added to a table by inserting one line. Where §4.3 to §4.7 give an order, the row goes
 before the first row it sorts before, and otherwise after the last row. A new section is inserted
 with one blank line between it and any text on either side.
 
@@ -161,8 +167,8 @@ writes the address `<system>/<slug>`:
 
 | File | Change |
 |---|---|
-| `requirements/<system>/<slug>.md` | Created: one functional requirement and one non-requirement, each a placeholder, with their block IDs |
-| `spec/<system>/<slug>.md` | Created: the eight numbered sections, a claim table claiming the placeholder requirement, and each registered concern's subsection |
+| `requirements/<system>/<slug>.md` | Created: one functional requirement, `<prefix>-F1`, and one non-requirement, `<prefix>-NR1`, each a placeholder, with their block IDs |
+| `spec/<system>/<slug>.md` | Created: the eight numbered sections, a claim table claiming `<prefix>-F1`, each registered concern's subsection, and a placeholder citing each accepted decision record whose Consequences name the specification |
 | `components.md` | A row in Components, with the slug linked to the specification, in the registry's order |
 | `TODO.md` | A row in the Tags table, if the vault has a live list (§4.4) |
 | `requirements/<system>/README.md` and `spec/<system>/README.md` | A row for the document, in alphabetical order. Where the folder is new, the index is created holding the row |
@@ -172,6 +178,12 @@ A concern registered as covered at a section such as `§5.1` gets a heading of l
 number of dots, such as `### 5.1 Personal data`. The heading is placed at the end of the numbered
 section it belongs to, and concerns are ordered by section number, so `§5.2` comes before
 `§5.10`.
+
+A new specification cites every accepted decision record that names it, so the skeleton adds no
+finding (`SHR:DOC-SCAFFOLD-F2`). The checker requires an accepted record to be cited back by each
+specification its Consequences name. A record names a specification when its Consequences section
+holds the specification's path, such as `spec/shared/trip-time.md`, in a link or a code span. The
+citations sit in a placeholder in the skeleton's section 2.
 
 ### 4.4 system
 
@@ -224,28 +236,52 @@ It refuses a group that is neither `workspace` nor a registered system. It write
 | `guides/<slug>.md` | Created: the title, an opening paragraph, one numbered step under The steps, and Confirming the work, each a placeholder |
 | `guides/README.md` | A row at the end of the table under the level-two heading naming the group with its first letter capitalised, such as Workspace. A missing section is added at the end of the file |
 
-### 4.7 The test suite
+### 4.7 docs
+
+*Invoked from:* `just new-docs <system> <slug>`.
+
+It starts whichever of its two documents a registered component lacks. The prefix and the
+description come from the component's row in the registry, so the author types neither again.
+
+It refuses a `<system>` of `concerns`, an address the registry does not hold, and a component that
+has both its documents already. Where one document exists, the new one must agree with it on the
+component's first requirement, `<prefix>-F1`, such as `SHR:DOC-CHECK-F1` for doc-check. A new
+specification's claim table claims that requirement, and a new requirements document defines it, as
+§4.3 writes them. The command therefore refuses an existing requirements document that does not
+define it, and an existing specification whose claim table does not claim it.
+
+| File | Change |
+|---|---|
+| `requirements/<system>/<slug>.md` | Created, where it is missing, as §4.3 writes it |
+| `spec/<system>/<slug>.md` | Created, where it is missing, as §4.3 writes it, citing the records that name it |
+| `requirements/<system>/README.md` and `spec/<system>/README.md` | A row for each document created, as §4.3 adds it, unless the index lists the document already |
+| `requirements/README.md` and `spec/README.md` | Only where a folder is new, as §4.3 |
+| `components.md` | Where the specification is created and the slug is not linked: the slug's cell, linked to it. That row is the one existing line doc-scaffold changes |
+| `TODO.md` | A row in the Tags table, only where the vault has a live list and the address has no row |
+
+### 4.8 The test suite
 
 The suite runs with `cargo test --package doc-scaffold`, and `just test-docs` runs it with
 doc-check's.
 
 - **Unit tests** cover reading headings and cells, the checks of §4.2, the record slug, and the
   date.
-- **Behaviour tests** run the built program against a copy of this repository's vault, and against
-  a small vault that registers a concern at `§5.1`. Each run of a command is followed by doc-check's
+- **Behaviour tests** run the built program against a copy of this repository's vault, and against a
+  small vault that registers a concern at `§5.1`. Each run of a command is followed by doc-check's
   `check` (§3.4), which must return the same findings as before the run. Every line of every file
-  that existed before must still be there, in order.
-- **Refusals** run each refused case of §4.3 to §4.6, and confirm the exit status, the reason, and
+  that existed before must still be there, in order. The one exception is the registry row §4.7
+  links, which must differ only in that link.
+- **Refusals** run each refused case of §4.3 to §4.7, and confirm the exit status, the reason, and
   that every file is unchanged.
 
 ## 5. Resources
 
-doc-scaffold creates only the files §4.3 to §4.6 list, under `docs/`.
+doc-scaffold creates only the files §4.3 to §4.7 list, under `docs/`.
 
 | Resource | Path | Owned by |
 |---|---|---|
 | The package | `tools/doc-scaffold/` | The rules keeper |
-| The recipes | `new-component`, `new-system`, `new-decision` and `new-guide`, in the `justfile` at the repository root | The rules keeper |
+| The recipes | `new-component`, `new-docs`, `new-system`, `new-decision` and `new-guide`, in the `justfile` at the repository root | The rules keeper |
 | The Cargo workspace membership | `tools/doc-scaffold` in the members of `Cargo.toml` at the repository root | The rules keeper |
 
 The package's manifest declares no dependencies. Its one development dependency is doc-check, by
@@ -262,17 +298,17 @@ its path in this repository, so its lockfile names no package from outside the r
   first write. A write that fails partway, such as on a full disk, stops the run with exit status 2,
   and the files listed before it were written.
 - **Deterministic.** The same arguments over the same files, on the same date, write the same
-  bytes. Rows are placed by the orders of §4.2 to §4.6, and never by the order the file system
+  bytes. Rows are placed by the orders of §4.2 to §4.7, and never by the order the file system
   lists files.
 
 ## 7. Requirements this satisfies
 
 | Requirement | What this component contributes |
 |---|---|
-| [SHR:DOC-SCAFFOLD-F1](../../requirements/shared/doc-scaffold.md#^shr-doc-scaffold-f1) | The four commands of §4.3 to §4.6, each writing every row its new thing needs. |
-| [SHR:DOC-SCAFFOLD-F2](../../requirements/shared/doc-scaffold.md#^shr-doc-scaffold-f2) | The skeletons and the row placement of §4.3 to §4.6, the text checks of §4.2, and the behaviour tests of §4.7 that run doc-check after every command. |
-| [SHR:DOC-SCAFFOLD-F3](../../requirements/shared/doc-scaffold.md#^shr-doc-scaffold-f3) | The refusals of §4.1 to §4.6, all made before anything is written, and exit status 1. |
-| [SHR:DOC-SCAFFOLD-F4](../../requirements/shared/doc-scaffold.md#^shr-doc-scaffold-f4) | Rows added by inserting lines (§4.2), and a new file refused where one exists (§4.1). |
+| [SHR:DOC-SCAFFOLD-F1](../../requirements/shared/doc-scaffold.md#^shr-doc-scaffold-f1) | The five commands of §4.3 to §4.7, each writing every row its new thing needs. |
+| [SHR:DOC-SCAFFOLD-F2](../../requirements/shared/doc-scaffold.md#^shr-doc-scaffold-f2) | The skeletons and the row placement of §4.3 to §4.7, the text checks of §4.2, the records a new specification cites (§4.3), and the behaviour tests of §4.8 that run doc-check after every command. |
+| [SHR:DOC-SCAFFOLD-F3](../../requirements/shared/doc-scaffold.md#^shr-doc-scaffold-f3) | The refusals of §4.1 to §4.7, all made before anything is written, and exit status 1. |
+| [SHR:DOC-SCAFFOLD-F4](../../requirements/shared/doc-scaffold.md#^shr-doc-scaffold-f4) | Rows added by inserting lines (§4.2), a new file refused where one exists (§4.1), and the one registry link of §4.7. |
 | [SHR:DOC-SCAFFOLD-F5](../../requirements/shared/doc-scaffold.md#^shr-doc-scaffold-f5) | The "To be written" marker of §4.1, and the list of files of §3.1. |
 | [SHR:DOC-SCAFFOLD-NFR1](../../requirements/shared/doc-scaffold.md#^shr-doc-scaffold-nfr1) | Every path joined to the vault, as §6 states. |
 | [SHR:DOC-SCAFFOLD-NFR2](../../requirements/shared/doc-scaffold.md#^shr-doc-scaffold-nfr2) | No socket, as §6 states. |

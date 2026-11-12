@@ -92,10 +92,12 @@ finished sentence, so search the files listed for "To be written", and replace e
 and 6 describe. A command that cannot be carried out, such as one naming a system that is not
 registered, writes nothing and says why.
 
-Three more commands start the other things an author adds:
+Four more commands start the other things an author adds, and the documents of a component that
+was registered without them:
 
 | Command | Starts |
 |---|---|
+| `just new-docs <system> <slug>` | The documents a registered component is missing, with their index rows, taking its prefix and description from the registry |
 | `just new-system <slug> <prefix> <description> <keeper>` | A system: its registry row, its tag, and its roadmap |
 | `just new-decision <title> <scope>...` | The next decision record, with its rows in both views of the decisions index. It takes `--slug` to shorten the filename, and `--date` to set the Date line |
 | `just new-guide <group> <slug> <title> <description>` | A guide, listed under `workspace` or a registered system in the guides index |

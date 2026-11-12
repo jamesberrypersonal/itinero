@@ -1,5 +1,6 @@
 //! doc-scaffold writes the skeleton documents and index rows for a new component, system,
-//! decision record or guide, so that the vault still passes doc-check.
+//! decision record or guide, or for a registered component's missing documents, so that the vault
+//! still passes doc-check.
 //!
 //! What it promises is `docs/requirements/shared/doc-scaffold.md`, and how it is built is
 //! `docs/spec/shared/doc-scaffold.md`. Section numbers in comments are that specification's.
@@ -22,6 +23,7 @@ const FAILED: u8 = 2;
 
 const USAGE: &str = "usage:
   doc-scaffold component <system> <slug> <prefix> <description>
+  doc-scaffold docs <system> <slug>
   doc-scaffold system <slug> <prefix> <description> <keeper>
   doc-scaffold decision <title> <scope>... [--slug <slug>] [--date <YYYY-MM-DD>]
   doc-scaffold guide <group> <slug> <title> <description>
@@ -63,6 +65,7 @@ fn parse(args: &[String]) -> Result<Args, String> {
     let arity = |n: usize| out.words.len() == n + 1;
     let fits = match command {
         "component" | "system" | "guide" => arity(4),
+        "docs" => arity(2),
         "decision" => out.words.len() >= 3,
         "" => return Err("no command given".into()),
         other => return Err(format!("unknown command {other}")),
@@ -86,7 +89,10 @@ fn run(args: &Args) -> Result<Plan, String> {
     let reg = Registry::read(plan.edit("components.md")?)?;
     let w = &args.words;
     match w[0].as_str() {
-        "component" => commands::component(&mut plan, &reg, &w[1], &w[2], &w[3], &w[4])?,
+        "component" => {
+            commands::component(&mut plan, &reg, &args.root, &w[1], &w[2], &w[3], &w[4])?
+        }
+        "docs" => commands::docs(&mut plan, &reg, &args.root, &w[1], &w[2])?,
         "system" => commands::system(&mut plan, &reg, &w[1], &w[2], &w[3], &w[4])?,
         "decision" => commands::decision(
             &mut plan,
@@ -151,6 +157,8 @@ mod tests {
     fn each_command_takes_its_arguments_and_no_others() {
         assert!(parse(&args(&["component", "shared", "x", "SHR:XXX", "An x"])).is_ok());
         assert!(parse(&args(&["component", "shared", "x", "SHR:XXX"])).is_err());
+        assert!(parse(&args(&["docs", "planner", "itinerary"])).is_ok());
+        assert!(parse(&args(&["docs", "planner"])).is_err());
         assert!(
             parse(&args(&[
                 "decision",

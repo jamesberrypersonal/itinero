@@ -1,5 +1,5 @@
 //! doc-scaffold's behaviour, run against copies of this repository's own vault and against a small
-//! vault built here (`docs/spec/shared/doc-scaffold.md` §4.7). Each test runs doc-check over the
+//! vault built here (`docs/spec/shared/doc-scaffold.md` §4.8). Each test runs doc-check over the
 //! result, through its library, so what doc-scaffold writes is held to the vault's rules.
 
 use std::fs;
@@ -128,26 +128,47 @@ fn snapshot(dir: &Path) -> Vec<(PathBuf, String)> {
     out
 }
 
-/// Runs a command that must succeed, and confirms it adds no finding and changes no line.
-fn scaffold_cleanly(root: &Path, args: &[&str]) -> String {
-    let before = findings(root);
+/// A registry row with its first cell's link taken out, so a row whose slug was linked to its
+/// new specification compares equal to the row before.
+fn unlinked(line: &str) -> String {
+    let Some(rest) = line.strip_prefix("| [") else {
+        return line.to_string();
+    };
+    match (rest.find("]("), rest.find(") |")) {
+        (Some(a), Some(b)) if a < b => format!("| {}{}", &rest[..a], &rest[b + 1..]),
+        _ => line.to_string(),
+    }
+}
+
+/// Runs a command that must succeed, and confirms it changes no line, apart from linking a
+/// registered component's slug to its new specification.
+fn scaffold_keeping_lines(root: &Path, args: &[&str]) -> Run {
     let files_before = snapshot(root);
     let run = scaffold(root, args);
     assert_eq!(run.status, 0, "{args:?} failed:\n{}", run.stderr);
-    let after = findings(root);
-    assert_eq!(after, before, "{args:?} changed what doc-check finds");
     // SHR:DOC-SCAFFOLD-F4: every line of every existing file is still there, in order.
     for (path, old) in files_before {
         let new = fs::read_to_string(&path).unwrap();
+        let registry = path.ends_with("docs/components.md");
+        let same = |a: &str, b: &str| a == b || (registry && unlinked(a) == unlinked(b));
         let mut new_lines = new.lines();
         for line in old.lines() {
             assert!(
-                new_lines.any(|n| n == line),
+                new_lines.any(|n| same(n, line)),
                 "{} lost or changed the line {line:?}",
                 path.display()
             );
         }
     }
+    run
+}
+
+/// Runs a command that must succeed, and confirms it adds no finding and changes no line.
+fn scaffold_cleanly(root: &Path, args: &[&str]) -> String {
+    let before = findings(root);
+    let run = scaffold_keeping_lines(root, args);
+    let after = findings(root);
+    assert_eq!(after, before, "{args:?} changed what doc-check finds");
     run.stdout
 }
 
@@ -229,6 +250,79 @@ fn a_component_of_a_system_with_no_folder_gets_its_folders_and_their_indexes() {
     let reg = read(&root, "components.md");
     assert!(reg.find("| [pages]") < reg.find("| [offline-copy]"));
     assert!(reg.find("| [offline-copy]") < reg.find("| [doc-check]"));
+}
+
+#[test]
+fn a_registered_component_gets_both_its_documents_and_a_linked_registry_row() {
+    let root = real_vault();
+    let out = scaffold_cleanly(&root, &["docs", "planner", "itinerary"]);
+    for line in [
+        "created docs/requirements/planner/itinerary.md",
+        "created docs/spec/planner/itinerary.md",
+        "created docs/requirements/planner/README.md",
+        "created docs/spec/planner/README.md",
+        "changed docs/components.md",
+        "changed docs/requirements/README.md",
+        "changed docs/spec/README.md",
+    ] {
+        assert!(out.contains(line), "{line} missing from:\n{out}");
+    }
+    // The address already has its tag, so the live list is left alone.
+    assert!(!out.contains("docs/TODO.md"), "{out}");
+    let reg = read(&root, "components.md");
+    assert!(
+        reg.contains("| [itinerary](spec/planner/itinerary.md) | planner | PLN:ITINERARY | | | ")
+    );
+    assert!(read(&root, "requirements/planner/itinerary.md").contains("### PLN:ITINERARY-F1 — "));
+    assert!(read(&root, "spec/planner/README.md").contains("| [itinerary.md](itinerary.md) | "));
+}
+
+#[test]
+fn a_registered_component_with_one_document_gets_the_other() {
+    let root = real_vault();
+    fs::remove_file(root.join("docs/spec/shared/trip-time.md")).unwrap();
+    let before = findings(&root);
+    assert!(
+        !before.is_empty(),
+        "removing a specification leaves findings"
+    );
+    let out = scaffold_keeping_lines(&root, &["docs", "shared", "trip-time"]).stdout;
+    assert!(
+        out.contains("created docs/spec/shared/trip-time.md"),
+        "{out}"
+    );
+    assert!(!out.contains("requirements/shared/trip-time.md"), "{out}");
+    // The index row and the registry link are already there, so neither file changes.
+    assert!(!out.contains("docs/spec/shared/README.md"), "{out}");
+    assert!(!out.contains("docs/components.md"), "{out}");
+    // SHR:DOC-SCAFFOLD-F2: on a vault with findings, the command adds none.
+    let after = findings(&root);
+    let added: Vec<_> = after.iter().filter(|f| !before.contains(f)).collect();
+    assert!(added.is_empty(), "new findings: {added:#?}");
+    assert!(
+        after.len() < before.len(),
+        "the new specification claims F1"
+    );
+}
+
+#[test]
+fn a_document_without_f1_is_not_given_a_skeleton_beside_it() {
+    let root = real_vault();
+    fs::remove_file(root.join("docs/spec/shared/trip-time.md")).unwrap();
+    let req = root.join("docs/requirements/shared/trip-time.md");
+    let text = fs::read_to_string(&req)
+        .unwrap()
+        .replace("^shr-trip-time-f1", "");
+    fs::write(&req, text).unwrap();
+    let before = snapshot(&root);
+    let run = scaffold(&root, &["docs", "shared", "trip-time"]);
+    assert_eq!(run.status, 1);
+    assert!(
+        run.stderr.contains("holds no SHR:TRIP-TIME-F1"),
+        "{}",
+        run.stderr
+    );
+    assert!(snapshot(&root) == before);
 }
 
 #[test]
@@ -454,6 +548,13 @@ fn a_refused_command_writes_nothing_and_says_why() {
             &["guide", "workspace", "documenting-a-component", "A", "x"],
             "already exists",
         ),
+        (&["docs", "planner", "budget"], "is not registered"),
+        (
+            &["docs", "shared", "doc-check"],
+            "already has both its documents",
+        ),
+        (&["docs", "concerns", "privacy"], "not a component"),
+        (&["docs", "planner"], "wrong number of arguments"),
         (&["concern", "privacy"], "unknown command"),
     ];
     let before = snapshot(&root);
