@@ -1,6 +1,6 @@
 # ADR-0007 — trip-time is written in TypeScript
 
-- **Status:** Proposed
+- **Status:** Accepted
 - **Date:** 2026-11-12
 - **Scope:** shared/trip-time
 

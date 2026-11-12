@@ -1,6 +1,6 @@
 # ADR-0008 — trip-time carries its own copy of the time-zone rules
 
-- **Status:** Proposed
+- **Status:** Accepted
 - **Date:** 2026-11-12
 - **Scope:** shared/trip-time, web
 

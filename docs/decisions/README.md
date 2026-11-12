@@ -29,8 +29,8 @@ keeps:
 | [0004](0004-a-trip-is-read-only-offline.md) | A trip can be read without a connection, but changed only with one | planner, web | Accepted |
 | [0005](0005-itinero-records-no-telemetry.md) | Itinero records no telemetry, so the documents reserve no place for it | workspace | Accepted |
 | [0006](0006-new-documents-start-from-skeletons.md) | New documents start from skeletons that a second program writes | shared/doc-check, shared/doc-scaffold | Accepted |
-| [0007](0007-trip-time-is-written-in-typescript.md) | trip-time is written in TypeScript | shared/trip-time | Proposed |
-| [0008](0008-trip-time-carries-its-own-time-zone-rules.md) | trip-time carries its own copy of the time-zone rules | shared/trip-time, web | Proposed |
+| [0007](0007-trip-time-is-written-in-typescript.md) | trip-time is written in TypeScript | shared/trip-time | Accepted |
+| [0008](0008-trip-time-carries-its-own-time-zone-rules.md) | trip-time carries its own copy of the time-zone rules | shared/trip-time, web | Accepted |
 
 ## By subject
 
@@ -53,7 +53,7 @@ keeps:
 | ADR | Title | Status |
 |---|---|---|
 | [0004](0004-a-trip-is-read-only-offline.md) | A trip can be read without a connection, but changed only with one | Accepted |
-| [0008](0008-trip-time-carries-its-own-time-zone-rules.md) | trip-time carries its own copy of the time-zone rules | Proposed |
+| [0008](0008-trip-time-carries-its-own-time-zone-rules.md) | trip-time carries its own copy of the time-zone rules | Accepted |
 
 ### shared/doc-check
 
@@ -72,5 +72,5 @@ keeps:
 
 | ADR | Title | Status |
 |---|---|---|
-| [0007](0007-trip-time-is-written-in-typescript.md) | trip-time is written in TypeScript | Proposed |
-| [0008](0008-trip-time-carries-its-own-time-zone-rules.md) | trip-time carries its own copy of the time-zone rules | Proposed |
+| [0007](0007-trip-time-is-written-in-typescript.md) | trip-time is written in TypeScript | Accepted |
+| [0008](0008-trip-time-carries-its-own-time-zone-rules.md) | trip-time carries its own copy of the time-zone rules | Accepted |
