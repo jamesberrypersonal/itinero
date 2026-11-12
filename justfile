@@ -12,6 +12,10 @@ test-docs:
 new-component *args:
     @cargo run --release --quiet --package doc-scaffold -- component "$@"
 
+# Write the skeleton documents and index rows a registered component is missing.
+new-docs *args:
+    @cargo run --release --quiet --package doc-scaffold -- docs "$@"
+
 # Register a new system, and write its roadmap's skeleton.
 new-system *args:
     @cargo run --release --quiet --package doc-scaffold -- system "$@"

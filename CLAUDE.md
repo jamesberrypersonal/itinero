@@ -23,6 +23,7 @@ just check-docs                 # check every document in docs/ (exit 0 clean, 1
 just test-docs                  # the whole test suites of doc-check and doc-scaffold
 just install-hook               # install the pre-commit hook
 just new-component <system> <slug> <PREFIX> "<description>"   # start a component's documents and rows
+just new-docs <system> <slug>                                 # start the missing documents of a registered component
 just new-system <slug> <PREFIX> "<description>" "<keeper>"     # register a system and start its roadmap
 just new-decision "<title>" <scope>... [--slug <slug>]        # start the next decision record
 just new-guide <group> <slug> "<title>" "<description>"       # start a guide
@@ -144,10 +145,12 @@ case-sensitive file system, so it is skipped on macOS and runs in CI, on Linux.
 
 `docs/spec/shared/doc-scaffold.md` specifies it, and ADR-0006 records why it is a separate program.
 It reads the registry and the index tables, refuses before writing anything, and edits existing
-files only by inserting lines. Its tests in `tools/doc-scaffold/tests/scaffold.rs` run each command
-on a copy of the real vault and require doc-check's findings to be unchanged afterwards. A change
-to what a new document must hold, in `documentation-system.md`, changes doc-scaffold's skeletons in
-`src/commands.rs` in the same pull request.
+files only by inserting lines. The one exception: `just new-docs` links a registered component's
+slug in the registry to the specification it has just written. Its tests in
+`tools/doc-scaffold/tests/scaffold.rs` run each command on a copy of the real vault and require
+doc-check's findings to be unchanged afterwards. A change to what a new document must hold, in
+`documentation-system.md`, changes doc-scaffold's skeletons in `src/commands.rs` in the same pull
+request.
 
 ## Continuous integration
 

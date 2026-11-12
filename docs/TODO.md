@@ -114,22 +114,3 @@ other languages travellers need is not known yet.
 *Proposal:* Decide which languages to support first, and add the requirements to trip-time.
 
 *Releases:* Nothing is planned for it yet.
-
-### TODO-8 — Start the documents of a component that is already registered
-
-*Tags:* shared/doc-scaffold
-*Written:* 2026-11-12
-
-*Problem:* doc-scaffold cannot start the documents of a component that is registered but has none,
-such as `shared/trip-time`, `planner/itinerary` or `planner/pages`.
-
-*Reason:* `just new-component` registers a component and writes its documents in one step, so it
-refuses an address that is already registered (`SHR:DOC-SCAFFOLD-F3`, a refused command writes
-nothing, and says why). Those three components were
-registered before doc-scaffold existed.
-
-*Proposal:* Add a command, such as `just new-docs`, that writes the skeleton requirements and
-specification for a registered component with neither, and their index rows. Change doc-scaffold's
-requirements and specification to promise it.
-
-*Releases:* Nothing is planned for it yet.

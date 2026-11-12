@@ -3,6 +3,17 @@
 What has been done, newest first. An entry that finishes an item of the live work list names the
 item, so a reader can find what became of its number. `documentation-system.md` sets the rules.
 
+## 2026-11-12 — TODO-8, the documents of a registered component from one command
+
+*By:* James Berry, with Claude
+
+`just new-docs <system> <slug>` starts the documents of a component that was registered before
+anyone wrote them, such as `planner/itinerary`. It writes whichever of the requirements and the
+specification is missing, with their index rows, and takes the prefix and description from the
+registry. Where it writes the specification, it links the component's slug in the registry to it,
+the one existing line doc-scaffold changes. A new specification also cites back each accepted
+decision record whose Consequences name it, for `just new-component` as well.
+
 ## 2026-11-11 — TODO-1, a new component's documents from one command
 
 *By:* James Berry, with Claude
