@@ -17,9 +17,10 @@ changes one.
 
 ### SHR:DOC-SCAFFOLD-F1 — One command starts each kind of thing an author adds
 
-One command starts a component, a system, a decision record or a guide. Another starts whichever
-of its two documents a registered component lacks. Each command writes the new documents and every
-row the documentation system requires before the new thing can be named. ^shr-doc-scaffold-f1
+One command starts a component, a system, a decision record or a guide. Another starts the
+requirements or the specification that a registered component lacks, or both. Each command writes
+the new documents and every row the documentation system requires before the new thing can be
+named. ^shr-doc-scaffold-f1
 
 - **Verification:** on a copy of the vault, run each command, then confirm that
     - a new component of a registered system has its row in the registry and in the live list's
@@ -45,9 +46,9 @@ row the documentation system requires before the new thing can be named. ^shr-do
 > anyone writes about it, as the planner's itinerary was. The command for a new component refuses
 > an address that is already registered, so such a component needs a command of its own.
 
-> **Why these four, and not concerns or booking kinds?** They are what authors add most often.
-> Registering a concern obliges every component specification to add a subsection, which is
-> written by hand in each one (`SHR:DOC-SCAFFOLD-NR2`).
+> **Why components, systems, decision records and guides, and not concerns or booking kinds?** They
+> are what authors add most often. Registering a concern obliges every component specification to
+> add a subsection, which is written by hand in each one (`SHR:DOC-SCAFFOLD-NR2`).
 
 ### SHR:DOC-SCAFFOLD-F2 — What a command writes passes the checker
 
@@ -71,15 +72,17 @@ A command whose arguments the vault cannot take writes no file, and prints the r
 - **Verification:** on a copy of the vault, confirm that each of these is refused, with its
   reason, and that every file is unchanged afterwards
     - a component of a system that is not registered
-    - an address, or a prefix, that is already registered
+    - a new component or system whose address, or prefix, is already registered
     - a slug or prefix that is not in the form the registry requires
     - a description holding a pipe, a line break, an angle bracket or an unclosed code span
-    - a document that already exists
+    - a new document where one already exists
+
     - a decision record scoped to an address that is not registered, or to `workspace` and an
       address together
     - the documents of a component that is not registered, or that has both its documents already
     - one document of a registered component, beside an existing document that does not define or
-      claim the component's first requirement
+      claim the requirement the new skeleton ties to, its first, such as `SHR:DOC-CHECK-F1` for
+      doc-check
     - an unknown command, or a command given the wrong number of arguments
 
 > **What does this buy?** A command that wrote half its files and then stopped would leave the

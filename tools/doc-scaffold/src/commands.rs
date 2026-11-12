@@ -367,10 +367,10 @@ fn spec_text(reg: &Registry, system: &str, slug: &str, prefix: &str, records: &[
     let cite = match records {
         [] => String::new(),
         [one] => format!(
-            "\n{MARK}: cite {one} where this specification relies on it. Its Consequences name\nthis specification.\n"
+            "\n{MARK}: cite {one} where this specification relies on it. {one} names this\nspecification in its Consequences, so the checker requires a citation of it to stay.\n"
         ),
         [rest @ .., last] => format!(
-            "\n{MARK}: cite {} and {last} where this specification relies on them. Their\nConsequences name this specification.\n",
+            "\n{MARK}: cite {} and {last} where this specification relies on them. Each names\nthis specification in its Consequences, so the checker requires a citation of each to stay.\n",
             rest.join(", ")
         ),
     };

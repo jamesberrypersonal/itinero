@@ -92,7 +92,8 @@ finished sentence, so search the files listed for "To be written", and replace e
 and 6 describe. A command that cannot be carried out, such as one naming a system that is not
 registered, writes nothing and says why.
 
-Four more commands start the other things an author adds:
+Four more commands start the other things an author adds, and the documents of a component that
+was registered without them:
 
 | Command | Starts |
 |---|---|

@@ -5,9 +5,10 @@
 ## 1. Purpose
 
 doc-scaffold is the program that starts a new component, system, decision record or guide in the
-`docs/` vault, and the missing documents of a component that is already registered. It writes each new document's skeleton, and adds every row that names the new
-thing to the registry, the indexes and the live work list. An author then fills in each part the
-skeleton marks, and runs the checker, doc-check.
+`docs/` vault, and the missing documents of a component that is already registered. It writes each
+new document's skeleton, and adds every row that names the new thing to the registry, the indexes
+and the live work list. An author then fills in each part the skeleton marks, and runs the checker,
+doc-check.
 
 ## 2. Scope
 
@@ -87,8 +88,10 @@ None. The package `tools/doc-scaffold` builds a binary only, and no other packag
 doc-scaffold drives three systems outside itself.
 
 - **The file system.** doc-scaffold reads the vault's `components.md`, its `TODO.md` and each index
-  it edits. It lists the vault's `decisions/` folder to find the next record number. It creates the new documents,
-  with any folders they need, and writes the indexes it changed.
+  it edits. For `docs`, it also reads the document a component already has. It lists the vault's
+  `decisions/` folder to find the next record number, and reads each record to find those that
+  name a new specification. It creates the new documents, with any folders they need, and
+  writes each index, and the registry, that it changed.
 - **just**, the command runner doc-check also uses. Each of the five recipes runs
   `cargo run --release --quiet --package doc-scaffold -- <command> <arguments>`.
 - **doc-check**, through its library, in doc-scaffold's tests only. The package `tools/doc-check`
@@ -109,6 +112,7 @@ automatically.
 2. It confirms that the vault holds the component registry, and reads it (§4.2).
 3. It runs its command (§4.3 to §4.7). The command first checks everything it refuses, and then
    plans each change in memory: a new file's text, or an existing file's lines with rows inserted.
+   The command of §4.7 may also link one registry cell.
 4. It writes every planned file whose text differs from what is on disk, creating folders as
    needed, and prints a line for each (§3.1).
 
@@ -163,8 +167,8 @@ writes the address `<system>/<slug>`:
 
 | File | Change |
 |---|---|
-| `requirements/<system>/<slug>.md` | Created: one functional requirement and one non-requirement, each a placeholder, with their block IDs |
-| `spec/<system>/<slug>.md` | Created: the eight numbered sections, a claim table claiming the placeholder requirement, each registered concern's subsection, and a placeholder citing each record that names it |
+| `requirements/<system>/<slug>.md` | Created: one functional requirement, `<prefix>-F1`, and one non-requirement, `<prefix>-NR1`, each a placeholder, with their block IDs |
+| `spec/<system>/<slug>.md` | Created: the eight numbered sections, a claim table claiming `<prefix>-F1`, each registered concern's subsection, and a placeholder citing each accepted decision record whose Consequences name the specification |
 | `components.md` | A row in Components, with the slug linked to the specification, in the registry's order |
 | `TODO.md` | A row in the Tags table, if the vault has a live list (§4.4) |
 | `requirements/<system>/README.md` and `spec/<system>/README.md` | A row for the document, in alphabetical order. Where the folder is new, the index is created holding the row |
@@ -175,11 +179,11 @@ number of dots, such as `### 5.1 Personal data`. The heading is placed at the en
 section it belongs to, and concerns are ordered by section number, so `§5.2` comes before
 `§5.10`.
 
-An accepted decision record must be cited back by each specification its Consequences name. A
-record names a specification when its Consequences section holds the specification's path, such as
-`spec/shared/trip-time.md`, in a link or a code span. Where accepted records name a new
-specification, its section 2 holds a placeholder that cites each of them, so the skeleton adds no
-finding (`SHR:DOC-SCAFFOLD-F2`).
+A new specification cites every accepted decision record that names it, so the skeleton adds no
+finding (`SHR:DOC-SCAFFOLD-F2`). The checker requires an accepted record to be cited back by each
+specification its Consequences name. A record names a specification when its Consequences section
+holds the specification's path, such as `spec/shared/trip-time.md`, in a link or a code span. The
+citations sit in a placeholder in the skeleton's section 2.
 
 ### 4.4 system
 
@@ -240,9 +244,11 @@ It starts whichever of its two documents a registered component lacks. The prefi
 description come from the component's row in the registry, so the author types neither again.
 
 It refuses a `<system>` of `concerns`, an address the registry does not hold, and a component that
-has both its documents already. Where one document exists, the new one is tied to it through the
-component's first requirement, F1. It therefore refuses an existing requirements document that does
-not define F1, and an existing specification whose claim table does not claim it.
+has both its documents already. Where one document exists, the new one must agree with it on the
+component's first requirement, `<prefix>-F1`, such as `SHR:DOC-CHECK-F1` for doc-check. A new
+specification's claim table claims that requirement, and a new requirements document defines it, as
+§4.3 writes them. The command therefore refuses an existing requirements document that does not
+define it, and an existing specification whose claim table does not claim it.
 
 | File | Change |
 |---|---|
@@ -250,8 +256,8 @@ not define F1, and an existing specification whose claim table does not claim it
 | `spec/<system>/<slug>.md` | Created, where it is missing, as §4.3 writes it, citing the records that name it |
 | `requirements/<system>/README.md` and `spec/<system>/README.md` | A row for each document created, as §4.3 adds it, unless the index lists the document already |
 | `requirements/README.md` and `spec/README.md` | Only where a folder is new, as §4.3 |
-| `components.md` | Where the specification is created and the slug is not linked: the slug linked to it, the one cell of an existing line doc-scaffold changes |
-| `TODO.md` | A row in the Tags table, only where the address has none |
+| `components.md` | Where the specification is created and the slug is not linked: the slug's cell, linked to it. That row is the one existing line doc-scaffold changes |
+| `TODO.md` | A row in the Tags table, only where the vault has a live list and the address has no row |
 
 ### 4.8 The test suite
 
@@ -260,10 +266,11 @@ doc-check's.
 
 - **Unit tests** cover reading headings and cells, the checks of §4.2, the record slug, and the
   date.
-- **Behaviour tests** run the built program against a copy of this repository's vault, and against
-  a small vault that registers a concern at `§5.1`. Each run of a command is followed by doc-check's
+- **Behaviour tests** run the built program against a copy of this repository's vault, and against a
+  small vault that registers a concern at `§5.1`. Each run of a command is followed by doc-check's
   `check` (§3.4), which must return the same findings as before the run. Every line of every file
-  that existed before must still be there, in order.
+  that existed before must still be there, in order. The one exception is the registry row §4.7
+  links, which must differ only in that link.
 - **Refusals** run each refused case of §4.3 to §4.7, and confirm the exit status, the reason, and
   that every file is unchanged.
 
