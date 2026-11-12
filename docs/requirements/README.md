@@ -15,4 +15,5 @@ gives it.
 | Role | Who |
 |---|---|
 | Author | Anyone who adds a document to the vault or changes one |
+| Traveller | Anyone who plans a trip in Itinero, or follows one on the way |
 | Rules keeper | Whoever changes `documentation-system.md`, and the checker that enforces it, through a decision record scoped `workspace` |
