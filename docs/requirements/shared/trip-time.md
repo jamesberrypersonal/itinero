@@ -197,7 +197,7 @@ trip-time says how far a value is from the current moment, such as "in 3 hours",
 
 - **Verification:** with the current moment fixed at 23:00 on 2 June 2026, Paris time,
     - confirm an exact time of 02:00 on 3 June, Paris time, is in 3 hours
-    - confirm the whole date 4 June, Paris time, is the day after tomorrow
+    - confirm the whole date 4 June, Paris time, is in 2 days
     - confirm the whole date 3 June, Tokyo time, is today, because it is already 06:00 on 3 June in
       Tokyo
     - confirm the whole date 1 June, Paris time, is yesterday
