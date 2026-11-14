@@ -19,7 +19,7 @@ system, component or concern is added here before any document names it.
 |---|---|---|---|---|---|
 | [itinerary](spec/planner/itinerary.md) | planner | PLN:ITINERARY | | | How a trip's pencilled stretches and firm items are stored and changed |
 | [pages](spec/planner/pages.md) | planner | PLN:PAGES | | | The pages of a trip, where travellers write up their research by hand |
-| [accounts](spec/access/accounts.md) | access | ACC:ACCOUNTS | | | Travellers' accounts, and signing in with a Google or an Apple account |
+| [accounts](spec/access/accounts.md) | access | ACC:ACCOUNTS | | | Travellers' accounts, and signing in with a Google account |
 | [membership](spec/access/membership.md) | access | ACC:MEMBERSHIP | | | Who is on each trip: its admins, the invitations that bring travellers in, and removing them |
 | [permissions](spec/access/permissions.md) | access | ACC:PERMISSIONS | | | What each traveller may see and change of a trip's pages, calendar and bookings |
 | [doc-check](spec/shared/doc-check.md) | shared | SHR:DOC-CHECK | | | The checker that holds every document in this vault to the documentation system |

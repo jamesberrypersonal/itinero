@@ -1,11 +1,11 @@
 # The accounts component
 
-**Assumes** [accounts.md](../../requirements/access/accounts.md) — what the accounts component promises, and the providers and sessions it works with.
+**Assumes** [accounts.md](../../requirements/access/accounts.md) — what the accounts component promises, and the provider and sessions it works with.
 
 ## 1. Purpose
 
 The accounts component is the part of Itinero's online side that holds each traveller's account,
-signs a traveller in with Google or Apple, and names the account behind every request. Every other
+signs a traveller in with Google, and names the account behind every request. Every other
 check of a request, such as what a traveller may see, starts from the account it gives.
 
 ## 2. Scope
@@ -24,20 +24,21 @@ Deliberately absent:
 
 - what a traveller may see or change, which `access/permissions` decides
 - who is on a trip, which `access/membership` holds
-- joining a traveller's Google and Apple accounts into one
-- signing in by any other means, or holding a password
+- joining two of a traveller's Google accounts into one
+- signing in by any other means than Google, or holding a password
 - deleting an account
 
-What Itinero's online side runs on, and so how the accounts component stores its records and serves
-its requests, is not decided until TODO-12 is done. This specification gives the behaviour any such
-platform must keep.
+Itinero's online side runs on Cloudflare's free plan, and travellers sign in with Google alone
+(ADR-0015, Itinero's online side runs on Cloudflare's free plan, and travellers sign in with Google
+alone). The accounts component is part of one Cloudflare Worker, a program Cloudflare runs on its
+servers for each request that arrives. Its records are held in D1, Cloudflare's hosted SQLite
+database.
 
 ## 3. Interface
 
 ### 3.1 User interface
 
-None. The web app shows the Google and Apple sign-in buttons each provider supplies, and a sign-out
-command.
+None. The web app shows the sign-in button Google supplies, and a sign-out command.
 
 ### 3.2 Application interface
 
@@ -48,7 +49,7 @@ message is one English sentence the web app may show.
 | Request | Body | Gives |
 |---|---|---|
 | `POST /auth/nonce` | None | `{ "nonce": ... }`: a single-use value for the next sign-in (§4.1) |
-| `POST /auth/sign-in` | `{ "provider": "google" \| "apple", "idToken": ..., "nonce": ... }` | `{ "account": ..., "email": ... }`, and sets the session (§4.2) |
+| `POST /auth/sign-in` | `{ "provider": "google", "idToken": ..., "nonce": ... }` | `{ "account": ..., "email": ... }`, and sets the session (§4.2) |
 | `POST /auth/sign-out` | None | Nothing, and ends the session sent with it (§4.4) |
 
 The session is set as a cookie named `itinero_session`, marked `Secure`, `HttpOnly` and
@@ -82,28 +83,27 @@ address. `Result` has the form `shared/trip-time` gives it: `{ ok: true, value }
 
 ### 3.4 Systems this drives
 
-The accounts component signs a traveller in through Google and Apple, using OpenID Connect, the
-standard protocol by which a provider vouches for who a person is. Each provider's sign-in, in the
-browser, gives the web app an ID token: a short-lived statement, signed by the provider, holding
-these claims among others.
+The accounts component signs a traveller in through Google, using OpenID Connect, the standard
+protocol by which a provider vouches for who a person is. Google's sign-in, in the browser, gives
+the web app an ID token: a short-lived statement, signed by Google, holding these claims among
+others.
 
 | Claim | Holds |
 |---|---|
-| `iss` | The issuer: `https://accounts.google.com` for Google, `https://appleid.apple.com` for Apple |
-| `aud` | The audience: the client identifier Itinero registered with that provider |
+| `iss` | The issuer: `https://accounts.google.com`, or `accounts.google.com` |
+| `aud` | The audience: the client identifier Itinero registered with Google |
 | `sub` | The subject: the provider's own identifier for the person, which never changes |
 | `email`, `email_verified` | The person's email address, and whether the provider has confirmed it is theirs |
 | `exp` | When the token stops being valid |
 | `nonce` | The single-use value the web app passed to the sign-in, which ties the token to it |
 
-Each provider publishes the public keys it signs tokens with, as a JSON Web Key Set at a fixed
-address: `https://www.googleapis.com/oauth2/v3/certs` for Google, and
-`https://appleid.apple.com/auth/keys` for Apple. The accounts component fetches each set, keeps it
-for the time its response allows, and fetches it again when a token names a key it does not hold.
+Google publishes the public keys it signs tokens with, as a JSON Web Key Set at
+`https://www.googleapis.com/oauth2/v3/certs`. The accounts component fetches the set, keeps it in
+Cloudflare's cache for the time the response allows, and fetches it again when a token names a key
+it does not hold. Google's documents for Sign in with Google give the full flow.
 
-Apple gives the `email` claim only at a person's first sign-in to Itinero, and may give an address
-at `privaterelay.appleid.com` that forwards to the person's own. The provider documents of each,
-Google Identity and Sign in with Apple, give the full flows.
+The sign-in in the browser needs only the client identifier, which is public. The ID token flow
+needs no client secret, so the online side holds none for Google.
 
 ## 4. Behaviour
 
@@ -134,8 +134,8 @@ within 10 minutes is thrown away.
 
 The account is then found by the pair of the provider and `sub`. Where no account holds the pair,
 one is made, with a new identifier. Where the token holds an `email`, the account's address and
-`emailVerified` are set from it (`ACC:ACCOUNTS-F2`). Where it holds none, as Apple's tokens after
-the first sign-in, they are kept as they were. The address is kept in lower case.
+`emailVerified` are set from it (`ACC:ACCOUNTS-F2`). Where it holds none, they are kept as they
+were. The address is kept in lower case.
 
 A new session is then started for the device (§4.3), and set as its cookie.
 
@@ -161,13 +161,15 @@ succeeds and does nothing.
 
 The suite runs the checks in the verification of each requirement the accounts component claims,
 against a provider stand-in that signs ID tokens with a key of its own. It also checks each refusal
-of §3.2, and that the stored records hold no session and no password. How the suite runs depends on
-the platform, which is not decided until TODO-12 is done.
+of §3.2, and that the stored records hold no session and no password. It runs with `npm test` in
+`services/online/`, inside Wrangler, Cloudflare's own tool, which runs the Worker and a D1 database
+on the developer's machine. The recipe `just test-online` runs it from anywhere in the
+repository.
 
 ## 5. Resources
 
-The accounts component stores three kinds of record. What holds them is not decided
-until TODO-12 is done.
+The accounts component stores three kinds of record, each a table of the online side's D1
+database.
 
 | Record | Holds | Kept |
 |---|---|---|
@@ -175,14 +177,19 @@ until TODO-12 is done.
 | Session | The SHA-256 digest of the session, its account, and when it was last used | Until signed out, or 180 days unused |
 | Nonce | The SHA-256 digest of the nonce, and when it was made | Until used, or 10 minutes old |
 
-The pair of the provider and `sub` is unique across accounts. Itinero's client identifier for each
-provider, and Apple's signing key for its client secret, are configuration held by the online side,
-never in the repository.
+The pair of the provider and `sub` is unique across accounts. A provider of `google` is the only one
+written today. The column is kept, so that an account's provider is never guessed. A scheduled task
+of the Worker, which Cloudflare runs once a day, deletes every session past its 180 days and every
+nonce past its 10 minutes.
 
-| Resource | Owned by |
-|---|---|
-| The client identifiers registered with Google and with Apple | Whoever keeps the access system's roadmap |
-| The stored records | Whoever keeps the access system's roadmap |
+Itinero's client identifier at Google is set as a variable of the Worker, named `GOOGLE_CLIENT_ID`,
+in its Wrangler configuration.
+
+| Resource | Path | Owned by |
+|---|---|---|
+| The Worker of the online side | `services/online/`, which Milestone Planner-0.3 builds on | Whoever keeps the access system's roadmap |
+| The tables `accounts`, `sessions` and `nonces` | The online side's D1 database | Whoever keeps the access system's roadmap |
+| The client identifier registered with Google | `GOOGLE_CLIENT_ID`, in the Worker's Wrangler configuration | Whoever keeps the access system's roadmap |
 
 ## 6. Quality attributes
 
@@ -204,12 +211,10 @@ never in the repository.
 | [ACC:ACCOUNTS-F3](../../requirements/access/accounts.md#^acc-accounts-f3) | Sessions, and their 180 days, in §4.3, and signing out in §4.4. |
 | [ACC:ACCOUNTS-F4](../../requirements/access/accounts.md#^acc-accounts-f4) | `whoSent`, in §3.3 and §4.3. |
 | [ACC:ACCOUNTS-NFR1](../../requirements/access/accounts.md#^acc-accounts-nfr1) | Digests in place of sessions and nonces, and no password, in §4.3 and §5. |
-| [ACC-F1](../../requirements/access/access.md#^acc-f1) | Signing in with Google or Apple, and staying signed in (§4.2, §4.3). Showing the sign-in buttons is the web app, whose specification is not yet written. |
+| [ACC-F1](../../requirements/access/access.md#^acc-f1) | Signing in with Google, and staying signed in (§4.2, §4.3). Showing the sign-in buttons is the web app, whose specification is not yet written. |
 | [ACC-NFR1](../../requirements/access/access.md#^acc-nfr1) | Naming, for certain, the account behind each request (§4.3). What that account may do is `access/permissions`. |
 
 ## 8. Open
 
-- **What the accounts component runs on.** Its records, and the service answering §3.2, depend on
-  the platform chosen for Itinero's online side. It is not decided until TODO-12 is done.
-- **A traveller who signs in with Google and then with Apple** has two accounts, each with its own
-  trips. Joining them is future work.
+- **A traveller with two Google accounts** has two Itinero accounts, each with its own trips.
+  Joining them is future work.

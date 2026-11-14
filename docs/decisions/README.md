@@ -37,6 +37,7 @@ keeps:
 | [0012](0012-access-passes-down-the-tree.md) | Access to a page passes down to the pages beneath it | access, planner/pages | Accepted |
 | [0013](0013-bookings-have-a-page-of-their-own.md) | A trip's bookings have a page of their own, and its calendar is seen only by the travellers an admin chooses | planner, bookings, access | Accepted |
 | [0014](0014-a-trip-opens-on-a-home-page.md) | A trip opens on a home page for each traveller, with their own dates and the country they are in | planner, web | Accepted |
+| [0015](0015-the-online-side-runs-on-cloudflare.md) | Itinero's online side runs on Cloudflare's free plan, and travellers sign in with Google alone | access, planner | Accepted |
 
 ## By subject
 
@@ -58,6 +59,7 @@ keeps:
 | [0011](0011-a-trips-pages-form-a-tree.md) | A trip's pages form a tree, with links between any two | Accepted |
 | [0013](0013-bookings-have-a-page-of-their-own.md) | A trip's bookings have a page of their own, and its calendar is seen only by the travellers an admin chooses | Accepted |
 | [0014](0014-a-trip-opens-on-a-home-page.md) | A trip opens on a home page for each traveller, with their own dates and the country they are in | Accepted |
+| [0015](0015-the-online-side-runs-on-cloudflare.md) | Itinero's online side runs on Cloudflare's free plan, and travellers sign in with Google alone | Accepted |
 
 ### access
 
@@ -66,6 +68,7 @@ keeps:
 | [0011](0011-a-trips-pages-form-a-tree.md) | A trip's pages form a tree, with links between any two | Accepted |
 | [0012](0012-access-passes-down-the-tree.md) | Access to a page passes down to the pages beneath it | Accepted |
 | [0013](0013-bookings-have-a-page-of-their-own.md) | A trip's bookings have a page of their own, and its calendar is seen only by the travellers an admin chooses | Accepted |
+| [0015](0015-the-online-side-runs-on-cloudflare.md) | Itinero's online side runs on Cloudflare's free plan, and travellers sign in with Google alone | Accepted |
 
 ### web
 

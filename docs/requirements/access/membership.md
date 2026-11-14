@@ -10,7 +10,7 @@ web app, which travellers use on a computer or a phone. The traveller and the ad
 `requirements/README.md` defines. A member of a trip is a traveller on it.
 
 An account is a traveller's Itinero account, which `access/accounts` holds. It holds the email
-address that Google or Apple, whichever the traveller signs in with, vouched for.
+address that Google, which every traveller signs in with, vouched for.
 
 ---
 

@@ -4,6 +4,17 @@ What has been done, newest first. The live work list, `TODO.md`, numbers each pi
 owed, such as TODO-9. An entry that finishes one of those items names it, so a reader can find what
 became of its number. `documentation-system.md` sets the rules.
 
+## 2026-11-14 — TODO-12, Itinero's online side runs on Cloudflare
+
+*By:* James Berry, with Claude
+
+Itinero's online side runs on Cloudflare's free plan, and travellers sign in with Google alone
+(ADR-0015, Itinero's online side runs on Cloudflare's free plan, and travellers sign in with Google
+alone). Requests are served by a Cloudflare Worker. Each trip is held in a Durable Object of its
+own, which applies its changes one at a time. Accounts and membership are held in a D1 database,
+and invitations are sent through Resend. Apple's sign-in was dropped, because offering it on a
+website costs $99 a year. Itinero's only running cost is its domain name.
+
 ## 2026-11-14 — TODO-10, a trip opens on a home page for each traveller
 
 *By:* James Berry, with Claude

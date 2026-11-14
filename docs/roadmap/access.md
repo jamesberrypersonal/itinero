@@ -18,19 +18,16 @@ Access is set page by page, so its design follows the planner's pages, in Milest
 - Access to a page passes down to the pages beneath it, from the trip's own access as the root. An
   admin can change a traveller's access for a branch, and a traveller who may see a page may see
   every page above it (ADR-0012, access to a page passes down to the pages beneath it).
-- The access system has its requirements. A traveller signs in with a Google or an Apple account,
+- The access system has its requirements. A traveller signs in with a Google account,
   and joins a trip by an invitation to their email address. A trip's creator is always its admin.
   A traveller sees a trip's calendar only once an admin grants it. An admin removes a traveller,
   who then loses the trip on every device.
 - The access system is divided into three components: `access/accounts`, `access/membership` and
-  `access/permissions`. Each has its requirements and its specification. Accounts and membership
-  leave what they run on to be decided.
+  `access/permissions`. Each has its requirements and its specification.
+- Itinero's online side runs on Cloudflare's free plan, and travellers sign in with Google alone
+  (ADR-0015, Itinero's online side runs on Cloudflare's free plan). Accounts and membership are held
+  in a D1 database, and invitations are sent through Resend.
 
 ## Pending
 
-### Phase 0 — Design
-
-#### Milestone Access-0.1 — Accounts, invitations and page access
-
-- Do TODO-12. Decide what Itinero's online side is built on, and complete the resources of the
-  accounts and membership specifications.
+Nothing is pending. Milestone Access-0.1 is complete in design, and building it is not yet planned.

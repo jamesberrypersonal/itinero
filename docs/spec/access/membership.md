@@ -30,9 +30,10 @@ Deliberately absent:
 - handing a trip to a new creator, or deleting a trip
 - invitations by a link anyone may use
 
-What Itinero's online side runs on, and so how the membership component stores its records and
-sends its emails, is not decided until TODO-12 is done. This specification gives the behaviour any
-such platform must keep.
+Itinero's online side runs on Cloudflare's free plan (ADR-0015, Itinero's online side runs on
+Cloudflare's free plan, and travellers sign in with Google alone). The membership component is part
+of the same Cloudflare Worker as `access/accounts`, and holds its records in the same D1 database,
+Cloudflare's hosted SQLite database. It sends its emails through Resend.
 
 ## 3. Interface
 
@@ -65,6 +66,7 @@ body `{ "code": ..., "message": ... }`.
 | `bad-email` | 400 | An address that is not one, as §4.2 gives |
 | `bad-invitation` | 404 | An invitation that is unknown, withdrawn, replaced, accepted or expired, or a token that is not its own |
 | `wrong-account` | 403 | Accepting with an account whose address is not the one invited, or is not confirmed |
+| `not-sent` | 502 | An invitation Resend refused to send (§3.4) |
 | `malformed` | 400 | A body not in the forms above |
 
 A trip the account is not a member of is refused with `not-a-member`, whatever the request, so a
@@ -95,9 +97,15 @@ time.
 
 ### 3.4 Systems this drives
 
-The membership component sends each invitation as an email, through an email sending service. Which
-service is not decided until TODO-12 is done. The email is sent from an address of Itinero's own,
-and is plain text with one link.
+The membership component sends each invitation as an email through Resend, an email sending
+service, within its free plan of 3,000 emails a month and 100 a day. It sends each one with a
+`POST` to `https://api.resend.com/emails`, with the Worker's secret `RESEND_API_KEY` as its bearer
+token. The email is plain text with one link.
+
+Resend sends to any address only from a domain whose ownership it has checked, through records
+added to the domain's DNS. Invitations are therefore sent from an address at Itinero's own domain,
+such as `invitations@` that domain. An invitation Resend refuses to send, such as one past the
+day's 100, closes the request with the refusal `not-sent`, and leaves no invitation open.
 
 ## 4. Behaviour
 
@@ -109,8 +117,10 @@ Behaviour crossing every operation:
   or compared.
 - **The server's clock is the only clock.** An invitation's expiry is checked against the online
   side's own clock.
-- **Each operation on a trip runs alone.** Two operations on the same trip never interleave, so an
-  invitation is never accepted twice, nor accepted as it is withdrawn.
+- **Each operation on a trip runs alone.** Each operation is one D1 batch, which D1 runs as one
+  transaction. An invitation is closed by an update that names its state as open, and the operation
+  stops where the update changes no row. So an invitation is never accepted twice, nor accepted as
+  it is withdrawn.
 
 ### 4.1 Creating a trip, and admins
 
@@ -185,13 +195,13 @@ gives the trips an account is a member of, in the order they were joined.
 ### 4.7 The test suite
 
 The suite runs the checks in the verification of each requirement the membership component claims,
-against an email stand-in that keeps each message sent. It also checks each refusal of §3.2. How
-the suite runs depends on the platform, which is not decided until TODO-12 is done.
+against an email stand-in that keeps each message sent. It also checks each refusal of §3.2. It runs
+with the accounts component's suite, with `npm test` in `services/online/`, inside Wrangler.
 
 ## 5. Resources
 
-The membership component stores two kinds of record. What holds them is not decided
-until TODO-12 is done.
+The membership component stores two kinds of record, each a table of the online side's D1
+database.
 
 | Record | Holds | Kept |
 |---|---|---|
@@ -201,10 +211,14 @@ until TODO-12 is done.
 A trip has exactly one member whose `creator` is true. The pair of the trip and the account is
 unique among members.
 
-| Resource | Owned by |
-|---|---|
-| The stored records | Whoever keeps the access system's roadmap |
-| The address invitations are sent from | Whoever keeps the access system's roadmap |
+A scheduled task of the Worker, which Cloudflare runs once a day, deletes every invitation 90 days
+after it closed, and closes every open invitation past its expiry.
+
+| Resource | Path | Owned by |
+|---|---|---|
+| The tables `members` and `invitations` | The online side's D1 database | Whoever keeps the access system's roadmap |
+| The Resend key | `RESEND_API_KEY`, a secret of the Worker, set with Wrangler and never in the repository | Whoever keeps the access system's roadmap |
+| The domain invitations are sent from, and its DNS records for Resend | Itinero's own domain | Whoever keeps the access system's roadmap |
 
 ## 6. Quality attributes
 
@@ -234,5 +248,4 @@ unique among members.
 
 ## 8. Open
 
-- **What the membership component runs on.** Its records, its service and its email sending depend
-  on the platform chosen for Itinero's online side. It is not decided until TODO-12 is done.
+None. The platform is decided (ADR-0015).

@@ -25,18 +25,17 @@ of the same three levels, apart from its pages.
 
 ## Functional requirements
 
-### ACC-F1 — A traveller signs in with a Google or an Apple account
+### ACC-F1 — A traveller signs in with a Google account
 
-A traveller signs in to Itinero with a Google account or an Apple account, and has an Itinero
-account from their first sign-in. Itinero holds no password for any traveller. A traveller signed
-in on a device stays signed in there until they sign out. ^acc-f1
+A traveller signs in to Itinero with a Google account, and has an Itinero account from their first
+sign-in. Itinero holds no password for any traveller. A traveller signed in on a device stays signed
+in there until they sign out. ^acc-f1
 
 - **Verification:** on a running system,
     - sign in with a Google account for the first time, and confirm an account is created and signed
       in
     - sign out, sign in with the same Google account, and confirm it is the same account, with the
       same trips
-    - sign in with an Apple account, and confirm it is accepted
     - close and reopen the app, and confirm the traveller is still signed in
 
 > **What does this buy?** A traveller joins with an account they already have, and has no new
@@ -84,8 +83,8 @@ it is accepted. A traveller sees nothing of a trip until they accept. ^acc-f3
 > **What does this buy?** An admin brings in exactly the people they mean to. An invitation
 > forwarded to someone else lets nobody in.
 
-> **What if the Apple account hides its email address?** Apple can give Itinero a relay address in
-> place of the real one. Such an account matches only an invitation to that relay address.
+> **What if a traveller's Google account uses an address that is not a Gmail one?** It matches all
+> the same. An admin invites a traveller at the address of their Google account, whatever it is.
 
 ### ACC-F4 — A traveller's access to the trip passes to every page
 
@@ -277,7 +276,7 @@ see, and never changes one they may not edit, whatever their device asks for. ^a
 
 | Identifier | The access system does not | Because |
 |---|---|---|
-| **ACC-NR1** | Let a traveller sign in with a password, or with any account but a Google or an Apple one | Travellers chose to sign in with an account they already have |
+| **ACC-NR1** | Let a traveller sign in with a password, or with any account but a Google one | Travellers sign in with an account they already have. Apple's sign-in costs $99 a year (ADR-0015, Itinero's online side runs on Cloudflare's free plan) |
 | **ACC-NR2** | Let a traveller leave a trip by themselves | Only an admin removes a traveller, for now |
 | **ACC-NR3** | Make an admin an ordinary traveller again | Admins are kept as they are made, for now |
 | **ACC-NR4** | Hand a trip's creator's role to another traveller, or delete a trip | A trip outlives no decision yet on who may end it. Both are future work |

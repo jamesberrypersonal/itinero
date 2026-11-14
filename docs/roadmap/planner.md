@@ -65,5 +65,6 @@ the planner's itinerary. The planner is the first system that needs that compone
 #### Milestone Planner-0.3 — The home page, and the trip held online
 
 - Register the component that holds the copy of each trip online, its calendar and its pages, and
-  write its requirements and specification. It moved here from Milestone Planner-0.1, because
-  milestones are reached in order and the pages were started first.
+  write its requirements and specification. Each trip is held in a Cloudflare Durable Object of its
+  own (ADR-0015, Itinero's online side runs on Cloudflare's free plan). It moved here from Milestone
+  Planner-0.1, because milestones are reached in order and the pages were started first.
