@@ -20,6 +20,9 @@ theirs, in Milestone Planner-0.2 and Milestone Access-0.1.
   is read-only offline).
 - The web app fetches, stores and loads the time-zone rules file that `shared/trip-time` uses
   (ADR-0008, trip-time carries its own copy of the time-zone rules).
+- A trip's copy on a device is protected by the device's own lock, every device keeps one, and
+  signing out deletes it (ADR-0017, a trip's copy on a device is protected by the device's own
+  lock, and deleted when its traveller signs out).
 
 ## Pending
 
@@ -29,8 +32,7 @@ theirs, in Milestone Planner-0.2 and Milestone Access-0.1.
 
 - Write the web app's requirements. A traveller reads and changes a trip on a computer or a
   phone. A phone with no connection shows the trip as it last stood, and says when that was.
-- Decide how a phone protects its copy of a trip. ADR-0004 requires the decision before a trip
-  holds personal details, such as emergency contacts.
+  Signing out deletes every trip from the device (ADR-0017).
 - Write the web app's requirements for a trip's home page: the traveller's day, their bookings,
   and the country the phone is in, worked out on the phone with a map of country borders held
   there (ADR-0014, a trip opens on a home page for each traveller).

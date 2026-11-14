@@ -3,7 +3,7 @@
 What needs active work, and what waits on a decision. `documentation-system.md` gives the list's
 rules. When an item is done, it leaves this list for `CHANGELOG.md` in the commit that finishes it.
 
-*Next free:* TODO-16
+*Next free:* TODO-17
 
 ## Tags
 
@@ -159,5 +159,23 @@ every other part of a trip together (`BKG-NR2`).
 *Proposal:* Decide where files are kept, how large one may be, and whether each phone keeps a copy
 of its traveller's files to read with no connection. Record it in a decision record scoped
 `bookings`.
+
+*Releases:* Nothing is planned for it yet.
+
+### TODO-16 — Sign a lost device out from another device
+
+*Tags:* access/accounts, web
+*Written:* 2026-11-14
+
+*Problem:* A traveller who loses a phone cannot sign it out from another device, so the lost phone
+keeps its copy of every trip, and its session, until it goes 180 days unused.
+
+*Reason:* Each device signs out for itself (`ACC:ACCOUNTS-NR3`). A device's copy is protected by
+the device's own lock alone (ADR-0017, a trip's copy on a device is protected by the device's own
+lock, and deleted when its traveller signs out).
+
+*Proposal:* Consider listing the devices a traveller is signed in on, and letting them sign out
+any or all of them, so that each deletes its copy the next time it connects. Decide it in a
+decision record scoped `access/accounts` and `web`.
 
 *Releases:* Nothing is planned for it yet.
