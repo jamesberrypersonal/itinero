@@ -215,6 +215,27 @@ moved or deleted. ^pln-itinerary-f9
 > page is. A page in the trip's graveyard, where deleted pages wait to be restored, is shown as
 > deleted (`PLN:PAGES-F5`).
 
+### PLN:ITINERARY-F10 — A trip holds its own dates, and each traveller's within them
+
+The itinerary holds a trip's first and last dates, and each traveller's own first and last dates,
+which fall within the trip's. A traveller with no dates of their own has the trip's. The itinerary
+refuses a traveller's dates outside the trip's. It refuses new dates for the trip that would leave a
+traveller's dates outside them, naming each such traveller. ^pln-itinerary-f10
+
+- **Verification:** on a new trip,
+    - set the trip's dates to 1 to 20 December 2026, and confirm they read back
+    - set a traveller's dates to 6 to 13 December, and confirm they read back, and that a second
+      traveller with no dates of their own has 1 to 20 December
+    - set the traveller's dates to 28 November to 3 December, and confirm it is refused, with the
+      reason
+    - set the trip's dates to 8 to 20 December, and confirm it is refused, naming the traveller
+
+> **What does this buy?** A companion joining for one week has a trip of their own length, which
+> the home page counts their days from (`PLN-F14`).
+
+> **Who may set the dates?** The caller decides: the trip's creator sets the trip's, and each
+> traveller sets their own (ADR-0014, a trip opens on a home page for each traveller).
+
 ---
 
 ## Non-functional requirements

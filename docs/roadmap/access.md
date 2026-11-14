@@ -22,6 +22,9 @@ Access is set page by page, so its design follows the planner's pages, in Milest
   and joins a trip by an invitation to their email address. A trip's creator is always its admin.
   A traveller sees a trip's calendar only once an admin grants it. An admin removes a traveller,
   who then loses the trip on every device.
+- The access system is divided into three components: `access/accounts`, `access/membership` and
+  `access/permissions`. Each has its requirements and its specification. Accounts and membership
+  leave what they run on to be decided.
 
 ## Pending
 
@@ -29,5 +32,5 @@ Access is set page by page, so its design follows the planner's pages, in Milest
 
 #### Milestone Access-0.1 — Accounts, invitations and page access
 
-- Divide the access system into components, and register them.
-- Write the requirements and specification for each of those components.
+- Do TODO-12. Decide what Itinero's online side is built on, and complete the resources of the
+  accounts and membership specifications.

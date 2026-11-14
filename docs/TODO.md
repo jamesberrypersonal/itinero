@@ -3,13 +3,16 @@
 What needs active work, and what waits on a decision. `documentation-system.md` gives the list's
 rules. When an item is done, it leaves this list for `CHANGELOG.md` in the commit that finishes it.
 
-*Next free:* TODO-12
+*Next free:* TODO-13
 
 ## Tags
 
 | Tag | Means |
 |---|---|
 | access | Accounts, invitations and permissions |
+| access/accounts | Travellers' accounts, and signing in with a Google or an Apple account |
+| access/membership | Who is on each trip: its admins, the invitations that bring travellers in, and removing them |
+| access/permissions | What each traveller may see and change of a trip's pages, calendar and bookings |
 | bookings | A trip's bookings, such as flights, stays and tours, each for the travellers it names, and the page that lists them |
 | planner | The trip planner |
 | planner/itinerary | The itinerary: a trip's pencilled stretches and firm items |
@@ -100,3 +103,24 @@ The country was enough to start with (`PLN-NR7`).
 add the requirements to the planner and the web app.
 
 *Releases:* Nothing is planned for it yet.
+
+### TODO-12 — Decide what Itinero's online side is built on
+
+*Tags:* access, planner, web
+*Written:* 2026-11-14
+
+*Problem:* Nothing says what runs Itinero's online side: the server that holds accounts, who is on
+each trip and the copy of each trip, the database it stores them in, and the service that sends
+invitation emails.
+
+*Reason:* The access system's accounts and membership are specified as behaviour, with their
+storage, hosting and email left open. The choice was put off while the trip held online is
+designed. One option is a TypeScript server on Node.js with a PostgreSQL database, which reuses the
+planner's packages unchanged. Another is a hosted platform that provides the database and the
+Google and Apple sign-in.
+
+*Proposal:* Choose the platform, and record it in a decision record scoped `access` and `planner`.
+Then complete the resources of `spec/access/accounts.md` and `spec/access/membership.md`.
+
+*Releases:* Milestone Access-0.1.
+

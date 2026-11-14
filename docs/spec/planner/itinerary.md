@@ -81,11 +81,15 @@ type Travel = { from: Place; to: Place; by: Way; arrive?: When };
 
 type FirmItem = { id: Id; title: string; when: When; travel?: Travel; page?: PageId };
 
-type Trip = { format: 1; id: Id; name: string; revision: number;
+type Dates = { first: LocalDate; last: LocalDate };
+type Trip = { format: 1; id: Id; name: string; revision: number; dates?: Dates;
+              travellers: readonly { traveller: Id; dates: Dates }[];   // ordered by traveller
               stretches: readonly Stretch[]; firm: readonly FirmItem[] };
 
 type Change =
   | { op: "rename";         name: string }
+  | { op: "trip-dates";     dates: Dates }
+  | { op: "traveller-dates"; traveller: Id; dates?: Dates }   // absent: the trip's dates
   | { op: "pencil";         stretch: Stretch }
   | { op: "move";           id: Id; first: LocalDate; last: LocalDate }
   | { op: "re-place";       id: Id; place: Place }
@@ -98,6 +102,7 @@ type DayLayout = { date: LocalDate; countries: Country[];
                    stretches: Stretch[]; firm: FirmItem[] };
 
 function newTrip(id: Id, name: string): Result<Trip>;
+function travellerDates(trip: Trip, traveller: Id): Dates | undefined;
 function apply(trip: Trip, change: Change): Result<Trip>;
 
 function extent(trip: Trip): { first: LocalDate; last: LocalDate } | undefined;
@@ -131,6 +136,8 @@ show it to the traveller.
 | `travel-order` | `apply` | Travel that certainly arrives before it leaves (§4.4) |
 | `range-order` | `layout` | A range whose last date is before its first |
 | `range-length` | `layout` | A range of more than 366 days |
+| `outside-trip` | `apply` | A traveller's dates outside the trip's, or set on a trip with no dates |
+| `travellers-outside` | `apply` | New dates for the trip that would leave a traveller's dates outside them. `details.travellers` lists each, comma separated |
 | `unknown-format` | `tripFromText` | A trip whose `format` is not 1 |
 
 `apply` also returns any refusal trip-time's `create` gives for a time in the change, with its code
@@ -170,6 +177,8 @@ anything is changed.
 | Change | Effect | Refused when |
 |---|---|---|
 | `rename` | Sets the trip's name | `bad-text` |
+| `trip-dates` | Sets the trip's first and last dates (§4.9) | `invalid-date`, `stretch-order`, `travellers-outside` |
+| `traveller-dates` | Sets a traveller's own dates, or removes them where `dates` is absent (§4.9) | `bad-id`, `invalid-date`, `stretch-order`, `outside-trip` |
 | `pencil` | Adds the stretch, after those the trip holds | `duplicate-id`, and any refusal of §4.3 |
 | `move` | Sets the stretch's first and last days | `unknown-id`, and any date refusal of §4.3 |
 | `re-place` | Sets the stretch's place | `unknown-id`, `unknown-country`, `bad-text` |
@@ -285,6 +294,21 @@ recipe, `just test-itinerary`, runs it from anywhere in the repository.
   `Europe/London` and to `Asia/Tokyo`, and confirm every result is the same
   (`PLN:ITINERARY-NFR1`).
 
+### 4.9 A trip's dates and each traveller's
+
+*Porcelain:* a trip's `dates` are its first and last days, both included, and each entry of
+`travellers` is one traveller's own (`PLN:ITINERARY-F10`). A traveller is named by the identifier
+of their account, which `access/accounts` gives. `travellerDates(trip, traveller)` gives the
+traveller's own dates, or the trip's where they have none, or `undefined` where the trip has no
+dates.
+
+A traveller's dates are refused with `outside-trip` where the trip has no dates, or where either
+date falls outside the trip's. New dates for the trip are refused with `travellers-outside` where
+any traveller's own dates would fall outside them. The itinerary does not check who sets the dates.
+The caller lets only the trip's creator set the trip's, and each traveller set their own
+(ADR-0014, a trip opens on a home page for each traveller). A traveller removed from the trip
+keeps their entry, which does nothing.
+
 ## 5. Resources
 
 ### 5.1 The text form of a trip
@@ -365,6 +389,8 @@ TypeScript and Node's type definitions.
 | [PLN:ITINERARY-F6](../../requirements/planner/itinerary.md#^pln-itinerary-f6) | `apply` and the revision, in §4.2. Applying each change to the copy held online is the component that holds it, which is not yet registered. |
 | [PLN:ITINERARY-F7](../../requirements/planner/itinerary.md#^pln-itinerary-f7) | Every check made before anything is changed, in §4.2. |
 | [PLN:ITINERARY-F8](../../requirements/planner/itinerary.md#^pln-itinerary-f8) | The text form of §4.7 and §5.1. |
+| [PLN:ITINERARY-F10](../../requirements/planner/itinerary.md#^pln-itinerary-f10) | The `trip-dates` and `traveller-dates` changes, and `travellerDates`, in §4.9. |
+| [PLN-F14](../../requirements/planner/planner.md#^pln-f14) | A trip's dates and each traveller's, with their refusals (§4.9). Setting them is the web app, and letting only the creator set the trip's is the component holding the copy of each trip online. Neither is yet specified. |
 | [PLN:ITINERARY-F9](../../requirements/planner/itinerary.md#^pln-itinerary-f9) | The `page` field of `Stretch` and `FirmItem` in §3.3, kept unchecked (§2). Whether the page is in the tree or the graveyard is `planner/pages`, in §4.6 of `spec/planner/pages.md`. |
 | [PLN:ITINERARY-NFR1](../../requirements/planner/itinerary.md#^pln-itinerary-nfr1) | No network code, and never reading the device's time zone (§4, §6). Keeping a copy on the phone is the web app, whose specification is not yet written. |
 | [PLN-F1](../../requirements/planner/planner.md#^pln-f1) | A trip's stretches, changed freely (§4.2, §4.3). Showing them on a calendar is the web app, whose specification is not yet written. |
