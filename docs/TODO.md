@@ -3,7 +3,7 @@
 What needs active work, and what waits on a decision. `documentation-system.md` gives the list's
 rules. When an item is done, it leaves this list for `CHANGELOG.md` in the commit that finishes it.
 
-*Next free:* TODO-10
+*Next free:* TODO-11
 
 ## Tags
 
@@ -11,7 +11,7 @@ rules. When an item is done, it leaves this list for `CHANGELOG.md` in the commi
 |---|---|
 | access | Accounts, invitations and permissions |
 | planner | The trip planner |
-| planner/itinerary | The itinerary model: trips, stops, days and the travel between them |
+| planner/itinerary | The itinerary: a trip's pencilled stretches and firm items |
 | planner/pages | The pages of a trip |
 | shared/doc-check | The documentation checker |
 | shared/doc-scaffold | The scaffolder that starts new documents |
@@ -132,5 +132,22 @@ works best from a reader that has seen none of the work. The author cannot do th
 changes. It does steps 1 to 3 itself, hands step 4 to a subagent with no other context, applies the
 fixes, rewraps only the paragraphs it changed, and runs `just check-docs` and `just test-docs`. It
 asks before editing an accepted decision record.
+
+*Releases:* Nothing is planned for it yet.
+
+### TODO-10 — Decide what a trip opens on
+
+*Tags:* planner, web
+*Written:* 2026-11-14
+
+*Problem:* Nothing says what a traveller sees first on opening a trip, since the calendar is not
+its centre (ADR-0009, a trip's calendar is pencilled in).
+
+*Reason:* A first idea is a home page for the trip. Before the trip, it would count down to the
+first day. During the trip, it would say which day of the trip today is. It would also list the
+next firm items, such as a booked flight, and link to the pages about the place the traveller is
+in. The idea was left for later, because nothing in Milestone Planner-0.1 depends on it.
+
+*Proposal:* Decide what a trip opens on, and add its requirements to the planner and the web app.
 
 *Releases:* Nothing is planned for it yet.

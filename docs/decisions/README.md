@@ -31,6 +31,7 @@ keeps:
 | [0006](0006-new-documents-start-from-skeletons.md) | New documents start from skeletons that a second program writes | shared/doc-check, shared/doc-scaffold | Accepted |
 | [0007](0007-trip-time-is-written-in-typescript.md) | trip-time is written in TypeScript | shared/trip-time | Accepted |
 | [0008](0008-trip-time-carries-its-own-time-zone-rules.md) | trip-time carries its own copy of the time-zone rules | shared/trip-time, web | Accepted |
+| [0009](0009-a-trips-calendar-is-pencilled-in.md) | A trip's calendar is pencilled in, and only its firm items are fixed | planner | Accepted |
 
 ## By subject
 
@@ -47,6 +48,7 @@ keeps:
 | ADR | Title | Status |
 |---|---|---|
 | [0004](0004-a-trip-is-read-only-offline.md) | A trip can be read without a connection, but changed only with one | Accepted |
+| [0009](0009-a-trips-calendar-is-pencilled-in.md) | A trip's calendar is pencilled in, and only its firm items are fixed | Accepted |
 
 ### web
 
