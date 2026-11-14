@@ -90,14 +90,16 @@ them. ^acc-membership-f4
 
 ### ACC:MEMBERSHIP-F5 — The membership component says who is on a trip, and which of them are admins
 
-For a trip, the membership component gives its members, which of them are admins, which is its
-creator, and the invitations not yet accepted. For an account, it gives the trips it is a member
-of. ^acc-membership-f5
+The membership component gives any member of a trip its members, which of them are admins, and
+which is its creator. It gives only an admin the invitations not yet accepted. For an account, it
+gives the trips it is a member of. ^acc-membership-f5
 
 - **Verification:** against the membership component, with the trip of `ACC:MEMBERSHIP-F4` after
   the removal,
-    - confirm it gives the two members left, each marked admin or not, and the creator
-    - invite an address, and confirm the invitation is given, with its expiry
+    - as a member who is not an admin, confirm it gives the two members left, each marked admin or
+      not, and the creator
+    - invite an address, and confirm an admin is given the invitation, with its expiry, and the
+      other member is not
     - confirm each member's account gives the trip among its trips
 
 > **What does this buy?** Every check of what a traveller may do starts from whether they are on

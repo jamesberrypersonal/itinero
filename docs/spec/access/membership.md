@@ -49,7 +49,7 @@ body `{ "code": ..., "message": ... }`.
 
 | Request | Body | Gives |
 |---|---|---|
-| `GET /trips/{trip}/members` | None | The members, admins, creator and open invitations (§4.6) |
+| `GET /trips/{trip}/members` | None | The members, admins and creator, and to an admin the open invitations (§4.6) |
 | `POST /trips/{trip}/invitations` | `{ "email": ..., "trip": "view" \| "edit", "calendar": "none" \| "view" \| "edit" }` | The invitation, without its token (§4.2) |
 | `DELETE /trips/{trip}/invitations/{invitation}` | None | Nothing, and withdraws it (§4.2) |
 | `POST /invitations/{invitation}/accept` | `{ "token": ... }` | The trip joined (§4.4) |
@@ -176,8 +176,10 @@ request of theirs about the trip is then refused with `not-a-member`.
 
 ### 4.6 Who is on a trip
 
-*Porcelain:* `GET /trips/{trip}/members` gives every member, with `admin`, `creator` and `joined`,
-and each open invitation's identifier, address, access and expiry (`ACC:MEMBERSHIP-F5`). `trips`
+*Porcelain:* `GET /trips/{trip}/members` gives any member every member of the trip, with `admin`,
+`creator` and `joined` (`ACC:MEMBERSHIP-F5`). To an admin, it also gives each open invitation's
+identifier, address, access and expiry. A member who is not an admin is given no invitations, so
+that the addresses invited stay with the admins. `trips`
 gives the trips an account is a member of, in the order they were joined.
 
 ### 4.7 The test suite
@@ -234,5 +236,3 @@ unique among members.
 
 - **What the membership component runs on.** Its records, its service and its email sending depend
   on the platform chosen for Itinero's online side. It is not decided until TODO-12 is done.
-- **Who sees a trip's members.** `GET /trips/{trip}/members` gives every member to any member. No
-  requirement says whether a traveller should see who else is on a trip. It is not decided.

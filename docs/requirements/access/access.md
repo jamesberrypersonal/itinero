@@ -50,13 +50,16 @@ in on a device stays signed in there until they sign out. ^acc-f1
 
 A traveller who creates a trip is its admin from then on. Nothing removes their admin role, and
 nothing removes them from the trip. An admin may make any other traveller on the trip an admin. An
-admin has edit access to every page of the trip. ^acc-f2
+admin has edit access to every page of the trip. Every traveller on a trip sees who else is on it,
+and which of them are admins. ^acc-f2
 
 - **Verification:** on a running system,
     - create a trip, and confirm its creator is its admin
     - as the creator, make a second traveller an admin, and confirm the second can edit every page
     - as the second admin, try to remove the creator, and to take away their admin role, and confirm
       each is refused, with the reason
+    - as a traveller who is not an admin, confirm they see every traveller on the trip, with the two
+      admins marked
 
 > **What does this buy?** Every trip always has someone who may manage it, whoever else joins or
 > leaves.
