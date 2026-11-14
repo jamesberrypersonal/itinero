@@ -14,21 +14,25 @@ Rules are sorted by what they apply to, and each rule belongs to exactly one par
 | **Shape** | What parts a document has, and in what order | Yes — the only part that branches |
 | **Rationale** | Nothing, while writing. Read it when a rule is challenged | — |
 
-**Voice is capped at twelve rules.** A thirteenth is admitted only by showing that one of the
-twelve is subsumed, dead, or wrong. The cap is what forces consolidation; without it the list
-grows monotonically and each rule dilutes the others.
+**Voice is capped at twelve rules.** It holds eleven today. Once it holds twelve, another rule is
+admitted only by showing that one of the twelve is subsumed, dead, or wrong. The cap is what forces
+consolidation. Without it the list only grows, and each rule dilutes the others.
 
 **A rule is admitted only on two conditions.** A document in this repository has violated it,
 and it is not derivable from a rule already present. Observations from a review are raw
-material: they accumulate in a companion file, `style-observations.md`, beside this one, and
-enter this file only at a distillation pass, which is allowed to delete. The companion is a
-table of date, document and what went wrong, with nothing edited on the way in. Distil when a
-document is migrated, or when the list reaches a dozen entries: read the whole list at once and
-ask what rules it implies. Several observations often collapse into one rule, or show that a
-standing rule is mis-stated.
+material. They accumulate in a companion file, `style-observations.md`, beside this one. The
+companion is a table of date, document and what went wrong, with nothing edited on the way in.
+Observations enter this file only at a distillation pass, which may delete observations and
+standing rules alike. Distil when a document is rewritten into the shape this file sets, or when
+the list reaches a dozen entries. A distillation reads the whole list at once and asks what rules
+it implies. Several observations often collapse into one rule, or show that a standing rule is
+mis-stated.
 
-Settled for **requirements**, **specifications**, **guides** and **orientation documents**.
-Decision records and whitepapers have no Shape section yet; Voice and Lexicon still bind them.
+The Shape part is settled for requirements, specifications, guides and orientation documents.
+Orientation documents are the ones in `overview/`, which route a reader to what they need. Two
+kinds of document have no part of their own under Shape yet: decision records, and whitepapers,
+which explain one mechanism end to end. The rules Shape sets for every document, and all of Voice
+and Lexicon, still bind them.
 
 ---
 
@@ -122,14 +126,16 @@ Correct:   proven by following the installation guide
 
 ### STY-V9 — Bold marks structure, never emphasis
 
-- **Test:** bold marks question labels and table row-heads. Nothing else is bold.
+- **Test:** bold marks table row-heads, and the question label that opens a rationale block
+  (`STY-S3`). Nothing else is bold.
 
 ### STY-V10 — A worked example is included only where the text cannot state its own boundary
 
 - **Test:** try to state the boundary in one sentence. If it states cleanly, keep the sentence
   and add no example. If it does not, the reader is being asked to recognise a quality rather
   than check a property, and one example shows what the sentence could not. A worked example
-  goes in a `[!TIP]` callout, so a reader can take or skip it whole.
+  goes in a `[!TIP]` callout, a blockquote that Obsidian and GitHub both draw as a boxed tip. A
+  reader can then take or skip the example whole.
 
 This bounds worked examples alone. The inline exemplar `STY-V7` requires is not one, and is
 never dropped under this rule.
@@ -155,26 +161,29 @@ thing, or one word for two things, and records which to write.
 | a person's role by name | operator, in a sentence about who may do what | "operator" conflates roles with different access |
 | operator, for any human | — | "without operator intervention" is correct |
 | `docs/spec/planner/api.md`, `packages/planner/` | a bare filename | a path relative to nowhere makes the reader guess |
-| porcelain, plumbing | surface, internals | the keyword appears in specification section titles |
+| porcelain, plumbing | surface, internals | the two words label a specification's section 4 subsections, as Shape describes |
 | item, for one entry of `TODO.md` | task, card, ticket, issue | the documentation system's word; a ticket lives in another tracker |
 | component, for the unit documented | module, subsystem, node, part | a component is what makes promises of its own, and `docs/components.md` registers each one |
 | package, for the unit the package manager builds | crate, module, library | a package and a component need not line up, so the two words are never swapped |
 | system, for a set of components with promises of their own | platform, suite, product | the planner, the bookings system and the web app are systems |
-| address, for the name a document uses for a system, component or concern | path, key | `planner/api` is an address, and it is also where the documents live |
+| address, for the name a document uses for a system, component or concern | path, key | `planner/api` is an address, and it is also where the documents live. A concern is a subject every component handles the same way, such as personal data |
 | outside the vault, for documentation in a package's own folder | legacy | the vault describes where documentation is, not how old it is |
 
-**A word is defined by what is done at its level**, not by its position in a taxonomy. Nobody
-builds a category. A package is what the package manager builds. A component is what makes promises of its own. An
-artefact is what a hash attests.
+**A word is defined by what is done at its level**, not by its position in a taxonomy. A package
+is what the package manager builds. A component is what makes promises of its own. A built
+artefact, such as an app's installer, is what a hash attests. A category has nothing done to it,
+so naming one defines nothing.
 
-Where vocabulary carries a system, show how the terms vary. Put the one-of-a-kind case beside
-the bundle, and give the discriminating test the reader applies to the next new thing.
+Where a set of terms names the kinds of one thing, show the kinds side by side. Put the single
+case beside the case that groups several, such as a component beside the system that groups
+components. Then give the test a reader applies to decide which kind the next new thing is.
 
 **A comparison teaches a new concept, or it is deleted.** Having defined something, a comparison
-to what the reader already knows will settle it — a template and the documents made from it are
-a class and its instances. Everywhere else the plain word serves: a keyword appears in a section
-title, it does not ride in one. The test is to delete the comparison. Keep it if the definition it
-follows becomes harder to grasp, and drop it if only the prose reads flatter.
+to what the reader already knows will settle it. A template and the documents made from it, for
+instance, are a class and its instances. Everywhere else the plain word serves. A section title
+names its keyword plainly, with no comparison attached. The test is to delete the comparison. Keep
+it if the definition it follows becomes harder to grasp, and drop it if only the prose reads
+flatter.
 
 ---
 
@@ -183,8 +192,8 @@ follows becomes harder to grasp, and drop it if only the prose reads flatter.
 ### Every document
 
 **STY-S1 — A document assumes at most its own tree's README.** Anything more is declared in one
-line at the top: `**Assumes** [document](path.md)`. The declaration is a budget, not a
-substitute for teaching.
+line at the top: `**Assumes** [document](path.md)`. The declaration limits what the document may
+take as read. It does not excuse the document from teaching anything else it needs.
 
 **STY-S2 — Concepts are introduced before first use**, in dependency order, at one altitude. A
 short overview beats definitions scattered through the sections that need them. A process the
@@ -192,8 +201,9 @@ document depends on is established as a subject in its own sentences before anyt
 it in passing.
 
 **STY-S3 — Normative text above, rationale below.** Rationale goes in question-labelled
-blockquote blocks: a bold question label, one question per block, narrative prose. A
-discovered-the-hard-way consequence stays a callout, because a question would soften it.
+blockquote blocks: a bold question label, one question per block, narrative prose. A consequence
+someone learned by being caught out, such as a command that deletes data without asking, goes in a
+`[!WARNING]` callout instead. A question label would soften it.
 
 **STY-S4 — A citation names a stable address.** A document, a numbered section (`§4`) and an
 identifier (`SHR:DOC-CHECK-F3`, `ADR-0001`) are stable addresses. A paragraph, a sentence and a point
@@ -201,25 +211,26 @@ partway through a section are not. Cite the smallest stable address that contain
 and reiterate in place whatever the current section needs. The checker resolves every `§4`
 against the sections its target defines.
 
-**STY-S5 — No document cites the live work list, except to say what waits on an item.** The list
-is live, and an item cited from elsewhere leaves it as soon as it is done. A document that needs to
-say work is owed says so itself. A statement that holds only until an item is done cites it as
+**STY-S5 — No document cites the live work list, except to say what waits on an item.** The list is
+live, and an item cited from elsewhere leaves it as soon as it is done. A document that needs to say
+work is owed says so itself. A statement that holds only until an item is done cites it as
 `until TODO-NN is done`. That stays true once the item leaves the list, because an identifier the
-list no longer holds names an item that is done. The file that defines the list's rules and the
-changelog cite it freely, because one defines its terms and the other receives its finished items.
-The checker enforces this.
+list no longer holds names an item that is done. `documentation-system.md`, which defines the list's
+rules, and the changelog cite it freely, because one defines its terms and the other receives its
+finished items. The checker enforces this.
 
 ### Requirements
 
-Each requirement is three parts, in this order, typographic — no subheadings.
+Each requirement is three parts below its heading, in this order. Typography tells the parts
+apart, with no subheadings: a plain paragraph, a bulleted list, then quoted blocks.
 
 | Part | What it is | Written for |
 |---|---|---|
 | Body | The promise, in observable behaviour, never mechanism | The release manager deciding what was contracted |
-| Verification | The proof | Whoever builds the gate |
+| Verification | The proof | Whoever builds the test or check that proves it |
 | Blockquote | Disambiguation: corner cases, boundaries, see-also | The reader who arrived confused or curious |
 
-**The body stays at the abstraction; the disambiguation may penetrate it.** A concrete case in
+**The body stays abstract, and the disambiguation may name concrete cases.** A concrete case in
 the body narrows the promise. The body also may not absorb mechanism. Where a body cannot be
 both generic and plain, the missing piece is usually a name.
 
@@ -227,18 +238,18 @@ both generic and plain, the missing piece is usually a name.
 
 **The verification is a bulleted list of short checks.** Each item is one short description of
 how to establish that the requirement is met. A single check is still a list. Setup shared by
-every check sits on the label line.
+every check sits on the line that carries the `**Verification:**` label.
 
-**The first question is always "what does this buy?"** If it has no answer, the requirement is
-misstated or should not exist.
+**The first question in the blockquote is always "what does this buy?"** If it has no answer, the
+requirement is misstated or should not exist.
 
-The disambiguation is optional and never filler. A requirement with none is the shape working,
-not a gap.
+Every question after the first is optional and never filler. A requirement with no other question
+is the shape working, not a gap.
 
 ### Specifications
 
 **A requirements document says what must be true and how to check it. A specification says how it
-is built.** It is the design of one submodule, written so that someone who has not read the code
+is built.** It is the design of one component, written so that someone who has not read the code
 could implement it. That is the test: if a capable reader could not build the thing from the
 document, it is not a specification yet.
 
@@ -249,7 +260,7 @@ knows where to look before opening the file, which is the whole point of fixing 
 |---|---|---|
 | 1 | Purpose | What this is for |
 | 2 | Scope | What it covers, what acts on it, and what is deliberately absent |
-| 3 | Interface | The surface, in the five parts below |
+| 3 | Interface | The surface, in the four parts below |
 | 4 | Behaviour | What it does — the section a reader implements from |
 | 5 | Resources | What it creates or stores, how that is named, who owns it, what protects it |
 | 6 | Quality attributes | Performance, security, availability, robustness |
@@ -265,9 +276,9 @@ question with no answer.
 
 | | Part | Answers |
 |---|---|---|
-| 3.1 | User interface | Who calls this |
-| 3.2 | Application interface | Who calls this |
-| 3.3 | Programming interface | Who calls this |
+| 3.1 | User interface | Who calls this, and what a person uses to do it, such as commands or screens |
+| 3.2 | Application interface | Who calls this over a network or a service boundary |
+| 3.3 | Programming interface | Who calls this from code, through functions in the same program |
 | 3.4 | Systems this drives | What this calls, and what it creates there |
 
 **Where 3.4 names a borrowed system, it teaches that system's vocabulary first.** `STY-S2` binds a
@@ -281,12 +292,13 @@ that system's own documentation, named rather than linked.
 |---|---|
 | 3.1 | Command or use case |
 | 3.2, 3.3 | Operation: inputs, effect, output, what it refuses, what a second call does |
-| 3.4 | Operation of the interface this implements, and how it is realised here |
+| 3.4 | Operation it performs on the system it drives, and how it is carried out here |
 
-**Section 4 states only what this implementation adds.** Where the abstract contract is the whole
-story, the operations go in a table and nothing more is said, so the section never restates the
-document it implements. Behaviour crossing every operation, such as a guard, is stated once at the
-top rather than in each.
+**Section 4 states only what this component adds.** A component can implement an interface that
+another document specifies, such as a storage adapter that implements a shared storage interface.
+Where that document is the whole story, the operations go in a table and nothing more is said.
+Section 4 then never restates the document the component implements. Behaviour crossing every
+operation, such as a guard, is stated once at the top rather than in each.
 
 **Section 4 is verified against the source, never inferred from the interface.** Behaviour read
 off a method signature is a guess, and a guess reads exactly like a fact. The claim most worth
@@ -298,9 +310,9 @@ level, live in their own tree. Section 6 says what this component's security or 
 properties are, naming the promise each one serves. The claim table in section 7 stays the
 complete record, and section 6 is its reader-facing view.
 
-**Where a specification has both halves, `Porcelain:` and `Plumbing:` still mark section 4's
-subsections** — the surface consumers use, then the machinery for those who change it. Porcelain
-never depends on plumbing having been read.
+**`Porcelain:` and `Plumbing:` mark section 4's subsections, where a specification has both.**
+Porcelain is the surface consumers use. Plumbing is the machinery beneath it, for those who change
+it. Porcelain never depends on plumbing having been read.
 
 **Where section 4 is organised by use case, each opens with `Invoked from:`**, naming the literal
 commands or triggers and saying what is automatic. What follows the label is a complete sentence
@@ -309,8 +321,9 @@ that stands without it.
 **A specification never argues against the alternative.** State what is, and cite the record that
 chose it.
 
-**A specification's porcelain is complete when writing the runbook from it is mechanical.** A
-section that leaves a runbook question unanswerable is missing semantics.
+**A specification's porcelain is complete when writing the guide from it is mechanical.** A guide
+is the step-by-step runbook for one task. A section that leaves one of its guide's questions
+unanswered is missing semantics.
 
 **A format read by many documents gets its own specification**, rather than a section inside the
 specification of whichever program writes it.
@@ -326,16 +339,20 @@ true while nobody acts. A guide line is an act.
 Each step names the exact file by repository-relative path or the exact command, and says what
 successful output looks like. The list ends with how to verify the change took effect.
 
-**Expected output is captured from a real run, never invented.** A runbook for verbs that do not
+**Expected output is captured from a real run, never invented.** A guide for commands that do not
 run yet is not written yet.
 
 Where a specification finds itself saying "then run…", that sentence belongs in a guide.
 
 ### Orientation documents
 
-**The system design decomposes by role, then use case.** Use cases own the path documents, and
-roles are how a reader finds theirs. The design routes rather than teaches: one line per use
-case saying what its path covers. A sparse path is a visible register of documentation debt.
+`overview/` holds two kinds of orientation document. The system design is its `README.md`, the
+front door a new reader starts from. A path document is a reading order for one use case, such as
+adding a booking kind. A role is a kind of reader, such as someone who writes the planner's code.
+
+**The system design decomposes by role, then use case.** Each use case has its own path document,
+and roles are how a reader finds theirs. The design routes rather than teaches, with one line per
+use case saying what its path covers. A sparse path is a visible register of documentation debt.
 
 **A path is a reading order, not a retelling.** It takes the reader through its use case's
 requirements, decisions and specifications in the order that teaches, and then into the trees. It
@@ -343,13 +360,14 @@ defines nothing and cites everything.
 
 **A path opens by answering "am I in the right place?"** The answer is bullets a reader triages
 in seconds: the concrete tasks this path serves, then one short list per near-miss destination.
-The system follows in one paragraph of simple promises, with no mechanism names.
+The system the use case belongs to follows, in one paragraph of simple promises with no mechanism
+names.
 
-**A path's bullet carries the claim, the scenario that makes it real, and the reader's working
-implication.**
+**A path's bullet carries three things.** They are the claim, the scenario that makes it real, and
+what the reader does differently because of it.
 
-**A path names no audience.** It is written to the intersection of the roles routed to it.
-Role-specific material sits in a marked aside.
+**A path names no single role as its audience.** It is written for every role routed to it.
+Material for one role sits in an aside that names that role, as `STY-V4` asks.
 
 ---
 
@@ -363,7 +381,7 @@ Run these against the document before committing.
 4. Read as someone who has read only the declared prerequisites. Can every sentence be parsed?
    (`STY-S1`, `STY-S2`)
 5. Validate every Mermaid diagram with mermaid-cli, never by eye.
-6. Run the documentation checker.
+6. Run the documentation checker, `just check-docs`.
 
 In Claude Code, the project skill `/final-pass` runs this pass over the documents a branch
 changes. A fresh subagent does step 4, because the author has seen the work and cannot read it as
@@ -377,10 +395,11 @@ Read when a rule is challenged. Nothing here is normative.
 
 **STY-V1 — why the test counts joints when the rule is about claims.** The two arrive
 together. Claims are joined artificially, and the joining is what overloads the reader.
-Counting joints therefore counts claims. A sentence carrying many claims across few joints was never
-observed during the markup exercise that settled the register, and the rule needs no second
-test for it. A count is also the only form the rule survives in, because a judgement about
-density returns one defensible aside at a time.
+Counting joints therefore counts claims. The Voice rules were settled by marking up existing
+documents sentence by sentence. That markup never found a sentence carrying many claims across few
+joints, so the rule needs no second test for it. A count is also the only form the rule survives
+in. Asked instead whether a sentence is too dense, a writer defends each aside on its own, one at a
+time, and none is ever removed.
 
 **STY-V3 — where the rule came from.** The two deleted examples are the two ways an aside fails.
 The first decorated a point two plain sentences had already made; the second said nothing at
@@ -395,8 +414,9 @@ superseded.
 The plain phrase is usually the more precise one, and where it is not, the sentence was hiding
 a claim it should state.
 
-**Requirements — why the FAQ shape.** Requirements are read by random access, so each one is
-self-contained. Deliberate redundancy is correct there. During a first migration to this shape,
+**Requirements — why questions in a blockquote.** Requirements are read by random access, so each
+one is self-contained. Deliberate redundancy is correct there. When requirements were first
+rewritten into this shape,
 two requirements carried commentary that answered only a peripheral question while the
 requirement's purpose was written nowhere. The mandatory first question is what made the hole
 visible.
@@ -405,18 +425,19 @@ visible.
 disambiguation. Another once carried a whole second program's shape in its body as if it were the
 promise. Two more circumlocuted until the two kinds of change they described were named.
 
-**STY-V11 — where the rule came from, and what it measures.** The failure is losing the
-opening of the sentence before reaching the next item. A list of items survives a sentence; a
-list of phrases does not. One requirement's "two things" was two items in prose, the first running
-three lines through a parenthetical and a citation, so the count was lost before the second
-arrived and the sentence had to open with "And" to reconnect them. Another's "two other promises"
-is the same construction with short items, and reads correctly, which is what the clause bound
-separates. The rule is also why a verification bullet is one confirmation per item.
+**STY-V11 — where the rule came from, and what it measures.** The failure is losing the opening of
+the sentence before reaching the next item. A list of items survives a sentence; a list of phrases
+does not. One requirement's "two things" was two items in prose, the first running three lines
+through a parenthetical and a citation, so the count was lost before the second arrived and the
+sentence had to open with "And" to reconnect them. Another's "two other promises" is the same
+construction with short items, and reads correctly. The rule's test draws the line between the two,
+because only the first has items that are clauses of their own. The rule is also why a verification
+bullet is one confirmation per item.
 
-**Requirements — why a single check is still a list.** The verification is read by whoever
-builds the gate, one check at a time, and a list is what makes each of them separately
-actionable. Holding the form constant means a requirement that grows a second check does not
-change shape, and a reader never has to notice which form they are looking at.
+**Requirements — why a single check is still a list.** The verification is read by whoever builds
+the test or check that proves the requirement, one check at a time, and a list is what makes each of
+them separately actionable. Holding the form constant means a requirement that grows a second check
+does not change shape, and a reader never has to notice which form they are looking at.
 
 **STY-S4 — why stability rather than wholeness.** The rule began as a specifications rule,
 where the section is the addressable unit and a reference partway through one rots. Generalised

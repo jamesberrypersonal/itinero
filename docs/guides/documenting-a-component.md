@@ -2,10 +2,11 @@
 
 **Assumes** [setting-up-the-repository.md](setting-up-the-repository.md) — a working copy of the repository, where `just check-docs` prints `doc-check: clean`.
 
-How to write the documents for a new part of the workspace, from registering it to landing its
-documents in a pull request. The guide follows one example the whole way: the documents of
-doc-check, the documentation checker, in a shortened form. You run the same commands with your own
-component's names, and doc-check tells you at each stage what is still missing.
+How to write the documents for a new part of the workspace, which is this repository and everything
+built in it, from registering the part to landing its documents in a pull request. The guide follows
+one example the whole way: the documents of doc-check, the documentation checker, in a shortened
+form. You run the same commands with your own component's names, and doc-check tells you at each
+stage what is still missing.
 
 The rules this guide follows are stated in full in
 [documentation-system.md](../documentation-system.md), and how sentences are written is in
@@ -16,16 +17,23 @@ The rules this guide follows are stated in full in
 A component is the unit the documentation describes: the smallest thing that makes promises of its
 own to someone outside it. doc-check is one, and so would be a trip planner's API. A system is a
 set of components that together make promises, such as the planner. A component that several
-systems use, or that none owns, belongs to `shared`.
+systems use, or that none owns, belongs to `shared`. A concern is a subject every component must
+handle the same way, such as personal data. It has documents of its own, like a component.
 
 Every system, component and concern has an address, which is how every document names it, and a
-prefix, which every one of its requirement identifiers starts with.
+prefix, which every one of its requirement identifiers starts with. A slug is the lower-case,
+hyphenated name at the end of an address, such as `itinerary` in `planner/itinerary`.
 
-| Thing | Address | Prefix | Its requirements, for example |
+| Thing | Address | Prefix | Its requirement identifiers start |
 |---|---|---|---|
-| A system | its slug, such as `planner` | two to four capitals, such as PLN | the planner's first functional requirement |
-| A component of a system | `planner/itinerary` | the system's prefix, a colon and a name, such as PLN:ITINERARY | the itinerary model's |
-| A shared component | `shared/doc-check` | SHR, a colon and a name: `SHR:DOC-CHECK` | `SHR:DOC-CHECK-F1` |
+| A system | its slug, such as `planner` | two to four capitals, such as PLN | `PLN-` |
+| A component of a system | `planner/itinerary` | the system's prefix, a colon and a name, such as PLN:ITINERARY | `PLN:ITINERARY-` |
+| A shared component | `shared/doc-check` | SHR, a colon and a name: `SHR:DOC-CHECK` | `SHR:DOC-CHECK-` |
+
+A requirement identifier is the prefix, a hyphen, the kind of requirement and a number. The kind
+is `F` for a functional requirement, `NFR` for a non-functional one, and `NR` for a
+non-requirement, which is something deliberately left out. doc-check's first functional
+requirement is `SHR:DOC-CHECK-F1`.
 
 Each kind of document answers one kind of question, and lives in its own folder of `docs/`:
 
@@ -33,7 +41,7 @@ Each kind of document answers one kind of question, and lives in its own folder 
 |---|---|---|
 | `requirements/` | What does it promise? Never how it does it | Numbered promises, each with the checks that prove it |
 | `spec/` | How is it built? | Eight numbered sections, the same for every component |
-| `decisions/` | Why was it built this way? | Short records, one per choice, never edited once acted on |
+| `decisions/` | Why was it built this way? | Short records, one per choice, never edited once accepted, only replaced by a new one |
 | `guides/` | How does a person do one task? | Numbered steps, each showing what success looks like |
 
 `components.md`, the component registry, is the one place a system, component or concern is
@@ -62,14 +70,16 @@ that the next stage clears.
 
 The steps below write every document and every row by hand, so that you see what each rule asks
 for. Once you know them, one command does the mechanical part of steps 3 to 6. It registers the
-component, writes its requirements and its specification as skeletons, and adds every row the
-indexes and the live list need:
+component, and writes its requirements and its specification as skeletons. It also adds the
+component's rows to the indexes, the `README.md` files that list each folder's documents, and to
+`docs/TODO.md`, the live work list that step 3 describes:
 
 ```
 just new-component <system> <slug> <prefix> <description>
 ```
 
-The scaffolder, doc-scaffold, was started with its own command:
+doc-scaffold is the program behind this command. Its own documents were started by running the
+command like this:
 
 ```
 just new-component shared doc-scaffold SHR:DOC-SCAFFOLD "Writes the skeleton documents and index rows for a new component, system, decision record or guide"
@@ -92,14 +102,14 @@ finished sentence, so search the files listed for "To be written", and replace e
 and 6 describe. A command that cannot be carried out, such as one naming a system that is not
 registered, writes nothing and says why.
 
-Four more commands start the other things an author adds, and the documents of a component that
-was registered without them:
+Four more commands start other things. One writes the documents of a component that is already
+registered but has none yet. The other three start a system, a decision record and a guide:
 
 | Command | Starts |
 |---|---|
 | `just new-docs <system> <slug>` | The documents a registered component is missing, with their index rows, taking its prefix and description from the registry |
-| `just new-system <slug> <prefix> <description> <keeper>` | A system: its registry row, its tag, and its roadmap |
-| `just new-decision <title> <scope>...` | The next decision record, with its rows in both views of the decisions index. It takes `--slug` to shorten the filename, and `--date` to set the Date line |
+| `just new-system <slug> <prefix> <description> <keeper>` | A system: its registry row, its tag in the live work list, and its roadmap, the document that orders the system's work. `<keeper>` names who keeps the roadmap |
+| `just new-decision <title> <scope>...` | The next decision record, with its two rows in `docs/decisions/README.md`, which step 7 describes. `<scope>` is each address the decision binds. It takes `--slug` to shorten the filename, and `--date` to set the Date line |
 | `just new-guide <group> <slug> <title> <description>` | A guide, listed under `workspace` or a registered system in the guides index |
 
 ## The steps
@@ -132,7 +142,7 @@ prefix:
 
 doc-check is used by the whole vault and owned by no system, so its address is `shared/doc-check`,
 and its prefix is `SHR:DOC-CHECK`. If your component's system is not yet in the registry, register
-the system first, in the same way, in the registry's Systems table.
+the system first with `just new-system`, from the table above.
 
 ### 3. Register the component
 
@@ -171,8 +181,8 @@ Run `just check-docs` again. It prints `doc-check: clean`.
 
 Create `docs/requirements/<system>/<slug>.md`, which for doc-check is
 `docs/requirements/shared/doc-check.md`. A requirements document says what the component promises,
-in terms a release manager could check, and never how it is built. Each promise is a short section
-in three parts, with no subheadings inside it:
+in terms a release manager could check, and never how it is built. Each promise is a short section:
+a heading, then three parts with no subheadings inside it:
 
 - **The heading** holds the identifier, a long dash, and a title that states the promise.
 - **The body** states the promise in one or two sentences, and ends with its block ID: the
@@ -259,8 +269,8 @@ What each shared component promises.
 | [doc-check.md](doc-check.md) | The checker that holds every document in the vault to the documentation system | Against copies of the vault built to break one rule at a time |
 ```
 
-If the folder already has one, add the row to its table instead. Run `just check-docs`. Where the
-tree's own index is missing too, it prints:
+If the folder already has one, add the row to its table instead. Run `just check-docs`. Where
+`docs/requirements/README.md`, the index of the whole requirements tree, is missing too, it prints:
 
 ```
 docs/requirements/shared/README.md:1: indexes: its parent directory has no index, docs/requirements/README.md. (documentation-system.md, "The layout")
@@ -362,8 +372,9 @@ nothing else. The real record, [ADR-0001](../decisions/0001-the-checker-reads-do
 shows the full form.
 
 `docs/decisions/README.md` lists every record twice: once in its Ledger table, in number order,
-and once in its By subject section, under each address the record's scope names. Run
-`just check-docs` with only the Ledger row added, and it prints:
+and once in its By subject section, under each address the record's scope names. Add a row for the
+record to each, copying the form of the rows already there. A row forgotten in either place is
+reported. With only the Ledger row added, `just check-docs` prints:
 
 ```
 docs/decisions/0001-the-checker-reads-documents-line-by-line.md:1: decision-index: the decision index does not list this record under shared/doc-check. Add a row for it under ### shared/doc-check in docs/decisions/README.md. (documentation-system.md, "The index")
@@ -371,11 +382,14 @@ doc-check: 1 finding in 1 file
 error: recipe `check-docs` failed on line 5 with exit code 1
 ```
 
-A record starts as Proposed, and can be edited freely while it is. Once the pull request's reviewer
-agrees, it becomes Accepted, and from then on its reasoning is never edited: a changed decision is
-a new record that supersedes it. Accepting it means changing the Status line in the record and in
-both index rows. An accepted record whose Consequences name a specification also needs that
-specification to cite it back. Change only the record's Status line, and `just check-docs` prints:
+A record starts as Proposed, and can be edited freely while it is. It becomes Accepted when the
+reviewer of your pull request, which step 9 opens, agrees with it. Make the change below on your
+branch then, before the pull request merges. From then on the record's reasoning is never edited. A
+changed decision is a new record that supersedes it.
+
+Accepting a record means changing the Status line in the record and in both index rows. An
+accepted record whose Consequences name a specification also needs that specification to cite it
+back. Change only the record's Status line, and `just check-docs` prints:
 
 ```
 docs/decisions/0001-the-checker-reads-documents-line-by-line.md:18: back-citations: docs/spec/shared/doc-check.md does not cite ADR-0001 back. Cite ADR-0001 in docs/spec/shared/doc-check.md. (documentation-system.md, "The shape of a record")
@@ -455,7 +469,8 @@ Among the lines it prints is:
  * [new branch]      docs/doc-check -> docs/doc-check
 ```
 
-Open a pull request, which asks for your branch to be reviewed and merged:
+Open a pull request, which asks for your branch to be reviewed and merged. If you signed in with
+way A of step 4 of the setup guide, the GitHub command-line tool is installed, so run:
 
 ```
 gh pr create
@@ -463,6 +478,9 @@ gh pr create
 
 It asks for a title and a description, then prints the address of the new pull request. Open that
 address in your browser.
+
+If you signed in with way B, open the repository's page on GitHub instead. It shows your branch
+just pushed, beside a Compare & pull request button. Choose it, and give a title and a description.
 
 ## Confirming the work
 
