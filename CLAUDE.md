@@ -100,6 +100,7 @@ Rules about process, which doc-check cannot see:
 - **Guide output is real.** Expected output in a guide is captured from a real run, never written
   from memory.
 - **The final pass.** Before committing a document, run the final pass at the end of `docs/style.md`.
+  The `final-pass` skill in `.claude/skills/` runs it over the documents a branch changes.
 
 ## doc-check's architecture
 
