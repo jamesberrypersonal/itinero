@@ -27,6 +27,8 @@ Access is set page by page, so its design follows the planner's pages, in Milest
 - Itinero's online side runs on Cloudflare's free plan, and travellers sign in with Google alone
   (ADR-0015, Itinero's online side runs on Cloudflare's free plan). Accounts and membership are held
   in a D1 database, and invitations are sent through Resend.
+- A traveller chooses the name other travellers see them by when they first sign in, such as to
+  accept an invitation, starting from their Google account's name, and changes it at any time.
 
 ## Pending
 

@@ -90,8 +90,8 @@ them. ^acc-membership-f4
 
 ### ACC:MEMBERSHIP-F5 — The membership component says who is on a trip, and which of them are admins
 
-The membership component gives any member of a trip its members, which of them are admins, and
-which is its creator. It gives only an admin the invitations not yet accepted. For an account, it
+The membership component gives any member of a trip its members, each with the name their account
+holds, which of them are admins, and which is its creator. It gives only an admin the invitations not yet accepted. For an account, it
 gives the trips it is a member of. ^acc-membership-f5
 
 - **Verification:** against the membership component, with the trip of `ACC:MEMBERSHIP-F4` after

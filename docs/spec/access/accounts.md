@@ -42,14 +42,15 @@ None. The web app shows the sign-in button Google supplies, and a sign-out comma
 
 ### 3.2 Application interface
 
-The accounts component answers three requests over HTTPS, each with a JSON body. Every response
+The accounts component answers four requests over HTTPS, each with a JSON body. Every response
 that refuses gives a status of 400 or 401, and a JSON body `{ "code": ..., "message": ... }`, whose
 message is one English sentence the web app may show.
 
 | Request | Body | Gives |
 |---|---|---|
 | `POST /auth/nonce` | None | `{ "nonce": ... }`: a single-use value for the next sign-in (§4.1) |
-| `POST /auth/sign-in` | `{ "provider": "google", "idToken": ..., "nonce": ... }` | `{ "account": ..., "email": ... }`, and sets the session (§4.2) |
+| `POST /auth/sign-in` | `{ "provider": "google", "idToken": ..., "nonce": ... }` | `{ "account": ..., "email": ..., "name": ..., "named": ... }`, and sets the session (§4.2) |
+| `PUT /auth/name` | `{ "name": ... }` | `{ "name": ... }`, and sets the account's name (§4.5) |
 | `POST /auth/sign-out` | None | Nothing, and ends the session sent with it (§4.4) |
 
 The session is set as a cookie named `itinero_session`, marked `Secure`, `HttpOnly` and
@@ -60,6 +61,7 @@ request without handling it.
 |---|---|---|
 | `bad-token` | 401 | An ID token whose signature, issuer, audience or expiry fails §4.2 |
 | `bad-nonce` | 401 | A nonce the accounts component did not give, already used, or older than 10 minutes |
+| `bad-name` | 400 | A name that is empty once trimmed, or longer than 60 characters (§4.5) |
 | `no-session` | 401 | A request with no session, or with one that has ended (§4.3) |
 | `malformed` | 400 | A body not in the form above |
 
@@ -70,7 +72,8 @@ copy of each trip online:
 
 ```ts
 type AccountId = string;      // "u-" and 22 characters of base64url, unique and never reused
-type Account = { id: AccountId; email: string; emailVerified: boolean };
+type Account = { id: AccountId; email: string; emailVerified: boolean;
+                 name: string; named: boolean };   // named: the traveller has chosen it
 
 function whoSent(request: { session?: string }): Promise<Result<Account>>;
 function account(id: AccountId): Promise<Account | undefined>;
@@ -94,6 +97,7 @@ others.
 | `aud` | The audience: the client identifier Itinero registered with Google |
 | `sub` | The subject: the provider's own identifier for the person, which never changes |
 | `email`, `email_verified` | The person's email address, and whether the provider has confirmed it is theirs |
+| `name` | The person's name, as their Google account gives it, where they have one |
 | `exp` | When the token stops being valid |
 | `nonce` | The single-use value the web app passed to the sign-in, which ties the token to it |
 
@@ -137,6 +141,11 @@ one is made, with a new identifier. Where the token holds an `email`, the accoun
 `emailVerified` are set from it (`ACC:ACCOUNTS-F2`). Where it holds none, they are kept as they
 were. The address is kept in lower case.
 
+A new account's `name` is the token's `name`, trimmed and cut to 60 characters, or the part of its
+email address before the `@` where the token holds no name. Its `named` is false. A sign-in to an
+account that already exists never changes its name (`ACC:ACCOUNTS-F5`). The sign-in gives `name`
+and `named`, so that the web app asks a traveller for their name while `named` is false.
+
 A new session is then started for the device (§4.3), and set as its cookie.
 
 ### 4.3 Sessions
@@ -157,7 +166,15 @@ request.
 on the account's other devices are unchanged. Signing out with no session, or one already ended,
 succeeds and does nothing.
 
-### 4.5 The test suite
+### 4.5 Choosing a name
+
+*Porcelain:* `PUT /auth/name` sets the name of the account behind the request's session, and sets
+`named` to true (`ACC:ACCOUNTS-F5`). The name is trimmed of white space at both ends, and refused
+with `bad-name` where it is then empty, or longer than 60 characters, counted as Unicode code
+points. A request with no session is refused with `no-session`. Setting the name an account
+already holds sets `named`, and changes nothing else.
+
+### 4.6 The test suite
 
 The suite runs the checks in the verification of each requirement the accounts component claims,
 against a provider stand-in that signs ID tokens with a key of its own. It also checks each refusal
@@ -173,7 +190,7 @@ database.
 
 | Record | Holds | Kept |
 |---|---|---|
-| Account | Its identifier, its provider, the provider's `sub`, its email address, `emailVerified`, and when it was made | For as long as Itinero runs. Deleting an account is future work |
+| Account | Its identifier, its provider, the provider's `sub`, its email address, `emailVerified`, its `name` and `named`, and when it was made | For as long as Itinero runs. Deleting an account is future work |
 | Session | The SHA-256 digest of the session, its account, and when it was last used | Until signed out, or 180 days unused |
 | Nonce | The SHA-256 digest of the nonce, and when it was made | Until used, or 10 minutes old |
 
@@ -210,8 +227,10 @@ in its Wrangler configuration.
 | [ACC:ACCOUNTS-F2](../../requirements/access/accounts.md#^acc-accounts-f2) | The email address and `emailVerified` set at each sign-in, in §4.2, and `account` in §3.3. |
 | [ACC:ACCOUNTS-F3](../../requirements/access/accounts.md#^acc-accounts-f3) | Sessions, and their 180 days, in §4.3, and signing out in §4.4. |
 | [ACC:ACCOUNTS-F4](../../requirements/access/accounts.md#^acc-accounts-f4) | `whoSent`, in §3.3 and §4.3. |
+| [ACC:ACCOUNTS-F5](../../requirements/access/accounts.md#^acc-accounts-f5) | A new account's name from its provider, and `named`, in §4.2, and `PUT /auth/name`, in §4.5. |
+| [ACC-F13](../../requirements/access/access.md#^acc-f13) | Each account's name, starting as its Google account's, and changed by its traveller (§4.2, §4.5). Asking for it is `web/screens`, and showing it on a trip is `access/membership`. |
 | [ACC:ACCOUNTS-NFR1](../../requirements/access/accounts.md#^acc-accounts-nfr1) | Digests in place of sessions and nonces, and no password, in §4.3 and §5. |
-| [ACC-F1](../../requirements/access/access.md#^acc-f1) | Signing in with Google, and staying signed in (§4.2, §4.3). Showing the sign-in buttons is the web app, whose specification is not yet written. |
+| [ACC-F1](../../requirements/access/access.md#^acc-f1) | Signing in with Google, and staying signed in (§4.2, §4.3). Showing the sign-in buttons is `web/screens`. |
 | [ACC-NFR1](../../requirements/access/access.md#^acc-nfr1) | Naming, for certain, the account behind each request (§4.3). What that account may do is `access/permissions`. |
 
 ## 8. Open

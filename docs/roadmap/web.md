@@ -23,18 +23,16 @@ theirs, in Milestone Planner-0.2 and Milestone Access-0.1.
 - A trip's copy on a device is protected by the device's own lock, every device keeps one, and
   signing out deletes it (ADR-0017, a trip's copy on a device is protected by the device's own
   lock, and deleted when its traveller signs out).
+- The web app has its requirements. A traveller uses Itinero in the browser of a phone or a
+  computer, and adds it to a phone's home screen. A device with no connection shows every trip it
+  holds, says when each was brought up to date, and offers no change. The home page finds the
+  phone's country on the phone itself, and never sends it.
+- The web app is built with Preact and Vite, and served by Itinero's own Worker (ADR-0018, the web
+  app is built with Preact, and served by Itinero's own Worker).
+- The web app is divided into three components: `web/shell`, `web/trip-store` and `web/screens`.
+  Each has its requirements and its specification, and all three are built as one package,
+  `@itinero/web`.
 
 ## Pending
 
-### Phase 0 — Design
-
-#### Milestone Web-0.1 — Reading and changing a trip
-
-- Write the web app's requirements. A traveller reads and changes a trip on a computer or a
-  phone. A phone with no connection shows the trip as it last stood, and says when that was.
-  Signing out deletes every trip from the device (ADR-0017).
-- Write the web app's requirements for a trip's home page: the traveller's day, their bookings,
-  and the country the phone is in, worked out on the phone with a map of country borders held
-  there (ADR-0014, a trip opens on a home page for each traveller).
-- Divide the web app into components, and register them.
-- Write the requirements and specification for each of those components.
+Nothing is pending. Milestone Web-0.1 is complete in design, and building it is not yet planned.

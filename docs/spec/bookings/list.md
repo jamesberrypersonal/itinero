@@ -358,14 +358,14 @@ TypeScript and Node's type definitions.
 | [BKG:LIST-F7](../../requirements/bookings/list.md#^bkg-list-f7) | The text form of §4.5 and §5.1. |
 | [BKG:LIST-NFR1](../../requirements/bookings/list.md#^bkg-list-nfr1) | No network code, and never reading the device's time zone or clock (§4, §6). |
 | [BKG:LIST-NFR2](../../requirements/bookings/list.md#^bkg-list-nfr2) | `order` and `notOver`, and the speed tests of §4.6. |
-| [BKG-F1](../../requirements/bookings/bookings.md#^bkg-f1) | A booking of one of four kinds, naming 1 to 50 travellers (§4.1), and the travellers each change touches (§4.2). Allowing the change is `planner/trip-host`, by asking `access/permissions`. Entering the booking is the web app, whose specification is not yet written. |
-| [BKG-F3](../../requirements/bookings/bookings.md#^bkg-f3) | `order`, `extent` and `notOver` (§4.3, §4.4), and each booking's `label`. Showing the page is the web app, whose specification is not yet written. |
-| [BKG-F4](../../requirements/bookings/bookings.md#^bkg-f4) | `Details`, checked in §4.1. Showing a hidden page as not available is the web app. |
+| [BKG-F1](../../requirements/bookings/bookings.md#^bkg-f1) | A booking of one of four kinds, naming 1 to 50 travellers (§4.1), and the travellers each change touches (§4.2). Allowing the change is `planner/trip-host`, by asking `access/permissions`. Entering the booking is `web/screens`. |
+| [BKG-F3](../../requirements/bookings/bookings.md#^bkg-f3) | `order`, `extent` and `notOver` (§4.3, §4.4), and each booking's `label`. Showing the page is `web/screens`. |
+| [BKG-F4](../../requirements/bookings/bookings.md#^bkg-f4) | `Details`, checked in §4.1. Showing a hidden page as not available is `web/screens`. |
 | [BKG-F5](../../requirements/bookings/bookings.md#^bkg-f5) | The `change` and `remove` changes, and the `stale` refusal holding the booking as it stands (§4.2). Who may make each change is `planner/trip-host`, by asking `access/permissions`. |
-| [BKG-F6](../../requirements/bookings/bookings.md#^bkg-f6) | The text form a phone keeps each booking in (§4.5). Giving each phone its bookings is `planner/trip-host`, and keeping them on the phone is the web app. |
-| [BKG-NFR1](../../requirements/bookings/bookings.md#^bkg-nfr1) | Ordering the page's bookings within 50 milliseconds (§6). Drawing the page is the web app, whose specification is not yet written. |
-| [PLN-F5](../../requirements/planner/planner.md#^pln-f5) | The dates each booking covers, and when it starts, for the calendar to order it among the firm items (§4.3). Showing them together is the web app. |
-| [PLN-F15](../../requirements/planner/planner.md#^pln-f15) | `onDate` for a traveller's bookings today, and `notOver` for their next ones (§4.4). Showing the home page is the web app. |
+| [BKG-F6](../../requirements/bookings/bookings.md#^bkg-f6) | The text form a phone keeps each booking in (§4.5). Giving each phone its bookings is `planner/trip-host`, and keeping them on the phone is `web/trip-store`. |
+| [BKG-NFR1](../../requirements/bookings/bookings.md#^bkg-nfr1) | Ordering the page's bookings within 50 milliseconds (§6). Drawing the page is `web/screens`. |
+| [PLN-F5](../../requirements/planner/planner.md#^pln-f5) | The dates each booking covers, and when it starts, for the calendar to order it among the firm items (§4.3). Showing them together is `web/screens`. |
+| [PLN-F15](../../requirements/planner/planner.md#^pln-f15) | `onDate` for a traveller's bookings today, and `notOver` for their next ones (§4.4). Showing the home page is `web/screens`. |
 
 ## 8. Open
 

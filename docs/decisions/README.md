@@ -40,6 +40,7 @@ keeps:
 | [0015](0015-the-online-side-runs-on-cloudflare.md) | Itinero's online side runs on Cloudflare's free plan, and travellers sign in with Google alone | access, planner | Accepted |
 | [0016](0016-bookings-are-entered-by-hand.md) | A trip's bookings are entered by hand, as one of four kinds, and kept with the trip online | bookings, planner/trip-host | Accepted |
 | [0017](0017-a-device-copy-is-protected-by-its-lock.md) | A trip's copy on a device is protected by the device's own lock, and deleted when its traveller signs out | web | Accepted |
+| [0018](0018-the-web-app-is-built-with-preact.md) | The web app is built with Preact, and served by Itinero's own Worker | web | Accepted |
 
 ## By subject
 
@@ -80,6 +81,7 @@ keeps:
 | [0008](0008-trip-time-carries-its-own-time-zone-rules.md) | trip-time carries its own copy of the time-zone rules | Accepted |
 | [0014](0014-a-trip-opens-on-a-home-page.md) | A trip opens on a home page for each traveller, with their own dates and the country they are in | Accepted |
 | [0017](0017-a-device-copy-is-protected-by-its-lock.md) | A trip's copy on a device is protected by the device's own lock, and deleted when its traveller signs out | Accepted |
+| [0018](0018-the-web-app-is-built-with-preact.md) | The web app is built with Preact, and served by Itinero's own Worker | Accepted |
 
 ### bookings
 

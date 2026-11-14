@@ -179,7 +179,7 @@ every booking has:
 |---|---|
 | [BKG:FLIGHT-F1](../../requirements/bookings/flight.md#^bkg-flight-f1) | `Leg` and `Airport`, in §3.3, and the leg checks of §4.1. |
 | [BKG:FLIGHT-F2](../../requirements/bookings/flight.md#^bkg-flight-f2) | The `travel-order` and `leg-order` refusals, each naming its leg (§4.1). |
-| [BKG:FLIGHT-F3](../../requirements/bookings/flight.md#^bkg-flight-f3) | `legDurations` and `connections`, in §4.3. Showing them is the web app, whose specification is not yet written. |
+| [BKG:FLIGHT-F3](../../requirements/bookings/flight.md#^bkg-flight-f3) | `legDurations` and `connections`, in §4.3. Showing them is `web/screens`. |
 | [BKG:FLIGHT-F4](../../requirements/bookings/flight.md#^bkg-flight-f4) | `Seat`, in §3.3, and the seat checks of §4.1. |
 | [BKG-F2](../../requirements/bookings/bookings.md#^bkg-f2) | A flight's times in each airport's local time, its refusals, and how long each leg takes (§4.1, §4.3). A journey's and a stay's are `bookings/journey` and `bookings/stay`. |
 

@@ -390,15 +390,15 @@ TypeScript and Node's type definitions.
 | [PLN:ITINERARY-F7](../../requirements/planner/itinerary.md#^pln-itinerary-f7) | Every check made before anything is changed, in §4.2. |
 | [PLN:ITINERARY-F8](../../requirements/planner/itinerary.md#^pln-itinerary-f8) | The text form of §4.7 and §5.1. |
 | [PLN:ITINERARY-F10](../../requirements/planner/itinerary.md#^pln-itinerary-f10) | The `trip-dates` and `traveller-dates` changes, and `travellerDates`, in §4.9. |
-| [PLN-F14](../../requirements/planner/planner.md#^pln-f14) | A trip's dates and each traveller's, with their refusals (§4.9). Setting them is the web app, and letting only the creator set the trip's is `planner/trip-host`. |
+| [PLN-F14](../../requirements/planner/planner.md#^pln-f14) | A trip's dates and each traveller's, with their refusals (§4.9). Setting them is `web/screens`, and letting only the creator set the trip's is `planner/trip-host`. |
 | [PLN:ITINERARY-F9](../../requirements/planner/itinerary.md#^pln-itinerary-f9) | The `page` field of `Stretch` and `FirmItem` in §3.3, kept unchecked (§2). Whether the page is in the tree or the graveyard is `planner/pages`, in §4.6 of `spec/planner/pages.md`. |
-| [PLN:ITINERARY-NFR1](../../requirements/planner/itinerary.md#^pln-itinerary-nfr1) | No network code, and never reading the device's time zone (§4, §6). Keeping a copy on the phone is the web app, whose specification is not yet written. |
-| [PLN-F1](../../requirements/planner/planner.md#^pln-f1) | A trip's stretches, changed freely (§4.2, §4.3). Showing them on a calendar is the web app, whose specification is not yet written. |
-| [PLN-F2](../../requirements/planner/planner.md#^pln-f2) | Each day's countries (§4.6). Showing them is the web app. |
-| [PLN-F3](../../requirements/planner/planner.md#^pln-f3) | Firm items with a date or a time (§4.4). Entering them is the web app. |
-| [PLN-F4](../../requirements/planner/planner.md#^pln-f4) | Travel, its order and its duration (§4.4). Entering and showing it is the web app. |
-| [PLN-F5](../../requirements/planner/planner.md#^pln-f5) | Each day's firm items, in order (§4.6). Showing them apart from the stretches is the web app. |
-| [PLN-F11](../../requirements/planner/planner.md#^pln-f11) | The page each stretch and firm item names (§3.3). Resolving the page is `planner/pages` (`spec/planner/pages.md` §4.6), and opening it is the web app, whose specification is not yet written. |
+| [PLN:ITINERARY-NFR1](../../requirements/planner/itinerary.md#^pln-itinerary-nfr1) | No network code, and never reading the device's time zone (§4, §6). Keeping a copy on the phone is `web/trip-store`. |
+| [PLN-F1](../../requirements/planner/planner.md#^pln-f1) | A trip's stretches, changed freely (§4.2, §4.3). Showing them on a calendar is `web/screens`. |
+| [PLN-F2](../../requirements/planner/planner.md#^pln-f2) | Each day's countries (§4.6). Showing them is `web/screens`. |
+| [PLN-F3](../../requirements/planner/planner.md#^pln-f3) | Firm items with a date or a time (§4.4). Entering them is `web/screens`. |
+| [PLN-F4](../../requirements/planner/planner.md#^pln-f4) | Travel, its order and its duration (§4.4). Entering and showing it is `web/screens`. |
+| [PLN-F5](../../requirements/planner/planner.md#^pln-f5) | Each day's firm items, in order (§4.6). Showing them apart from the stretches is `web/screens`. |
+| [PLN-F11](../../requirements/planner/planner.md#^pln-f11) | The page each stretch and firm item names (§3.3). Resolving the page is `planner/pages` (`spec/planner/pages.md` §4.6), and opening it is `web/screens`. |
 | [PLN-F6](../../requirements/planner/planner.md#^pln-f6) | Changes that give the same trip wherever they are applied (§4.2). Holding the copy online, and bringing each traveller the changed trip, is `planner/trip-host`. |
 
 ## 8. Open

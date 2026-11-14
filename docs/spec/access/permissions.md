@@ -313,11 +313,11 @@ The package's one runtime dependency is `@itinero/pages`. Its development depend
 | [ACC:PERMISSIONS-F8](../../requirements/access/permissions.md#^acc-permissions-f8) | The text form of §4.7 and §5.1, and every check made before anything is changed, in §4.1. |
 | [ACC:PERMISSIONS-NFR1](../../requirements/access/permissions.md#^acc-permissions-nfr1) | No network code, and nothing read from the device (§6). |
 | [ACC-F4](../../requirements/access/access.md#^acc-f4) | Access to the trip passing to every page, in §4.2. A new page needs no grant, because its level comes from its parent. |
-| [ACC-F5](../../requirements/access/access.md#^acc-f5) | The calendar's level, none until granted (§4.1, §4.3). Showing or hiding the calendar is the web app, whose specification is not yet written. |
+| [ACC-F5](../../requirements/access/access.md#^acc-f5) | The calendar's level, none until granted (§4.1, §4.3). Showing or hiding the calendar is `web/screens`. |
 | [ACC-F6](../../requirements/access/access.md#^acc-f6) | `bookingLevel` (§4.3). The travellers each booking names, before and after each change, are `bookings/list`'s `touches`, and giving each device only its bookings is `planner/trip-host`. |
 | [ACC-F7](../../requirements/access/access.md#^acc-f7) | Exceptions, and the `hidden-above` refusal naming the page (§4.1, §4.2). |
-| [ACC-F8](../../requirements/access/access.md#^acc-f8) | `no-view` and `no-edit` (§4.4), and pages of level none left out of `seen` (§4.5). Showing a link as not available is the web app. |
-| [ACC-F9](../../requirements/access/access.md#^acc-f9) | `widens` (§4.6). Asking the traveller to confirm is the web app. |
+| [ACC-F8](../../requirements/access/access.md#^acc-f8) | `no-view` and `no-edit` (§4.4), and pages of level none left out of `seen` (§4.5). Showing a link as not available is `web/screens`. |
+| [ACC-F9](../../requirements/access/access.md#^acc-f9) | `widens` (§4.6). Asking the traveller to confirm is `web/screens`. |
 | [ACC-F10](../../requirements/access/access.md#^acc-f10) | The graveyard of `seen` (§4.5), and `admin-only` for `read-buried` and `restore` (§4.4). |
 | [ACC-F12](../../requirements/access/access.md#^acc-f12) | `seen`, which gives what a phone may hold (§4.5). Bringing the phone's copy up to date is `planner/trip-host`. |
 | [ACC-NFR1](../../requirements/access/access.md#^acc-nfr1) | `authorise`, which fails closed (§4.4, §6). Asking it before every request is `planner/trip-host`. Knowing who sent the request is `access/accounts`. |

@@ -27,6 +27,9 @@ rules. When an item is done, it leaves this list for `CHANGELOG.md` in the commi
 | shared/doc-scaffold | The scaffolder that starts new documents |
 | shared/trip-time | Local dates and times, and time zones |
 | web | The web app, on a computer and on a phone |
+| web/screens | What travellers see and use: the home page, the calendar, the bookings page, the pages of research and the trip's members |
+| web/shell | The installable app itself: launching with no connection, adding it to a phone's home screen, and keeping the time-zone rules up to date |
+| web/trip-store | Each trip's copy on a device: catching it up, telling it of changes as they happen, sending changes, and deleting it on sign-out |
 | docs | The documentation system, and the tools authors use with it |
 
 ## Items

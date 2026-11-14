@@ -80,6 +80,24 @@ refused. ^acc-accounts-f4
 > **What does this buy?** Every check of what a traveller may do starts from knowing, for certain,
 > who the traveller is (`ACC-NFR1`).
 
+### ACC:ACCOUNTS-F5 — An account holds a name its traveller chooses, which a later sign-in never changes
+
+A new account starts with the name its provider gives, marked as not yet chosen, and the accounts
+component tells the caller so. A traveller sets their account's name to between 1 and 60
+characters, and it is then chosen. A later sign-in never changes a chosen name. The accounts
+component gives a caller an account's name. ^acc-accounts-f5
+
+- **Verification:** against the accounts component, with a test account at Google named Sam Taylor,
+    - sign in for the first time, and confirm the account's name is Sam Taylor, not yet chosen
+    - set the name to Sam, and confirm it is chosen
+    - change the Google account's name, sign in again, and confirm the name is still Sam
+    - set an empty name, and a name of 61 characters, and confirm each is refused, with the reason
+
+> **What does this buy?** Travellers on a trip see each other by the names they chose (`ACC-F13`).
+
+> **What if the provider gives no name?** The account starts with the part of its email address
+> before the `@`, not yet chosen.
+
 ---
 
 ## Non-functional requirements

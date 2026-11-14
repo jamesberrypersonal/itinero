@@ -385,16 +385,16 @@ development dependencies are `@itinero/trip-time`, TypeScript and Node's type de
 | [PLN:PAGES-F7](../../requirements/planner/pages.md#^pln-pages-f7) | `search` and its folding, in §4.7. |
 | [PLN:PAGES-F8](../../requirements/planner/pages.md#^pln-pages-f8) | The text form of §4.8 and §5.1, and `forPhone`. |
 | [PLN:PAGES-F10](../../requirements/planner/pages.md#^pln-pages-f10) | The `base` of a `write`, and the `stale` refusal, in §3.3 and §4.2. |
-| [PLN-F16](../../requirements/planner/planner.md#^pln-f16) | The `stale` refusal, with the text as it stands (§4.2). Showing both texts is the web app, whose specification is not yet written. |
+| [PLN-F16](../../requirements/planner/planner.md#^pln-f16) | The `stale` refusal, with the text as it stands (§4.2). Showing both texts is `web/screens`. |
 | [PLN:PAGES-F9](../../requirements/planner/pages.md#^pln-pages-f9) | `apply`, with every check made before anything is changed, in §4.2. Applying each change to the copy held online is `planner/trip-host`. |
-| [PLN:PAGES-NFR1](../../requirements/planner/pages.md#^pln-pages-nfr1) | No network code, and never reading the device (§4, §6). Keeping a copy on the phone is the web app, whose specification is not yet written. |
-| [PLN-F7](../../requirements/planner/planner.md#^pln-f7) | Pages with a title and Markdown text, kept as written (§4.2). Showing the text formatted is the web app. |
-| [PLN-F8](../../requirements/planner/planner.md#^pln-f8) | The tree, moves and deletes (§4.2 to §4.4). Asking the traveller to confirm a delete is the web app. |
-| [PLN-F9](../../requirements/planner/planner.md#^pln-f9) | Links that name their page, resolved with `state` (§4.6). Opening a page from a link is the web app. |
-| [PLN-F10](../../requirements/planner/planner.md#^pln-f10) | A page for each country given to `newPages` (§4.1). Choosing the countries is the web app. |
-| [PLN-F15](../../requirements/planner/planner.md#^pln-f15) | `countryPage`, for the country the phone is in (§4.1). The day, the bookings and the phone's country are the web app, whose specification is not yet written. |
+| [PLN:PAGES-NFR1](../../requirements/planner/pages.md#^pln-pages-nfr1) | No network code, and never reading the device (§4, §6). Keeping a copy on the phone is `web/trip-store`. |
+| [PLN-F7](../../requirements/planner/planner.md#^pln-f7) | Pages with a title and Markdown text, kept as written (§4.2). Showing the text formatted is `web/screens`. |
+| [PLN-F8](../../requirements/planner/planner.md#^pln-f8) | The tree, moves and deletes (§4.2 to §4.4). Asking the traveller to confirm a delete is `web/screens`. |
+| [PLN-F9](../../requirements/planner/planner.md#^pln-f9) | Links that name their page, resolved with `state` (§4.6). Opening a page from a link is `web/screens`. |
+| [PLN-F10](../../requirements/planner/planner.md#^pln-f10) | A page for each country given to `newPages` (§4.1). Choosing the countries is `web/screens`. |
+| [PLN-F15](../../requirements/planner/planner.md#^pln-f15) | `countryPage`, for the country the phone is in (§4.1). The day, the bookings and the phone's country are `web/screens`. |
 | [PLN-F11](../../requirements/planner/planner.md#^pln-f11) | `state`, for the page a stretch or a firm item names (§4.6). Naming the page is `planner/itinerary`. |
-| [PLN-F12](../../requirements/planner/planner.md#^pln-f12) | `search`, over the pages of `forPhone` with no connection (§4.7, §4.8). Showing the results is the web app. |
+| [PLN-F12](../../requirements/planner/planner.md#^pln-f12) | `search`, over the pages of `forPhone` with no connection (§4.7, §4.8). Showing the results is `web/screens`. |
 | [PLN-F13](../../requirements/planner/planner.md#^pln-f13) | `graveyard`, `page` and `restore` (§4.4, §4.5). Refusing a traveller who is not an admin is `access/permissions`. |
 
 ## 8. Open

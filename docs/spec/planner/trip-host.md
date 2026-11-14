@@ -317,7 +317,7 @@ trip cannot be deleted yet (`ACC-NR4`).
 | [PLN:HOST-F9](../../requirements/planner/trip-host.md#^pln-host-f9) | The `bookings` table of §4.1, the checks of a booking change in §4.3, and `bookings` in the catch-up of §4.4. |
 | [PLN:HOST-NFR1](../../requirements/planner/trip-host.md#^pln-host-nfr1) | `seen` for every read, `you` holding only the traveller's own grant, and sockets carrying only a sequence (§4.4, §4.5). |
 | [PLN:HOST-NFR2](../../requirements/planner/trip-host.md#^pln-host-nfr2) | One request for each change and each catch-up, and hibernating sockets (§6). |
-| [PLN-F6](../../requirements/planner/planner.md#^pln-f6) | The one copy every change is applied to, and the sockets that tell open devices of each change (§4.3, §4.5). Showing the change is the web app, whose specification is not yet written. |
+| [PLN-F6](../../requirements/planner/planner.md#^pln-f6) | The one copy every change is applied to, and the sockets that tell open devices of each change (§4.3, §4.5). Showing the change is `web/screens`. |
 | [PLN-F10](../../requirements/planner/planner.md#^pln-f10) | A page for each country chosen, at creation (§4.2). |
 | [PLN-F14](../../requirements/planner/planner.md#^pln-f14) | Letting only the creator set the trip's dates, and each traveller their own (§4.3). |
 | [PLN-F16](../../requirements/planner/planner.md#^pln-f16) | The `stale` refusal, with the text as it stands, returned to the device (§4.3). |
@@ -328,7 +328,7 @@ trip cannot be deleted yet (`ACC-NR4`).
 | [ACC-F6](../../requirements/access/access.md#^acc-f6) | Giving each device only the bookings whose `bookingLevel` is view or edit, and checking each change to a booking against its travellers before and after (§4.3, §4.4). |
 | [BKG-F1](../../requirements/bookings/bookings.md#^bkg-f1) | Applying an added booking once `authorise` allows it, and the `unknown-traveller` refusal (§4.3). The booking's checks are `bookings/list`. |
 | [BKG-F5](../../requirements/bookings/bookings.md#^bkg-f5) | Checking a change or a removal against the travellers the booking names before and after it (§4.3). The `stale` refusal is `bookings/list`. |
-| [BKG-F6](../../requirements/bookings/bookings.md#^bkg-f6) | Giving each device every booking its traveller may see, whole, in the catch-up of §4.4. Keeping them on the phone is the web app, whose specification is not yet written. |
+| [BKG-F6](../../requirements/bookings/bookings.md#^bkg-f6) | Giving each device every booking its traveller may see, whole, in the catch-up of §4.4. Keeping them on the phone is `web/trip-store`. |
 
 ## 8. Open
 

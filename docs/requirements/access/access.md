@@ -250,6 +250,26 @@ it connects. ^acc-f12
 > **What does this buy?** The copy of a trip on a phone keeps to the same access as the trip
 > itself. Taking a page from a traveller takes it from their phone too.
 
+### ACC-F13 — A traveller chooses the name other travellers see them by
+
+A traveller signing in to Itinero for the first time, such as to accept an invitation, chooses the
+name every other traveller on their trips sees them by. The name starts as the one on their Google
+account, and they may keep it or change it. A traveller changes their name at any time after. ^acc-f13
+
+- **Verification:** on a running system, with an admin who invites a traveller whose Google account
+  is named Sam Taylor,
+    - as the traveller, open the invitation, sign in for the first time, and confirm Itinero asks for
+      a name, starting as Sam Taylor
+    - change it to Sam, accept, and confirm the admin sees the new member as Sam
+    - as the traveller, change the name to Sam T, and confirm the admin sees Sam T
+    - sign out and in again, and confirm Itinero asks for no name, and the name is still Sam T
+
+> **What does this buy?** Travellers on a trip know each other by the names they use, and an
+> invitation's new member is recognised at once, not by an email address.
+
+> **Does a traveller's name show on every trip?** Yes. A traveller has one name, which every trip
+> they are on shows.
+
 ---
 
 ## Non-functional requirements

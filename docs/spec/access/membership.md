@@ -82,6 +82,7 @@ import type { AccountId } from "access/accounts";            // as spec/access/a
 import type { GrantChange } from "@itinero/permissions";
 
 type Member = { account: AccountId; admin: boolean; creator: boolean; joined: string };
+type Listed = Member & { name: string };   // as GET /trips/{trip}/members gives each member
 
 function createTrip(trip: string, creator: AccountId): Promise<Member>;
 function member(trip: string, account: AccountId): Promise<Member | undefined>;
@@ -187,7 +188,8 @@ request of theirs about the trip is then refused with `not-a-member`.
 ### 4.6 Who is on a trip
 
 *Porcelain:* `GET /trips/{trip}/members` gives any member every member of the trip, with `admin`,
-`creator` and `joined` (`ACC:MEMBERSHIP-F5`). To an admin, it also gives each open invitation's
+`creator` and `joined`, and the `name` `access/accounts`' `account` gives for it
+(`ACC:MEMBERSHIP-F5`, `ACC-F13`). To an admin, it also gives each open invitation's
 identifier, address, access and expiry. A member who is not an admin is given no invitations, so
 that the addresses invited stay with the admins. `trips`
 gives the trips an account is a member of, in the order they were joined.
@@ -242,9 +244,10 @@ after it closed, and closes every open invitation past its expiry.
 | [ACC:MEMBERSHIP-F4](../../requirements/access/membership.md#^acc-membership-f4) | Removing a member, in §4.5. |
 | [ACC:MEMBERSHIP-F5](../../requirements/access/membership.md#^acc-membership-f5) | `member` and `trips` in §3.3, and the members of §4.6. |
 | [ACC:MEMBERSHIP-NFR1](../../requirements/access/membership.md#^acc-membership-nfr1) | The random token, kept only as a digest, and the address check, in §4.2 and §4.4. |
+| [ACC-F13](../../requirements/access/access.md#^acc-f13) | Each member's name, in the list of §4.6. |
 | [ACC-F2](../../requirements/access/access.md#^acc-f2) | The creator as the permanent admin, and making admins (§4.1). Giving an admin edit access to every page is `access/permissions`. |
-| [ACC-F3](../../requirements/access/access.md#^acc-f3) | Invitations by address, their expiry and withdrawal, and accepting only with the address invited (§4.2 to §4.4). Showing the trip once accepted is the web app, whose specification is not yet written. |
-| [ACC-F11](../../requirements/access/access.md#^acc-f11) | Removing a member (§4.5). Deleting the trip from each of their phones is `planner/trip-host` and the web app. |
+| [ACC-F3](../../requirements/access/access.md#^acc-f3) | Invitations by address, their expiry and withdrawal, and accepting only with the address invited (§4.2 to §4.4). Showing the trip once accepted is `web/screens`. |
+| [ACC-F11](../../requirements/access/access.md#^acc-f11) | Removing a member (§4.5). Deleting the trip from each of their phones is `planner/trip-host` and `web/trip-store`. |
 
 ## 8. Open
 
