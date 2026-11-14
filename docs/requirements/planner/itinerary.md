@@ -190,6 +190,22 @@ and says why. ^pln-itinerary-f8
 > **What does this buy?** A trip is stored online and copied to each phone for reading with no
 > connection (ADR-0004, a trip is read-only offline). Both copies read the same trip.
 
+### PLN:ITINERARY-F9 — A stretch or a firm item names at most one page of its trip
+
+A stretch or a firm item can name one page of the trip, which the caller gives. The itinerary keeps
+the name the caller gave, and lays it out with the stretch or the firm item. It keeps the name
+after that page is deleted. ^pln-itinerary-f9
+
+- **Verification:** on a new trip,
+    - add a stretch naming a page, and confirm it reads back naming that page
+    - change the stretch to name no page, and confirm it reads back naming none
+    - add a firm item naming a page, lay out its day, and confirm the item names the page
+
+> **What does this buy?** A traveller follows a stretch or a booking to its research (`PLN-F11`).
+
+> **Does the itinerary know whether the page exists?** No. The pages are a component of their
+> own, `planner/pages`. A caller showing the link asks it, and shows a deleted page as gone.
+
 ---
 
 ## Non-functional requirements

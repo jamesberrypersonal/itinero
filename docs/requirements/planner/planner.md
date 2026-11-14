@@ -144,12 +144,14 @@ change the next time they open the trip with a connection. ^pln-f6
 
 ### PLN-F7 — A traveller writes research on the pages of a trip
 
-A traveller adds pages to a trip, each with a title and text written by hand. A page's text can hold
-links to other websites. Every page belongs to one trip. ^pln-f7
+A traveller adds any number of pages to a trip, each with a title and text written by hand in
+Markdown, the plain-text format for headings, lists, tables, checklists and links. A page's text can
+hold links to other websites. The planner imposes no structure on the text. Every page belongs to
+one trip. ^pln-f7
 
 - **Verification:** on a running system,
-    - add a page titled "Eating in Lyon" to a trip, write text holding a link to a restaurant's
-      website, and confirm the page reads back as written
+    - add a page titled "Eating in Lyon" to a trip, write text holding a heading, a checklist, a
+      table and a link to a restaurant's website, and confirm the page reads back as written
     - follow the link, and confirm it opens the restaurant's website
     - open another trip, and confirm the page is not among its pages
 
@@ -157,7 +159,72 @@ links to other websites. Every page belongs to one trip. ^pln-f7
 > where to eat. The traveller keeps it beside the trip it is for, rather than in a separate
 > spreadsheet.
 
-> **How are a trip's pages arranged?** That is not decided until TODO-2 is done.
+> **How are a trip's pages arranged?** In a tree, with links between any two (`PLN-F8`,
+> `PLN-F9`).
+
+### PLN-F8 — A trip's pages form a tree, which a traveller rearranges freely
+
+Each page of a trip sits under at most one other page, or at the top of the trip, nested to any
+depth. A traveller moves a page, with every page beneath it, under any other page or to the top.
+The pages under one page keep the order the traveller gives them. Deleting a page deletes every
+page beneath it too, once the traveller confirms, having been told how many pages that is. ^pln-f8
+
+- **Verification:** on a trip with the pages Chile, Santiago under Chile, and Eating in Santiago
+  under Santiago,
+    - move Santiago to the top, and confirm Eating in Santiago moves with it
+    - try to move Chile under Eating in Santiago, and confirm it is refused, with the reason
+    - put W trek and Santiago under Chile, in that order, and confirm they read in that order
+    - delete Santiago, and confirm the planner asks first, saying one page beneath it will go
+    - confirm the delete, and confirm Santiago and Eating in Santiago are both gone
+
+> **What does this buy?** A long trip's research stays grouped, such as a country's cities under
+> the country, without the planner choosing the groups (ADR-0010, a trip's pages form a tree).
+
+> **Why does deleting a page delete the pages beneath it?** They usually belong with it, such as a
+> city's notes under the city. The confirmation guards against deleting a whole branch by mistake.
+
+### PLN-F9 — A page links to any other page of its trip, and the link survives renaming and moving
+
+A page's text can link to any other page of the same trip, in any branch of the tree, as many times
+as the traveller likes. Following a link opens the page it points to. The link still points to its
+page after that page is renamed or moved. A link to a deleted page stays in the text, and shows that
+its page is gone. ^pln-f9
+
+- **Verification:** on the trip of `PLN-F8`, with a page Transport at the top,
+    - link Transport's text to Santiago and to W trek, and confirm each link opens its page
+    - rename Santiago to Santiago de Chile, move it to the top, and confirm the link still opens it
+    - delete W trek, and confirm its link stays in Transport's text, shown as pointing to a deleted
+      page
+
+> **What does this buy?** Research cuts across the tree. A page on transport links to each city it
+> mentions, wherever each sits.
+
+### PLN-F10 — A traveller creating a trip chooses its countries, and each gets a page
+
+A traveller creating a trip can choose the countries it will visit. The planner creates a page at
+the top of the trip for each, titled with the country's name. Each is then an ordinary page. ^pln-f10
+
+- **Verification:** on a running system,
+    - create a trip, choosing Chile and Argentina, and confirm it has a page titled Chile and one
+      titled Argentina, both at the top
+    - rename, move and delete the Argentina page, and confirm each is accepted
+    - create a trip choosing no countries, and confirm it has no pages
+
+> **What does this buy?** Research for a trip across several countries starts country by country.
+> The traveller begins with a place for each.
+
+### PLN-F11 — A stretch or a firm item links to a page of its trip
+
+A traveller links a stretch or a firm item on the trip's calendar to one page of the same trip.
+Following the link opens the page. ^pln-f11
+
+- **Verification:** on a trip with Santiago pencilled in, and a page titled Santiago,
+    - link the stretch to the page, and confirm following the link opens it
+    - link a booked tour to the page Eating in Santiago, and confirm following the link opens it
+    - delete the page Santiago, and confirm the stretch shows that its page is gone
+
+> **What does this buy?** The research for where the traveller is, or for what is booked, is one
+> step from the calendar.
 
 > **Who may read or change a page?** The access system, which handles accounts and invitations,
 > decides page by page.

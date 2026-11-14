@@ -21,36 +21,19 @@ rules. When an item is done, it leaves this list for `CHANGELOG.md` in the commi
 
 ## Items
 
-### TODO-2 — Decide whether a trip's pages form a tree
-
-*Tags:* planner/pages
-*Written:* 2026-11-11
-
-*Problem:* Nothing says whether a page of a trip can hold other pages, such as a country's page
-holding a page for each city.
-
-*Reason:* Travellers write their research by hand, and a tree is one way to organise it. The idea
-is liked but not decided.
-
-*Proposal:* Decide between a flat set of pages and a tree, and record the choice in a decision
-record scoped `planner/pages`.
-
-*Releases:* Milestone Planner-0.2.
-
 ### TODO-3 — Decide whether access to a page passes to the pages below it
 
 *Tags:* access, planner/pages
 *Written:* 2026-11-11
-*Blocked:* TODO-2
 
-*Problem:* If pages form a tree, nothing says whether a traveller who may see a page may also see
-the pages below it.
+*Problem:* Nothing says whether a traveller who may see a page of a trip may also see the pages
+beneath it in the trip's tree of pages (ADR-0010, a trip's pages form a tree).
 
-*Reason:* An admin sets each traveller's access page by page. Whether that access passes down a
-tree was left for later, and it matters only if there is a tree.
+*Reason:* An admin sets each traveller's access page by page. Whether that access passes down the
+tree was left until the pages were decided.
 
-*Proposal:* Once the pages are decided, decide whether access passes down. Record the choice in a
-decision record scoped `access` and `planner/pages`.
+*Proposal:* Decide whether access passes down the tree. Record the choice in a decision record
+scoped `access` and `planner/pages`.
 
 *Releases:* Milestone Access-0.1.
 

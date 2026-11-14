@@ -32,6 +32,7 @@ keeps:
 | [0007](0007-trip-time-is-written-in-typescript.md) | trip-time is written in TypeScript | shared/trip-time | Accepted |
 | [0008](0008-trip-time-carries-its-own-time-zone-rules.md) | trip-time carries its own copy of the time-zone rules | shared/trip-time, web | Accepted |
 | [0009](0009-a-trips-calendar-is-pencilled-in.md) | A trip's calendar is pencilled in, and only its firm items are fixed | planner | Accepted |
+| [0010](0010-a-trips-pages-form-a-tree.md) | A trip's pages form a tree, with links between any two | planner | Accepted |
 
 ## By subject
 
@@ -49,6 +50,7 @@ keeps:
 |---|---|---|
 | [0004](0004-a-trip-is-read-only-offline.md) | A trip can be read without a connection, but changed only with one | Accepted |
 | [0009](0009-a-trips-calendar-is-pencilled-in.md) | A trip's calendar is pencilled in, and only its firm items are fixed | Accepted |
+| [0010](0010-a-trips-pages-form-a-tree.md) | A trip's pages form a tree, with links between any two | Accepted |
 
 ### web
 

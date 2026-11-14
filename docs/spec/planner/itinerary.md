@@ -34,6 +34,10 @@ A trip's calendar is pencilled in, and only its firm items are fixed (ADR-0009, 
 is pencilled in). Every stretch is therefore pencilled in, and nothing in a stretch is checked
 against a firm item, or against another stretch.
 
+A stretch or a firm item can name one page of the trip (ADR-0010, a trip's pages form a tree, with
+links between any two). The page belongs to `planner/pages`, the component that holds a trip's
+pages, and the itinerary never checks that it exists.
+
 The itinerary is written in TypeScript, as one package that runs unchanged in the browser and on
 Node.js, the JavaScript runtime servers use. It holds every time as a value of `shared/trip-time`,
 the package that holds dates and times in the local time of their place.
@@ -62,14 +66,16 @@ type Id = string;            // 1 to 64 of A–Z, a–z, 0–9, "-" and "_", uni
 type Country = string;       // an ISO 3166-1 alpha-2 code, such as "FR"
 type Place = { country: Country; name?: string };      // name: somewhere in the country
 
-type Stretch = { id: Id; place: Place; first: LocalDate; last: LocalDate };
+type PageId = string;        // a page of the trip, as planner/pages names it
+
+type Stretch = { id: Id; place: Place; first: LocalDate; last: LocalDate; page?: PageId };
 
 type Day = { kind: "day"; date: LocalDate };           // a date with no time
 type When = Day | TripTime;                             // TripTime of a kind holding a time
 type Way = "flight" | "train" | "bus" | "ferry" | "car" | "other";
 type Travel = { from: Place; to: Place; by: Way; arrive?: When };
 
-type FirmItem = { id: Id; title: string; when: When; travel?: Travel };
+type FirmItem = { id: Id; title: string; when: When; travel?: Travel; page?: PageId };
 
 type Trip = { format: 1; id: Id; name: string; revision: number;
               stretches: readonly Stretch[]; firm: readonly FirmItem[] };
@@ -188,6 +194,7 @@ applies every change, and its result is the one that stands (§8).
 - it covers at most 366 days, both ends counted, or it is refused with `stretch-length`
 - its place's country is in the list of §5.2, or it is refused with `unknown-country`
 - its place's name, where present, is checked as a title is, with `bad-text`
+- its `page`, where present, has the form of an `Id`, or it is refused with `bad-id`
 
 Nothing compares a stretch with any other stretch, or with a firm item. Gaps and overlaps are
 accepted (ADR-0009).
@@ -197,6 +204,7 @@ accepted (ADR-0009).
 *Plumbing:* a firm item is checked as follows (`PLN:ITINERARY-F3`, `PLN:ITINERARY-F4`):
 
 - its title is checked with `bad-text`
+- its `page`, where present, has the form of an `Id`, or it is refused with `bad-id`
 - a `when` or an `arrive` of kind `day` has a real date in range, or is refused with
   `invalid-date`
 - a `when` or an `arrive` of trip-time's kind `date` or `tbd` is refused with `date-only`
@@ -352,12 +360,14 @@ TypeScript and Node's type definitions.
 | [PLN:ITINERARY-F6](../../requirements/planner/itinerary.md#^pln-itinerary-f6) | `apply` and the revision, in §4.2. Applying each change to the copy held online is the component that holds it, which is not yet registered. |
 | [PLN:ITINERARY-F7](../../requirements/planner/itinerary.md#^pln-itinerary-f7) | Every check made before anything is changed, in §4.2. |
 | [PLN:ITINERARY-F8](../../requirements/planner/itinerary.md#^pln-itinerary-f8) | The text form of §4.7 and §5.1. |
+| [PLN:ITINERARY-F9](../../requirements/planner/itinerary.md#^pln-itinerary-f9) | The `page` field of `Stretch` and `FirmItem` in §3.3, kept unchecked (§2). Whether the page exists is `planner/pages`, whose specification is not yet written. |
 | [PLN:ITINERARY-NFR1](../../requirements/planner/itinerary.md#^pln-itinerary-nfr1) | No network code, and never reading the device's time zone (§4, §6). Keeping a copy on the phone is the web app, whose specification is not yet written. |
 | [PLN-F1](../../requirements/planner/planner.md#^pln-f1) | A trip's stretches, changed freely (§4.2, §4.3). Showing them on a calendar is the web app, whose specification is not yet written. |
 | [PLN-F2](../../requirements/planner/planner.md#^pln-f2) | Each day's countries (§4.6). Showing them is the web app. |
 | [PLN-F3](../../requirements/planner/planner.md#^pln-f3) | Firm items with a date or a time (§4.4). Entering them is the web app. |
 | [PLN-F4](../../requirements/planner/planner.md#^pln-f4) | Travel, its order and its duration (§4.4). Entering and showing it is the web app. |
 | [PLN-F5](../../requirements/planner/planner.md#^pln-f5) | Each day's firm items, in order (§4.6). Showing them apart from the stretches is the web app. |
+| [PLN-F11](../../requirements/planner/planner.md#^pln-f11) | The page each stretch and firm item names (§3.3). Opening the page is `planner/pages` and the web app, whose specifications are not yet written. |
 | [PLN-F6](../../requirements/planner/planner.md#^pln-f6) | Changes that give the same trip wherever they are applied (§4.2). Holding the copy online, and bringing each traveller the changed trip, is the component that holds it, which is not yet registered. |
 
 ## 8. Open
