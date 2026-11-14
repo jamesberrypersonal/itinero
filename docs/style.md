@@ -365,6 +365,10 @@ Run these against the document before committing.
 5. Validate every Mermaid diagram with mermaid-cli, never by eye.
 6. Run the documentation checker.
 
+In Claude Code, the project skill `/final-pass` runs this pass over the documents a branch
+changes. A fresh subagent does step 4, because the author has seen the work and cannot read it as
+a newcomer.
+
 ---
 
 ## Rationale

@@ -3,6 +3,20 @@
 What has been done, newest first. An entry that finishes an item of the live work list names the
 item, so a reader can find what became of its number. `documentation-system.md` sets the rules.
 
+## 2026-11-14 — TODO-9, the style guide's final pass from a Claude skill
+
+*By:* James Berry, with Claude
+
+The project skill `final-pass`, in `.claude/skills/final-pass/SKILL.md`, runs the final pass over
+the documents a branch changes. The final pass is the list of checks at the end of `style.md` that
+every document gets before it is committed. An author starts the skill by typing `/final-pass` in
+Claude Code. The skill runs the first three checks itself. It gives the fourth, reading each
+document as a newcomer would, to a fresh subagent. That subagent reads only the document and the
+documents it declares it assumes. Whoever wrote the documents has seen the work, and cannot read
+them as a newcomer. The skill then applies its fixes, and rewraps at 100 columns only the
+paragraphs it changed. Last, it runs `just check-docs` and `just test-docs`. It asks before it
+edits a decision record that has been accepted, because an accepted record is never changed.
+
 ## 2026-11-12 — TODO-8, the documents of a registered component from one command
 
 *By:* James Berry, with Claude

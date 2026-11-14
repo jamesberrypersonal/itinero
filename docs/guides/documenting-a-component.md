@@ -392,10 +392,16 @@ as "reads each document line by line (ADR-0001)". Run `just check-docs` again. I
 ### 8. Read it through as a newcomer
 
 doc-check checks the structure, but not whether the documents are clear. Before committing, run
-the final pass at the end of [style.md](../style.md) by hand: delete every link and check each
-sentence still makes its point, count the joints in each sentence, and read the first sentence of
-every paragraph in order. Then read the documents as someone who has read only what they declare
-they assume.
+the final pass at the end of [style.md](../style.md). Read each sentence as if its links were gone,
+and check it still makes its point. Count each sentence's joints, which are its semicolons, colons,
+em-dash breaks and conjunctions joining two clauses. A sentence with more than one joint carries
+two claims, so split it in two. Read the first sentence of every paragraph in order, and check they
+carry the argument. Then read each document as someone who has read only the documents named on
+its Assumes line, the line at the top that says what it builds on.
+
+If you use Claude Code, Anthropic's command-line coding assistant, type `/final-pass` to run the
+pass over every document your branch changes. It applies its fixes without committing them, and
+lists what it changed and what it left alone.
 
 ### 9. Commit, and open a pull request
 
