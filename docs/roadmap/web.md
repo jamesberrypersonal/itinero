@@ -18,6 +18,8 @@ theirs, in Milestone Planner-0.2 and Milestone Access-0.1.
 - The web app is registered.
 - A trip can be read on a phone with no connection, and changed only with one (ADR-0004, a trip
   is read-only offline).
+- The web app fetches, stores and loads the time-zone rules file that `shared/trip-time` uses
+  (ADR-0008, trip-time carries its own copy of the time-zone rules).
 
 ## Pending
 

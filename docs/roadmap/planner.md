@@ -21,6 +21,9 @@ planner is the first system that needs them.
   is read-only offline).
 - `shared/trip-time` has its requirements and its specification. A date or time is held in the
   local time of the place it happens, such as a train leaving Lyon at 09:10 Paris time.
+- `shared/trip-time` is written in TypeScript (ADR-0007, trip-time is written in TypeScript), and
+  carries its own copy of the time-zone rules (ADR-0008, trip-time carries its own copy of the
+  time-zone rules).
 
 ## Pending
 
