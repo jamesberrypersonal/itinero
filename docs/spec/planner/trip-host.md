@@ -11,8 +11,8 @@ tells each open device when a trip changes.
 
 ## 2. Scope
 
-The trip host covers a trip's calendar, pages and grants of access as stored online, the changes to
-them, catching a device up, telling open devices of changes, and reading and restoring pages in the
+The trip host covers a trip's calendar, pages, grants of access and bookings as stored online, the
+changes to them, catching a device up, telling open devices of changes, and reading and restoring pages in the
 graveyard.
 
 Three things act on it:
@@ -29,7 +29,8 @@ Deliberately absent:
 
 - deciding what a traveller may do, which `access/permissions` does when the trip host asks
 - the rules of the calendar and the pages, which `planner/itinerary` and `planner/pages` hold
-- a trip's bookings, which join the trip's copy once the bookings system is designed
+- the rules of a booking, which `bookings/list`, the component that holds a trip's bookings, holds
+  with the components of each kind of booking
 - accepting a change made with no connection, or merging changes made while apart (ADR-0004, a trip
   is read-only offline)
 - merging two travellers' edits to one page, which is future work
@@ -41,7 +42,8 @@ Worker, a program Cloudflare runs for each request. The Worker names the account
 `access/accounts`, and the member with `access/membership`. It then passes the request to the
 trip's Durable Object: a small program with its own SQLite database, which Cloudflare runs in one
 place and which handles one request at a time. The Durable Object is the trip host's copy of the
-trip.
+trip. It holds the trip's bookings beside the rest of the trip (ADR-0016, a trip's bookings are
+entered by hand, as one of four kinds, and kept with the trip online).
 
 ## 3. Interface
 
@@ -60,14 +62,15 @@ may show.
 |---|---|---|
 | `POST /trips` | `{ "name": ..., "first": ..., "last": ..., "countries": [ ... ] }` | `{ "trip": ... }`, the new trip's identifier (§4.2) |
 | `GET /trips` | None | Each trip the account is on, with its name and dates (§4.2) |
-| `POST /trips/{trip}/changes` | `{ "target": "calendar" \| "pages" \| "grants", "change": ..., "agreed": ... }` | `{ "sequence": ... }` (§4.3) |
+| `POST /trips/{trip}/changes` | `{ "target": "calendar" \| "pages" \| "grants" \| "bookings", "change": ..., "agreed": ... }` | `{ "sequence": ... }` (§4.3) |
 | `POST /trips/{trip}/sync` | `{ "since": ..., "holdsCalendar": ... }` | What the device may hold that changed since (§4.4) |
 | `POST /trips/{trip}/pages` | `{ "pages": [ ... ] }` | The pages named that the traveller may see (§4.4) |
+| `POST /trips/{trip}/bookings` | `{ "bookings": [ ... ] }` | The bookings named that the traveller may see (§4.4) |
 | `GET /trips/{trip}/buried/{page}` | None | A page in the graveyard, to an admin (§4.6) |
 | `GET /trips/{trip}/live` | None | A WebSocket that is told of each change (§4.5) |
 
 A `change` is written in the text form of its package: the itinerary's for `calendar`, the pages'
-for `pages`, and the permissions' for `grants`. `countries` is a list of country codes, from the
+for `pages`, the permissions' for `grants`, and the bookings' for `bookings`. `countries` is a list of country codes, from the
 itinerary's list of countries. `agreed`, where present, is the number of travellers the traveller
 agreed would come to see a moved page.
 
@@ -77,11 +80,12 @@ agreed would come to see a moved page.
 | `creator-only` | 403 | A `rename` or a `trip-dates` change by a traveller who is not the trip's creator |
 | `own-dates-only` | 403 | A `traveller-dates` change for another traveller, by a traveller who is not an admin |
 | `membership-only` | 403 | An `add` or a `remove` grant sent by a device. Only `access/membership` sends them |
+| `unknown-traveller` | 409 | A booking naming a traveller who is not on the trip. `details.traveller` names them |
 | `agree-first` | 409 | A move that would let more travellers see a page than `agreed` says. `details.count` gives how many |
 | `malformed` | 400 | A body not in the forms above |
 
-Every refusal from `access/permissions`, `planner/itinerary` and `planner/pages` is returned with
-its own code and details unchanged, such as `no-edit`, `stale` or `cycle`. A refusal for missing
+Every refusal from `access/permissions`, `planner/itinerary`, `planner/pages` and `bookings/list` is
+returned with its own code and details unchanged, such as `no-edit`, `stale` or `cycle`. A refusal for missing
 access has status 403, and any other has status 409.
 
 ### 3.3 Programming interface
@@ -97,10 +101,11 @@ type Member = Who & { creator: boolean };        // the caller gives it, from ac
 class TripHost {
   create(trip: string, creator: Member, name: string, first: string, last: string,
          countries: readonly string[]): Promise<Result<true>>;
-  change(who: Member, target: "calendar" | "pages" | "grants", change: string,
+  change(who: Member, target: "calendar" | "pages" | "grants" | "bookings", change: string,
          agreed?: number): Promise<Result<{ sequence: number }>>;
   sync(who: Member, since: number | undefined, holdsCalendar: boolean): Promise<Result<Sync>>;
   pages(who: Member, ids: readonly string[]): Promise<Result<readonly string[]>>;
+  bookings(who: Member, ids: readonly string[]): Promise<Result<readonly string[]>>;
   buried(who: Member, page: string): Promise<Result<string>>;
   grant(change: GrantChange): Promise<Result<{ sequence: number }>>;   // from access/membership
   summary(): Promise<{ name: string; first: string; last: string }>;
@@ -139,13 +144,14 @@ Behaviour crossing every operation:
 
 ### 4.1 What the Durable Object stores
 
-*Plumbing:* each trip's Durable Object holds four tables:
+*Plumbing:* each trip's Durable Object holds five tables:
 
 | Table | Holds |
 |---|---|
 | `trip` | One row: the trip, in the itinerary's text form, its `changed`, and the trip's `sequence` |
 | `pages` | One row for each page, in the pages' text form, with its `changed` |
 | `grants` | One row: the trip's grants, in the permissions' text form |
+| `bookings` | One row for each booking, keyed by its identifier, in the bookings' text form, with its `changed` |
 | `creator` | One row: the creator's account |
 
 The itinerary needs the world's time-zone rules, which `shared/trip-time` loads from a rules file.
@@ -180,16 +186,21 @@ one's name and dates, from its `summary`.
    needs an admin, or is refused with `own-dates-only`. Any other change needs edit access to the
    calendar. For `pages`, the change is asked of `authorise` as a `change-page`. For `grants`, an
    `add` or a `remove` is refused with `membership-only`, and any other change is asked as a
-   `grant`.
+   `grant`. For `bookings`, the trip host reads the booking held with the change's identifier, and
+   takes the bookings' `touches`. It asks `authorise` for a `change-booking` naming `before`, where
+   `before` names anyone, and for one naming `after`, where `after` names anyone. Each traveller of
+   `after` must be held in the grants, or the change is refused with `unknown-traveller`
+   (`PLN:HOST-F9`).
 2. **A move that widens who may see a page** (`PLN:HOST-F4`). For a `move`, the trip host asks
    `access/permissions`'s `widens`. Where it gives more than 0, and more than `agreed`, the change
    is refused with `agree-first`, with the count in `details.count`.
 3. **The change itself.** The change is applied with its package's `apply`: the itinerary's, the
-   pages' or `applyGrant`. Any refusal is returned unchanged, such as the pages' `stale`, which
+   pages', `applyGrant`, or the bookings', given the booking held. Any refusal is returned unchanged, such as the pages' `stale`, which
    holds the page's text as it stands (`PLN:HOST-F3`).
 
 Where every check passes, the trip host raises the `sequence`, and stores each record the change
-wrote: the trip, the one page `apply` wrote, or the grants. It does both in one transaction. It
+wrote: the trip, the one page `apply` wrote, the grants, or the one booking `apply` gave. A removed
+booking's row is deleted. It does both in one transaction. It
 then tells every open socket of the new sequence (§4.5), and gives `{ "sequence": ... }`.
 
 `grant`, from `access/membership`, applies an `add` or a `remove` in the same way, with no check of
@@ -208,6 +219,7 @@ with the close code 4403.
 | `calendar` | The stretches and firm items, where the traveller's level for the calendar is view or edit, and the trip changed after `since`, or `holdsCalendar` is false. `null` where their level is none, and absent where nothing changed |
 | `pages` | For each page of `seen`, from `access/permissions`, its identifier and its `changed`. A page whose `changed` is after `since` also holds its text form |
 | `graveyard` | The identifiers and titles of the pages in the graveyard the traveller may see |
+| `bookings` | For each booking whose `bookingLevel` for the traveller is view or edit, its identifier and its `changed`. A booking whose `changed` is after `since` also holds its text form |
 
 A `since` that is absent counts as 0, so every page holds its text form. The device then:
 
@@ -216,9 +228,14 @@ A `since` that is absent counts as 0, so every page holds its text form. The dev
   device does not hold. Such a page has become visible through a change of access, not a change
   to the page
 - drops the calendar where `calendar` is `null`
+- drops each booking it holds that `bookings` does not list, since it was removed, or the traveller
+  may no longer see it (`PLN:HOST-F9`)
+- fetches, with `POST /trips/{trip}/bookings`, each booking `bookings` lists without its text that
+  the device does not hold, such as every booking of a trip once its traveller is made an admin
 
 `pages(who, ids)` gives the text form of each page named that `seen` holds, and leaves out any
-other, without saying why. `you` holds only the traveller's own grant, so that no traveller learns
+other, without saying why. `bookings(who, ids)` does the same for each booking named whose
+`bookingLevel` for the traveller is view or edit. `you` holds only the traveller's own grant, so that no traveller learns
 another's access (`PLN:HOST-NFR1`).
 
 A device whose `sync` is refused with `not-a-member` deletes its copy of the trip (`PLN:HOST-F7`).
@@ -251,8 +268,8 @@ runs it from anywhere in the repository.
 - **Order tests** send changes to one trip from several connections at once, and confirm each is
   applied once, with its own sequence.
 - **Leak tests** catch up, as a traveller hidden from part of a trip, from every sequence the trip
-  has held, and confirm nothing given names a page, a stretch or a grant that traveller may not
-  see (`PLN:HOST-NFR1`).
+  has held, and confirm nothing given names a page, a stretch, a grant or a booking that traveller
+  may not see (`PLN:HOST-NFR1`).
 - **Cost tests** count the requests and the storage of the day of `PLN:HOST-NFR2`, and confirm
   they are within the free plan's limits.
 
@@ -268,14 +285,14 @@ runs it from anywhere in the repository.
 | The recipe | `test-online`, in the `justfile` at the repository root | Whoever keeps the planner's roadmap |
 
 The Worker's runtime dependencies are `@itinero/itinerary`, `@itinero/pages`,
-`@itinero/permissions` and `@itinero/trip-time`. A trip's database is deleted with nothing, since a
+`@itinero/permissions`, `@itinero/bookings` and `@itinero/trip-time`. A trip's database is deleted with nothing, since a
 trip cannot be deleted yet (`ACC-NR4`).
 
 ## 6. Quality attributes
 
 - **One change at a time** (`PLN:HOST-F2`). A Durable Object handles one request at a time, and
   stores each change in one transaction.
-- **Nothing leaks** (`PLN:HOST-NFR1`). Every read goes through `seen` or `authorise`, every refusal
+- **Nothing leaks** (`PLN:HOST-NFR1`). Every read goes through `seen`, `bookingLevel` or `authorise`, every refusal
   for a trip the account is not on is the same, and a socket carries only a sequence.
 - **Fails closed** (`ACC-NFR1`). A request with no account, no member or no access reaches no data.
 - **Costs nothing at this scale** (`PLN:HOST-NFR2`). A change is one request to the Durable Object,
@@ -297,6 +314,7 @@ trip cannot be deleted yet (`ACC-NR4`).
 | [PLN:HOST-F6](../../requirements/planner/trip-host.md#^pln-host-f6) | The sockets of §4.5. |
 | [PLN:HOST-F7](../../requirements/planner/trip-host.md#^pln-host-f7) | `grant`, in §4.3, and `not-a-member` on catching up, in §4.4. |
 | [PLN:HOST-F8](../../requirements/planner/trip-host.md#^pln-host-f8) | `buried`, and the `restore` change, in §4.6. |
+| [PLN:HOST-F9](../../requirements/planner/trip-host.md#^pln-host-f9) | The `bookings` table of §4.1, the checks of a booking change in §4.3, and `bookings` in the catch-up of §4.4. |
 | [PLN:HOST-NFR1](../../requirements/planner/trip-host.md#^pln-host-nfr1) | `seen` for every read, `you` holding only the traveller's own grant, and sockets carrying only a sequence (§4.4, §4.5). |
 | [PLN:HOST-NFR2](../../requirements/planner/trip-host.md#^pln-host-nfr2) | One request for each change and each catch-up, and hibernating sockets (§6). |
 | [PLN-F6](../../requirements/planner/planner.md#^pln-f6) | The one copy every change is applied to, and the sockets that tell open devices of each change (§4.3, §4.5). Showing the change is the web app, whose specification is not yet written. |
@@ -307,11 +325,13 @@ trip cannot be deleted yet (`ACC-NR4`).
 | [ACC-F11](../../requirements/access/access.md#^acc-f11) | `grant` applying each removal, and a device deleting its copy on `not-a-member` (§4.3, §4.4). |
 | [ACC-F12](../../requirements/access/access.md#^acc-f12) | Catching each device up on what `seen` gives (§4.4). |
 | [ACC-NFR1](../../requirements/access/access.md#^acc-nfr1) | Asking `authorise` before every change and every read (§4). |
+| [ACC-F6](../../requirements/access/access.md#^acc-f6) | Giving each device only the bookings whose `bookingLevel` is view or edit, and checking each change to a booking against its travellers before and after (§4.3, §4.4). |
+| [BKG-F1](../../requirements/bookings/bookings.md#^bkg-f1) | Applying an added booking once `authorise` allows it, and the `unknown-traveller` refusal (§4.3). The booking's checks are `bookings/list`. |
+| [BKG-F5](../../requirements/bookings/bookings.md#^bkg-f5) | Checking a change or a removal against the travellers the booking names before and after it (§4.3). The `stale` refusal is `bookings/list`. |
+| [BKG-F6](../../requirements/bookings/bookings.md#^bkg-f6) | Giving each device every booking its traveller may see, whole, in the catch-up of §4.4. Keeping them on the phone is the web app, whose specification is not yet written. |
 
 ## 8. Open
 
-- **Bookings.** A trip's bookings join its Durable Object once the bookings system is designed, with
-  a table of their own and a place in `sync`.
 - **Merging edits.** Two travellers' edits to one page are refused, not merged. Merging them
   automatically is future work, and would change how a page's text is stored and sent.
 - **A trip left without a member.** A trip whose `createTrip` failed keeps its Durable Object, which

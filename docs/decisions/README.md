@@ -38,6 +38,7 @@ keeps:
 | [0013](0013-bookings-have-a-page-of-their-own.md) | A trip's bookings have a page of their own, and its calendar is seen only by the travellers an admin chooses | planner, bookings, access | Accepted |
 | [0014](0014-a-trip-opens-on-a-home-page.md) | A trip opens on a home page for each traveller, with their own dates and the country they are in | planner, web | Accepted |
 | [0015](0015-the-online-side-runs-on-cloudflare.md) | Itinero's online side runs on Cloudflare's free plan, and travellers sign in with Google alone | access, planner | Accepted |
+| [0016](0016-bookings-are-entered-by-hand.md) | A trip's bookings are entered by hand, as one of four kinds, and kept with the trip online | bookings, planner/trip-host | Accepted |
 
 ## By subject
 
@@ -83,12 +84,19 @@ keeps:
 | ADR | Title | Status |
 |---|---|---|
 | [0013](0013-bookings-have-a-page-of-their-own.md) | A trip's bookings have a page of their own, and its calendar is seen only by the travellers an admin chooses | Accepted |
+| [0016](0016-bookings-are-entered-by-hand.md) | A trip's bookings are entered by hand, as one of four kinds, and kept with the trip online | Accepted |
 
 ### planner/pages
 
 | ADR | Title | Status |
 |---|---|---|
 | [0012](0012-access-passes-down-the-tree.md) | Access to a page passes down to the pages beneath it | Accepted |
+
+### planner/trip-host
+
+| ADR | Title | Status |
+|---|---|---|
+| [0016](0016-bookings-are-entered-by-hand.md) | A trip's bookings are entered by hand, as one of four kinds, and kept with the trip online | Accepted |
 
 ### shared/doc-check
 

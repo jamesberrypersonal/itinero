@@ -23,6 +23,7 @@ system, component or concern is added here before any document names it.
 | [accounts](spec/access/accounts.md) | access | ACC:ACCOUNTS | | | Travellers' accounts, and signing in with a Google account |
 | [membership](spec/access/membership.md) | access | ACC:MEMBERSHIP | | | Who is on each trip: its admins, the invitations that bring travellers in, and removing them |
 | [permissions](spec/access/permissions.md) | access | ACC:PERMISSIONS | | | What each traveller may see and change of a trip's pages, calendar and bookings |
+| [list](spec/bookings/list.md) | bookings | BKG:LIST | | | A trip's bookings: adding, changing and removing each one, the travellers it names, and the order they happen in |
 | [doc-check](spec/shared/doc-check.md) | shared | SHR:DOC-CHECK | | | The checker that holds every document in this vault to the documentation system |
 | [doc-scaffold](spec/shared/doc-scaffold.md) | shared | SHR:DOC-SCAFFOLD | `doc-scaffold` | | The scaffolder that starts a new component, system, decision record or guide, with every row that names it |
 | [trip-time](spec/shared/trip-time.md) | shared | SHR:TRIP-TIME | | | Dates and times in the local time of the place they happen, and the time zones between places |
@@ -31,6 +32,10 @@ system, component or concern is added here before any document names it.
 
 | Kind | Prefix | Imported | Manual | In `@itinero/bookings` | Is |
 |---|---|---|---|---|---|
+| flight | BKG:FLIGHT | planned | yes | `FlightBooking`, not built yet | A flight, in one or more legs, each leaving and arriving in its own airport's local time |
+| stay | BKG:STAY | planned | yes | `StayBooking`, not built yet | One or more nights' stay, such as a hotel or a flat, from check-in to check-out |
+| journey | BKG:JOURNEY | no | yes | `JourneyBooking`, not built yet | A train, a bus, a ferry or a hired car, from one place to another, with a time at each end |
+| activity | BKG:ACTIVITY | no | yes | `ActivityBooking`, not built yet | A tour, a ticket or a table, at one place, on a date and perhaps at a time |
 
 ## Cross-cutting concerns
 

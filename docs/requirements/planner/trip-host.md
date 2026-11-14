@@ -2,9 +2,9 @@
 
 What the component `planner/trip-host` promises to the components that use it, and through them to
 travellers. The trip host holds the one copy of each trip online, which every change is applied to.
-It holds the trip's calendar, its pages and its grants of access, applies each change a traveller
-makes once the change is allowed, and keeps each traveller's devices up to date with what they may
-see. The component registry, `components.md`, gives it the prefix `PLN:HOST`.
+It holds the trip's calendar, its pages, its grants of access and its bookings, applies each
+change a traveller makes once the change is allowed, and keeps each traveller's devices up to date
+with what they may see. The component registry, `components.md`, gives it the prefix `PLN:HOST`.
 
 Three roles appear below. A device is the app a traveller uses, on a computer or a phone, which the
 web app provides. The traveller and the admin are the roles `requirements/README.md` defines.
@@ -16,10 +16,12 @@ The parts of a trip are those the planner's requirements define, in
 - **The pages** hold the travellers' research, in a tree, with a graveyard for deleted pages.
 - **The grants** hold the access each traveller has been given to the trip, its pages and its
   calendar.
+- **The bookings** hold what the trip's travellers have booked, such as flights and stays, each
+  naming the travellers it is for. `requirements/bookings/bookings.md` defines them.
 
 A change is one edit to any of these, such as moving a stretch, rewriting a page or giving a
 traveller access to the calendar. A trip's sequence counts every change applied to it, across all
-three.
+four.
 
 ---
 
@@ -142,6 +144,29 @@ page an admin asks it to. It refuses either for a traveller who is not an admin.
 
 > **What does this buy?** A branch of research deleted by mistake is recovered (`PLN-F13`).
 
+### PLN:HOST-F9 — The trip host holds a trip's bookings, and gives each device only those its traveller may see
+
+The trip host holds a trip's bookings beside its calendar, pages and grants. It applies a change to
+a booking only from a traveller who may change the booking both before and after the change, and
+only where every traveller the booking names is on the trip. A device is given, and keeps, only the
+bookings its traveller may see. ^pln-host-f9
+
+- **Verification:** on the trip of `PLN:HOST-F1`, with a second and a third traveller holding edit
+  access to the trip,
+    - as the second traveller, add a flight naming themselves and the third, and confirm the
+      sequence rises by one
+    - as the second traveller, take the third off the flight, and confirm it is accepted
+    - as the third traveller, change the flight, and confirm it is refused
+    - add a booking naming a traveller not on the trip, and confirm it is refused, with the reason
+    - with the third traveller's device offline, add them to the flight again, bring the device
+      back, and confirm it holds the flight
+    - take them off it again, bring the device back, and confirm it no longer holds the flight
+
+> **What does this buy?** A booking is kept with the trip it belongs to, and reaches only the
+> travellers it names and the admins (`BKG-F1`, `BKG-F5`, `ACC-F6`), as every other part of a trip
+> does (ADR-0016, a trip's bookings are entered by hand, as one of four kinds, and kept with the
+> trip online).
+
 ---
 
 ## Non-functional requirements
@@ -182,7 +207,6 @@ the free plan Itinero's online side runs on. ^pln-host-nfr2
 |---|---|---|
 | **PLN:HOST-NR1** | Accept a change from a device with no connection, or merge changes made while apart | A trip changes only while the traveller is online (ADR-0004, a trip is read-only offline) |
 | **PLN:HOST-NR2** | Merge two travellers' edits to one page | Merging edits as they are made is future work (`PLN-NR8`) |
-| **PLN:HOST-NR3** | Hold a trip's bookings | The bookings system's design comes first. Its bookings are to join each trip's copy once designed |
 | **PLN:HOST-NR4** | Decide who may make a change | `access/permissions` decides. The trip host asks it before every change |
 | **PLN:HOST-NR5** | Give a traveller a copy of a trip to keep outside Itinero | Exporting a trip is future work |
 

@@ -3,7 +3,7 @@
 What needs active work, and what waits on a decision. `documentation-system.md` gives the list's
 rules. When an item is done, it leaves this list for `CHANGELOG.md` in the commit that finishes it.
 
-*Next free:* TODO-14
+*Next free:* TODO-16
 
 ## Tags
 
@@ -14,6 +14,11 @@ rules. When an item is done, it leaves this list for `CHANGELOG.md` in the commi
 | access/membership | Who is on each trip: its admins, the invitations that bring travellers in, and removing them |
 | access/permissions | What each traveller may see and change of a trip's pages, calendar and bookings |
 | bookings | A trip's bookings, such as flights, stays and tours, each for the travellers it names, and the page that lists them |
+| bookings/activity | A tour, a ticket or a table, at one place, on a date and perhaps at a time |
+| bookings/flight | A flight, in one or more legs, each leaving and arriving in its own airport's local time |
+| bookings/journey | A train, a bus, a ferry or a hired car, from one place to another, with a time at each end |
+| bookings/list | A trip's bookings: adding, changing and removing each one, the travellers it names, and the order they happen in |
+| bookings/stay | One or more nights' stay, such as a hotel or a flat, from check-in to check-out |
 | planner | The trip planner |
 | planner/itinerary | The itinerary: a trip's pencilled stretches and firm items |
 | planner/pages | The pages of a trip |
@@ -122,3 +127,37 @@ decision record scoped `planner`.
 
 *Releases:* Nothing is planned for it yet.
 
+### TODO-14 — Read a booking in from its confirmation email
+
+*Tags:* bookings, bookings/flight, bookings/stay
+*Written:* 2026-11-14
+
+*Problem:* A traveller copies every booking in by hand, from a confirmation they already hold as
+an email.
+
+*Reason:* Reading confirmations from many airlines and hotels is the largest part of the bookings
+system, and travellers needed their bookings before it could be built (ADR-0016, a trip's bookings
+are entered by hand, as one of four kinds, and kept with the trip online).
+
+*Proposal:* Decide how a confirmation reaches Itinero, such as by forwarding it to an address of
+the trip, and how its booking is matched to a trip and its travellers. Start with flights and
+stays, and record the choice in a decision record scoped `bookings`.
+
+*Releases:* Nothing is planned for it yet.
+
+### TODO-15 — Hold a file with a booking, such as a ticket or a boarding pass
+
+*Tags:* bookings, bookings/list, web
+*Written:* 2026-11-14
+
+*Problem:* A booking holds text only, so a traveller opens a ticket's file from their email, which
+may need a connection.
+
+*Reason:* Files would fill the free plan's storage, and every phone's copy of a trip, faster than
+every other part of a trip together (`BKG-NR2`).
+
+*Proposal:* Decide where files are kept, how large one may be, and whether each phone keeps a copy
+of its traveller's files to read with no connection. Record it in a decision record scoped
+`bookings`.
+
+*Releases:* Nothing is planned for it yet.

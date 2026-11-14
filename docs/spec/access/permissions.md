@@ -314,7 +314,7 @@ The package's one runtime dependency is `@itinero/pages`. Its development depend
 | [ACC:PERMISSIONS-NFR1](../../requirements/access/permissions.md#^acc-permissions-nfr1) | No network code, and nothing read from the device (§6). |
 | [ACC-F4](../../requirements/access/access.md#^acc-f4) | Access to the trip passing to every page, in §4.2. A new page needs no grant, because its level comes from its parent. |
 | [ACC-F5](../../requirements/access/access.md#^acc-f5) | The calendar's level, none until granted (§4.1, §4.3). Showing or hiding the calendar is the web app, whose specification is not yet written. |
-| [ACC-F6](../../requirements/access/access.md#^acc-f6) | `bookingLevel` (§4.3). The travellers each booking names are the bookings system's, whose specification is not yet written. |
+| [ACC-F6](../../requirements/access/access.md#^acc-f6) | `bookingLevel` (§4.3). The travellers each booking names, before and after each change, are `bookings/list`'s `touches`, and giving each device only its bookings is `planner/trip-host`. |
 | [ACC-F7](../../requirements/access/access.md#^acc-f7) | Exceptions, and the `hidden-above` refusal naming the page (§4.1, §4.2). |
 | [ACC-F8](../../requirements/access/access.md#^acc-f8) | `no-view` and `no-edit` (§4.4), and pages of level none left out of `seen` (§4.5). Showing a link as not available is the web app. |
 | [ACC-F9](../../requirements/access/access.md#^acc-f9) | `widens` (§4.6). Asking the traveller to confirm is the web app. |

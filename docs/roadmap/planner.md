@@ -26,6 +26,9 @@ the planner's itinerary. The planner is the first system that needs that compone
   (ADR-0015, Itinero's online side runs on Cloudflare's free plan). It applies every change once
   `access/permissions` allows it, one at a time, and tells each open device of each change.
 - A traveller's save of a page another traveller changed meanwhile is refused, with both texts kept.
+- `planner/trip-host` holds a trip's bookings beside its calendar and pages, and gives each device
+  only the bookings its traveller may see (ADR-0016, a trip's bookings are entered by hand, as one
+  of four kinds, and kept with the trip online).
 
 #### Milestone Planner-0.2 — Pages
 
