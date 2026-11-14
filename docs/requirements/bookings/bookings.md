@@ -22,8 +22,8 @@ by the travellers an admin chooses). Each booking is one of four kinds:
 | **Activity** | Something booked at one place, such as a tour, a ticket or a table | A day's tour of Torres del Paine on 10 December |
 
 A booking's times are in the local time of the place each one happens, as `shared/trip-time`, the
-component that holds a trip's dates and times, holds them. The traveller chooses that place's time
-zone, because nothing in Itinero finds it (`BKG-NR7`).
+component that holds a trip's dates and times, holds them. The web app fills in each place's time
+zone where it knows the place, and the traveller may choose another (`BKG-NR7`).
 
 ---
 
@@ -185,7 +185,7 @@ a phone with no connection. ^bkg-nfr1
 | **BKG-NR4** | Track what a booking costs | Travellers chose not to track spending in Itinero (`PLN-NR3`) |
 | **BKG-NR5** | Keep a removed booking so that it can be restored | A booking is a few lines, and the company's confirmation still holds them |
 | **BKG-NR6** | Turn a firm item into a booking, or check a booking against the stretches pencilled in | Nothing turns one into the other, and a booking and a stretch can disagree (ADR-0013) |
-| **BKG-NR7** | Find the time zone of an airport or a place | The traveller chooses each place's time zone (`SHR:TRIP-TIME-NR1`) |
+| **BKG-NR7** | Find the time zone of an airport or a place | The web app fills it in from its list of places, and the bookings system holds the zone it is given (`WEB-F9`) |
 | **BKG-NR8** | Show a flight's live status, such as a delay or a gate | Live status comes from a paid service, and Itinero costs nothing to run (ADR-0015) |
 
 ^bkg-nr

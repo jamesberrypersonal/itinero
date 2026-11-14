@@ -171,6 +171,28 @@ rules. ^web-f8
 > because their devices hold different rules (ADR-0008, trip-time carries its own copy of the
 > time-zone rules, `SHR:TRIP-TIME-NFR2`).
 
+### WEB-F9 — Entering an airport or a town fills in its time zone, with or without a connection
+
+When a traveller enters an airport's three-letter code, or a town of 1,000 people or more in a
+country their trips visit, the web app fills in its time zone beside the time, with or without a
+connection. The traveller can choose another zone. For a place the web app does not know, they
+choose the zone by hand. ^web-f9
+
+- **Verification:** on a trip through Chile, on a phone with no connection,
+    - add a flight from `SCL` to `PUQ`, and confirm the zones `America/Santiago` and
+      `America/Punta_Arenas` are filled in
+    - add a bus from Puerto Natales, and confirm `America/Punta_Arenas` is filled in
+    - change the bus's zone to `America/Santiago`, and confirm the change is kept
+    - add a stay in a town of Peru, which no trip visits, and confirm the zone is chosen by hand
+
+> **What does this buy?** A traveller copies a booking in as the confirmation gives it, without
+> knowing the name of every place's time zone (ADR-0019, a place's time zone is filled in from a
+> list of places, kept on the phone one country at a time).
+
+> **Why only the countries a trip visits?** The towns of the whole world would be several megabytes
+> on every phone. Each trip needs only a few countries, and every airport is held, since a flight
+> often leaves from outside them.
+
 ---
 
 ## Non-functional requirements

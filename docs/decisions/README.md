@@ -41,6 +41,7 @@ keeps:
 | [0016](0016-bookings-are-entered-by-hand.md) | A trip's bookings are entered by hand, as one of four kinds, and kept with the trip online | bookings, planner/trip-host | Accepted |
 | [0017](0017-a-device-copy-is-protected-by-its-lock.md) | A trip's copy on a device is protected by the device's own lock, and deleted when its traveller signs out | web | Accepted |
 | [0018](0018-the-web-app-is-built-with-preact.md) | The web app is built with Preact, and served by Itinero's own Worker | web | Accepted |
+| [0019](0019-a-place-time-zone-comes-from-a-list.md) | A place's time zone is filled in from a list of places, kept on the phone one country at a time | web | Accepted |
 
 ## By subject
 
@@ -82,6 +83,7 @@ keeps:
 | [0014](0014-a-trip-opens-on-a-home-page.md) | A trip opens on a home page for each traveller, with their own dates and the country they are in | Accepted |
 | [0017](0017-a-device-copy-is-protected-by-its-lock.md) | A trip's copy on a device is protected by the device's own lock, and deleted when its traveller signs out | Accepted |
 | [0018](0018-the-web-app-is-built-with-preact.md) | The web app is built with Preact, and served by Itinero's own Worker | Accepted |
+| [0019](0019-a-place-time-zone-comes-from-a-list.md) | A place's time zone is filled in from a list of places, kept on the phone one country at a time | Accepted |
 
 ### bookings
 

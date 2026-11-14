@@ -4,6 +4,17 @@ What has been done, newest first. The live work list, `TODO.md`, numbers each pi
 owed, such as TODO-9. An entry that finishes one of those items names it, so a reader can find what
 became of its number. `documentation-system.md` sets the rules.
 
+## 2026-11-14 — TODO-5, a place's time zone is filled in from the place
+
+*By:* James Berry, with Claude
+
+The web app fills in a place's time zone when a traveller enters an airport's code or a town's name
+(ADR-0019, a place's time zone is filled in from a list of places, kept on the phone one country at
+a time). A device holds every airport, and the towns of 1,000 people or more of each country its
+trips visit, fetched in the background after sign-in and read with no connection. The towns come
+from GeoNames, and the airports from OurAirports. The traveller can still choose another zone.
+`web/places` holds the list.
+
 ## 2026-11-14 — TODO-12, Itinero's online side runs on Cloudflare
 
 *By:* James Berry, with Claude

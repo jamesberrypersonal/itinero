@@ -90,7 +90,7 @@ trip's bookings are ordered is promised by `bookings/list`, in `BKG:LIST-NFR2`.
 
 | Identifier | The flight booking does not | Because |
 |---|---|---|
-| **BKG:FLIGHT-NR1** | Find an airport's time zone, or check that its code names a real airport | The traveller chooses each time zone, and checking codes needs a list of airports kept up to date (`BKG-NR7`) |
+| **BKG:FLIGHT-NR1** | Find an airport's time zone, or check that its code names a real airport | The web app fills each zone in from its list of airports, and the flight holds the zone it is given (`BKG-NR7`) |
 | **BKG:FLIGHT-NR2** | Show a flight's live status, such as a delay or a gate | Live status comes from a paid service (`BKG-NR8`) |
 | **BKG:FLIGHT-NR3** | Hold a flight's terminal, baggage allowance or fare class | These belong in the booking's notes, for now |
 

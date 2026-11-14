@@ -27,6 +27,7 @@ rules. When an item is done, it leaves this list for `CHANGELOG.md` in the commi
 | shared/doc-scaffold | The scaffolder that starts new documents |
 | shared/trip-time | Local dates and times, and time zones |
 | web | The web app, on a computer and on a phone |
+| web/places | The places a device knows the time zone of: every airport, and the towns of each country its trips visit |
 | web/screens | What travellers see and use: the home page, the calendar, the bookings page, the pages of research and the trip's members |
 | web/shell | The installable app itself: launching with no connection, adding it to a phone's home screen, and keeping the time-zone rules up to date |
 | web/trip-store | Each trip's copy on a device: catching it up, telling it of changes as they happen, sending changes, and deleting it on sign-out |
@@ -46,22 +47,6 @@ trip held online as the only copy anyone changes. That way, two changes never ne
 
 *Proposal:* Decide how changes made on two phones while apart are reconciled. Record it in a
 decision record that supersedes ADR-0004.
-
-*Releases:* Nothing is planned for it yet.
-
-### TODO-5 — Find a place's time zone from the place itself
-
-*Tags:* shared/trip-time
-*Written:* 2026-11-12
-
-*Problem:* trip-time takes the time zone of each date and time from the component that gives it
-the date or time. It cannot find the time zone of a place such as Lyon or Narita airport.
-
-*Reason:* The first requirements for trip-time leave the lookup to the caller
-(`SHR:TRIP-TIME-NR1`). A lookup that works offline needs a list of places held on the phone.
-
-*Proposal:* Decide where a place's time zone comes from, and which component finds it. Then write
-its requirements.
 
 *Releases:* Nothing is planned for it yet.
 

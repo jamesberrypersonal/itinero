@@ -32,6 +32,9 @@ theirs, in Milestone Planner-0.2 and Milestone Access-0.1.
 - The web app is divided into three components: `web/shell`, `web/trip-store` and `web/screens`.
   Each has its requirements and its specification, and all three are built as one package,
   `@itinero/web`.
+- A place's time zone is filled in from a list of places on the device: every airport, and the
+  towns of each country the device's trips visit (ADR-0019, a place's time zone is filled in from a
+  list of places, kept on the phone one country at a time). `web/places` holds it.
 
 ## Pending
 

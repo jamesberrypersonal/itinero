@@ -178,6 +178,6 @@ phone. ^bkg-list-nfr2
 | **BKG:LIST-NR1** | Store a booking, or send one between devices | `planner/trip-host` stores each trip online, and the web app keeps the copy on a phone |
 | **BKG:LIST-NR2** | Decide who may see or change a booking | `access/permissions` decides, from the travellers the bookings list gives (`BKG:LIST-F2`) |
 | **BKG:LIST-NR3** | Check the details of a kind | Each kind's component checks its own, and the bookings list applies their checks |
-| **BKG:LIST-NR4** | Find a place's time zone | The traveller chooses it (`BKG-NR7`) |
+| **BKG:LIST-NR4** | Find a place's time zone | The web app fills it in, and the traveller may change it (`BKG-NR7`) |
 
 ^bkg-list-nr

@@ -196,8 +196,12 @@ new tab, and its page opens as §4.6 gives (`WEB:SCREENS-F4`).
 
 Adding a booking asks first for its kind, then shows that kind's form (`BKG-F1`). The travellers it
 names start as the traveller adding it alone, chosen from the copy's members. A time asks for its
-precision, its date, its clock times and its time zone, chosen from trip-time's zones by typing part
-of a city's name. The form sends an `add`, or a `change` with the revision the screen was opened
+precision, its date, its clock times and its time zone. The zone is filled in from `web/places`, the
+component that knows the time zone of each airport and town the device holds: from an airport's
+code for a flight, and from the town typed for a journey's ends, a stay or an activity, which
+`towns` suggests as the traveller types. The traveller can choose another zone from trip-time's
+zones, by typing part of a city's name, and does so for a place `web/places` does not hold
+(`WEB-F9`). A firm item's times on the calendar are filled in in the same way. The form sends an `add`, or a `change` with the revision the screen was opened
 from, as the bookings' `changeToText` writes it. A `stale` refusal shows the booking as it now
 stands, from `details.booking`, beside the traveller's own, to start again from (`BKG-F5`).
 
@@ -252,6 +256,9 @@ sign in where they have not, and to choose their name where they have not (§4.1
 ### 4.8 The clock and date order
 
 *Invoked from:* `/settings`.
+
+The settings list the countries whose places the device holds, offer to fetch another while online
+with `web/places`' `fetchCountry`, and say `Place names from GeoNames, under CC BY 4.0`.
 
 The settings show the traveller's name, which they change online with `PUT /auth/name`. A trip
 store catch-up then brings the new name to every trip's members (`WEB:SCREENS-F10`).
@@ -346,6 +353,7 @@ and the packages of the trip's parts, which `spec/web/shell.md` §5 lists.
 | [WEB-F5](../../requirements/web/web.md#^web-f5) | The notice on a computer at sign-in (§4.1). Deleting the trips is `web/trip-store`. |
 | [WEB-F6](../../requirements/web/web.md#^web-f6) | Finding the country on the phone, and never storing or sending it (§4.3, §5.1). |
 | [WEB-F7](../../requirements/web/web.md#^web-f7) | The style of §4.8. |
+| [WEB-F9](../../requirements/web/web.md#^web-f9) | Filling each zone in from `web/places`, and letting the traveller choose another (§4.5). |
 | [WEB-NFR1](../../requirements/web/web.md#^web-nfr1) | Drawing the home page within 500 milliseconds (§6). Opening and reading the copy are `web/shell` and `web/trip-store`. |
 | [WEB-NFR2](../../requirements/web/web.md#^web-nfr2) | The map of §5.1, at most 500 kilobytes. The rest of the download is `web/shell`. |
 | [WEB-NFR3](../../requirements/web/web.md#^web-nfr3) | The browser tests of §4.9, in the three engines `spec/web/shell.md` §4.5 names. |

@@ -22,8 +22,8 @@ A trip is built from these parts:
 
 A trip's calendar holds pencilled stretches and firm items. A trip's bookings have a page of their
 own, and the calendar shows them too (ADR-0013). A day of a trip is one calendar date. A firm item's
-time is in the local time of the place it happens. The traveller chooses that place's time zone,
-because the planner does not find it (`PLN-NR5`). Times are held by `shared/trip-time`, the
+time is in the local time of the place it happens. The web app fills in that place's time zone
+where it knows the place, and the traveller may choose another (`PLN-NR5`). Times are held by `shared/trip-time`, the
 component that holds a trip's dates and times. It holds four kinds of value with a time: an exact
 time like 09:10, an approximate time like around 14:00, a window like 14:00 to 16:00, and a part of
 a day like the afternoon.
@@ -368,7 +368,7 @@ phone (ADR-0004, a trip is read-only offline).
 | **PLN-NR2** | Accept a change to a trip from a device with no connection | A trip changes only while the traveller is online (ADR-0004, a trip is read-only offline) |
 | **PLN-NR3** | Track what a trip costs, or what a traveller spends | Travellers chose not to track spending in Itinero |
 | **PLN-NR4** | Hold a page that belongs to more than one trip, or to none | Pages shared between trips, such as a country's, are future work |
-| **PLN-NR5** | Find the time zone of a place by itself | Finding a place's time zone is future work (`SHR:TRIP-TIME-NR1`) |
+| **PLN-NR5** | Find the time zone of a place by itself | The web app fills it in from its list of places, and the planner holds the zone it is given (`WEB-F9`) |
 | **PLN-NR6** | Hold facts about a country, such as its entry rules or emergency numbers | A country is a name on a stretch, for now (ADR-0013, a trip's calendar is pencilled in, and its bookings have a page of their own) |
 | **PLN-NR7** | Find the city a traveller is in | Finding the city needs a list of places held on the phone. It is future work |
 | **PLN-NR8** | Combine two travellers' edits to one page automatically | Merging edits as they are typed is future work |
