@@ -27,7 +27,7 @@ rules. When an item is done, it leaves this list for `CHANGELOG.md` in the commi
 *Written:* 2026-11-11
 
 *Problem:* Nothing says whether a traveller who may see a page of a trip may also see the pages
-beneath it in the trip's tree of pages (ADR-0010, a trip's pages form a tree).
+beneath it in the trip's tree of pages (ADR-0011, a trip's pages form a tree).
 
 *Reason:* An admin sets each traveller's access page by page. Whether that access passes down the
 tree was left until the pages were decided.
@@ -98,33 +98,13 @@ other languages travellers need is not known yet.
 
 *Releases:* Nothing is planned for it yet.
 
-### TODO-9 — Run the style guide's final pass with a Claude skill
-
-*Tags:* docs
-*Written:* 2026-11-12
-
-*Problem:* The final pass at the end of `style.md` is run by hand, step by step, and nothing makes
-sure each step is done the same way every time.
-
-*Reason:* The pass found real defects in two pull requests, #6 and #7, beyond what doc-check
-reports. Among them were a requirement that contradicted its own specification, and sentences a
-change had made untrue elsewhere in the same document. Its most useful step, reading as a newcomer,
-works best from a reader that has seen none of the work. The author cannot do that.
-
-*Proposal:* Add a project skill in `.claude/skills/` that runs the pass over the documents a branch
-changes. It does steps 1 to 3 itself, hands step 4 to a subagent with no other context, applies the
-fixes, rewraps only the paragraphs it changed, and runs `just check-docs` and `just test-docs`. It
-asks before editing an accepted decision record.
-
-*Releases:* Nothing is planned for it yet.
-
 ### TODO-10 — Decide what a trip opens on
 
 *Tags:* planner, web
 *Written:* 2026-11-14
 
 *Problem:* Nothing says what a traveller sees first on opening a trip, since the calendar is not
-its centre (ADR-0009, a trip's calendar is pencilled in).
+its centre (ADR-0010, a trip's calendar is pencilled in).
 
 *Reason:* A first idea is a home page for the trip. Before the trip, it would count down to the
 first day. During the trip, it would say which day of the trip today is. It would also list the

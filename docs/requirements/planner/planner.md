@@ -18,7 +18,7 @@ A trip is built from these parts:
 | **Firm item** | Something fixed to a date, with a time if it has one | A booked flight from Paris to New York on 5 June, leaving at 10:00 |
 | **Page** | Research a traveller writes by hand, belonging to one trip | Notes on where to eat in Lyon |
 
-A trip's calendar is pencilled in, and only its firm items are fixed (ADR-0009). A day of a trip is
+A trip's calendar is pencilled in, and only its firm items are fixed (ADR-0010). A day of a trip is
 one calendar date. A firm item's time is in the local time of the place it happens, in the time
 zone the traveller chooses. Times are held by `shared/trip-time`, the component that holds a trip's
 dates and times. It holds four kinds of value with a time: an exact time like 09:10, an
@@ -63,7 +63,7 @@ stretches in two countries shows both. ^pln-f2
 > traveller sees at a glance roughly when they will be in each one.
 
 > **Does a country hold anything, such as its entry rules?** No. A country is a name on a stretch
-> (ADR-0009, a trip's calendar is pencilled in).
+> (ADR-0010, a trip's calendar is pencilled in).
 
 ### PLN-F3 — A traveller adds firm items, each fixed to a date
 
@@ -102,7 +102,7 @@ turns out to be, and says why. ^pln-f4
 > traveller copies both in as printed, and sees how long the journey really takes.
 
 > **Is travel needed between every two stretches?** No. Travel appears on the calendar only once a
-> traveller adds it as a firm item (ADR-0009, a trip's calendar is pencilled in).
+> traveller adds it as a firm item (ADR-0010, a trip's calendar is pencilled in).
 
 ### PLN-F5 — The calendar shows firm items apart from the pencilled stretches, in the order they happen
 
@@ -178,7 +178,7 @@ page beneath it too, once the traveller confirms, having been told how many page
     - confirm the delete, and confirm Santiago and Eating in Santiago are both gone
 
 > **What does this buy?** A long trip's research stays grouped, such as a country's cities under
-> the country, without the planner choosing the groups (ADR-0010, a trip's pages form a tree).
+> the country, without the planner choosing the groups (ADR-0011, a trip's pages form a tree).
 
 > **Why does deleting a page delete the pages beneath it?** They usually belong with it, such as a
 > city's notes under the city. The confirmation guards against deleting a whole branch by mistake.
@@ -242,11 +242,11 @@ phone with no connection is promised for the web app (ADR-0004, a trip is read-o
 
 | Identifier | The planner does not | Because |
 |---|---|---|
-| **PLN-NR1** | Warn of a gap between stretches, an overlap, or two stretches in a row with no travel between them | A rough plan has loose ends on purpose (ADR-0009, a trip's calendar is pencilled in) |
+| **PLN-NR1** | Warn of a gap between stretches, an overlap, or two stretches in a row with no travel between them | A rough plan has loose ends on purpose (ADR-0010, a trip's calendar is pencilled in) |
 | **PLN-NR2** | Accept a change to a trip from a device with no connection | A trip changes only while the traveller is online (ADR-0004, a trip is read-only offline) |
 | **PLN-NR3** | Track what a trip costs, or what a traveller spends | Travellers chose not to track spending in Itinero |
 | **PLN-NR4** | Hold a page that belongs to more than one trip, or to none | Pages shared between trips, such as a country's, are future work |
 | **PLN-NR5** | Find the time zone of a place by itself | Finding a place's time zone is future work (`SHR:TRIP-TIME-NR1`) |
-| **PLN-NR6** | Hold facts about a country, such as its entry rules or emergency numbers | A country is a name on a stretch, for now (ADR-0009, a trip's calendar is pencilled in) |
+| **PLN-NR6** | Hold facts about a country, such as its entry rules or emergency numbers | A country is a name on a stretch, for now (ADR-0010, a trip's calendar is pencilled in) |
 
 ^pln-nr

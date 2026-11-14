@@ -16,7 +16,7 @@ planner is the first system that needs them.
 #### Milestone Planner-0.2 — Pages
 
 - A trip's pages form a tree, with links between any two, and hold Markdown text. A trip's chosen
-  countries each get a page, and the calendar links to pages (ADR-0010, a trip's pages form a
+  countries each get a page, and the calendar links to pages (ADR-0011, a trip's pages form a
   tree).
 - The planner system's requirements promise the tree, the links between pages, a page for each
   chosen country, and links from the calendar to pages.
@@ -34,7 +34,7 @@ planner is the first system that needs them.
   carries its own copy of the time-zone rules (ADR-0008, trip-time carries its own copy of the
   time-zone rules).
 - A trip's calendar holds pencilled stretches, each a place and rough dates, and firm items fixed to
-  a date (ADR-0009, a trip's calendar is pencilled in).
+  a date (ADR-0010, a trip's calendar is pencilled in).
 - The planner system has its requirements: a trip pencilled in on a calendar, the country of each
   day, firm items and firm travel in local time, changes shared between travellers, and pages.
 - `planner/itinerary` has its requirements and its specification. Each change to a trip is applied

@@ -1,4 +1,4 @@
-# ADR-0010 — A trip's pages form a tree, with links between any two
+# ADR-0011 — A trip's pages form a tree, with links between any two
 
 - **Status:** Accepted
 - **Date:** 2026-11-14

@@ -25,16 +25,16 @@ Deliberately absent:
 - storing a trip, or sending a trip or a change between devices
 - deciding who may see or change a trip, which is the access system's
 - finding a place's time zone. The caller gives every time's zone
-- warning of gaps, overlaps or missing travel (ADR-0009, a trip's calendar is pencilled in)
+- warning of gaps, overlaps or missing travel (ADR-0010, a trip's calendar is pencilled in)
 - merging changes made on two devices while apart (ADR-0004, a trip is read-only offline)
 - a trip's pages, which are `planner/pages`
 - reading the device's clock or its time zone
 
-A trip's calendar is pencilled in, and only its firm items are fixed (ADR-0009, a trip's calendar
+A trip's calendar is pencilled in, and only its firm items are fixed (ADR-0010, a trip's calendar
 is pencilled in). Every stretch is therefore pencilled in, and nothing in a stretch is checked
 against a firm item, or against another stretch.
 
-A stretch or a firm item can name one page of the trip (ADR-0010, a trip's pages form a tree, with
+A stretch or a firm item can name one page of the trip (ADR-0011, a trip's pages form a tree, with
 links between any two). The page belongs to `planner/pages`, the component that holds a trip's
 pages, and the itinerary never checks that it exists.
 
@@ -197,7 +197,7 @@ applies every change, and its result is the one that stands (§8).
 - its `page`, where present, has the form of an `Id`, or it is refused with `bad-id`
 
 Nothing compares a stretch with any other stretch, or with a firm item. Gaps and overlaps are
-accepted (ADR-0009).
+accepted (ADR-0010).
 
 ### 4.4 Firm items
 

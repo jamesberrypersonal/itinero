@@ -50,7 +50,7 @@ and says why. ^pln-itinerary-f1
 > **What does this buy?** The traveller pencils in a trip roughly and changes it often
 > (`PLN-F1`). The itinerary never stands in the way of a half-built plan.
 
-> **Why accept gaps and overlaps?** A rough plan has loose ends on purpose (ADR-0009, a trip's
+> **Why accept gaps and overlaps?** A rough plan has loose ends on purpose (ADR-0010, a trip's
 > calendar is pencilled in).
 
 > **Are any dates refused?** A stretch covers at most 366 days, and its dates fall between 1970 and
@@ -115,7 +115,7 @@ has a time at both ends. ^pln-itinerary-f4
 > time, and sees how long the journey really takes (`PLN-F4`).
 
 > **Is travel needed between two stretches?** No. The itinerary holds travel only as a traveller
-> adds it (ADR-0009, a trip's calendar is pencilled in).
+> adds it (ADR-0010, a trip's calendar is pencilled in).
 
 ### PLN:ITINERARY-F5 — The itinerary lays out a range of days, each with its stretches and its firm items in order
 

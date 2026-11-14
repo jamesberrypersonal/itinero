@@ -836,8 +836,8 @@ next milestone, or a later one, and the roadmap says so.
 - **Pending:** a section for each phase, in order, and in it a subsection for each milestone, in
   order, headed with its name and a short title, holding a list. Each item is one piece of work: its
   first sentence summarises the work, and what follows is short. An item that does a work-list item
-  says so, as `Do TODO-NN`; once its milestone is complete, the work-list items it did are removed
-  from the list in one batch, and recorded in the changelog.
+  says so, as `Do TODO-NN`. The commit that finishes the work-list item moves the step to the
+  milestone's entry in the completed half.
 
 **A milestone in progress can appear in both halves.** What it has finished is listed under its
 heading in the completed half, and what remains stays listed under its heading in the pending half.
@@ -902,8 +902,9 @@ nothing else cites an item except to say what waits on it.** The list is live, a
 it as soon as it is done. A document that needs to say work is owed says so itself. The one
 exception is a statement that holds only until an item is done, such as a promise today's code
 keeps only once a defect is fixed. It cites the item in the form `until TODO-NN is done`. A
-roadmap also names, as a step of a milestone, each item the milestone does, such as `Do TODO-61`,
-and removes the items in a batch once the milestone is complete.
+roadmap also names, as a step of a milestone, each item the milestone does, such as `Do TODO-61`.
+Such an item leaves the list when it is finished, like any other (ADR-0009, a finished item leaves
+the live list in the commit that finishes it).
 Identifiers are never reused, so the citation can never come to name another item. An identifier
 the list no longer holds names an item that is done. The condition it states is then met, and the
 changelog says when.

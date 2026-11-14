@@ -31,8 +31,9 @@ keeps:
 | [0006](0006-new-documents-start-from-skeletons.md) | New documents start from skeletons that a second program writes | shared/doc-check, shared/doc-scaffold | Accepted |
 | [0007](0007-trip-time-is-written-in-typescript.md) | trip-time is written in TypeScript | shared/trip-time | Accepted |
 | [0008](0008-trip-time-carries-its-own-time-zone-rules.md) | trip-time carries its own copy of the time-zone rules | shared/trip-time, web | Accepted |
-| [0009](0009-a-trips-calendar-is-pencilled-in.md) | A trip's calendar is pencilled in, and only its firm items are fixed | planner | Accepted |
-| [0010](0010-a-trips-pages-form-a-tree.md) | A trip's pages form a tree, with links between any two | planner | Accepted |
+| [0009](0009-a-finished-item-leaves-the-list-when-finished.md) | A finished item leaves the live list in the commit that finishes it | workspace | Accepted |
+| [0010](0010-a-trips-calendar-is-pencilled-in.md) | A trip's calendar is pencilled in, and only its firm items are fixed | planner | Accepted |
+| [0011](0011-a-trips-pages-form-a-tree.md) | A trip's pages form a tree, with links between any two | planner | Accepted |
 
 ## By subject
 
@@ -43,14 +44,15 @@ keeps:
 | [0002](0002-claims-code-spans-raw-html-and-list-labels-are-checked.md) | Requirement claims, one-line code spans, no raw HTML and the live list's labels are checked | Accepted |
 | [0003](0003-the-checker-is-built-in-rust-and-run-through-just.md) | The documentation checker is built in Rust and run through just | Accepted |
 | [0005](0005-itinero-records-no-telemetry.md) | Itinero records no telemetry, so the documents reserve no place for it | Accepted |
+| [0009](0009-a-finished-item-leaves-the-list-when-finished.md) | A finished item leaves the live list in the commit that finishes it | Accepted |
 
 ### planner
 
 | ADR | Title | Status |
 |---|---|---|
 | [0004](0004-a-trip-is-read-only-offline.md) | A trip can be read without a connection, but changed only with one | Accepted |
-| [0009](0009-a-trips-calendar-is-pencilled-in.md) | A trip's calendar is pencilled in, and only its firm items are fixed | Accepted |
-| [0010](0010-a-trips-pages-form-a-tree.md) | A trip's pages form a tree, with links between any two | Accepted |
+| [0010](0010-a-trips-calendar-is-pencilled-in.md) | A trip's calendar is pencilled in, and only its firm items are fixed | Accepted |
+| [0011](0011-a-trips-pages-form-a-tree.md) | A trip's pages form a tree, with links between any two | Accepted |
 
 ### web
 

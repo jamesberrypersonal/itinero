@@ -1,4 +1,4 @@
-# ADR-0009 — A trip's calendar is pencilled in, and only its firm items are fixed
+# ADR-0010 — A trip's calendar is pencilled in, and only its firm items are fixed
 
 - **Status:** Accepted
 - **Date:** 2026-11-14
