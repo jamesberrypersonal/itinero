@@ -4,6 +4,17 @@ What has been done, newest first. The live work list, `TODO.md`, numbers each pi
 owed, such as TODO-9. An entry that finishes one of those items names it, so a reader can find what
 became of its number. `documentation-system.md` sets the rules.
 
+## 2026-11-14 — TODO-3, access to a page passes down the tree
+
+*By:* James Berry, with Claude
+
+Access to a page passes down to the pages beneath it (ADR-0012, access to a page passes down to the
+pages beneath it). An admin gives each traveller view or edit access to the trip, and it passes to
+every page, including pages added later. An admin can change a traveller's access for a branch. A
+traveller who may see a page may see every page above it. A new page takes its parent's access,
+and a moved page takes its new place's, once the traveller moving it confirms any move that lets
+more travellers see it.
+
 ## 2026-11-14 — TODO-9, the style guide's final pass from a Claude skill
 
 *By:* James Berry, with Claude

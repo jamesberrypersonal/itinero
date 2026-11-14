@@ -21,22 +21,6 @@ rules. When an item is done, it leaves this list for `CHANGELOG.md` in the commi
 
 ## Items
 
-### TODO-3 — Decide whether access to a page passes to the pages below it
-
-*Tags:* access, planner/pages
-*Written:* 2026-11-11
-
-*Problem:* Nothing says whether a traveller who may see a page of a trip may also see the pages
-beneath it in the trip's tree of pages (ADR-0011, a trip's pages form a tree).
-
-*Reason:* An admin sets each traveller's access page by page. Whether that access passes down the
-tree was left until the pages were decided.
-
-*Proposal:* Decide whether access passes down the tree. Record the choice in a decision record
-scoped `access` and `planner/pages`.
-
-*Releases:* Milestone Access-0.1.
-
 ### TODO-4 — Let a traveller change a trip while offline
 
 *Tags:* web, planner/itinerary

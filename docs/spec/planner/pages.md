@@ -296,6 +296,9 @@ text.
 
 `forPhone(pages)` gives the same trip's pages with every page in the graveyard left out. The caller
 keeps on the phone the pages `forPhone` gives, less any page the traveller may not see (ADR-0004).
+A traveller who may see a page may see every page above it (ADR-0012, access to a page passes down
+to the pages beneath it). The pages kept are therefore whole branches, and no page on the phone
+lacks its parent.
 
 ### 4.9 The test suite
 
@@ -391,6 +394,3 @@ development dependencies are `@itinero/trip-time`, TypeScript and Node's type de
   editing the same page at the same time, the later write stands, and the other's work is lost.
   One remedy is for a `write` to name the `revision` it was made against, and be refused where the
   page has changed since. It is not decided.
-- **A page whose parent a traveller may not see.** The access system gives each traveller only the
-  pages they may see, so a page can arrive without its parent. Whether access to a page passes to
-  the pages beneath it, and so where such a page sits, is not decided until TODO-3 is done.
