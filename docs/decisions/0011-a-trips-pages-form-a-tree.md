@@ -2,7 +2,7 @@
 
 - **Status:** Accepted
 - **Date:** 2026-11-14
-- **Scope:** planner
+- **Scope:** planner, access
 
 ## Problem
 
@@ -29,10 +29,18 @@ order the traveller gives them.
 **Links.** A page's text can link to any other page of the trip, in any branch of the tree, as many
 times as the traveller likes. A link names the page it points to, not its title or its place in the
 tree, so it survives the page being renamed or moved. A link to a page that has been deleted stays
-in the text, and shows that its page is gone.
+in the text. It shows that its page is in the trip's graveyard, which the paragraph on deleting
+describes.
 
-**Deleting.** Deleting a page deletes every page beneath it as well. Before deleting, the planner
-asks the traveller to confirm, saying how many pages beneath it will go with it.
+**Deleting.** Deleting a page moves it, with every page beneath it, to the trip's graveyard. Before
+deleting, the planner asks the traveller to confirm, saying how many pages beneath it will go with
+it. The access system, the system that handles accounts and invitations, sets which pages each
+traveller may see, page by page. Each traveller sees the graveyard as a list of the titles of the
+deleted pages they could see before the delete. Only a trip's admin, a traveller who may manage the
+trip, can read a page in the graveyard, or restore it with the pages beneath it. A restored page
+returns under its old parent, or to the top of the trip when its old parent is in the graveyard too.
+Nothing deletes a page from the graveyard. The copy of a trip each phone keeps for reading with no
+connection holds no page in the graveyard.
 
 **Content.** A page holds a title and text written in Markdown, the plain-text format for headings,
 lists, tables, checklists and links that Obsidian and GitHub use. The planner imposes no structure
@@ -42,15 +50,17 @@ on the text.
 planner creates a page at the top of the trip for each, titled with the country's name. Each is an
 ordinary page from then on, renamed, moved or deleted like any other.
 
-**Links from the calendar.** A stretch pencilled in on the trip's calendar, or a firm item fixed to a
-date, can link to one page of the trip, such as Santiago's stretch linking to the Santiago page.
+**Links from the calendar.** A trip's calendar holds stretches and firm items. A stretch is a
+place and the dates a traveller expects to be there, pencilled in. A firm item is something fixed
+to a date, such as a booked tour. A stretch or a firm item can link to one page of the trip, such as
+Santiago's stretch linking to the Santiago page.
 
 ## Consequences
 
 - `planner/pages`, the component that holds a trip's pages, holds the tree, the links, and the text.
   Its specification gives how a link names its page.
 - `planner/itinerary`, the component that holds a trip's calendar, gives each stretch and each firm
-  item a link to at most one page. `spec/planner/itinerary.md` changes to hold it.
+  item a link to at most one page. `spec/planner/itinerary.md` changes to hold that link.
 - The planner promises the tree, the links and the pages for countries in its own requirements.
 - Whether access to a page passes to the pages beneath it is a real question, because a tree
   exists. It is not decided until TODO-3 is done.
@@ -59,10 +69,16 @@ date, can link to one page of the trip, such as Santiago's stretch linking to th
 - Pages hold no images or attached files. Adding them later enlarges the copy each phone keeps for
   reading with no connection (ADR-0004, a trip is read-only offline), and needs storage designed
   for them.
-- One confirmed delete removes a whole branch, such as a country's research. A traveller who
-  wants to keep part of it moves that part elsewhere first.
-- Every link to a deleted page, from another page or from the calendar, shows that its page is
-  gone.
+- One confirmed delete moves a whole branch, such as a country's research, to the graveyard. A
+  traveller who wants to keep part of it in the tree moves that part elsewhere first. A delete made
+  by mistake is undone by an admin restoring the branch.
+- Every link to a page in the graveyard, from another page or from the calendar, shows that its
+  page is in the graveyard. On a phone with no connection, such a link shows only that its page is
+  not on the phone.
+- The graveyard only grows. The pages in it are held online, so they never enlarge the copy each
+  phone keeps.
+- The access system promises that only an admin reads or restores a page in the graveyard. It also
+  promises that each traveller's list of the graveyard holds only the deleted pages they could see.
 
 ## Alternatives considered
 
@@ -73,6 +89,12 @@ date, can link to one page of the trip, such as Santiago's stretch linking to th
 - **Deleting a page, and moving the pages under it up to its parent.** The pages under a page
   usually belong with it, such as a city's notes under the city, and moving them up would scatter
   them through the tree. The confirmation guards against a mistaken delete instead.
+- **Deleting a page for good, at once.** A delete made by mistake, such as a country's research
+  deleted in place of a city's, could not be undone. The graveyard keeps it, at no cost to the copy
+  on each phone.
+- **Letting every traveller read and restore the pages in the graveyard.** A traveller who may not
+  see a page in the tree could read it once it was deleted. Who may read a page is decided page by
+  page, and only an admin manages the whole trip.
 - **A page for each country created when its first stretch is pencilled in.** Pages would appear
   while the traveller is only trying out a route, and a traveller choosing countries at the start
   already knows where the trip goes.

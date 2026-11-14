@@ -26,8 +26,10 @@ accepted record is never changed.
 A trip's pages form a tree, nested to any depth, and any page can link to any other, across
 branches (ADR-0011, a trip's pages form a tree, with links between any two). A page holds Markdown
 text, with no structure imposed. A traveller creating a trip chooses its countries, and each gets a
-page. A stretch or a firm item on the trip's calendar can link to a page. Deleting a page deletes
-the pages under it too, once the traveller confirms.
+page. A stretch or a firm item on the trip's calendar can link to a page. Deleting a page moves it,
+with the pages under it, to the trip's graveyard, once the traveller confirms. Each traveller sees
+the graveyard as a list of the deleted pages they could see, and only an admin reads or restores a
+page in it.
 
 ## 2026-11-12 — TODO-8, the documents of a registered component from one command
 

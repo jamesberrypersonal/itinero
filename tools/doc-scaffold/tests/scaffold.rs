@@ -264,7 +264,7 @@ fn register_without_documents(root: &Path) {
     };
     insert_after(
         "components.md",
-        "| pages | planner |",
+        "| [pages](spec/planner/pages.md) | planner |",
         "| offline-copy | web | WEB:OFFLINE | | | The copy of a trip a phone keeps |",
     );
     insert_after("TODO.md", "| web |", "| web/offline-copy | The copy of a trip a phone keeps |");

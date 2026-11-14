@@ -33,7 +33,7 @@ keeps:
 | [0008](0008-trip-time-carries-its-own-time-zone-rules.md) | trip-time carries its own copy of the time-zone rules | shared/trip-time, web | Accepted |
 | [0009](0009-a-finished-item-leaves-the-list-when-finished.md) | A finished item leaves the live list in the commit that finishes it | workspace | Accepted |
 | [0010](0010-a-trips-calendar-is-pencilled-in.md) | A trip's calendar is pencilled in, and only its firm items are fixed | planner | Accepted |
-| [0011](0011-a-trips-pages-form-a-tree.md) | A trip's pages form a tree, with links between any two | planner | Accepted |
+| [0011](0011-a-trips-pages-form-a-tree.md) | A trip's pages form a tree, with links between any two | planner, access | Accepted |
 
 ## By subject
 
@@ -52,6 +52,12 @@ keeps:
 |---|---|---|
 | [0004](0004-a-trip-is-read-only-offline.md) | A trip can be read without a connection, but changed only with one | Accepted |
 | [0010](0010-a-trips-calendar-is-pencilled-in.md) | A trip's calendar is pencilled in, and only its firm items are fixed | Accepted |
+| [0011](0011-a-trips-pages-form-a-tree.md) | A trip's pages form a tree, with links between any two | Accepted |
+
+### access
+
+| ADR | Title | Status |
+|---|---|---|
 | [0011](0011-a-trips-pages-form-a-tree.md) | A trip's pages form a tree, with links between any two | Accepted |
 
 ### web

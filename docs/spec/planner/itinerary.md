@@ -121,7 +121,7 @@ show it to the traveller.
 | `stretch-order` | `apply` | A stretch whose last day is before its first |
 | `stretch-length` | `apply` | A stretch of more than 366 days |
 | `unknown-country` | `apply` | A country not in the list of §5.2 |
-| `date-only` | `apply` | A `when` or an `arrive` of trip-time's kind `date` or `tbd`. A date with no time is a `Day` |
+| `date-only` | `apply` | A `when` or an `arrive` of trip-time's kind `date`, a whole date, or `tbd`, a date whose time is to be decided. A date with no time is a `Day` |
 | `duplicate-id` | `apply` | An added stretch or firm item whose identifier the trip already holds |
 | `unknown-id` | `apply` | A change naming a stretch or firm item the trip does not hold |
 | `travel-order` | `apply` | Travel that certainly arrives before it leaves (§4.4) |
@@ -141,8 +141,8 @@ None. The itinerary calls only `@itinero/trip-time`, which `spec/shared/trip-tim
 Behaviour crossing every operation:
 
 - **Dates are calendar dates.** A `LocalDate` is a Gregorian date written `YYYY-MM-DD`. A stretch's
-  dates and a `Day` belong to no time zone, because the place they are pencilled at has none
-  (`PLN:ITINERARY-NR3`).
+  dates and a `Day` belong to no time zone. The caller gives a zone only with a time, because the
+  itinerary never finds a place's zone (`PLN:ITINERARY-NR3`).
 - **The device's own time zone is never read.** The itinerary works out dates by counting days
   in the Gregorian calendar, and orders times with trip-time, which never reads it either.
 - **The local date of a `When`** is its `date` field. Its last local date is its `endDate` for
@@ -160,7 +160,7 @@ trip is named before any copy of it is stored.
 
 *Porcelain:* `apply(trip, change)` checks the change against the trip and gives a new trip, with
 the change made and its revision one higher (`PLN:ITINERARY-F6`). A change it refuses gives the
-refusal, and the trip given is unchanged (`PLN:ITINERARY-F7`). Every check is made before
+refusal, and the trip passed in is unchanged (`PLN:ITINERARY-F7`). Every check is made before
 anything is changed.
 
 | Change | Effect | Refused when |
@@ -253,7 +253,8 @@ A day's firm items are ordered in two groups:
    lists them
 
 An item shown on a later day than its `when`, such as the overnight bus on its day of arrival, is
-ordered by its `when` all the same, and so comes before the items that start that day.
+ordered by its `when` all the same, and so comes before the items of the second group that start
+that day.
 
 ### 4.7 The text form
 
@@ -319,8 +320,8 @@ as a string. A change is written the same way, as an object holding its `op` and
 ### 5.2 The list of countries
 
 The package holds the list of countries as a table of each code and its English name, such as
-`FR` and France. It holds every code ISO 3166-1 assigns officially, the international standard for
-country codes. `countries()` gives the table, in the order of its names.
+`FR` and France. It holds every code that ISO 3166-1, the international standard for country codes,
+assigns officially. `countries()` gives the table, in the order of its names.
 
 A code later withdrawn from ISO 3166-1 stays in the table, so that a stored trip naming it still
 reads back.
@@ -360,14 +361,14 @@ TypeScript and Node's type definitions.
 | [PLN:ITINERARY-F6](../../requirements/planner/itinerary.md#^pln-itinerary-f6) | `apply` and the revision, in §4.2. Applying each change to the copy held online is the component that holds it, which is not yet registered. |
 | [PLN:ITINERARY-F7](../../requirements/planner/itinerary.md#^pln-itinerary-f7) | Every check made before anything is changed, in §4.2. |
 | [PLN:ITINERARY-F8](../../requirements/planner/itinerary.md#^pln-itinerary-f8) | The text form of §4.7 and §5.1. |
-| [PLN:ITINERARY-F9](../../requirements/planner/itinerary.md#^pln-itinerary-f9) | The `page` field of `Stretch` and `FirmItem` in §3.3, kept unchecked (§2). Whether the page exists is `planner/pages`, whose specification is not yet written. |
+| [PLN:ITINERARY-F9](../../requirements/planner/itinerary.md#^pln-itinerary-f9) | The `page` field of `Stretch` and `FirmItem` in §3.3, kept unchecked (§2). Whether the page is in the tree or the graveyard is `planner/pages`, in §4.6 of `spec/planner/pages.md`. |
 | [PLN:ITINERARY-NFR1](../../requirements/planner/itinerary.md#^pln-itinerary-nfr1) | No network code, and never reading the device's time zone (§4, §6). Keeping a copy on the phone is the web app, whose specification is not yet written. |
 | [PLN-F1](../../requirements/planner/planner.md#^pln-f1) | A trip's stretches, changed freely (§4.2, §4.3). Showing them on a calendar is the web app, whose specification is not yet written. |
 | [PLN-F2](../../requirements/planner/planner.md#^pln-f2) | Each day's countries (§4.6). Showing them is the web app. |
 | [PLN-F3](../../requirements/planner/planner.md#^pln-f3) | Firm items with a date or a time (§4.4). Entering them is the web app. |
 | [PLN-F4](../../requirements/planner/planner.md#^pln-f4) | Travel, its order and its duration (§4.4). Entering and showing it is the web app. |
 | [PLN-F5](../../requirements/planner/planner.md#^pln-f5) | Each day's firm items, in order (§4.6). Showing them apart from the stretches is the web app. |
-| [PLN-F11](../../requirements/planner/planner.md#^pln-f11) | The page each stretch and firm item names (§3.3). Opening the page is `planner/pages` and the web app, whose specifications are not yet written. |
+| [PLN-F11](../../requirements/planner/planner.md#^pln-f11) | The page each stretch and firm item names (§3.3). Resolving the page is `planner/pages` (`spec/planner/pages.md` §4.6), and opening it is the web app, whose specification is not yet written. |
 | [PLN-F6](../../requirements/planner/planner.md#^pln-f6) | Changes that give the same trip wherever they are applied (§4.2). Holding the copy online, and bringing each traveller the changed trip, is the component that holds it, which is not yet registered. |
 
 ## 8. Open
