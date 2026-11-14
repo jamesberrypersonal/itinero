@@ -161,8 +161,8 @@ each is held. ^pln-itinerary-f6
 > **What does this buy?** A change a traveller makes is applied to the one copy of the trip held
 > online, and every other traveller sees the same result (`PLN-F6`).
 
-> **Who applies a change to the copy held online?** The component that holds it. That component is
-> not yet registered.
+> **Who applies a change to the copy held online?** `planner/trip-host`, the component that holds
+> it.
 
 ### PLN:ITINERARY-F7 — A refused change leaves the trip as it was, and says why
 
@@ -263,7 +263,7 @@ on the time zone the device is set to. ^pln-itinerary-nfr1
 
 | Identifier | The itinerary does not | Because |
 |---|---|---|
-| **PLN:ITINERARY-NR1** | Store a trip, or send a change from one device to another | The component that holds the copy online does that. It is not yet registered |
+| **PLN:ITINERARY-NR1** | Store a trip, or send a change from one device to another | `planner/trip-host`, which holds the copy of each trip online, does that |
 | **PLN:ITINERARY-NR2** | Decide who may see or change a trip | The access system, which handles accounts and invitations, decides |
 | **PLN:ITINERARY-NR3** | Find the time zone of a place | The caller gives each time's zone (`SHR:TRIP-TIME-NR1`) |
 | **PLN:ITINERARY-NR4** | Warn of a gap, an overlap, or two stretches in a row with no travel between them | A rough plan has loose ends on purpose (`PLN-NR1`) |

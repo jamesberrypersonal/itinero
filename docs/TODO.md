@@ -3,7 +3,7 @@
 What needs active work, and what waits on a decision. `documentation-system.md` gives the list's
 rules. When an item is done, it leaves this list for `CHANGELOG.md` in the commit that finishes it.
 
-*Next free:* TODO-13
+*Next free:* TODO-14
 
 ## Tags
 
@@ -17,6 +17,7 @@ rules. When an item is done, it leaves this list for `CHANGELOG.md` in the commi
 | planner | The trip planner |
 | planner/itinerary | The itinerary: a trip's pencilled stretches and firm items |
 | planner/pages | The pages of a trip |
+| planner/trip-host | The copy of each trip held online, in a Durable Object of its own, which applies every change and keeps each traveller's devices up to date |
 | shared/doc-check | The documentation checker |
 | shared/doc-scaffold | The scaffolder that starts new documents |
 | shared/trip-time | Local dates and times, and time zones |
@@ -103,3 +104,21 @@ The country was enough to start with (`PLN-NR7`).
 add the requirements to the planner and the web app.
 
 *Releases:* Nothing is planned for it yet.
+
+### TODO-13 — Merge two travellers' edits to one page automatically
+
+*Tags:* planner/pages, planner/trip-host, web
+*Written:* 2026-11-14
+
+*Problem:* When two travellers edit the same page at once, the second save is refused, and the
+second traveller combines the two texts by hand.
+
+*Reason:* Refusing a save made from an older version of a page loses no work, and is simple to
+build (`PLN-NR8`). Merging edits as they are made changes how a page's text is stored and sent.
+
+*Proposal:* Look into merging edits automatically, such as with a CRDT, a data type built so that
+edits made at once on two devices always combine into the same text. Record the choice in a
+decision record scoped `planner`.
+
+*Releases:* Nothing is planned for it yet.
+

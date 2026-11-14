@@ -136,12 +136,15 @@ whatever time zone each is in. ^pln-f5
 ### PLN-F6 — A change one traveller makes is seen by every other traveller on the trip
 
 When a traveller changes a trip, every other traveller who can see that part of the trip sees the
-change the next time they open the trip with a connection. ^pln-f6
+change within a few seconds, if they have the trip open with a connection. Otherwise, they see it
+the next time they open the trip with a connection. ^pln-f6
 
 - **Verification:** with two travellers on the same trip, each on their own device,
     - have the first pencil in a stretch, and confirm the second sees it on opening the trip
     - have the first move a firm item to another day, and confirm the second sees it on the new day
-    - have the second change a flight's time, and confirm the first sees the new time
+    - have the second change a planned flight's time, and confirm the first sees the new time
+    - with both holding the trip open, have the first rename a page, and confirm the second sees the
+      new title within 2 seconds, without reopening the trip
 
 > **What does this buy?** Travellers plan a trip together. Each one has to be able to trust that
 > the plan they open is the one everyone else is working from.
@@ -329,6 +332,24 @@ the country they are in. The location never leaves the phone. ^pln-f15
 > **Why the country, and not the city?** Finding the city on the phone needs far more data held
 > there. The country is all the home page knows, for now (`PLN-NR7`).
 
+### PLN-F16 — A traveller's edit to a page another traveller changed meanwhile is refused, and shows both texts
+
+When a traveller saves a page that another traveller changed after the first began editing it, the
+planner refuses the save, and loses neither text. It shows the traveller both, theirs and the page
+as it now stands, for them to combine and save again. ^pln-f16
+
+- **Verification:** with two travellers editing Eating in Santiago at once, each on their own
+  device,
+    - have the first save, then the second, and confirm the second's save is refused
+    - confirm the second is shown their own text and the first's, and can save a text combining both
+    - confirm the first's save stands in the meantime
+
+> **What does this buy?** Two travellers writing up the same research at once never lose either's
+> work without being told.
+
+> **Why not combine the two texts automatically?** It is a larger design, and future work
+> (`PLN-NR8`).
+
 ---
 
 ## Non-functional requirements
@@ -350,5 +371,6 @@ phone (ADR-0004, a trip is read-only offline).
 | **PLN-NR5** | Find the time zone of a place by itself | Finding a place's time zone is future work (`SHR:TRIP-TIME-NR1`) |
 | **PLN-NR6** | Hold facts about a country, such as its entry rules or emergency numbers | A country is a name on a stretch, for now (ADR-0013, a trip's calendar is pencilled in, and its bookings have a page of their own) |
 | **PLN-NR7** | Find the city a traveller is in | Finding the city needs a list of places held on the phone. It is future work |
+| **PLN-NR8** | Combine two travellers' edits to one page automatically | Merging edits as they are typed is future work |
 
 ^pln-nr

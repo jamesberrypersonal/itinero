@@ -22,6 +22,10 @@ the planner's itinerary. The planner is the first system that needs that compone
   own, and its calendar is seen only by the travellers an admin chooses).
 - The planner system's requirements promise a trip's dates, each traveller's dates within them, and
   the home page.
+- `planner/trip-host` holds the copy of each trip online, in a Cloudflare Durable Object of its own
+  (ADR-0015, Itinero's online side runs on Cloudflare's free plan). It applies every change once
+  `access/permissions` allows it, one at a time, and tells each open device of each change.
+- A traveller's save of a page another traveller changed meanwhile is refused, with both texts kept.
 
 #### Milestone Planner-0.2 — Pages
 
@@ -60,11 +64,5 @@ the planner's itinerary. The planner is the first system that needs that compone
 
 ## Pending
 
-### Phase 0 — Design
-
-#### Milestone Planner-0.3 — The home page, and the trip held online
-
-- Register the component that holds the copy of each trip online, its calendar and its pages, and
-  write its requirements and specification. Each trip is held in a Cloudflare Durable Object of its
-  own (ADR-0015, Itinero's online side runs on Cloudflare's free plan). It moved here from Milestone
-  Planner-0.1, because milestones are reached in order and the pages were started first.
+Nothing is pending. Phase 0's design of the planner is complete, and building it is not yet
+planned.

@@ -17,9 +17,9 @@ Three things act on it:
 
 - **The web app**, the system travellers use on a computer or a phone, sends an admin's
   invitations, withdrawals and removals, and a traveller's acceptance (§3.2).
-- **The component holding the copy of each trip online** asks who is on a trip and who is an admin,
-  for every request. It also applies the grant changes the membership component hands it. That
-  component is not yet registered.
+- **`planner/trip-host`**, the component holding the copy of each trip online, asks who is on a
+  trip and who is an admin, for every request. It also applies the grant changes the membership
+  component hands it.
 - **`access/accounts`**, the component that holds accounts, names the account behind each request,
   and gives an account's email address.
 
@@ -244,7 +244,7 @@ after it closed, and closes every open invitation past its expiry.
 | [ACC:MEMBERSHIP-NFR1](../../requirements/access/membership.md#^acc-membership-nfr1) | The random token, kept only as a digest, and the address check, in §4.2 and §4.4. |
 | [ACC-F2](../../requirements/access/access.md#^acc-f2) | The creator as the permanent admin, and making admins (§4.1). Giving an admin edit access to every page is `access/permissions`. |
 | [ACC-F3](../../requirements/access/access.md#^acc-f3) | Invitations by address, their expiry and withdrawal, and accepting only with the address invited (§4.2 to §4.4). Showing the trip once accepted is the web app, whose specification is not yet written. |
-| [ACC-F11](../../requirements/access/access.md#^acc-f11) | Removing a member (§4.5). Deleting the trip from each of their phones is the component holding the copy of each trip online, which is not yet registered, and the web app. |
+| [ACC-F11](../../requirements/access/access.md#^acc-f11) | Removing a member (§4.5). Deleting the trip from each of their phones is `planner/trip-host` and the web app. |
 
 ## 8. Open
 

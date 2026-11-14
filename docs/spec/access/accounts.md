@@ -17,8 +17,8 @@ Two things act on it:
 
 - **The web app**, the system travellers use on a computer or a phone, signs a traveller in and
   out, and sends its session with every request (§3.2).
-- **The component holding the copy of each trip online** passes it each request, and is given the
-  account that sent it. That component is not yet registered.
+- **`planner/trip-host`**, the component holding the copy of each trip online, passes it each
+  request, and is given the account that sent it.
 
 Deliberately absent:
 
@@ -187,7 +187,7 @@ in its Wrangler configuration.
 
 | Resource | Path | Owned by |
 |---|---|---|
-| The Worker of the online side | `services/online/`, which Milestone Planner-0.3 builds on | Whoever keeps the access system's roadmap |
+| The Worker of the online side | `services/online/`, which `planner/trip-host` shares | Whoever keeps the access system's roadmap |
 | The tables `accounts`, `sessions` and `nonces` | The online side's D1 database | Whoever keeps the access system's roadmap |
 | The client identifier registered with Google | `GOOGLE_CLIENT_ID`, in the Worker's Wrangler configuration | Whoever keeps the access system's roadmap |
 

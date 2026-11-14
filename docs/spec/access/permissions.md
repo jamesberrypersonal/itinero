@@ -18,9 +18,9 @@ form a trip's grants are stored in.
 
 Two things act on it:
 
-- **The component holding the copy of each trip online** applies every grant, checks every
-  request before carrying it out, and gives each traveller only what the component says they may
-  see. That component is not yet registered (§8).
+- **`planner/trip-host`**, the component holding the copy of each trip online, applies every
+  grant, checks every request before carrying it out, and gives each traveller only what the
+  permissions component says they may see.
 - **The web app**, the system travellers use on a computer or a phone, asks the same questions of
   the copy on the phone, to show a traveller what they may change.
 
@@ -319,14 +319,11 @@ The package's one runtime dependency is `@itinero/pages`. Its development depend
 | [ACC-F8](../../requirements/access/access.md#^acc-f8) | `no-view` and `no-edit` (§4.4), and pages of level none left out of `seen` (§4.5). Showing a link as not available is the web app. |
 | [ACC-F9](../../requirements/access/access.md#^acc-f9) | `widens` (§4.6). Asking the traveller to confirm is the web app. |
 | [ACC-F10](../../requirements/access/access.md#^acc-f10) | The graveyard of `seen` (§4.5), and `admin-only` for `read-buried` and `restore` (§4.4). |
-| [ACC-F12](../../requirements/access/access.md#^acc-f12) | `seen`, which gives what a phone may hold (§4.5). Bringing the phone's copy up to date is the component holding the copy of each trip online, which is not yet registered. |
-| [ACC-NFR1](../../requirements/access/access.md#^acc-nfr1) | `authorise`, which fails closed (§4.4, §6). Asking it before every request is the component holding the copy of each trip online, which is not yet registered. Knowing who sent the request is `access/accounts`. |
+| [ACC-F12](../../requirements/access/access.md#^acc-f12) | `seen`, which gives what a phone may hold (§4.5). Bringing the phone's copy up to date is `planner/trip-host`. |
+| [ACC-NFR1](../../requirements/access/access.md#^acc-nfr1) | `authorise`, which fails closed (§4.4, §6). Asking it before every request is `planner/trip-host`. Knowing who sent the request is `access/accounts`. |
 
 ## 8. Open
 
-- **Where the grants are held, and who calls `authorise`.** The component holding the copy of each
-  trip online stores each trip's grants beside its pages, and asks `authorise` before every
-  request. It is to be registered in Milestone Planner-0.3.
 - **Changes to access after a delete.** A page in the graveyard keeps its parent, so a traveller's
   level for it follows their access as it stands, not as it stood at the delete (§4.5). An admin
   who hides a branch after one of its pages was deleted hides that page in the graveyard too.

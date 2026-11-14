@@ -17,8 +17,8 @@ day-by-day layout, and the text form a trip and a change are stored and sent in.
 Two things act on it:
 
 - **A caller**, such as the web app, builds changes, applies them, and lays out days (§3.3).
-- **The component holding the copy of each trip online** applies every change a traveller makes,
-  and sends the changed trip back. That component is not yet registered (§8).
+- **`planner/trip-host`**, the component holding the copy of each trip online, applies every change
+  a traveller makes, and sends the changed trip back.
 
 Deliberately absent:
 
@@ -386,11 +386,11 @@ TypeScript and Node's type definitions.
 | [PLN:ITINERARY-F3](../../requirements/planner/itinerary.md#^pln-itinerary-f3) | The `add-firm`, `change-firm` and `remove-firm` changes of §4.2, and the checks of §4.4. The zone of each time comes from the caller. |
 | [PLN:ITINERARY-F4](../../requirements/planner/itinerary.md#^pln-itinerary-f4) | The `Travel` type of §3.3, the `travel-order` refusal, and `travelDuration`, in §4.4. |
 | [PLN:ITINERARY-F5](../../requirements/planner/itinerary.md#^pln-itinerary-f5) | `layout` and `extent`, in §4.5 and §4.6. |
-| [PLN:ITINERARY-F6](../../requirements/planner/itinerary.md#^pln-itinerary-f6) | `apply` and the revision, in §4.2. Applying each change to the copy held online is the component that holds it, which is not yet registered. |
+| [PLN:ITINERARY-F6](../../requirements/planner/itinerary.md#^pln-itinerary-f6) | `apply` and the revision, in §4.2. Applying each change to the copy held online is `planner/trip-host`. |
 | [PLN:ITINERARY-F7](../../requirements/planner/itinerary.md#^pln-itinerary-f7) | Every check made before anything is changed, in §4.2. |
 | [PLN:ITINERARY-F8](../../requirements/planner/itinerary.md#^pln-itinerary-f8) | The text form of §4.7 and §5.1. |
 | [PLN:ITINERARY-F10](../../requirements/planner/itinerary.md#^pln-itinerary-f10) | The `trip-dates` and `traveller-dates` changes, and `travellerDates`, in §4.9. |
-| [PLN-F14](../../requirements/planner/planner.md#^pln-f14) | A trip's dates and each traveller's, with their refusals (§4.9). Setting them is the web app, and letting only the creator set the trip's is the component holding the copy of each trip online. Neither is yet specified. |
+| [PLN-F14](../../requirements/planner/planner.md#^pln-f14) | A trip's dates and each traveller's, with their refusals (§4.9). Setting them is the web app, and letting only the creator set the trip's is `planner/trip-host`. |
 | [PLN:ITINERARY-F9](../../requirements/planner/itinerary.md#^pln-itinerary-f9) | The `page` field of `Stretch` and `FirmItem` in §3.3, kept unchecked (§2). Whether the page is in the tree or the graveyard is `planner/pages`, in §4.6 of `spec/planner/pages.md`. |
 | [PLN:ITINERARY-NFR1](../../requirements/planner/itinerary.md#^pln-itinerary-nfr1) | No network code, and never reading the device's time zone (§4, §6). Keeping a copy on the phone is the web app, whose specification is not yet written. |
 | [PLN-F1](../../requirements/planner/planner.md#^pln-f1) | A trip's stretches, changed freely (§4.2, §4.3). Showing them on a calendar is the web app, whose specification is not yet written. |
@@ -399,12 +399,9 @@ TypeScript and Node's type definitions.
 | [PLN-F4](../../requirements/planner/planner.md#^pln-f4) | Travel, its order and its duration (§4.4). Entering and showing it is the web app. |
 | [PLN-F5](../../requirements/planner/planner.md#^pln-f5) | Each day's firm items, in order (§4.6). Showing them apart from the stretches is the web app. |
 | [PLN-F11](../../requirements/planner/planner.md#^pln-f11) | The page each stretch and firm item names (§3.3). Resolving the page is `planner/pages` (`spec/planner/pages.md` §4.6), and opening it is the web app, whose specification is not yet written. |
-| [PLN-F6](../../requirements/planner/planner.md#^pln-f6) | Changes that give the same trip wherever they are applied (§4.2). Holding the copy online, and bringing each traveller the changed trip, is the component that holds it, which is not yet registered. |
+| [PLN-F6](../../requirements/planner/planner.md#^pln-f6) | Changes that give the same trip wherever they are applied (§4.2). Holding the copy online, and bringing each traveller the changed trip, is `planner/trip-host`. |
 
 ## 8. Open
 
-- **Where the copy of a trip held online lives.** No component holds it yet. That component applies
-  every change with `apply`, keeps the result, and sends the changed trip to every traveller who may
-  see it. Its result is the one that stands when a device and the copy online have different
-  time-zone rules (§4.2). It also decides whether a change names the revision it was made against.
-  It is to be registered in the planner before Milestone Planner-0.1 is complete.
+None. `planner/trip-host`, the component that holds the copy of each trip online, applies every
+change with `apply`. Its result stands where a device holds other time-zone rules (§4.2).

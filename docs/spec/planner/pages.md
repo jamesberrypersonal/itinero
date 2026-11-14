@@ -80,7 +80,7 @@ type Where = { parent?: Id; after?: Id };   // after absent: first under the par
 type Change =
   | { op: "add";     id: Id; title: string; text?: string; at: Where }
   | { op: "rename";  id: Id; title: string }
-  | { op: "write";   id: Id; text: string }
+  | { op: "write";   id: Id; text: string; base: number }   // base: the revision edited from
   | { op: "move";    id: Id; to: Where }
   | { op: "bury";    id: Id }
   | { op: "restore"; id: Id };
@@ -134,6 +134,7 @@ is one English sentence saying what was refused and why. A caller may show it to
 | `cycle` | `apply` | A move under the page itself, or under a page beneath it |
 | `in-graveyard` | `apply` | A `rename`, `write`, `move` or `bury` of a page in the graveyard |
 | `not-in-graveyard` | `apply` | A `restore` of a page in the tree |
+| `stale` | `apply` | A `write` whose `base` is not the page's `revision`. `details.text` holds the page's text as it stands, and `details.revision` its revision |
 | `no-words` | `search` | Words that are empty once trimmed |
 | `unknown-format` | `pageFromText` | A page whose `format` is not 1 |
 
@@ -180,7 +181,7 @@ the pages given are unchanged. Every check is made before anything is changed.
 |---|---|---|---|
 | `add` | Adds a page at the place `at` gives, with the title and text given, or no text | The new page | `bad-id`, `duplicate-id`, `bad-title`, `text-length`, and any refusal of §4.3 |
 | `rename` | Sets the page's title | The page | `unknown-id`, `in-graveyard`, `bad-title` |
-| `write` | Sets the page's text | The page | `unknown-id`, `in-graveyard`, `text-length` |
+| `write` | Sets the page's text, where `base` is the page's `revision` | The page | `unknown-id`, `in-graveyard`, `stale`, `text-length` |
 | `move` | Puts the page at the place `to` gives. Every page beneath it moves with it, unwritten | The page | `unknown-id`, `in-graveyard`, `cycle`, and any refusal of §4.3 |
 | `bury` | Deletes the page, with every page beneath it (§4.4) | The page | `unknown-id`, `in-graveyard` |
 | `restore` | Returns the page to the tree (§4.5) | The page | `unknown-id`, `not-in-graveyard` |
@@ -383,7 +384,9 @@ development dependencies are `@itinero/trip-time`, TypeScript and Node's type de
 | [PLN:PAGES-F6](../../requirements/planner/pages.md#^pln-pages-f6) | `newPages`, the `country` of each page it makes, and `countryPage`, in §4.1. |
 | [PLN:PAGES-F7](../../requirements/planner/pages.md#^pln-pages-f7) | `search` and its folding, in §4.7. |
 | [PLN:PAGES-F8](../../requirements/planner/pages.md#^pln-pages-f8) | The text form of §4.8 and §5.1, and `forPhone`. |
-| [PLN:PAGES-F9](../../requirements/planner/pages.md#^pln-pages-f9) | `apply`, with every check made before anything is changed, in §4.2. Applying each change to the copy held online is the component that holds it, which is not yet registered. |
+| [PLN:PAGES-F10](../../requirements/planner/pages.md#^pln-pages-f10) | The `base` of a `write`, and the `stale` refusal, in §3.3 and §4.2. |
+| [PLN-F16](../../requirements/planner/planner.md#^pln-f16) | The `stale` refusal, with the text as it stands (§4.2). Showing both texts is the web app, whose specification is not yet written. |
+| [PLN:PAGES-F9](../../requirements/planner/pages.md#^pln-pages-f9) | `apply`, with every check made before anything is changed, in §4.2. Applying each change to the copy held online is `planner/trip-host`. |
 | [PLN:PAGES-NFR1](../../requirements/planner/pages.md#^pln-pages-nfr1) | No network code, and never reading the device (§4, §6). Keeping a copy on the phone is the web app, whose specification is not yet written. |
 | [PLN-F7](../../requirements/planner/planner.md#^pln-f7) | Pages with a title and Markdown text, kept as written (§4.2). Showing the text formatted is the web app. |
 | [PLN-F8](../../requirements/planner/planner.md#^pln-f8) | The tree, moves and deletes (§4.2 to §4.4). Asking the traveller to confirm a delete is the web app. |
@@ -392,15 +395,9 @@ development dependencies are `@itinero/trip-time`, TypeScript and Node's type de
 | [PLN-F15](../../requirements/planner/planner.md#^pln-f15) | `countryPage`, for the country the phone is in (§4.1). The day, the bookings and the phone's country are the web app, whose specification is not yet written. |
 | [PLN-F11](../../requirements/planner/planner.md#^pln-f11) | `state`, for the page a stretch or a firm item names (§4.6). Naming the page is `planner/itinerary`. |
 | [PLN-F12](../../requirements/planner/planner.md#^pln-f12) | `search`, over the pages of `forPhone` with no connection (§4.7, §4.8). Showing the results is the web app. |
-| [PLN-F13](../../requirements/planner/planner.md#^pln-f13) | `graveyard`, `page` and `restore` (§4.4, §4.5). Refusing a traveller who is not an admin is the access system, whose requirements are not yet written. |
+| [PLN-F13](../../requirements/planner/planner.md#^pln-f13) | `graveyard`, `page` and `restore` (§4.4, §4.5). Refusing a traveller who is not an admin is `access/permissions`. |
 
 ## 8. Open
 
-- **Where the copy of a trip's pages held online lives.** No component holds it yet. That
-  component applies every change with `apply`, stores the records each change writes, and sends
-  each changed page to every traveller who may see it. It is the same component that holds the
-  itinerary's copy online, and is to be registered in Milestone Planner-0.3.
-- **Two travellers writing one page at once.** A `write` sets the whole text. Of two travellers
-  editing the same page at the same time, the later write stands, and the other's work is lost.
-  One remedy is for a `write` to name the `revision` it was made against, and be refused where the
-  page has changed since. It is not decided.
+None. `planner/trip-host`, the component that holds the copy of each trip online, stores each
+page `apply` writes, and sends it to each traveller who may see it.

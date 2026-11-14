@@ -198,10 +198,10 @@ same results on every device. ^acc-permissions-nfr1
 
 | Identifier | The permissions component does not | Because |
 |---|---|---|
-| **ACC:PERMISSIONS-NR1** | Stop a request by itself | The caller asks it before carrying out a request. The component that holds the copy of each trip online does so. It is not yet registered |
+| **ACC:PERMISSIONS-NR1** | Stop a request by itself | The caller asks it before carrying out a request. `planner/trip-host` does so |
 | **ACC:PERMISSIONS-NR2** | Know who is on a trip, or who is an admin | `access/membership` does. The caller passes it on |
 | **ACC:PERMISSIONS-NR3** | Know who is making a request | `access/accounts` signs each traveller in. The caller passes the traveller on |
-| **ACC:PERMISSIONS-NR4** | Store a trip's grants | The component that holds the copy of each trip online stores them with the trip |
+| **ACC:PERMISSIONS-NR4** | Store a trip's grants | `planner/trip-host` stores them with the trip |
 | **ACC:PERMISSIONS-NR5** | Set access to one stretch or one firm item of the calendar | The calendar is granted whole (`ACC-NR5`) |
 
 ^acc-permissions-nr

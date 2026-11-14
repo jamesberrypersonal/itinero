@@ -199,6 +199,24 @@ does not hold, leaves every page as it was. The refusal says what was refused an
 > **What does this buy?** A change a traveller makes is applied to the one copy held online, and
 > every other traveller sees the same result (`PLN-F6`). No change is ever half applied.
 
+### PLN:PAGES-F10 — A rewrite of a page's text made from an older version is refused, with the text as it stands
+
+A rewrite of a page's text names the version of the page it was made from. The pages component
+refuses a rewrite made from a version older than the page's own, and gives the page's text as it
+now stands, so that neither text is lost. ^pln-pages-f10
+
+- **Verification:** on a trip with one page, at its first version,
+    - rewrite its text from the first version, and confirm it is accepted, at the second version
+    - rewrite it again from the first version, and confirm it is refused, with the text the second
+      version holds
+    - rewrite it from the second version, and confirm it is accepted
+
+> **What does this buy?** Two travellers writing up the same page at once never lose either's text
+> without being told (`PLN-F16`).
+
+> **Does a rename or a move need the version too?** No. A title is short, and a later rename or
+> move simply stands.
+
 ---
 
 ## Non-functional requirements
@@ -230,7 +248,7 @@ depend on the language or the time zone the device is set to. ^pln-pages-nfr1
 
 | Identifier | The pages component does not | Because |
 |---|---|---|
-| **PLN:PAGES-NR1** | Store a trip's pages, or send a change from one device to another | The component that holds the copy online does that. It is not yet registered |
+| **PLN:PAGES-NR1** | Store a trip's pages, or send a change from one device to another | `planner/trip-host`, which holds the copy of each trip online, does that |
 | **PLN:PAGES-NR2** | Decide who may see or change a page, or read or restore a page in the graveyard | The access system, which handles accounts and invitations, decides |
 | **PLN:PAGES-NR3** | Show a page's Markdown as formatted text | The web app shows it |
 | **PLN:PAGES-NR4** | Hold images or attached files | A page holds a title and text (ADR-0011, a trip's pages form a tree, with links between any two) |
