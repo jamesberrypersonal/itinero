@@ -8,7 +8,7 @@ system, component or concern is added here before any document names it.
 
 | System | Prefix | Outside the vault | Is |
 |---|---|---|---|
-| planner | PLN | | The trip planner: each trip, the stops it visits, the days spent at each, and the travel between them |
+| planner | PLN | | The trip planner: each trip, the calendar it is pencilled in on, its firm dates, and its research pages |
 | access | ACC | | Accounts, invitations to a trip, and who may see and change each of its pages |
 | web | WEB | | The app travellers use on a computer or a phone, including reading a trip with no connection |
 
@@ -16,7 +16,7 @@ system, component or concern is added here before any document names it.
 
 | Component | System | Prefix | Packages | Outside the vault | Is |
 |---|---|---|---|---|---|
-| itinerary | planner | PLN:ITINERARY | | | How a trip, its stops, its days and the travel between stops are stored and changed |
+| [itinerary](spec/planner/itinerary.md) | planner | PLN:ITINERARY | | | How a trip's pencilled stretches and firm items are stored and changed |
 | pages | planner | PLN:PAGES | | | The pages of a trip, where travellers write up their research by hand |
 | [doc-check](spec/shared/doc-check.md) | shared | SHR:DOC-CHECK | | | The checker that holds every document in this vault to the documentation system |
 | [doc-scaffold](spec/shared/doc-scaffold.md) | shared | SHR:DOC-SCAFFOLD | `doc-scaffold` | | The scaffolder that starts a new component, system, decision record or guide, with every row that names it |

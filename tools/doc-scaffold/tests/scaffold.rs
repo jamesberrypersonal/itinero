@@ -252,15 +252,34 @@ fn a_component_of_a_system_with_no_folder_gets_its_folders_and_their_indexes() {
     assert!(reg.find("| [offline-copy]") < reg.find("| [doc-check]"));
 }
 
+/// Registers `web/offline-copy` in a copy of the vault without writing its documents, as a
+/// component registered before anyone documents it is.
+fn register_without_documents(root: &Path) {
+    let insert_after = |rel: &str, after: &str, row: &str| {
+        let path = root.join("docs").join(rel);
+        let text = fs::read_to_string(&path).unwrap();
+        let at = text.find(after).unwrap_or_else(|| panic!("{rel} holds no {after:?}"));
+        let end = at + text[at..].find('\n').unwrap() + 1;
+        fs::write(&path, format!("{}{row}\n{}", &text[..end], &text[end..])).unwrap();
+    };
+    insert_after(
+        "components.md",
+        "| pages | planner |",
+        "| offline-copy | web | WEB:OFFLINE | | | The copy of a trip a phone keeps |",
+    );
+    insert_after("TODO.md", "| web |", "| web/offline-copy | The copy of a trip a phone keeps |");
+}
+
 #[test]
 fn a_registered_component_gets_both_its_documents_and_a_linked_registry_row() {
     let root = real_vault();
-    let out = scaffold_cleanly(&root, &["docs", "planner", "itinerary"]);
+    register_without_documents(&root);
+    let out = scaffold_cleanly(&root, &["docs", "web", "offline-copy"]);
     for line in [
-        "created docs/requirements/planner/itinerary.md",
-        "created docs/spec/planner/itinerary.md",
-        "created docs/requirements/planner/README.md",
-        "created docs/spec/planner/README.md",
+        "created docs/requirements/web/offline-copy.md",
+        "created docs/spec/web/offline-copy.md",
+        "created docs/requirements/web/README.md",
+        "created docs/spec/web/README.md",
         "changed docs/components.md",
         "changed docs/requirements/README.md",
         "changed docs/spec/README.md",
@@ -270,30 +289,32 @@ fn a_registered_component_gets_both_its_documents_and_a_linked_registry_row() {
     // The address already has its tag, so the live list is left alone.
     assert!(!out.contains("docs/TODO.md"), "{out}");
     let reg = read(&root, "components.md");
-    assert!(
-        reg.contains("| [itinerary](spec/planner/itinerary.md) | planner | PLN:ITINERARY | | | ")
-    );
-    assert!(read(&root, "requirements/planner/itinerary.md").contains("### PLN:ITINERARY-F1 — "));
-    assert!(read(&root, "spec/planner/README.md").contains("| [itinerary.md](itinerary.md) | "));
+    assert!(reg.contains(
+        "| [offline-copy](spec/web/offline-copy.md) | web | WEB:OFFLINE | | | "
+    ));
+    assert!(read(&root, "requirements/web/offline-copy.md").contains("### WEB:OFFLINE-F1 — "));
+    assert!(read(&root, "spec/web/README.md").contains("| [offline-copy.md](offline-copy.md) | "));
 }
 
 #[test]
 fn a_registered_component_with_one_document_gets_the_other() {
     let root = real_vault();
-    fs::remove_file(root.join("docs/spec/shared/trip-time.md")).unwrap();
+    register_without_documents(&root);
+    scaffold_cleanly(&root, &["docs", "web", "offline-copy"]);
+    fs::remove_file(root.join("docs/spec/web/offline-copy.md")).unwrap();
     let before = findings(&root);
     assert!(
         !before.is_empty(),
         "removing a specification leaves findings"
     );
-    let out = scaffold_keeping_lines(&root, &["docs", "shared", "trip-time"]).stdout;
+    let out = scaffold_keeping_lines(&root, &["docs", "web", "offline-copy"]).stdout;
     assert!(
-        out.contains("created docs/spec/shared/trip-time.md"),
+        out.contains("created docs/spec/web/offline-copy.md"),
         "{out}"
     );
-    assert!(!out.contains("requirements/shared/trip-time.md"), "{out}");
+    assert!(!out.contains("requirements/web/offline-copy.md"), "{out}");
     // The index row and the registry link are already there, so neither file changes.
-    assert!(!out.contains("docs/spec/shared/README.md"), "{out}");
+    assert!(!out.contains("docs/spec/web/README.md"), "{out}");
     assert!(!out.contains("docs/components.md"), "{out}");
     // SHR:DOC-SCAFFOLD-F2: on a vault with findings, the command adds none.
     let after = findings(&root);
