@@ -4,6 +4,18 @@ What has been done, newest first. The live work list, `TODO.md`, numbers each pi
 owed, such as TODO-9. An entry that finishes one of those items names it, so a reader can find what
 became of its number. `documentation-system.md` sets the rules.
 
+## 2026-11-14 — TODO-10, a trip opens on a home page for each traveller
+
+*By:* James Berry, with Claude
+
+A trip opens on a home page for each traveller (ADR-0014, a trip opens on a home page for each
+traveller). A trip has its own first and last dates, and each traveller sets their own within them.
+Before their dates, the home page counts the days left. During them, it says which day of their
+trip it is. It lists the traveller's bookings for today and the next ones, and links to the page
+for the country the phone is in. The phone works out its country itself, and its location never
+leaves it. A trip's bookings have a page of their own, and its calendar is seen only by the
+travellers an admin chooses (ADR-0013, which supersedes ADR-0010).
+
 ## 2026-11-14 — TODO-3, access to a page passes down the tree
 
 *By:* James Berry, with Claude

@@ -11,6 +11,7 @@ system, component or concern is added here before any document names it.
 | planner | PLN | | The trip planner: each trip, the calendar it is pencilled in on, its firm dates, and its research pages |
 | access | ACC | | Accounts, invitations to a trip, and who may see and change each of its pages |
 | web | WEB | | The app travellers use on a computer or a phone, including reading a trip with no connection |
+| bookings | BKG | | A trip's bookings, such as flights, stays and tours, each for the travellers it names, and the page that lists them |
 
 ## Components
 

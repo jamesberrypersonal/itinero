@@ -15,16 +15,18 @@ A trip is built from these parts:
 | **Trip** | One journey, with a name | Twelve days in France, the United States and Canada in June 2026 |
 | **Place** | A country, or somewhere in one | France, or Paris in France |
 | **Stretch** | A place, and the dates a traveller expects to be there, pencilled in | Paris, from 3 to 5 June |
-| **Firm item** | Something fixed to a date, with a time if it has one | A booked flight from Paris to New York on 5 June, leaving at 10:00 |
+| **Firm item** | Something decided but not booked, fixed to a date, with a time if it has one | A bus from New York to Montreal on 8 June, not yet booked |
+| **Booking** | Something booked, fixed to a date, for the travellers it names | A booked flight from Paris to New York on 5 June, leaving at 10:00 |
 | **Page** | Research a traveller writes by hand, belonging to one trip | Notes on where to eat in Lyon |
 | **Graveyard** | The pages travellers have deleted from a trip, kept so that they can be restored | A city's notes, deleted with the city |
 
-A trip's calendar is pencilled in, and only its firm items are fixed (ADR-0010). A day of a trip is
-one calendar date. A firm item's time is in the local time of the place it happens. The traveller
-chooses that place's time zone, because the planner does not find it (`PLN-NR5`). Times are held by
-`shared/trip-time`, the component that holds a trip's dates and times. It holds four kinds of value
-with a time: an exact time like 09:10, an approximate time like around 14:00, a window like 14:00 to
-16:00, and a part of a day like the afternoon.
+A trip's calendar holds pencilled stretches and firm items. A trip's bookings have a page of their
+own, and the calendar shows them too (ADR-0013). A day of a trip is one calendar date. A firm item's
+time is in the local time of the place it happens. The traveller chooses that place's time zone,
+because the planner does not find it (`PLN-NR5`). Times are held by `shared/trip-time`, the
+component that holds a trip's dates and times. It holds four kinds of value with a time: an exact
+time like 09:10, an approximate time like around 14:00, a window like 14:00 to 16:00, and a part of
+a day like the afternoon.
 
 ---
 
@@ -64,7 +66,7 @@ stretches in two countries shows both. ^pln-f2
 > traveller sees at a glance roughly when they will be in each one.
 
 > **Does a country hold anything, such as its entry rules?** No. A country is a name on a stretch
-> (ADR-0010, a trip's calendar is pencilled in).
+> (ADR-0013, a trip's calendar is pencilled in, and its bookings have a page of their own).
 
 ### PLN-F3 — A traveller adds firm items, each fixed to a date
 
@@ -81,8 +83,9 @@ of any of the four kinds with a time, in the local time of the place it happens.
 > **What does this buy?** Only a few things in a loosely planned trip are fixed, but those few must
 > not be missed. A traveller records each one where they will see it.
 
-> **What counts as a firm item?** Anything fixed to a date, such as a booked tour, a booked table,
-> or a day the traveller has decided to move on.
+> **What counts as a firm item?** Anything decided and fixed to a date but not booked, such as a
+> day to move on, or a bus not yet booked. Something booked is a booking, which has a page of its
+> own.
 
 ### PLN-F4 — A firm item of travel records how the traveller travels, and when they leave and arrive, each in local time
 
@@ -93,29 +96,31 @@ travel takes. It refuses travel that certainly arrives before it leaves, whateve
 turns out to be, and says why. ^pln-f4
 
 - **Verification:** on the trip of `PLN-F1`,
-    - add a flight from Paris to New York leaving at 10:00 on 5 June, Paris time, and arriving at
-      12:30, New York time, and confirm it reads 10:00 Paris time, 12:30 New York time, taking 8
-      hours 30 minutes
+    - add a planned flight from Paris to New York leaving at 10:00 on 5 June, Paris time, and
+      arriving at 12:30, New York time, and confirm it reads 10:00 Paris time, 12:30 New York time,
+      taking 8 hours 30 minutes
     - add a train from Lyon to Paris on 3 June, with no times, and confirm it is accepted
     - add travel leaving at 10:00 and arriving at 03:00 the same day, both Paris time, and confirm
       it is refused, with the reason
 
-> **What does this buy?** A ticket gives each end of a journey in the local time of its place. The
-> traveller copies both in as printed, and sees how long the journey really takes.
+> **What does this buy?** A timetable gives each end of a journey in the local time of its place.
+> The traveller copies both in as printed, and sees how long the journey really takes.
 
 > **Is travel needed between every two stretches?** No. Travel appears on the calendar only once a
-> traveller adds it as a firm item (ADR-0010, a trip's calendar is pencilled in).
+> traveller adds it, as a firm item or as a booking (ADR-0013, a trip's calendar is pencilled in,
+> and its bookings have a page of their own).
 
-### PLN-F5 — The calendar shows firm items apart from the pencilled stretches, in the order they happen
+### PLN-F5 — The calendar shows firm items and bookings apart from the pencilled stretches, in the order they happen
 
-The calendar shows each firm item on the day of its local date, so that it stands out from the
-stretches around it. Travel that runs overnight shows on every day it covers. The firm items of
-each day are listed in the order they happen, whatever time zone each is in. ^pln-f5
+The calendar shows each firm item, and each booking the traveller may see, on the day of its local
+date, so that it stands out from the stretches around it. Travel that runs overnight shows on every
+day it covers. The firm items of each day, with its bookings, are listed in the order they happen,
+whatever time zone each is in. ^pln-f5
 
 - **Verification:** on the trip of `PLN-F1`, with the flight of `PLN-F4`,
     - confirm the flight shows on 5 June, apart from the pencilled stretches of France and New York
-    - add a hotel check-in between 14:00 and 16:00 on 5 June, New York time, and a coffee at 08:00
-      on 5 June, Paris time, and confirm 5 June lists coffee, flight, check-in
+    - add a booking for a hotel check-in between 14:00 and 16:00 on 5 June, New York time, and a
+      coffee at 08:00 on 5 June, Paris time, and confirm 5 June lists coffee, flight, check-in
     - add a bus leaving New York at 22:30 on 8 June and arriving in Montreal at 07:00 on 9 June,
       and confirm it shows on both days
 
@@ -228,7 +233,8 @@ Following the link opens the page. ^pln-f11
 
 - **Verification:** on a trip with Santiago pencilled in, and a page titled Santiago,
     - link the stretch to the page, and confirm following the link opens it
-    - link a booked tour to the page Eating in Santiago, and confirm following the link opens it
+    - link a planned market visit to the page Eating in Santiago, and confirm following the link
+      opens it
     - delete the page Santiago, and confirm the stretch shows that its page is in the graveyard
 
 > **What does this buy?** The research for where the traveller is, or for what is booked, is one
@@ -280,6 +286,49 @@ old parent is in the graveyard too. Nothing deletes a page from the graveyard. ^
 > pages in the tree, so the graveyard never makes it larger. With no connection, a link to a page in
 > the graveyard shows only that its page is not on the phone.
 
+### PLN-F14 — A trip has its own first and last dates, and each traveller has theirs within them
+
+The traveller who creates a trip sets its first and last dates. Each traveller, on joining the trip,
+can set their own first and last dates, which fall within the trip's. A traveller who sets none has
+the trip's dates. The planner refuses a traveller's dates outside the trip's, and refuses to change
+the trip's dates so that a traveller's would fall outside them, naming each such traveller. ^pln-f14
+
+- **Verification:** on a running system,
+    - create a trip from 1 to 20 December, and confirm those are its dates
+    - join it as a second traveller, set 6 to 13 December, and confirm they are accepted
+    - set 28 November to 3 December as the second traveller's dates, and confirm it is refused,
+      with the reason
+    - change the trip to 8 to 20 December, and confirm it is refused, naming the second traveller
+
+> **What does this buy?** A companion joining for one week of a month has a trip of their own
+> length, and the home page counts their days, not everyone's (`PLN-F15`).
+
+> **Why not work the dates out from the calendar?** A traveller who may not see the calendar would
+> learn its span from them (ADR-0014, a trip opens on a home page for each traveller).
+
+### PLN-F15 — A trip opens on a home page for each traveller, with their own day, bookings and country
+
+Opening a trip shows a home page for the traveller looking. Before their first date, it says how
+many days are left until it. During their dates, it says which day of their trip today is. After
+their last date, it says their trip is over. It lists their bookings for today, and their next
+ones. When the traveller lets the app read the phone's location, it links to the trip's page for
+the country they are in. The location never leaves the phone. ^pln-f15
+
+- **Verification:** on the trip of `PLN-F14`, as the second traveller, with a booked tour on 9
+  December for them and a booked flight on 9 December for the first traveller only,
+    - on 3 December, confirm the home page says 3 days are left
+    - on 9 December, confirm it says day 4 of 8, and lists the tour, and not the flight
+    - with the phone in Chile, and the trip holding a page made for Chile, confirm the home page
+      links to that page
+    - confirm no request the phone sends holds its location
+    - on 14 December, confirm it says the trip is over
+
+> **What does this buy?** A traveller opening a trip sees what matters to them that day, on the
+> road, without seeing anyone else's plan.
+
+> **Why the country, and not the city?** Finding the city on the phone needs far more data held
+> there. The country is all the home page knows, for now (`PLN-NR7`).
+
 ---
 
 ## Non-functional requirements
@@ -294,11 +343,12 @@ phone (ADR-0004, a trip is read-only offline).
 
 | Identifier | The planner does not | Because |
 |---|---|---|
-| **PLN-NR1** | Warn of a gap between stretches, an overlap, or two stretches in a row with no travel between them | A rough plan has loose ends on purpose (ADR-0010, a trip's calendar is pencilled in) |
+| **PLN-NR1** | Warn of a gap between stretches, an overlap, or two stretches in a row with no travel between them | A rough plan has loose ends on purpose (ADR-0013, a trip's calendar is pencilled in, and its bookings have a page of their own) |
 | **PLN-NR2** | Accept a change to a trip from a device with no connection | A trip changes only while the traveller is online (ADR-0004, a trip is read-only offline) |
 | **PLN-NR3** | Track what a trip costs, or what a traveller spends | Travellers chose not to track spending in Itinero |
 | **PLN-NR4** | Hold a page that belongs to more than one trip, or to none | Pages shared between trips, such as a country's, are future work |
 | **PLN-NR5** | Find the time zone of a place by itself | Finding a place's time zone is future work (`SHR:TRIP-TIME-NR1`) |
-| **PLN-NR6** | Hold facts about a country, such as its entry rules or emergency numbers | A country is a name on a stretch, for now (ADR-0010, a trip's calendar is pencilled in) |
+| **PLN-NR6** | Hold facts about a country, such as its entry rules or emergency numbers | A country is a name on a stretch, for now (ADR-0013, a trip's calendar is pencilled in, and its bookings have a page of their own) |
+| **PLN-NR7** | Find the city a traveller is in | Finding the city needs a list of places held on the phone. It is future work |
 
 ^pln-nr

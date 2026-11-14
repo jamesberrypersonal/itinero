@@ -353,22 +353,22 @@ fn a_new_system_takes_components_decisions_and_guides() {
         &root,
         &[
             "system",
-            "bookings",
-            "BKG",
-            "Bookings, and the trips they belong to",
+            "journal",
+            "JRN",
+            "Journals, and the trips they belong to",
             "A Keeper",
         ],
     );
-    assert!(read(&root, "roadmap/bookings.md").contains("Milestone Bookings-0.1"));
+    assert!(read(&root, "roadmap/journal.md").contains("Milestone Journal-0.1"));
     assert!(read(&root, "roadmap/README.md").contains("| A Keeper |"));
     scaffold_cleanly(
         &root,
         &[
             "component",
-            "bookings",
+            "journal",
             "email-parser",
-            "BKG:PARSER",
-            "Reads a confirmation email",
+            "JRN:PARSER",
+            "Reads a journal entry sent by email",
         ],
     );
     let n = next_record(&root);
@@ -376,8 +376,8 @@ fn a_new_system_takes_components_decisions_and_guides() {
         &root,
         &[
             "decision",
-            "Bookings are matched to trips by date",
-            "bookings",
+            "Journal entries are matched to trips by date",
+            "journal",
             "shared/trip-time",
             "--date",
             "2026-11-11",
@@ -385,25 +385,25 @@ fn a_new_system_takes_components_decisions_and_guides() {
     );
     let record = read(
         &root,
-        &format!("decisions/{n}-bookings-are-matched-to-trips-by-date.md"),
+        &format!("decisions/{n}-journal-entries-are-matched-to-trips-by-date.md"),
     );
-    assert!(record.contains("- **Date:** 2026-11-11\n- **Scope:** bookings, shared/trip-time\n"));
-    // The new subject sorts after web, the last system, and before the components.
+    assert!(record.contains("- **Date:** 2026-11-11\n- **Scope:** journal, shared/trip-time\n"));
+    // The new subject sorts after bookings, the last system, and before the components.
     let index = read(&root, "decisions/README.md");
-    assert!(index.find("### web") < index.find("### bookings"));
-    assert!(index.find("### bookings") < index.find("### shared/doc-check"));
+    assert!(index.find("### bookings") < index.find("### journal"));
+    assert!(index.find("### journal") < index.find("### shared/doc-check"));
     assert!(index.find("### shared/doc-check") < index.find("### shared/trip-time"));
     scaffold_cleanly(
         &root,
         &[
             "guide",
-            "bookings",
-            "forwarding-a-booking",
-            "Forwarding a booking",
-            "Sending a confirmation email to a trip",
+            "journal",
+            "emailing-a-journal-entry",
+            "Emailing a journal entry",
+            "Sending a day's notes to a trip by email",
         ],
     );
-    assert!(read(&root, "guides/README.md").contains("## Bookings\n\n| Guide | Covers |"));
+    assert!(read(&root, "guides/README.md").contains("## Journal\n\n| Guide | Covers |"));
 }
 
 #[test]
@@ -499,8 +499,8 @@ fn a_refused_command_writes_nothing_and_says_why() {
     let root = real_vault();
     let cases: &[(&[&str], &str)] = &[
         (
-            &["component", "bookings", "parser", "BKG:PARSER", "x"],
-            "the system bookings is not registered",
+            &["component", "journal", "parser", "JRN:PARSER", "x"],
+            "the system journal is not registered",
         ),
         (
             &["component", "shared", "doc-check", "SHR:DOC-CHECK2", "x"],

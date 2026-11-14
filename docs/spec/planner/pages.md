@@ -70,7 +70,8 @@ type Page = { format: 1; id: Id; trip: Id; revision: number;
               parent?: Id;   // absent: at the top of the trip
               order: string; // its place among the pages under its parent (§4.3)
               title: string; text: string;
-              buried?: number };   // present: deleted. Higher: deleted later (§4.4)
+              buried?: number;     // present: deleted. Higher: deleted later (§4.4)
+              country?: string };  // the ISO 3166-1 alpha-2 code of a page made for a country
 
 type Pages = { trip: Id; pages: readonly Page[] };      // every page, ordered by id
 
@@ -91,7 +92,8 @@ type State = "tree" | "graveyard" | "absent";
 type Buried = { page: Page; went: number };                  // went: pages that went with it
 type Hit = { page: Page; around: readonly { before: string; match: string; after: string }[] };
 
-function newPages(trip: Id, countries: readonly { id: Id; title: string }[]): Result<Pages>;
+function newPages(trip: Id,
+                  countries: readonly { id: Id; title: string; country: string }[]): Result<Pages>;
 function apply(pages: Pages, change: Change): Result<Applied>;
 
 function tree(pages: Pages): readonly Branch[];
@@ -100,6 +102,7 @@ function page(pages: Pages, id: Id): Page | undefined;
 function beneath(pages: Pages, id: Id): number;
 function graveyard(pages: Pages): readonly Buried[];
 function forPhone(pages: Pages): Pages;
+function countryPage(pages: Pages, country: string): Page | undefined;
 
 function pageLink(id: Id, words: string): string;
 function linkTarget(href: string): Id | undefined;
@@ -159,6 +162,12 @@ Behaviour crossing every operation:
 country given, in the order given, each with no text (`PLN:PAGES-F6`). With no countries, it gives
 no pages. The caller makes each identifier, as `crypto.randomUUID()` does, and takes each title from
 the itinerary's `countries()`, which `spec/planner/itinerary.md` §5.2 gives.
+
+Each page made for a country keeps that country's code in `country`. No change sets or clears it,
+so it stays through a rename and a move (ADR-0014, a trip opens on a home page for each traveller).
+`countryPage(pages, country)` gives the page in the tree whose `country` is the code given, or
+`undefined` where there is none. Where two pages share a code, it gives the first in the order of
+the tree. The home page calls it with the country the phone is in.
 
 ### 4.2 apply
 
@@ -371,7 +380,7 @@ development dependencies are `@itinero/trip-time`, TypeScript and Node's type de
 | [PLN:PAGES-F3](../../requirements/planner/pages.md#^pln-pages-f3) | `beneath` and the `bury` change, in §4.4, and the `in-graveyard` refusal. |
 | [PLN:PAGES-F4](../../requirements/planner/pages.md#^pln-pages-f4) | `graveyard` and `page`, in §4.4, and the `restore` change of §4.5. |
 | [PLN:PAGES-F5](../../requirements/planner/pages.md#^pln-pages-f5) | The link form, `pageLink`, `linkTarget` and `state`, in §4.6. |
-| [PLN:PAGES-F6](../../requirements/planner/pages.md#^pln-pages-f6) | `newPages`, in §4.1. |
+| [PLN:PAGES-F6](../../requirements/planner/pages.md#^pln-pages-f6) | `newPages`, the `country` of each page it makes, and `countryPage`, in §4.1. |
 | [PLN:PAGES-F7](../../requirements/planner/pages.md#^pln-pages-f7) | `search` and its folding, in §4.7. |
 | [PLN:PAGES-F8](../../requirements/planner/pages.md#^pln-pages-f8) | The text form of §4.8 and §5.1, and `forPhone`. |
 | [PLN:PAGES-F9](../../requirements/planner/pages.md#^pln-pages-f9) | `apply`, with every check made before anything is changed, in §4.2. Applying each change to the copy held online is the component that holds it, which is not yet registered. |
@@ -380,6 +389,7 @@ development dependencies are `@itinero/trip-time`, TypeScript and Node's type de
 | [PLN-F8](../../requirements/planner/planner.md#^pln-f8) | The tree, moves and deletes (§4.2 to §4.4). Asking the traveller to confirm a delete is the web app. |
 | [PLN-F9](../../requirements/planner/planner.md#^pln-f9) | Links that name their page, resolved with `state` (§4.6). Opening a page from a link is the web app. |
 | [PLN-F10](../../requirements/planner/planner.md#^pln-f10) | A page for each country given to `newPages` (§4.1). Choosing the countries is the web app. |
+| [PLN-F15](../../requirements/planner/planner.md#^pln-f15) | `countryPage`, for the country the phone is in (§4.1). The day, the bookings and the phone's country are the web app, whose specification is not yet written. |
 | [PLN-F11](../../requirements/planner/planner.md#^pln-f11) | `state`, for the page a stretch or a firm item names (§4.6). Naming the page is `planner/itinerary`. |
 | [PLN-F12](../../requirements/planner/planner.md#^pln-f12) | `search`, over the pages of `forPhone` with no connection (§4.7, §4.8). Showing the results is the web app. |
 | [PLN-F13](../../requirements/planner/planner.md#^pln-f13) | `graveyard`, `page` and `restore` (§4.4, §4.5). Refusing a traveller who is not an admin is the access system, whose requirements are not yet written. |

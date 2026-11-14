@@ -134,16 +134,19 @@ restored. ^pln-pages-f5
 
 The pages component starts a new trip's pages empty, or with one page at the top of the trip for
 each country the caller gives, titled with the name the caller gives, in the order given. Each is
-then an ordinary page. ^pln-pages-f6
+then an ordinary page, which remembers its country even after it is renamed or moved. Given a
+country, the pages component gives the page in the tree made for it, if there is one. ^pln-pages-f6
 
 - **Verification:**
     - start a trip's pages with Chile, then Argentina, and confirm the tree holds those two pages at
       the top, in that order
     - rename, move and delete the page Argentina, and confirm each is accepted
+    - rename Chile to Chile and Patagonia, move it under another page, and confirm the page made for
+      Chile is still that page
     - start a trip's pages with no countries, and confirm the tree holds no page
 
 > **What does this buy?** Research for a trip across several countries starts country by country
-> (`PLN-F10`).
+> (`PLN-F10`). The home page finds the page for the country the traveller is in (`PLN-F15`).
 
 ### PLN:PAGES-F7 — A search lists every page in the tree whose title or text holds the words searched for
 

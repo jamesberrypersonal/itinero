@@ -32,9 +32,11 @@ keeps:
 | [0007](0007-trip-time-is-written-in-typescript.md) | trip-time is written in TypeScript | shared/trip-time | Accepted |
 | [0008](0008-trip-time-carries-its-own-time-zone-rules.md) | trip-time carries its own copy of the time-zone rules | shared/trip-time, web | Accepted |
 | [0009](0009-a-finished-item-leaves-the-list-when-finished.md) | A finished item leaves the live list in the commit that finishes it | workspace | Accepted |
-| [0010](0010-a-trips-calendar-is-pencilled-in.md) | A trip's calendar is pencilled in, and only its firm items are fixed | planner | Accepted |
+| [0010](0010-a-trips-calendar-is-pencilled-in.md) | A trip's calendar is pencilled in, and only its firm items are fixed | planner | Superseded by ADR-0013 |
 | [0011](0011-a-trips-pages-form-a-tree.md) | A trip's pages form a tree, with links between any two | planner, access | Accepted |
 | [0012](0012-access-passes-down-the-tree.md) | Access to a page passes down to the pages beneath it | access, planner/pages | Accepted |
+| [0013](0013-bookings-have-a-page-of-their-own.md) | A trip's bookings have a page of their own, and its calendar is seen only by the travellers an admin chooses | planner, bookings, access | Accepted |
+| [0014](0014-a-trip-opens-on-a-home-page.md) | A trip opens on a home page for each traveller, with their own dates and the country they are in | planner, web | Accepted |
 
 ## By subject
 
@@ -52,8 +54,10 @@ keeps:
 | ADR | Title | Status |
 |---|---|---|
 | [0004](0004-a-trip-is-read-only-offline.md) | A trip can be read without a connection, but changed only with one | Accepted |
-| [0010](0010-a-trips-calendar-is-pencilled-in.md) | A trip's calendar is pencilled in, and only its firm items are fixed | Accepted |
+| [0010](0010-a-trips-calendar-is-pencilled-in.md) | A trip's calendar is pencilled in, and only its firm items are fixed | Superseded by ADR-0013 |
 | [0011](0011-a-trips-pages-form-a-tree.md) | A trip's pages form a tree, with links between any two | Accepted |
+| [0013](0013-bookings-have-a-page-of-their-own.md) | A trip's bookings have a page of their own, and its calendar is seen only by the travellers an admin chooses | Accepted |
+| [0014](0014-a-trip-opens-on-a-home-page.md) | A trip opens on a home page for each traveller, with their own dates and the country they are in | Accepted |
 
 ### access
 
@@ -61,6 +65,7 @@ keeps:
 |---|---|---|
 | [0011](0011-a-trips-pages-form-a-tree.md) | A trip's pages form a tree, with links between any two | Accepted |
 | [0012](0012-access-passes-down-the-tree.md) | Access to a page passes down to the pages beneath it | Accepted |
+| [0013](0013-bookings-have-a-page-of-their-own.md) | A trip's bookings have a page of their own, and its calendar is seen only by the travellers an admin chooses | Accepted |
 
 ### web
 
@@ -68,6 +73,13 @@ keeps:
 |---|---|---|
 | [0004](0004-a-trip-is-read-only-offline.md) | A trip can be read without a connection, but changed only with one | Accepted |
 | [0008](0008-trip-time-carries-its-own-time-zone-rules.md) | trip-time carries its own copy of the time-zone rules | Accepted |
+| [0014](0014-a-trip-opens-on-a-home-page.md) | A trip opens on a home page for each traveller, with their own dates and the country they are in | Accepted |
+
+### bookings
+
+| ADR | Title | Status |
+|---|---|---|
+| [0013](0013-bookings-have-a-page-of-their-own.md) | A trip's bookings have a page of their own, and its calendar is seen only by the travellers an admin chooses | Accepted |
 
 ### planner/pages
 

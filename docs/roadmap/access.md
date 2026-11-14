@@ -18,6 +18,10 @@ Access is set page by page, so its design follows the planner's pages, in Milest
 - Access to a page passes down to the pages beneath it, from the trip's own access as the root. An
   admin can change a traveller's access for a branch, and a traveller who may see a page may see
   every page above it (ADR-0012, access to a page passes down to the pages beneath it).
+- The access system has its requirements. A traveller signs in with a Google or an Apple account,
+  and joins a trip by an invitation to their email address. A trip's creator is always its admin.
+  A traveller sees a trip's calendar only once an admin grants it. An admin removes a traveller,
+  who then loses the trip on every device.
 
 ## Pending
 
@@ -25,8 +29,5 @@ Access is set page by page, so its design follows the planner's pages, in Milest
 
 #### Milestone Access-0.1 — Accounts, invitations and page access
 
-- Write the access system's requirements. A traveller joins a trip by invitation and creates an
-  account. A trip's creator is always its admin, and can make other travellers admins. An admin
-  sets each traveller's view and edit access to each page separately.
 - Divide the access system into components, and register them.
 - Write the requirements and specification for each of those components.

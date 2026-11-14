@@ -13,6 +13,16 @@ the planner's itinerary. The planner is the first system that needs that compone
 
 ### Phase 0 — Design
 
+#### Milestone Planner-0.3 — The home page, and the trip held online
+
+- A trip opens on a home page for each traveller, with their own dates, their bookings and the
+  country the phone is in (ADR-0014, a trip opens on a home page for each traveller).
+- A trip's calendar holds stretches and unbooked firm items, and is seen only by the travellers an
+  admin chooses. Bookings have a page of their own (ADR-0013, a trip's bookings have a page of their
+  own, and its calendar is seen only by the travellers an admin chooses).
+- The planner system's requirements promise a trip's dates, each traveller's dates within them, and
+  the home page.
+
 #### Milestone Planner-0.2 — Pages
 
 - A trip's pages form a tree, with links between any two, and hold Markdown text. A trip's chosen
@@ -52,7 +62,7 @@ the planner's itinerary. The planner is the first system that needs that compone
 
 ### Phase 0 — Design
 
-#### Milestone Planner-0.3 — The trip held online
+#### Milestone Planner-0.3 — The home page, and the trip held online
 
 - Register the component that holds the copy of each trip online, its calendar and its pages, and
   write its requirements and specification. It moved here from Milestone Planner-0.1, because

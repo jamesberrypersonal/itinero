@@ -31,5 +31,8 @@ theirs, in Milestone Planner-0.2 and Milestone Access-0.1.
   phone. A phone with no connection shows the trip as it last stood, and says when that was.
 - Decide how a phone protects its copy of a trip. ADR-0004 requires the decision before a trip
   holds personal details, such as emergency contacts.
+- Write the web app's requirements for a trip's home page: the traveller's day, their bookings,
+  and the country the phone is in, worked out on the phone with a map of country borders held
+  there (ADR-0014, a trip opens on a home page for each traveller).
 - Divide the web app into components, and register them.
 - Write the requirements and specification for each of those components.

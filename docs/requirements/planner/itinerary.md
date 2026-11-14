@@ -14,8 +14,9 @@ A trip has a name, and holds stretches and firm items:
 - **A place** is a country, or somewhere in one, such as Paris in France.
 - **A stretch** is a place and the dates a traveller expects to be there, pencilled in. Its dates
   run from its first day to its last, both included.
-- **A firm item** is something fixed to a date, such as a booked tour. It has a date, or a time that
-  includes its date.
+- **A firm item** is something decided but not booked, fixed to a date, such as a day to move on.
+  It has a date, or a time that includes its date. A booking is not a firm item: bookings are the
+  bookings system's.
 - **A firm item of travel** goes from one place to another, by a way of travelling such as a train.
 
 Times are held by `shared/trip-time`, the component that holds a trip's dates and times in the
@@ -52,8 +53,8 @@ fall outside 1970 to 9999, or that covers more than 366 days, and says why. ^pln
 > **What does this buy?** The traveller pencils in a trip roughly and changes it often
 > (`PLN-F1`). The itinerary never stands in the way of a half-built plan.
 
-> **Why accept gaps and overlaps?** A rough plan has loose ends on purpose (ADR-0010, a trip's
-> calendar is pencilled in).
+> **Why accept gaps and overlaps?** A rough plan has loose ends on purpose (ADR-0013, a trip's
+> calendar is pencilled in, and its bookings have a page of their own).
 
 > **What of a stay longer than 366 days?** It is pencilled in as two stretches.
 
@@ -90,8 +91,8 @@ the caller gives. The itinerary refuses a time that trip-time refuses, with trip
       confirm it is refused, with trip-time's reason
     - remove the museum visit, and confirm the trip no longer holds it
 
-> **What does this buy?** The few fixed points of a trip are held exactly as they were booked
-> (`PLN-F3`). A booking with no time, such as a park ticket for a day, needs no time made up.
+> **What does this buy?** The few decided points of a trip are held exactly as they were decided
+> (`PLN-F3`). A firm item with no time, such as a day to move on, needs no time made up.
 
 > **Who decides a time's zone?** The caller does, from the time zone the traveller chose for it.
 > The itinerary does not look a place up (`PLN:ITINERARY-NR3`).
@@ -116,7 +117,7 @@ has a time, of any of the four kinds, at both ends. ^pln-itinerary-f4
 > time, and sees how long the journey really takes (`PLN-F4`).
 
 > **Is travel needed between two stretches?** No. The itinerary holds travel only as a traveller
-> adds it (ADR-0010, a trip's calendar is pencilled in).
+> adds it (ADR-0013, a trip's calendar is pencilled in, and its bookings have a page of their own).
 
 ### PLN:ITINERARY-F5 — The itinerary lays out a range of days, each with its stretches and its firm items in order
 
@@ -206,7 +207,7 @@ moved or deleted. ^pln-itinerary-f9
     - change the stretch to name no page, and confirm it reads back naming none
     - add a firm item naming a page, lay out its day, and confirm the item names the page
 
-> **What does this buy?** A traveller follows a stretch or a firm item, such as a booked tour, to
+> **What does this buy?** A traveller follows a stretch or a firm item, such as a planned bus, to
 > the page holding its research (`PLN-F11`).
 
 > **Does the itinerary know whether the page exists?** No. The pages are a component of their

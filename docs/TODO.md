@@ -3,13 +3,14 @@
 What needs active work, and what waits on a decision. `documentation-system.md` gives the list's
 rules. When an item is done, it leaves this list for `CHANGELOG.md` in the commit that finishes it.
 
-*Next free:* TODO-11
+*Next free:* TODO-12
 
 ## Tags
 
 | Tag | Means |
 |---|---|
 | access | Accounts, invitations and permissions |
+| bookings | A trip's bookings, such as flights, stays and tours, each for the travellers it names, and the page that lists them |
 | planner | The trip planner |
 | planner/itinerary | The itinerary: a trip's pencilled stretches and firm items |
 | planner/pages | The pages of a trip |
@@ -82,19 +83,20 @@ other languages travellers need is not known yet.
 
 *Releases:* Nothing is planned for it yet.
 
-### TODO-10 — Decide what a trip opens on
+### TODO-11 — Find the city a traveller is in, for the home page
 
 *Tags:* planner, web
 *Written:* 2026-11-14
 
-*Problem:* Nothing says what a traveller sees first on opening a trip, since the calendar is not
-its centre (ADR-0010, a trip's calendar is pencilled in).
+*Problem:* A trip's home page links to the page for the country the traveller is in, but not to the
+page for their city.
 
-*Reason:* A first idea is a home page for the trip. Before the trip, it would count down to the
-first day. During the trip, it would say which day of the trip today is. It would also list the
-next firm items, such as a booked flight, and link to the pages about the place the traveller is
-in. The idea was left for later, because nothing in Milestone Planner-0.1 depends on it.
+*Reason:* The phone works out its country from its own location, with a small map of country
+borders held on it (ADR-0014, a trip opens on a home page for each traveller). Finding the city
+needs a far larger list of places on the phone, and pages that remember the place they are about.
+The country was enough to start with (`PLN-NR7`).
 
-*Proposal:* Decide what a trip opens on, and add its requirements to the planner and the web app.
+*Proposal:* Decide where the list of places comes from, and how a page records its place. Then
+add the requirements to the planner and the web app.
 
 *Releases:* Nothing is planned for it yet.
