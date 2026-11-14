@@ -8,6 +8,7 @@ gives it.
 
 | Folder | Its documents promise about |
 |---|---|
+| [planner/](planner/README.md) | The trip planner: each trip, its pencilled calendar, its firm items, and its pages |
 | [shared/](shared/README.md) | Components that several systems use, or that no system owns |
 
 ## People
