@@ -28,7 +28,7 @@ Deliberately absent:
 - finding a stay's time zone, or its place on a map
 
 The stay booking is part of the package `@itinero/bookings`, which `spec/bookings/list.md`
-describes. A stay is entered by hand, and importing one from a confirmation email is planned
+describes. A stay is entered by hand, and importing one is not planned
 (ADR-0016, a trip's bookings are entered by hand, as one of four kinds, and kept with the trip
 online).
 

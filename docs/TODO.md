@@ -125,11 +125,13 @@ an email.
 
 *Reason:* Reading confirmations from many airlines and hotels is the largest part of the bookings
 system, and travellers needed their bookings before it could be built (ADR-0016, a trip's bookings
-are entered by hand, as one of four kinds, and kept with the trip online).
+are entered by hand, as one of four kinds, and kept with the trip online). It left open whether
+Itinero should import bookings at all.
 
-*Proposal:* Decide how a confirmation reaches Itinero, such as by forwarding it to an address of
-the trip, and how its booking is matched to a trip and its travellers. Start with flights and
-stays, and record the choice in a decision record scoped `bookings`.
+*Proposal:* Decide whether Itinero should import bookings at all. If it should, decide how a
+confirmation reaches Itinero, such as by forwarding it to an address of the trip, and how its
+booking is matched to a trip and its travellers, and record it in a decision record scoped
+`bookings`.
 
 *Releases:* Nothing is planned for it yet.
 
@@ -144,9 +146,9 @@ may need a connection.
 *Reason:* Files would fill the free plan's storage, and every phone's copy of a trip, faster than
 every other part of a trip together (`BKG-NR2`).
 
-*Proposal:* Decide where files are kept, how large one may be, and whether each phone keeps a copy
-of its traveller's files to read with no connection. Record it in a decision record scoped
-`bookings`.
+*Proposal:* Decide whether a booking should hold files at all. If it should, decide where files are
+kept, how large one may be, and whether each phone keeps a copy of its traveller's files to read
+with no connection, and record it in a decision record scoped `bookings`.
 
 *Releases:* Nothing is planned for it yet.
 

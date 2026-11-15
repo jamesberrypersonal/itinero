@@ -179,8 +179,8 @@ a phone with no connection. ^bkg-nfr1
 
 | Identifier | The bookings system does not | Because |
 |---|---|---|
-| **BKG-NR1** | Read a booking in from a confirmation email | Travellers enter bookings by hand first. Importing, first for flights and stays, is future work (ADR-0016, a trip's bookings are entered by hand, as one of four kinds, and kept with the trip online) |
-| **BKG-NR2** | Hold a file with a booking, such as a PDF ticket or a boarding pass | Files would fill the free plan's storage and every phone's copy. Holding them is future work (ADR-0016) |
+| **BKG-NR1** | Read a booking in from a confirmation email | Travellers enter bookings by hand. Whether Itinero should import them is undecided (ADR-0016, a trip's bookings are entered by hand, as one of four kinds, and kept with the trip online) |
+| **BKG-NR2** | Hold a file with a booking, such as a PDF ticket or a boarding pass | Files would fill the free plan's storage and every phone's copy. Whether Itinero should hold them is undecided (ADR-0016) |
 | **BKG-NR3** | Make a booking, or check one with the company that holds it | Itinero records bookings made elsewhere |
 | **BKG-NR4** | Track what a booking costs | Travellers chose not to track spending in Itinero (`PLN-NR3`) |
 | **BKG-NR5** | Keep a removed booking so that it can be restored | A booking is a few lines, and the company's confirmation still holds them |

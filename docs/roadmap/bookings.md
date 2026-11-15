@@ -31,11 +31,5 @@ the travellers it names and the admins (ADR-0013, a trip's bookings have a page 
 
 ## Pending
 
-### Phase 0 — Design
-
-#### Milestone Bookings-0.2 — Importing and files
-
-- Do TODO-14: decide how a booking is read in from its confirmation email, first for flights and
-  stays.
-- Do TODO-15: decide whether a booking can hold a file, such as a ticket, and whether each phone
-  keeps it.
+Nothing is pending. Milestone Bookings-0.1 is complete in design, and building it is not yet
+planned.

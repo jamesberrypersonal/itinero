@@ -27,8 +27,8 @@ may see, which they read with no connection (ADR-0004, a trip is read-only offli
 
 ## Decision
 
-**A traveller enters each booking by hand.** Importing a booking from a confirmation email is
-planned, first for flights and stays, and designed later.
+**A traveller enters each booking by hand.** Itinero does not import a booking from a
+confirmation email. Whether it ever should is left open.
 
 **Each booking is one of four kinds, and each kind has a form of its own.** The kinds are:
 
@@ -44,7 +44,7 @@ Every booking also holds the same few details, whatever its kind: the travellers
 booking reference, who it is booked with, a link, notes, and perhaps a page of the trip.
 
 **A booking holds text only.** A file, such as a PDF ticket or a boarding pass, is not held.
-Holding files is designed later.
+Whether Itinero should ever hold files is left open.
 
 **A trip's bookings are kept in its Durable Object, beside its calendar, pages and grants.** Each
 booking is a record of its own. The trip host applies each change to a booking once
@@ -61,14 +61,13 @@ booking is refused, and the traveller is shown the booking as it stands.
 - `spec/planner/trip-host.md` changes to hold a trip's bookings, check each change to one, and
   give each device its own in its catch-up.
 - A booking costs nothing to store: it is a few hundred bytes in the trip's own database.
-- The registry's table of booking kinds marks flights and stays as planned for importing, and
-  journeys and activities as not.
+- The registry's table of booking kinds marks no kind as imported, or planned for importing.
 - A traveller copies each time from their confirmation, and chooses each place's time zone, because
   nothing in Itinero finds the time zone of a place yet.
 - A traveller who needs a ticket's file at a gate opens it from their email, or from the link a
   booking holds. A link needs a connection.
-- A booking an importer reads in later is held in the same four forms, so importing adds no new
-  form.
+- Were importing ever added, a booking read in would be held in the same four forms, so it would
+  add no new form.
 - Two travellers changing one booking at once never lose a change silently. The second is told,
   and changes the booking again.
 
