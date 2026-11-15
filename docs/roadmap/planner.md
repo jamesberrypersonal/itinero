@@ -4,7 +4,8 @@
 
 The planner holds each trip: the calendar a traveller pencils it in on, the dates that are fixed,
 and the pages where travellers write up their research. Phase 0 designs it: the requirements and
-specifications for the planner and its components, before any of it is built.
+specifications for the planner and its components, before any of it is built. Phase 1 builds it,
+one component at a time, starting from the components that depend on no other.
 
 This roadmap also plans `shared/trip-time`, the component that holds the local dates and times of
 the planner's itinerary. The planner is the first system that needs that component.
@@ -67,5 +68,33 @@ the planner's itinerary. The planner is the first system that needs that compone
 
 ## Pending
 
-Nothing is pending. Phase 0's design of the planner is complete, and building it is not yet
-planned.
+### Phase 1 — Build
+
+#### Milestone Planner-1.1 — Dates and times
+
+- Add the npm workspace, in `package.json` at the repository root, and run its tests in continuous
+  integration beside the documentation check.
+- Build `shared/trip-time` as `@itinero/trip-time`, in `packages/trip-time/`, as its specification
+  gives it, with its copy of the time-zone rules.
+- Prove each requirement of `shared/trip-time` by the verification it carries.
+
+#### Milestone Planner-1.2 — The itinerary
+
+- Build `planner/itinerary` as `@itinero/itinerary`, in `packages/itinerary/`, as its specification
+  gives it.
+- Prove each requirement of `planner/itinerary` by the verification it carries.
+
+#### Milestone Planner-1.3 — Pages
+
+- Build `planner/pages` as `@itinero/pages`, in `packages/pages/`, as its specification gives it.
+- Prove each requirement of `planner/pages` by the verification it carries.
+
+#### Milestone Planner-1.4 — The trip held online
+
+**Waits on:** Milestone Access-1.3, Milestone Bookings-1.1
+
+- Build `planner/trip-host` in the Worker of the online side, in `services/online/`, with a Durable
+  Object for each trip, as its specification gives it.
+- Prove each requirement of `planner/trip-host` by the verification it carries.
+- Prove the planner system's own requirements that need only the online side, such as changes
+  shared between travellers. Those that need a phone wait for the web app.

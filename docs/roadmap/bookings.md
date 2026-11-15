@@ -4,7 +4,8 @@
 
 The bookings system holds a trip's bookings, such as flights, stays and tours, each for the
 travellers it names, and the page that lists them. Phase 0 designs it: its requirements, its
-components and their specifications, before any of it is built.
+components and their specifications, before any of it is built. Phase 1 builds it, one component
+at a time: what every booking has first, then each kind.
 
 A booking's visibility follows the access system, which promises that each booking is seen only by
 the travellers it names and the admins (ADR-0013, a trip's bookings have a page of their own).
@@ -31,5 +32,32 @@ the travellers it names and the admins (ADR-0013, a trip's bookings have a page 
 
 ## Pending
 
-Nothing is pending. Milestone Bookings-0.1 is complete in design, and building it is not yet
-planned.
+### Phase 1 — Build
+
+#### Milestone Bookings-1.1 — What every booking has
+
+**Waits on:** Milestone Planner-1.1
+
+- Build `bookings/list` as `@itinero/bookings`, in `packages/bookings/`, as its specification
+  gives it.
+- Prove each requirement of `bookings/list` by the verification it carries.
+
+#### Milestone Bookings-1.2 — Flights
+
+- Add `bookings/flight` to `@itinero/bookings`, as its specification gives it.
+- Prove each requirement of `bookings/flight` by the verification it carries.
+
+#### Milestone Bookings-1.3 — Stays
+
+- Add `bookings/stay` to `@itinero/bookings`, as its specification gives it.
+- Prove each requirement of `bookings/stay` by the verification it carries.
+
+#### Milestone Bookings-1.4 — Journeys
+
+- Add `bookings/journey` to `@itinero/bookings`, as its specification gives it.
+- Prove each requirement of `bookings/journey` by the verification it carries.
+
+#### Milestone Bookings-1.5 — Activities
+
+- Add `bookings/activity` to `@itinero/bookings`, as its specification gives it.
+- Prove each requirement of `bookings/activity` by the verification it carries.

@@ -4,7 +4,7 @@
 
 The access system holds accounts, invitations to a trip, and who may see and change each of its
 pages. Phase 0 designs it: its requirements, its components and their specifications, before any
-of it is built.
+of it is built. Phase 1 builds it, one component at a time.
 
 Access is set page by page, so its design follows the planner's pages, in Milestone Planner-0.2.
 
@@ -32,4 +32,26 @@ Access is set page by page, so its design follows the planner's pages, in Milest
 
 ## Pending
 
-Nothing is pending. Milestone Access-0.1 is complete in design, and building it is not yet planned.
+### Phase 1 — Build
+
+#### Milestone Access-1.1 — Accounts and signing in
+
+- Start the Worker of the online side, in `services/online/`, with its D1 database, and deploy it
+  to Cloudflare's free plan.
+- Register Itinero with Google, and build `access/accounts` in the Worker, as its specification
+  gives it.
+- Prove each requirement of `access/accounts` by the verification it carries.
+
+#### Milestone Access-1.2 — Permissions
+
+**Waits on:** Milestone Planner-1.3
+
+- Build `access/permissions` as `@itinero/permissions`, in `packages/permissions/`, as its
+  specification gives it.
+- Prove each requirement of `access/permissions` by the verification it carries.
+
+#### Milestone Access-1.3 — Membership and invitations
+
+- Build `access/membership` in the Worker, with invitations sent through Resend, as its
+  specification gives it.
+- Prove each requirement of `access/membership` by the verification it carries.
