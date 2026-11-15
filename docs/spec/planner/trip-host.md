@@ -154,7 +154,7 @@ Behaviour crossing every operation:
 | Table | Holds |
 |---|---|
 | `trip` | One row: the trip, in the itinerary's text form, its `changed`, and the trip's `sequence` |
-| `pages` | One row for each page: its `changed`, its text and title, and each other field of the page in a column of its own |
+| `pages` | One row for each page: its `changed`, its text and title, each other field of the page in a column of its own, and `seenBy` for a page deleted itself (§4.6) |
 | `grants` | One row: the trip's grants, in the permissions' text form |
 | `bookings` | One row for each booking, keyed by its identifier, in the bookings' text form, with its `changed` |
 | `creator` | One row: the creator's account |
@@ -196,15 +196,17 @@ one's name and dates, from its `summary`.
 *Porcelain:* `change` reads the change from its text, and checks it in this order (`PLN:HOST-F2`):
 
 1. **Who may make it.** For `calendar`, a `rename` or a `trip-dates` change needs the trip's
-   creator, or is refused with `creator-only`. A `traveller-dates` change for another traveller
-   needs an admin, or is refused with `own-dates-only`. Any other change needs edit access to the
-   calendar. For `pages`, the change is asked of `authorise` as a `change-page`. For `grants`, an
+   creator, or is refused with `creator-only`. A `traveller-dates` change for the traveller's own
+   dates needs only that they are on the trip, whatever their access to the calendar (`PLN-F14`).
+   One for another traveller needs an admin, or is refused with `own-dates-only`. Any other change
+   needs edit access to the calendar. For `pages`, the change is asked of `authorise` as a `change-page`. For `grants`, an
    `add` or a `remove` is refused with `membership-only`, and any other change is asked as a
    `grant`. For `bookings`, the trip host reads the booking held with the change's identifier, and
    takes the bookings' `touches`. It asks `authorise` for a `change-booking` naming `before`, where
    `before` names anyone, and for one naming `after`, where `after` names anyone. Each traveller of
-   `after` must be held in the grants, or the change is refused with `unknown-traveller`
-   (`PLN:HOST-F9`).
+   `after` must be held in the grants, or named in `before`, or the change is refused with
+   `unknown-traveller` (`PLN:HOST-F9`). A booking therefore keeps a traveller removed from the
+   trip, and a change cannot add one.
 2. **A move that widens who may see a page** (`PLN:HOST-F4`). For a `move`, the trip host asks
    `access/permissions`'s `widens`. Where it gives more than 0, and more than `agreed`, the change
    is refused with `agree-first`, with the count in `details.count`.
@@ -245,7 +247,7 @@ given everything an admin may see, and every other device its new list of member
 | `grants` | The trip's grants, in the permissions' text form, where the traveller is an admin. Absent for any other traveller |
 | `calendar` | The stretches and firm items, where the traveller's level for the calendar is view or edit, and the trip changed after `since`, or `holdsCalendar` is false. `null` where their level is none, and absent where nothing changed |
 | `pages` | For each page of `seen`, from `access/permissions`, its identifier and its `changed`. A page whose `changed` is after `since` also holds its text form |
-| `graveyard` | The identifiers and titles of the pages in the graveyard the traveller may see |
+| `graveyard` | For each page the pages' `graveyard` lists whose `seenBy` holds the traveller, or for every one to an admin: its identifier, its title, and the number of pages that went with it |
 | `bookings` | For each booking whose `bookingLevel` for the traveller is view or edit, its identifier and its `changed`. A booking whose `changed` is after `since` also holds its text form |
 
 A `since` that is absent counts as 0, so every page holds its text form. The device then:
@@ -289,6 +291,17 @@ text form to an admin (`PLN:HOST-F8`). A restore is a `restore` change to `pages
 `authorise` allows only to an admin. The pages' `apply` refuses a restore of a page whose parent
 is in the graveyard, with `parent-in-graveyard`, and the trip host returns the refusal unchanged.
 A restored page therefore always returns to its old place, and to the access of that place.
+
+*Plumbing:* each traveller is shown in the graveyard the deleted pages they could see when each was
+deleted (`ACC-F10`). The trip host records it as it applies a `bury`. Before the change is made,
+it asks `access/permissions`'s `pageLevel` of each traveller the grants hold who is not an admin.
+It then stores, in the buried page's `seenBy`, the accounts whose level was view or edit. A
+`restore` clears `seenBy`.
+
+A page deleted only because a page above it was deleted holds no `seenBy`, because the pages'
+`graveyard` does not list it. A page deleted before a page above it keeps its own `seenBy`, and is
+shown by it once the page above is restored (ADR-0021, a deleted page is restored only to its old
+place). A traveller who joins after a delete could not see the page then, and is not shown it.
 
 ### 4.7 The test suite
 
@@ -354,6 +367,7 @@ trip cannot be deleted yet (`ACC-NR4`).
 | [PLN:HOST-F6](../../requirements/planner/trip-host.md#^pln-host-f6) | The sockets of §4.5, and `touch`, in §4.3, for a member made an admin. |
 | [PLN:HOST-F7](../../requirements/planner/trip-host.md#^pln-host-f7) | `grant`, safe to repeat, in §4.3, and `not-a-member` on catching up, in §4.4. |
 | [PLN:HOST-F8](../../requirements/planner/trip-host.md#^pln-host-f8) | `buried`, and the `restore` change, in §4.6. |
+| [ACC-F10](../../requirements/access/access.md#^acc-f10) | `seenBy`, recorded at each delete, and the `graveyard` of the catch-up (§4.4, §4.6). Refusing to open or restore a page to a traveller who is not an admin is `access/permissions`. |
 | [PLN:HOST-F9](../../requirements/planner/trip-host.md#^pln-host-f9) | The `bookings` table of §4.1, the checks of a booking change in §4.3, and `bookings` in the catch-up of §4.4. |
 | [PLN:HOST-NFR1](../../requirements/planner/trip-host.md#^pln-host-nfr1) | `seen` for every read, `you` holding only the traveller's own grant, `grants` given to an admin alone, and sockets carrying only a sequence (§4.4, §4.5). |
 | [PLN:HOST-NFR2](../../requirements/planner/trip-host.md#^pln-host-nfr2) | One request for each change and each catch-up, and hibernating sockets (§6). |

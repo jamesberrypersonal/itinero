@@ -210,6 +210,8 @@ deleted. Only an admin opens a page in the graveyard to read it, or restores it.
     - as the traveller, confirm the graveyard does not list Santiago
     - delete Chile, and confirm the graveyard lists Chile for the traveller, and refuses to open it
     - as an admin, open and restore Chile, and confirm each is accepted
+    - delete Chile again, hide Chile from the traveller, and confirm the graveyard still lists Chile
+      for them, since they could see it when it was deleted
 
 > **What does this buy?** Deleting a page never shows it to someone who could not see it before. A
 > branch deleted by mistake is still recovered by an admin.

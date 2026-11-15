@@ -52,7 +52,7 @@ return.
 ### 3.2 Application interface
 
 None. The permissions component has no network or service interface. A request reaches it through
-the component holding the copy of each trip online (§8).
+`planner/trip-host`, the component holding the copy of each trip online.
 
 ### 3.3 Programming interface
 
@@ -93,7 +93,7 @@ type Request =
   | { kind: "change-booking"; travellers: readonly Id[] }
   | { kind: "grant";        change: GrantChange };
 
-type Seen = { pages: Pages; graveyard: readonly Id[]; calendar: Level };
+type Seen = { pages: Pages; calendar: Level };
 
 function newGrants(trip: Id): Grants;
 function applyGrant(grants: Grants, pages: Pages, change: GrantChange): Result<Grants>;
@@ -224,8 +224,6 @@ traveller unchanged (`ACC:PERMISSIONS-NR1`).
 - **pages:** the result of `forPhone` of `@itinero/pages`, with every page of level none left out.
   A page left out takes the pages beneath it with it, as §4.2 makes them none too. The pages kept
   are whole branches from the top of the trip down
-- **graveyard:** the identifiers of the pages of `@itinero/pages`'s `graveyard` whose level for the
-  traveller is view or edit, in the order `graveyard` gives
 - **calendar:** the traveller's level for the calendar
 
 The caller gives the traveller, and keeps on the traveller's phone, the pages of `seen`, the
@@ -318,12 +316,11 @@ The package's one runtime dependency is `@itinero/pages`. Its development depend
 | [ACC-F7](../../requirements/access/access.md#^acc-f7) | Exceptions, and the `hidden-above` refusal naming the page (§4.1, §4.2). |
 | [ACC-F8](../../requirements/access/access.md#^acc-f8) | `no-view` and `no-edit` (§4.4), and pages of level none left out of `seen` (§4.5). Showing a link as not available is `web/screens`. |
 | [ACC-F9](../../requirements/access/access.md#^acc-f9) | `widens` (§4.6). Asking the traveller to confirm is `web/screens`. |
-| [ACC-F10](../../requirements/access/access.md#^acc-f10) | The graveyard of `seen` (§4.5), and `admin-only` for `read-buried` and `restore` (§4.4). |
+| [ACC-F10](../../requirements/access/access.md#^acc-f10) | `admin-only` for `read-buried` and `restore` (§4.4), and `pageLevel`, which `planner/trip-host` asks at each delete (§4.2). |
 | [ACC-F12](../../requirements/access/access.md#^acc-f12) | `seen`, which gives what a phone may hold (§4.5). Bringing the phone's copy up to date is `planner/trip-host`. |
 | [ACC-NFR1](../../requirements/access/access.md#^acc-nfr1) | `authorise`, which fails closed (§4.4, §6). Asking it before every request is `planner/trip-host`. Knowing who sent the request is `access/accounts`. |
 
 ## 8. Open
 
-- **Changes to access after a delete.** A page in the graveyard keeps its parent, so a traveller's
-  level for it follows their access as it stands, not as it stood at the delete (§4.5). An admin
-  who hides a branch after one of its pages was deleted hides that page in the graveyard too.
+None. Which deleted pages each traveller is shown is recorded at each delete by `planner/trip-host`,
+with `pageLevel` (`spec/planner/trip-host.md` §4.6).

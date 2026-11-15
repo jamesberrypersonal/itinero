@@ -149,7 +149,7 @@ first and the last dates any stretch or firm item covers. ^pln-itinerary-f5
 
 The itinerary applies a change to a trip and gives the changed trip. Every change it applies raises
 the trip's revision by one. A change sets whole values, such as a stretch's dates, so of two changes
-to the same value of one stretch or firm item, the later one stands. Two copies of a trip that apply
+to the same value of one stretch, the later one stands. Two copies of a trip that apply
 the same changes in the same order, under the same time-zone rules, hold the same trip, wherever
 each is held. ^pln-itinerary-f6
 
@@ -235,6 +235,23 @@ traveller's dates outside them, naming each such traveller. ^pln-itinerary-f10
 
 > **Who may set the dates?** The caller decides: the trip's creator sets the trip's, and each
 > traveller sets their own (ADR-0014, a trip opens on a home page for each traveller).
+
+### PLN:ITINERARY-F11 — A change to a firm item made from an older version is refused, with the item as it stands
+
+A change to a firm item names the version of the item it was made from. Where the item has changed
+since, the itinerary refuses the change, and gives the item as it now stands. ^pln-itinerary-f11
+
+- **Verification:** on a trip with a museum visit as a firm item,
+    - change its time from the version held, and confirm it is accepted
+    - change its title from the version before that change, and confirm it is refused, with the
+      museum visit as it now stands
+    - move a stretch twice from the same version, and confirm the second move is accepted and stands
+
+> **What does this buy?** Two travellers correcting one firm item at once never lose a change
+> without being told, as with a page and a booking (`PLN-F16`, `BKG-F5`).
+
+> **Why not a stretch too?** A stretch is changed one value at a time, such as its dates by a drag,
+> so the later change is the one the traveller meant.
 
 ---
 

@@ -141,6 +141,8 @@ The trip host gives an admin the title and text of any page in the trip's gravey
 page an admin asks it to. It refuses either for a traveller who is not an admin. ^pln-host-f8
 
 - **Verification:** on the trip of `PLN:HOST-F1`, with the page Argentina deleted,
+    - as a traveller who could see Argentina when it was deleted, confirm the graveyard lists it,
+      and keeps listing it after an admin hides its branch from them
     - as the creator, read Argentina, and confirm its text reads as it was written
     - as a traveller who is not an admin, read it, and confirm it is refused
     - as the creator, restore it, and confirm it returns at the top of the trip

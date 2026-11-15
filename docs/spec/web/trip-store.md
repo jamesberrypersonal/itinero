@@ -57,7 +57,8 @@ import type { Booking } from "@itinero/bookings";
 import type { Grant, Grants, Level, TripLevel } from "@itinero/permissions";
 import type { Result } from "@itinero/trip-time";
 
-type Member = { account: string; name: string; admin: boolean; creator: boolean; joined: string };
+type Member = { account: string; name: string; admin: boolean; creator: boolean; joined: string;
+                removed?: string };                   // present: a former member, removed then
 type Invitation = { id: string; email: string; trip: TripLevel; calendar: Level;
                     expires: string };                    // expires: an ISO 8601 UTC time
 
@@ -65,7 +66,7 @@ type Copy = {
   id: string; name: string; dates: Dates; mine: Dates;   // mine: the traveller's own dates
   you: { admin: boolean; creator: boolean; grant: Grant };
   calendar?: Trip;                                        // absent: not granted
-  pages: Pages; graveyard: readonly { id: string; title: string }[];
+  pages: Pages; graveyard: readonly { id: string; title: string; went: number }[];
   bookings: readonly Booking[]; members: readonly Member[];
   grants?: Grants;                                        // an admin's copy alone: everyone's access
   invitations?: readonly Invitation[];                    // an admin's copy alone: those still open

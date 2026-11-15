@@ -79,7 +79,8 @@ type When = Day | TripTime;                             // TripTime of a kind ho
 type Way = "flight" | "train" | "bus" | "ferry" | "car" | "other";
 type Travel = { from: Place; to: Place; by: Way; arrive?: When };
 
-type FirmItem = { id: Id; title: string; when: When; travel?: Travel; page?: PageId };
+type FirmItem = { id: Id; revision: number;      // set by apply (§4.2)
+                  title: string; when: When; travel?: Travel; page?: PageId };
 
 type Dates = { first: LocalDate; last: LocalDate };
 type Trip = { format: 1; id: Id; name: string; revision: number; dates?: Dates;
@@ -95,7 +96,7 @@ type Change =
   | { op: "re-place";       id: Id; place: Place }
   | { op: "remove-stretch"; id: Id }
   | { op: "add-firm";       item: FirmItem }
-  | { op: "change-firm";    item: FirmItem }
+  | { op: "change-firm";    item: FirmItem; base: number }  // base: the revision changed from
   | { op: "remove-firm";    id: Id };
 
 type DayLayout = { date: LocalDate; countries: Country[];
@@ -138,6 +139,7 @@ show it to the traveller.
 | `range-length` | `layout` | A range of more than 366 days |
 | `outside-trip` | `apply` | A traveller's dates outside the trip's, or set on a trip with no dates |
 | `travellers-outside` | `apply` | New dates for the trip that would leave a traveller's dates outside them. `details.travellers` lists each, comma separated |
+| `stale` | `apply` | A `change-firm` whose `base` is not the firm item's `revision`. `details.item` holds the firm item as it stands, in the form of §5.1, and `details.revision` its revision |
 | `unknown-format` | `tripFromText` | A trip whose `format` is not 1 |
 
 `apply` also returns any refusal trip-time's `create` gives for a time in the change, with its code
@@ -183,15 +185,17 @@ anything is changed.
 | `move` | Sets the stretch's first and last days | `unknown-id`, and any date refusal of §4.3 |
 | `re-place` | Sets the stretch's place | `unknown-id`, `unknown-country`, `bad-text` |
 | `remove-stretch` | Removes the stretch | `unknown-id` |
-| `add-firm` | Adds the firm item, after those the trip holds | `duplicate-id`, and any refusal of §4.4 |
-| `change-firm` | Replaces the firm item with the same identifier, keeping its place in the list | `unknown-id`, and any refusal of §4.4 |
+| `add-firm` | Adds the firm item, after those the trip holds, with `revision` 1 | `duplicate-id`, and any refusal of §4.4 |
+| `change-firm` | Replaces the firm item with the same identifier, keeping its place in the list, with its `revision` one higher | `unknown-id`, `stale`, and any refusal of §4.4 |
 | `remove-firm` | Removes the firm item | `unknown-id` |
 
 An identifier is unique across a trip's stretches and its firm items together. A removed
 identifier may be used again.
 
 A change sets whole fields, and never adds to or subtracts from them. Two changes to the same
-field of one stretch or firm item therefore leave the later one standing.
+field of one stretch therefore leave the later one standing. A firm item is changed whole, so a
+`change-firm` made from an older version of it is refused with `stale`, and loses neither change
+(`PLN:ITINERARY-F11`). The `revision` a caller puts in an added or changed firm item is ignored.
 
 The result depends on the rules trip-time has loaded, because trip-time's `create` refuses a time
 in the hour the clocks skip, and the hour moves when a zone's rules change. The copy held online
@@ -318,9 +322,11 @@ A trip is one JSON object. Every time is held as a string in trip-time's text fo
 
 ```json
 {
+  "dates": { "first": "2026-06-01", "last": "2026-06-12" },
   "firm": [
     {
       "id": "b3c1",
+      "revision": 2,
       "title": "Flight to New York",
       "travel": {
         "arrive": "2026-06-05T12:30[America/New_York]",
@@ -330,7 +336,7 @@ A trip is one JSON object. Every time is held as a string in trip-time's text fo
       },
       "when": "2026-06-05T10:00[Europe/Paris]"
     },
-    { "id": "c9d0", "title": "Move on from Lyon", "when": { "day": "2026-06-03" } }
+    { "id": "c9d0", "revision": 1, "title": "Move on from Lyon", "when": { "day": "2026-06-03" } }
   ],
   "format": 1,
   "id": "6f1e",
@@ -338,6 +344,9 @@ A trip is one JSON object. Every time is held as a string in trip-time's text fo
   "revision": 7,
   "stretches": [
     { "first": "2026-06-01", "id": "a17f", "last": "2026-06-05", "place": { "country": "FR" } }
+  ],
+  "travellers": [
+    { "dates": { "first": "2026-06-03", "last": "2026-06-08" }, "traveller": "u-9b17" }
   ]
 }
 ```
@@ -389,6 +398,7 @@ TypeScript and Node's type definitions.
 | [PLN:ITINERARY-F6](../../requirements/planner/itinerary.md#^pln-itinerary-f6) | `apply` and the revision, in §4.2. Applying each change to the copy held online is `planner/trip-host`. |
 | [PLN:ITINERARY-F7](../../requirements/planner/itinerary.md#^pln-itinerary-f7) | Every check made before anything is changed, in §4.2. |
 | [PLN:ITINERARY-F8](../../requirements/planner/itinerary.md#^pln-itinerary-f8) | The text form of §4.7 and §5.1. |
+| [PLN:ITINERARY-F11](../../requirements/planner/itinerary.md#^pln-itinerary-f11) | A firm item's `revision`, the `base` of a `change-firm`, and the `stale` refusal, in §3.3 and §4.2. |
 | [PLN:ITINERARY-F10](../../requirements/planner/itinerary.md#^pln-itinerary-f10) | The `trip-dates` and `traveller-dates` changes, and `travellerDates`, in §4.9. |
 | [PLN-F14](../../requirements/planner/planner.md#^pln-f14) | A trip's dates and each traveller's, with their refusals (§4.9). Setting them is `web/screens`, and letting only the creator set the trip's is `planner/trip-host`. |
 | [PLN:ITINERARY-F9](../../requirements/planner/itinerary.md#^pln-itinerary-f9) | The `page` field of `Stretch` and `FirmItem` in §3.3, kept unchecked (§2). Whether the page is in the tree or the graveyard is `planner/pages`, in §4.6 of `spec/planner/pages.md`. |

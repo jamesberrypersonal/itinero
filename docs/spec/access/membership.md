@@ -83,7 +83,8 @@ import type { AccountId } from "access/accounts";            // as spec/access/a
 import type { GrantChange } from "@itinero/permissions";
 
 type Member = { account: AccountId; admin: boolean; creator: boolean; joined: string };
-type Listed = Member & { name: string };   // as GET /api/trips/{trip}/members gives each member
+type Listed = Member & { name: string;     // as GET /api/trips/{trip}/members gives each member
+                         removed?: string }; // present: a former member, removed then
 
 function createTrip(trip: string, creator: AccountId): Promise<Member>;
 function member(trip: string, account: AccountId): Promise<Member | undefined>;
@@ -92,7 +93,8 @@ type Change = GrantChange | { op: "admin"; traveller: AccountId };
 function onChange(listener: (trip: string, change: Change) => Promise<void>): void;
 ```
 
-`member` gives the member an account is on a trip, or `undefined`. The caller passes
+`member` gives the member an account is on a trip, or `undefined`, including for a former
+member. The caller passes
 `{ traveller: account, admin }` from it to every function of `@itinero/permissions`. `onChange`
 names the listener that applies to a trip's grants each `add` and `remove` the membership component
 makes (§4.4, §4.5). The listener is also given `{ op: "admin", traveller }` for each member made an
@@ -209,8 +211,13 @@ listener is given `{ op: "remove", traveller }`, and the acceptance is refused w
 *Porcelain:* `DELETE /api/trips/{trip}/members/{account}` is refused with `admin-only` from a member who
 is not an admin, and with `creator` for the trip's creator (`ACC:MEMBERSHIP-F4`). Otherwise the
 listener of `onChange` is given `{ op: "remove", traveller }`, which takes away every grant the
-member holds. Once the listener returns, the member is removed. Every request of theirs about the
-trip is then refused with `not-a-member`.
+member holds. Once the listener returns, the member is removed: their record is kept, with
+`removed` set to the moment of the removal, and `admin` set false. Every request of theirs about the
+trip is then refused with `not-a-member`, as for any account not on it.
+
+A former member is kept so that what still names them, such as a booking, still shows who they
+were. An invitation is not refused for a former member's address, and accepting it makes them a
+member again: `removed` is cleared, and `joined` is set to the acceptance.
 
 A removal that stops after the listener returns leaves a member with no grant. `planner/trip-host`
 refuses every request of such a member with `not-a-member`, so they have lost the trip already. They
@@ -220,10 +227,12 @@ are still listed as a member, and an admin removes them again to finish.
 
 *Porcelain:* `GET /api/trips/{trip}/members` gives any member every member of the trip, with `admin`,
 `creator` and `joined`, and the `name` `access/accounts`' `account` gives for it
-(`ACC:MEMBERSHIP-F5`, `ACC-F13`). To an admin, it also gives each open invitation's
+(`ACC:MEMBERSHIP-F5`, `ACC-F13`). It also gives each former member, with `removed`, so that their
+name can be shown where something names them. To an admin, it also gives each open invitation's
 identifier, address, access and expiry. A member who is not an admin is given no invitations, so
 that the addresses invited stay with the admins. `trips`
-gives the trips an account is a member of, in the order they were joined.
+gives the trips an account is a member of, in the order they were joined, and no trip it has been
+removed from.
 
 ### 4.7 The test suite
 
@@ -238,7 +247,7 @@ database.
 
 | Record | Holds | Kept |
 |---|---|---|
-| Member | The trip, the account, `admin`, `creator`, and when they joined | Until the member is removed |
+| Member | The trip, the account, `admin`, `creator`, when they joined, and when they were removed, for a former member | For as long as the trip is kept, so that a former member's name still shows |
 | Invitation | Its identifier, the trip, the address, the access to the trip and the calendar, who sent it, the token's SHA-256 digest, when it expires, and whether it is open, withdrawn, replaced or accepted | For 90 days after it closes, so that an admin can see what became of it |
 
 A trip has exactly one member whose `creator` is true. The pair of the trip and the account is

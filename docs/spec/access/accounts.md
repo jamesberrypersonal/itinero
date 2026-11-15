@@ -123,21 +123,32 @@ Behaviour crossing every operation:
 
 ### 4.1 The nonce
 
-*Porcelain:* `POST /api/auth/nonce` gives a nonce of 32 random bytes, written in base64url, and keeps a
-SHA-256 digest of it with the time it was made. A sign-in naming it uses it up. A nonce not used
-within 10 minutes is thrown away.
+*Porcelain:* `POST /api/auth/nonce` gives a nonce, and stores nothing. A nonce is 16 random bytes and
+the time it was made, followed by their HMAC-SHA256, a code made from them with the Worker's secret
+`NONCE_KEY`, all written in base64url. Only the online side can make a nonce whose code checks.
+Asking for any number of nonces therefore writes no record, so it costs the free plan's daily
+writes nothing.
+
+A sign-in naming a nonce uses it up, by storing its SHA-256 digest (§4.2). A nonce older than 10
+minutes is refused whether or not it was used.
 
 ### 4.2 Signing in
 
 *Porcelain:* `POST /api/auth/sign-in` accepts an ID token only when every check below passes
 (`ACC:ACCOUNTS-F1`):
 
-1. the nonce given is one the accounts component made, unused and under 10 minutes old, or the
-   sign-in is refused with `bad-nonce`. It is used up whether or not the rest passes
+1. the nonce given has a code that checks with `NONCE_KEY`, and was made under 10 minutes ago, or
+   the sign-in is refused with `bad-nonce`
 2. the token's signature checks against a key of its provider's key set, or it is refused with
    `bad-token`
 3. its `iss` is its provider's, its `aud` is Itinero's client identifier for that provider, its
    `exp` is not past, and its `nonce` equals the nonce given, or it is refused with `bad-token`
+4. the nonce's digest is stored, and is not stored already, or the sign-in is refused with
+   `bad-nonce`
+
+Nothing is written before the fourth check, so a sign-in with a token Google did not sign for
+Itinero writes no record. The fourth check is one insert, which fails where the digest is held, so
+two sign-ins naming one nonce at once cannot both pass.
 
 The account is then found by the pair of the provider and `sub`. Where no account holds the pair,
 one is made, with a new identifier. Where the token holds an `email`, the account's address and
@@ -207,7 +218,7 @@ database.
 |---|---|---|
 | Account | Its identifier, its provider, the provider's `sub`, its email address, `emailVerified`, its `name` and `named`, and when it was made | For as long as Itinero runs. Deleting an account is future work |
 | Session | The SHA-256 digest of the session, its account, and when it was last used | Until signed out, or 180 days unused |
-| Nonce | The SHA-256 digest of the nonce, and when it was made | Until used, or 10 minutes old |
+| Nonce | The SHA-256 digest of a nonce a sign-in used, and when it was made | Until 10 minutes after it was made, when §4.2 refuses it for its age anyway |
 
 The pair of the provider and `sub` is unique across accounts. A provider of `google` is the only one
 written today. The column is kept, so that an account's provider is never guessed. A scheduled task
@@ -215,7 +226,9 @@ of the Worker, which Cloudflare runs once a day, deletes every session past its 
 nonce past its 10 minutes.
 
 Itinero's client identifier at Google is set as a variable of the Worker, named `GOOGLE_CLIENT_ID`,
-in its Wrangler configuration. `OLDEST_API` is a constant of the Worker's code, so that it changes
+in its Wrangler configuration. `NONCE_KEY` is 32 random bytes, set as a secret of the Worker with
+Wrangler, and never in the repository. Changing it refuses every nonce not yet used, which costs a
+traveller signing in at that moment one more try. `OLDEST_API` is a constant of the Worker's code, so that it changes
 only with a deploy.
 
 | Resource | Path | Owned by |
@@ -223,6 +236,7 @@ only with a deploy.
 | The Worker of the online side | `services/online/`, which `planner/trip-host` shares | Whoever keeps the access system's roadmap |
 | The tables `accounts`, `sessions` and `nonces` | The online side's D1 database | Whoever keeps the access system's roadmap |
 | The client identifier registered with Google | `GOOGLE_CLIENT_ID`, in the Worker's Wrangler configuration | Whoever keeps the access system's roadmap |
+| The key nonces are made with | `NONCE_KEY`, a secret of the Worker | Whoever keeps the access system's roadmap |
 
 ## 6. Quality attributes
 

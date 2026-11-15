@@ -185,7 +185,10 @@ phone (`WEB:SCREENS-F3`). Each day shows:
 A stretch or a firm item that names a page links to it, and the link shows not available where the
 pages' `state` is not `tree` or the page is hidden (`PLN-F11`). A traveller with edit access to the
 calendar drags a stretch's ends to resize it, or taps it to change its place or dates, and adds a
-stretch or a firm item from a day (`PLN-F1`, `PLN-F3`, `PLN-F4`). A traveller with no calendar in
+stretch or a firm item from a day (`PLN-F1`, `PLN-F3`, `PLN-F4`). A firm item's form sends a
+`change-firm` with the revision it was opened from. A `stale` refusal shows the item as it now
+stands, from `details.item`, beside the traveller's own, to start again from
+(`PLN:ITINERARY-F11`). A traveller with no calendar in
 their copy has no calendar in their bar, and its address opens the home page.
 
 ### 4.5 The bookings
@@ -241,7 +244,7 @@ by side, from `details.text`, and the traveller saves again from that revision (
 
 Search runs the pages' `search` over the copy, with or without a connection, and lists each page
 found with the words around each match (`PLN-F12`). The graveyard lists the titles of the copy's
-`graveyard`. An admin, online, opens a page there with the trip store's `buried`, and restores it
+`graveyard`, each with the number of pages that went with it. An admin, online, opens a page there with the trip store's `buried`, and restores it
 with a `restore` change (`PLN-F13`).
 
 ### 4.7 The members and their access
@@ -249,8 +252,9 @@ with a `restore` change (`PLN-F13`).
 *Invoked from:* the members in a trip's bar, and the link in an invitation's email.
 
 The members screen lists the copy's members by name, with the creator and the admins marked
-(`ACC-F2`). Every other screen names a traveller in the same way, such as each traveller a booking
-names.
+(`ACC-F2`). A former member, one with `removed`, is not listed there. Every other screen names a
+traveller in the same way, such as each traveller a booking names, and writes a former member's
+name followed by `(left the trip)`. A booking form offers only the members still on the trip.
 
 An admin also sees the open invitations, from the copy's `invitations`, and each member's access,
 from the copy's `grants`. Online, an admin can:
@@ -391,6 +395,7 @@ and the packages of the trip's parts, which `spec/web/shell.md` §5 lists.
 | [PLN-F13](../../requirements/planner/planner.md#^pln-f13) | The graveyard, and an admin's restore (§4.6). |
 | [PLN-F14](../../requirements/planner/planner.md#^pln-f14) | Setting the trip's dates when it is created, and each traveller's own (§4.2, §4.3). |
 | [PLN-F15](../../requirements/planner/planner.md#^pln-f15) | The home page's day, bookings and country (§4.3). |
+| [PLN:ITINERARY-F11](../../requirements/planner/itinerary.md#^pln-itinerary-f11) | Both versions of a firm item, side by side, on a `stale` refusal (§4.4). |
 | [PLN-F16](../../requirements/planner/planner.md#^pln-f16) | Both texts, side by side, on a `stale` refusal (§4.6). |
 | [BKG-F1](../../requirements/bookings/bookings.md#^bkg-f1) | The form of each kind, naming the traveller adding it to start (§4.5). |
 | [BKG-F3](../../requirements/bookings/bookings.md#^bkg-f3) | The bookings page, opening at the first not yet over (§4.5). |

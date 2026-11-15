@@ -19,9 +19,8 @@ Two things act on it:
 
 - **A caller**, such as the web app, builds changes, applies them, resolves links and searches
   (§3.3).
-- **The component holding the copy of each trip online** applies every change a traveller makes,
-  stores each page it changes, and sends the changed pages back. That component is not yet
-  registered (§8).
+- **`planner/trip-host`**, the component holding the copy of each trip online, applies every
+  change a traveller makes, stores each page it changes, and sends the changed pages back.
 
 Deliberately absent:
 
@@ -53,7 +52,7 @@ None. The pages component has no user interface. The web app shows what its func
 ### 3.2 Application interface
 
 None. The pages component has no network or service interface. A change reaches the copy of a trip
-held online through the component that holds it (§8).
+held online through `planner/trip-host`.
 
 ### 3.3 Programming interface
 

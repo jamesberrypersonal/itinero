@@ -111,24 +111,24 @@ trip's grants. It also reads or restores a page in the graveyard. ^acc-permissio
 
 ### ACC:PERMISSIONS-F5 — The permissions component gives what a traveller may see, and what their phone may hold
 
-For a traveller, the permissions component gives the pages of the tree they may see, the pages of
-the graveyard they may see listed, and the bookings they may see. It also gives the copy their
+For a traveller, the permissions component gives the pages of the tree they may see, and the
+bookings they may see. It also gives the copy their
 phone may hold for reading with no connection: those pages of the tree, those bookings, and the
 calendar only where their level for it is view or edit. ^acc-permissions-f5
 
 - **Verification:** on the trip that `ACC:PERMISSIONS-F1`'s verification sets up, with the
   traveller given no access to Santiago, and Santiago then deleted,
-    - confirm the pages given are Chile only, and the graveyard given holds no page
-    - delete Chile, and confirm the graveyard given holds Chile
+    - confirm the pages given are Chile only
     - confirm the phone's copy holds no calendar, then grant the traveller view access to the
       calendar, and confirm it does
 
 > **What does this buy?** Each traveller, and each phone, holds what the traveller may see and
 > nothing more (`ACC-F8`, `ACC-F10`, `ACC-F12`).
 
-> **What decides whether a traveller sees a page in the graveyard?** Their level for the page
-> where it stood. A deleted page keeps its parent, so the level is the one they had at the delete,
-> unless an admin has changed their access since.
+> **What decides whether a traveller sees a page in the graveyard?** Their level for the page when
+> it was deleted. `planner/trip-host`, which holds the copy of each trip online, asks the
+> permissions component for it at the delete, and keeps it (ADR-0012, access to a page passes down
+> to the pages beneath it).
 
 ### ACC:PERMISSIONS-F6 — A traveller added to or removed from a trip gains or loses every grant at once
 

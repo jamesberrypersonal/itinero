@@ -93,8 +93,9 @@ them. ^acc-membership-f4
 ### ACC:MEMBERSHIP-F5 — The membership component says who is on a trip, and which of them are admins
 
 The membership component gives any member of a trip its members, each with the name their account
-holds, which of them are admins, and which is its creator. It gives only an admin the invitations not yet accepted. For an account, it
-gives the trips it is a member of. ^acc-membership-f5
+holds, which of them are admins, and which is its creator. It also gives each former member's
+name, marked as removed. It gives only an admin the invitations not yet accepted. For an account,
+it gives the trips it is a member of. ^acc-membership-f5
 
 - **Verification:** against the membership component, with the trip of `ACC:MEMBERSHIP-F4` after
   the removal,
@@ -103,9 +104,14 @@ gives the trips it is a member of. ^acc-membership-f5
     - invite an address, and confirm an admin is given the invitation, with its expiry, and the
       other member is not
     - confirm each member's account gives the trip among its trips
+    - confirm the member removed is given by name, marked as removed, and that their account does
+      not give the trip among its trips
 
 > **What does this buy?** Every check of what a traveller may do starts from whether they are on
 > the trip, and whether they are an admin (`ACC-F2`).
+
+> **Why give the names of former members?** A booking keeps naming a traveller after they leave
+> the trip, and the travellers still on it should see who that was.
 
 ---
 
