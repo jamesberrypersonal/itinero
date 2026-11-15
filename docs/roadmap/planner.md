@@ -12,6 +12,23 @@ the planner's itinerary. The planner is the first system that needs that compone
 
 ## Completed
 
+### Phase 1 — Build
+
+#### Milestone Planner-1.1 — Dates and times
+
+- The npm workspace, in `package.json` at the repository root, holds the product's packages under
+  `packages/`. The workflow `test-packages` runs their tests in continuous integration, beside the
+  documentation check.
+- `shared/trip-time` is built as `@itinero/trip-time`, in `packages/trip-time/`, as its
+  specification gives it, in TypeScript with no runtime dependencies (ADR-0007, trip-time is
+  written in TypeScript).
+- Its rules file, `rules/2026f.json`, holds release 2026f of the IANA time zone database, read from
+  the TZif files macOS ships for that release (ADR-0008, trip-time carries its own copy of the
+  time-zone rules). The build script, `npm run build-rules`, makes the rules file from an unpacked
+  IANA release with that release's own zic.
+- Its test suite proves each requirement of `shared/trip-time` by the verification it carries,
+  except the checks of `SHR:TRIP-TIME-NFR1` that need a phone.
+
 ### Phase 0 — Design
 
 #### Milestone Planner-0.3 — The home page, and the trip held online
@@ -73,14 +90,6 @@ the planner's itinerary. The planner is the first system that needs that compone
 
 ### Phase 1 — Build
 
-#### Milestone Planner-1.1 — Dates and times
-
-- Add the npm workspace, in `package.json` at the repository root, and run its tests in continuous
-  integration beside the documentation check.
-- Build `shared/trip-time` as `@itinero/trip-time`, in `packages/trip-time/`, as its specification
-  gives it, with its copy of the time-zone rules.
-- Prove each requirement of `shared/trip-time` by the verification it carries.
-
 #### Milestone Planner-1.2 — The itinerary
 
 - Build `planner/itinerary` as `@itinero/itinerary`, in `packages/itinerary/`, as its specification
@@ -96,6 +105,9 @@ the planner's itinerary. The planner is the first system that needs that compone
 
 **Waits on:** Milestone Access-1.3, Milestone Bookings-1.1, Milestone Web-0.2
 
+- Rebuild `packages/trip-time/rules/2026f.json` with the build script, from IANA's own release,
+  and confirm the test suite still passes. Milestone Planner-1.1 moved this here, since the release
+  could not be downloaded when it was built.
 - Build `planner/trip-host` in the Worker of the online side, in `services/online/`, with a Durable
   Object for each trip, as its specification gives it.
 - Prove each requirement of `planner/trip-host` by the verification it carries.

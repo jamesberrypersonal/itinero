@@ -1,0 +1,23 @@
+# Runs the test suite of every package in the npm workspace (docs/spec/shared/trip-time.md §4.12).
+name: test-packages
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test-packages:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install the workspace
+        run: npm ci
+
+      - name: Test every package
+        run: npm test

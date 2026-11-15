@@ -8,6 +8,10 @@ check-docs *args:
 test-docs:
     @cargo test --quiet --package doc-check --package doc-scaffold
 
+# Run the test suite of @itinero/trip-time (docs/spec/shared/trip-time.md §4.12).
+test-trip-time:
+    @npm test --workspace @itinero/trip-time
+
 # Write the skeleton documents and index rows for a new component.
 new-component *args:
     @cargo run --release --quiet --package doc-scaffold -- component "$@"

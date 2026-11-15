@@ -1,0 +1,9 @@
+{
+  "aliases": {},
+  "format": 1,
+  "version": "test-b",
+  "zones": {
+    "America/New_York": {"changes":[],"initial":-18000,"rule":"EST5EDT,M3.2.0,M11.1.0"},
+    "Europe/Paris": {"changes":[],"initial":3600,"rule":"CET-1"}
+  }
+}

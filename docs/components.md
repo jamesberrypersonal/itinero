@@ -30,7 +30,7 @@ system, component or concern is added here before any document names it.
 | [list](spec/bookings/list.md) | bookings | BKG:LIST | | | A trip's bookings: adding, changing and removing each one, the travellers it names, and the order they happen in |
 | [doc-check](spec/shared/doc-check.md) | shared | SHR:DOC-CHECK | | | The checker that holds every document in this vault to the documentation system |
 | [doc-scaffold](spec/shared/doc-scaffold.md) | shared | SHR:DOC-SCAFFOLD | `doc-scaffold` | | The scaffolder that starts a new component, system, decision record or guide, with every row that names it |
-| [trip-time](spec/shared/trip-time.md) | shared | SHR:TRIP-TIME | | | Dates and times in the local time of the place they happen, and the time zones between places |
+| [trip-time](spec/shared/trip-time.md) | shared | SHR:TRIP-TIME | `@itinero/trip-time` | | Dates and times in the local time of the place they happen, and the time zones between places |
 
 ## Booking kinds
 

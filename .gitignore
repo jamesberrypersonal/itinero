@@ -5,6 +5,9 @@ Thumbs.db
 # Dependencies
 node_modules/
 
+# IANA time zone database releases, unpacked for trip-time's build script (docs/spec/shared/trip-time.md §4.11)
+packages/trip-time/tzdb/
+
 # Build output
 dist/
 build/
