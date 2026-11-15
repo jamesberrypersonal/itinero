@@ -36,6 +36,8 @@ Access is set page by page, so its design follows the planner's pages, in Milest
 
 #### Milestone Access-1.1 — Accounts and signing in
 
+**Waits on:** Milestone Web-0.2
+
 - Start the Worker of the online side, in `services/online/`, with its D1 database, and deploy it
   to Cloudflare's free plan.
 - Register Itinero with Google, and build `access/accounts` in the Worker, as its specification

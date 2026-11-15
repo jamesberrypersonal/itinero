@@ -94,7 +94,7 @@ the planner's itinerary. The planner is the first system that needs that compone
 
 #### Milestone Planner-1.4 — The trip held online
 
-**Waits on:** Milestone Access-1.3, Milestone Bookings-1.1
+**Waits on:** Milestone Access-1.3, Milestone Bookings-1.1, Milestone Web-0.2
 
 - Build `planner/trip-host` in the Worker of the online side, in `services/online/`, with a Durable
   Object for each trip, as its specification gives it.
