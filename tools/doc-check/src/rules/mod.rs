@@ -42,6 +42,7 @@ pub const RULES: &[(&str, &str)] = &[
     ("claims", "Requirements this satisfies"),
     ("code-spans", "Markdown rules"),
     ("raw-html", "Markdown rules"),
+    ("milestones", "Citations"),
 ];
 
 pub fn heading(rule: &str) -> &'static str {

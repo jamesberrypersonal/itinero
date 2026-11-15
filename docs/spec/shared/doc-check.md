@@ -179,7 +179,8 @@ number, optionally followed by further dot-joined numbers, and then a full stop 
 Each rule has a name, which every finding prints. There is one rule for each row of the table of
 mechanical checks in `documentation-system.md`. The last three rows, `claims`, `code-spans` and
 `raw-html`, joined the table with ADR-0002 (the checker confirms requirement claims, one-line code
-spans and the absence of raw HTML). Each rule names the heading of `documentation-system.md` that states it.
+spans and the absence of raw HTML). The rule `milestones` joined it with ADR-0020 (a milestone
+names the milestones of other systems it waits on). Each rule names the heading of `documentation-system.md` that states it.
 
 | Rule | Checks | Stated under |
 |---|---|---|
@@ -206,6 +207,7 @@ spans and the absence of raw HTML). Each rule names the heading of `documentatio
 | `claims` | Every requirement is claimed by some specification | Requirements this satisfies |
 | `code-spans` | Every code span closes on the line it opens on | Markdown rules |
 | `raw-html` | No HTML tag or comment appears outside code | Markdown rules |
+| `milestones` | Each milestone citation names a milestone heading in its system's roadmap | Citations |
 
 Three tables are read once and shared by the rules.
 
@@ -398,6 +400,18 @@ inside a span opened by a longer run.
 Every raw HTML part (§4.2) is reported, at its line. The passing form puts it in a code span, or
 writes its `<` as `&lt;`.
 
+#### 4.3.24 milestones
+
+A milestone citation is the word `Milestone`, a space, a system's name, a hyphen, a phase number, a
+full stop and a milestone number, as in Milestone Planner-0.1. A system's name opens with a capital
+letter, and is its slug with the first letter capitalised. The citation's roadmap is
+`roadmap/<slug>.md`, and it defines a milestone when one of its headings opens with the citation,
+followed by the heading's end or by ` — `.
+
+Every milestone citation outside a link target is reported unless its roadmap defines it, with
+the passing form naming the milestone headings that roadmap does define. A vault with no `roadmap/`
+directory has no roadmaps, and the rule then has nothing to check.
+
 ### 4.4 Findings
 
 A finding is one line:
@@ -502,7 +516,7 @@ The package's manifest declares no dependencies, so its lockfile names only the 
 | [SHR:DOC-CHECK-F1](../../requirements/shared/doc-check.md#^shr-doc-check-f1) | The walk of §4.2: every document under `docs/`, skipping drafts and every `graveyard` directory with everything below it. |
 | [SHR:DOC-CHECK-F2](../../requirements/shared/doc-check.md#^shr-doc-check-f2) | The three exit statuses of §3.1, and the conditions of §4.6. |
 | [SHR:DOC-CHECK-F3](../../requirements/shared/doc-check.md#^shr-doc-check-f3) | The finding form of §4.4, and the passing forms each rule of §4.3 gives. |
-| [SHR:DOC-CHECK-F4](../../requirements/shared/doc-check.md#^shr-doc-check-f4) | The rules `links`, `identifiers`, `adr-citations` and `sections`. |
+| [SHR:DOC-CHECK-F4](../../requirements/shared/doc-check.md#^shr-doc-check-f4) | The rules `links`, `identifiers`, `adr-citations`, `sections` and `milestones`. |
 | [SHR:DOC-CHECK-F5](../../requirements/shared/doc-check.md#^shr-doc-check-f5) | The rules `links` and `callouts`. |
 | [SHR:DOC-CHECK-F6](../../requirements/shared/doc-check.md#^shr-doc-check-f6) | The rules `filenames` and `case-collisions`. |
 | [SHR:DOC-CHECK-F7](../../requirements/shared/doc-check.md#^shr-doc-check-f7) | The rule `indexes`. |

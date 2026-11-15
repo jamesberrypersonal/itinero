@@ -1,0 +1,293 @@
+# The itinerary component
+
+What the component `planner/itinerary` promises to the components that use it, and through them to
+travellers. The itinerary holds a trip's calendar: the stretches a traveller pencils in, and the
+firm items fixed to a date. It applies each change to a trip, and lays the trip out day by day. The
+component registry, `components.md`, gives it the prefix `PLN:ITINERARY`.
+
+Two roles appear below. A caller is a component that uses the itinerary, such as the web app. The
+traveller is the role `requirements/README.md` defines.
+
+The parts of a trip are those the planner's requirements define, in `requirements/planner/planner.md`.
+A trip has a name, and holds stretches and firm items:
+
+- **A place** is a country, or somewhere in one, such as Paris in France.
+- **A stretch** is a place and the dates a traveller expects to be there, pencilled in. Its dates
+  run from its first day to its last, both included.
+- **A firm item** is something decided but not booked, fixed to a date, such as a day to move on.
+  It has a date, or a time that includes its date. A booking is not a firm item: bookings are the
+  bookings system's.
+- **A firm item of travel** goes from one place to another, by a way of travelling such as a train.
+
+Times are held by `shared/trip-time`, the component that holds a trip's dates and times in the
+local time of their place. trip-time holds six kinds of value. Four of them hold a time: an exact
+time like 09:10, an approximate time like around 14:00, a window like 14:00 to 16:00, and a part of
+a day like the afternoon. The other two are a whole date, and a date whose time is still to be
+decided. A time of the last three kinds that hold one is imprecise, because it covers a range of
+moments. trip-time works out each time from its copy of the world's time-zone rules, which is
+updated as countries change their clocks (ADR-0008, trip-time carries its own copy of the
+time-zone rules).
+
+A change is one edit to a trip, such as moving a stretch or adding a firm item. A trip's revision
+starts at 1, and goes up by one with each change applied to it.
+
+---
+
+## Functional requirements
+
+### PLN:ITINERARY-F1 — A trip holds any arrangement of stretches, each changed freely
+
+The itinerary adds a stretch to a trip, moves or resizes it to any dates, changes its place, and
+removes it. It accepts stretches that leave gaps between them or that overlap, and a trip with no
+stretches. It refuses a stretch whose last day is before its first, whose dates do not exist or
+fall outside 1970 to 9999, or that covers more than 366 days, and says why. ^pln-itinerary-f1
+
+- **Verification:** on a new trip,
+    - add France from 1 to 5 June 2026 and New York in the United States from 5 to 8 June, and
+      confirm both read back unchanged
+    - move New York to 10 to 12 June, and confirm the gap from 6 to 9 June is accepted
+    - add Paris from 3 to 5 June, and confirm its overlap with France is accepted
+    - add a stretch from 5 to 3 June, and one on 30 February, and confirm each is refused, with the
+      reason
+
+> **What does this buy?** The traveller pencils in a trip roughly and changes it often
+> (`PLN-F1`). The itinerary never stands in the way of a half-built plan.
+
+> **Why accept gaps and overlaps?** A rough plan has loose ends on purpose (ADR-0013, a trip's
+> calendar is pencilled in, and its bookings have a page of their own).
+
+> **What of a stay longer than 366 days?** It is pencilled in as two stretches.
+
+### PLN:ITINERARY-F2 — Every place names a country, and each day gives the countries covering it
+
+Every place names a country, and may also name somewhere in it. The itinerary refuses a country it
+does not know. For each day, it gives the country of every stretch covering that day, each country
+once. ^pln-itinerary-f2
+
+- **Verification:** on a trip with France from 1 to 5 June 2026, Lyon in France from 1 to 3 June,
+  and New York in the United States from 5 to 8 June,
+    - confirm 2 June gives France, once
+    - confirm 5 June gives France, then the United States
+    - confirm 9 June gives no country
+    - add a stretch in a country that does not exist, and confirm it is refused, with the reason
+
+> **What does this buy?** The calendar shows which country each day is in (`PLN-F2`). A traveller
+> planning several countries sees each one's share of the trip.
+
+> **In what order are a day's countries given?** In the order of the stretches covering the day,
+> by their first day. The stretch a traveller reaches first comes first.
+
+### PLN:ITINERARY-F3 — A firm item has a title, and a date or a time in local time
+
+The itinerary adds, changes and removes firm items. A firm item has a title, and either a date or a
+time that includes its date. A time is of one of the four kinds that hold a time, in the time zone
+the caller gives. The itinerary refuses a time that trip-time refuses, with trip-time's reason. ^pln-itinerary-f3
+
+- **Verification:** on a new trip,
+    - add 3 June 2026, the day the traveller has decided to move on from Lyon, as a firm item with
+      no time, and confirm it reads back unchanged
+    - add a museum visit on the afternoon of 4 June, Paris time, and confirm it reads back unchanged
+    - add a dinner at 02:30 on 29 March 2026, Paris time, in the hour Paris's clocks skip, and
+      confirm it is refused, with trip-time's reason
+    - remove the museum visit, and confirm the trip no longer holds it
+
+> **What does this buy?** The few decided points of a trip are held exactly as they were decided
+> (`PLN-F3`). A firm item with no time, such as a day to move on, needs no time made up.
+
+> **Who decides a time's zone?** The caller does, from the time zone the traveller chose for it.
+> The itinerary does not look a place up (`PLN:ITINERARY-NR3`).
+
+### PLN:ITINERARY-F4 — A firm item of travel holds where it goes, how, and when it leaves and arrives
+
+A firm item of travel names the place it leaves, the place it reaches, and how the traveller
+travels: by flight, train, bus, ferry, car, or another way. Its date or time is when it leaves. It
+can also have a date or a time it arrives. The itinerary refuses travel that certainly arrives
+before it leaves, whatever an imprecise time turns out to be. It gives the duration of travel that
+has a time, of any of the four kinds, at both ends. ^pln-itinerary-f4
+
+- **Verification:** on a new trip,
+    - add a flight from Paris to New York leaving at 10:00 on 5 June 2026, Paris time, and arriving
+      at 12:30, New York time, and confirm its duration is 8 hours 30 minutes
+    - add a train from Lyon to Paris on 3 June, with no times, and confirm it is accepted, with no
+      duration
+    - add a flight leaving at 10:00 and arriving at 03:00 the same day, both Paris time, and
+      confirm it is refused, with the reason
+
+> **What does this buy?** A traveller copies a ticket's times in as printed, in each end's local
+> time, and sees how long the journey really takes (`PLN-F4`).
+
+> **Is travel needed between two stretches?** No. The itinerary holds travel only as a traveller
+> adds it (ADR-0013, a trip's calendar is pencilled in, and its bookings have a page of their own).
+
+### PLN:ITINERARY-F5 — The itinerary lays out a range of days, each with its stretches and its firm items in order
+
+Given a range of dates, the itinerary lists each day in it. Each day gives the stretches covering
+it, their countries, and its firm items. A day's firm items are in the order they happen, whatever
+time zone each is in, with those that have only a date first. A firm item shows on every day from
+its date to the last date it reaches, such as the day travel arrives, or the second date of a
+window that runs past midnight. The itinerary also gives the
+first and the last dates any stretch or firm item covers. ^pln-itinerary-f5
+
+- **Verification:** on a trip with France from 1 to 5 June 2026 and New York from 5 to 8 June,
+    - lay out 4 to 6 June, and confirm it gives three days, with France on 4 June, France and New
+      York on 5 June, and New York on 6 June
+    - add a coffee at 08:00 on 5 June, Paris time, a flight leaving Paris at 10:00 on 5 June, and a
+      check-in between 14:00 and 16:00 on 5 June, New York time, and confirm 5 June lists coffee,
+      flight, check-in
+    - add a bus leaving New York at 22:30 on 8 June and arriving in Montreal at 07:00 on 9 June,
+      and confirm it is listed on both days
+    - confirm the itinerary gives the first and last dates any stretch or firm item covers
+
+> **What does this buy?** The calendar shows what is fixed against the rough plan around it, and
+> a day crossing time zones reads in the order it is lived (`PLN-F5`).
+
+> **Why a range of days, rather than the whole trip?** A calendar shows a month or a week at a
+> time. A trip with a stretch pencilled in years ahead would otherwise lay out every day between.
+> A range covers at most 366 days.
+
+### PLN:ITINERARY-F6 — The same changes, applied in the same order, give the same trip
+
+The itinerary applies a change to a trip and gives the changed trip. Every change it applies raises
+the trip's revision by one. A change sets whole values, such as a stretch's dates, so of two changes
+to the same value of one stretch, the later one stands. Two copies of a trip that apply
+the same changes in the same order, under the same time-zone rules, hold the same trip, wherever
+each is held. ^pln-itinerary-f6
+
+- **Verification:** on two copies of the same trip,
+    - apply the same ten changes, in the same order, to each, and confirm the two trips are equal
+    - confirm each revision is ten more than it was
+    - move one stretch twice, to two different dates, and confirm the second move stands
+
+> **What does this buy?** A change a traveller makes is applied to the one copy of the trip held
+> online, and every other traveller sees the same result (`PLN-F6`).
+
+> **Who applies a change to the copy held online?** `planner/trip-host`, the component that holds
+> it.
+
+### PLN:ITINERARY-F7 — A refused change leaves the trip as it was, and says why
+
+The itinerary refuses a change it cannot apply, such as one naming a stretch the trip does not
+hold. The refusal says what was refused and why. A refused change leaves the trip and its
+revision unchanged. ^pln-itinerary-f7
+
+- **Verification:** on a trip with one stretch,
+    - move a stretch the trip does not hold, and confirm it is refused, with the reason
+    - add the trip's stretch a second time, under the identifier the caller gave it, and confirm the
+      second is refused, with the reason
+    - confirm that after each refusal, the trip and its revision are unchanged
+
+> **What does this buy?** A traveller whose change is refused keeps the trip as it was, and can see
+> what to fix. No change is ever half applied.
+
+### PLN:ITINERARY-F8 — A trip is written as text, and read back unchanged
+
+The itinerary writes a trip as text, and reads that text back as the same trip. It reads back text
+it wrote under an older copy of the time-zone rules. It refuses text that is not a trip it wrote,
+and says why. ^pln-itinerary-f8
+
+- **Verification:**
+    - write a trip holding every kind of stretch and firm item as text, read it back, and confirm
+      the two trips are equal
+    - read back a trip written under one copy of the time-zone rules after loading another, and
+      confirm every local time is unchanged
+    - read back text that is not a trip, and confirm it is refused, with the reason
+
+> **What does this buy?** A trip is stored online and copied to each phone for reading with no
+> connection (ADR-0004, a trip is read-only offline). Both copies read the same trip.
+
+### PLN:ITINERARY-F9 — A stretch or a firm item names at most one page of its trip
+
+A stretch or a firm item can name one of the trip's pages of research, by the identifier
+`planner/pages` gives the page, which the caller passes on. The itinerary keeps the identifier, and
+lays it out with the stretch or the firm item. It keeps the identifier after that page is renamed,
+moved or deleted. ^pln-itinerary-f9
+
+- **Verification:** on a new trip,
+    - add a stretch naming a page, and confirm it reads back naming that page
+    - change the stretch to name no page, and confirm it reads back naming none
+    - add a firm item naming a page, lay out its day, and confirm the item names the page
+
+> **What does this buy?** A traveller follows a stretch or a firm item, such as a planned bus, to
+> the page holding its research (`PLN-F11`).
+
+> **Does the itinerary know whether the page exists?** No. The pages are a component of their
+> own, `planner/pages`. A caller showing the page a stretch names asks `planner/pages` where the
+> page is. A page in the trip's graveyard, where deleted pages wait to be restored, is shown as
+> deleted (`PLN:PAGES-F5`).
+
+### PLN:ITINERARY-F10 — A trip holds its own dates, and each traveller's within them
+
+The itinerary holds a trip's first and last dates, and each traveller's own first and last dates,
+which fall within the trip's. A traveller with no dates of their own has the trip's. The itinerary
+refuses a traveller's dates outside the trip's. It refuses new dates for the trip that would leave a
+traveller's dates outside them, naming each such traveller. ^pln-itinerary-f10
+
+- **Verification:** on a new trip,
+    - set the trip's dates to 1 to 20 December 2026, and confirm they read back
+    - set a traveller's dates to 6 to 13 December, and confirm they read back, and that a second
+      traveller with no dates of their own has 1 to 20 December
+    - set the traveller's dates to 28 November to 3 December, and confirm it is refused, with the
+      reason
+    - set the trip's dates to 8 to 20 December, and confirm it is refused, naming the traveller
+
+> **What does this buy?** A companion joining for one week has a trip of their own length, which
+> the home page counts their days from (`PLN-F14`).
+
+> **Who may set the dates?** The caller decides: the trip's creator sets the trip's, and each
+> traveller sets their own (ADR-0014, a trip opens on a home page for each traveller).
+
+### PLN:ITINERARY-F11 — A change to a firm item made from an older version is refused, with the item as it stands
+
+Each firm item has a revision of its own, a number the itinerary raises each time the item
+changes. A change to a firm item names the revision it was made from. Where the item has changed
+since, the itinerary refuses the change, and gives the item as it now stands. ^pln-itinerary-f11
+
+- **Verification:** on a trip with a museum visit as a firm item,
+    - change its time from its current revision, and confirm it is accepted
+    - change its title from the revision before that change, and confirm it is refused, with the
+      museum visit as it now stands
+    - move a stretch, then move it again from a copy of the trip that has not seen the first move,
+      and confirm the second move is accepted and stands
+
+> **What does this buy?** Two travellers correcting one firm item at once never lose a change
+> without being told, as with a page and a booking (`PLN-F16`, `BKG-F5`).
+
+> **Why not a stretch too?** A stretch is changed one value at a time, such as its dates by a drag.
+> A firm item's form changes every value at once, so a second form saved over the first would undo
+> changes its traveller never saw.
+
+---
+
+## Non-functional requirements
+
+### PLN:ITINERARY-NFR1 — The itinerary works without a connection, and the same on every device
+
+Everything the itinerary promises works on a device with no connection. Its results do not depend
+on the time zone the device is set to. ^pln-itinerary-nfr1
+
+- **Verification:**
+    - on a phone with no connection, confirm `PLN:ITINERARY-F5` and `PLN:ITINERARY-F8` still hold
+    - on two devices, one set to London time and one to Tokyo time, lay out the same days of the
+      same trip, and confirm the results are the same
+
+> **What does this buy?** A traveller reads a trip on a phone with no connection (ADR-0004, a trip
+> is read-only offline). Two travellers whose phones are set to different time zones read the same
+> calendar.
+
+> **Can a trip then be changed with no connection?** No. The planner accepts a change only from a
+> device with a connection (ADR-0004). The itinerary runs on the phone to read the trip it holds.
+
+---
+
+## Non-requirements
+
+| Identifier | The itinerary does not | Because |
+|---|---|---|
+| **PLN:ITINERARY-NR1** | Store a trip, or send a change from one device to another | `planner/trip-host`, which holds the copy of each trip online, does that |
+| **PLN:ITINERARY-NR2** | Decide who may see or change a trip | The access system, which handles accounts and invitations, decides |
+| **PLN:ITINERARY-NR3** | Find the time zone of a place | The caller gives each time's zone (`SHR:TRIP-TIME-NR1`) |
+| **PLN:ITINERARY-NR4** | Warn of a gap, an overlap, or two stretches in a row with no travel between them | A rough plan has loose ends on purpose (`PLN-NR1`) |
+| **PLN:ITINERARY-NR5** | Merge changes made on two devices while apart | A trip changes only while the traveller is online (ADR-0004, a trip is read-only offline) |
+| **PLN:ITINERARY-NR6** | Hold a trip's pages | The pages are a component of their own, `planner/pages` |
+
+^pln-itinerary-nr

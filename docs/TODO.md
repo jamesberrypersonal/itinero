@@ -3,56 +3,37 @@
 What needs active work, and what waits on a decision. `documentation-system.md` gives the list's
 rules. When an item is done, it leaves this list for `CHANGELOG.md` in the commit that finishes it.
 
-*Next free:* TODO-10
+*Next free:* TODO-17
 
 ## Tags
 
 | Tag | Means |
 |---|---|
 | access | Accounts, invitations and permissions |
+| access/accounts | Travellers' accounts, and signing in with a Google account |
+| access/membership | Who is on each trip: its admins, the invitations that bring travellers in, and removing them |
+| access/permissions | What each traveller may see and change of a trip's pages, calendar and bookings |
+| bookings | A trip's bookings, such as flights, stays and tours, each for the travellers it names, and the page that lists them |
+| bookings/activity | A tour, a ticket or a table, at one place, on a date and perhaps at a time |
+| bookings/flight | A flight, in one or more legs, each leaving and arriving in its own airport's local time |
+| bookings/journey | A train, a bus, a ferry or a hired car, from one place to another, with a time at each end |
+| bookings/list | A trip's bookings: adding, changing and removing each one, the travellers it names, and the order they happen in |
+| bookings/stay | One or more nights' stay, such as a hotel or a flat, from check-in to check-out |
 | planner | The trip planner |
-| planner/itinerary | The itinerary model: trips, stops, days and the travel between them |
+| planner/itinerary | The itinerary: a trip's pencilled stretches and firm items |
 | planner/pages | The pages of a trip |
+| planner/trip-host | The copy of each trip held online, in a Durable Object of its own, which applies every change and keeps each traveller's devices up to date |
 | shared/doc-check | The documentation checker |
 | shared/doc-scaffold | The scaffolder that starts new documents |
 | shared/trip-time | Local dates and times, and time zones |
 | web | The web app, on a computer and on a phone |
+| web/places | The places a device knows the time zone of: every airport, and the towns of each country its trips visit |
+| web/screens | What travellers see and use: the home page, the calendar, the bookings page, the pages of research and the trip's members |
+| web/shell | The installable app itself: launching with no connection, adding it to a phone's home screen, and keeping the time-zone rules up to date |
+| web/trip-store | Each trip's copy on a device: catching it up, telling it of changes as they happen, sending changes, and deleting it on sign-out |
 | docs | The documentation system, and the tools authors use with it |
 
 ## Items
-
-### TODO-2 — Decide whether a trip's pages form a tree
-
-*Tags:* planner/pages
-*Written:* 2026-11-11
-
-*Problem:* Nothing says whether a page of a trip can hold other pages, such as a country's page
-holding a page for each city.
-
-*Reason:* Travellers write their research by hand, and a tree is one way to organise it. The idea
-is liked but not decided.
-
-*Proposal:* Decide between a flat set of pages and a tree, and record the choice in a decision
-record scoped `planner/pages`.
-
-*Releases:* Milestone Planner-0.2.
-
-### TODO-3 — Decide whether access to a page passes to the pages below it
-
-*Tags:* access, planner/pages
-*Written:* 2026-11-11
-*Blocked:* TODO-2
-
-*Problem:* If pages form a tree, nothing says whether a traveller who may see a page may also see
-the pages below it.
-
-*Reason:* An admin sets each traveller's access page by page. Whether that access passes down a
-tree was left for later, and it matters only if there is a tree.
-
-*Proposal:* Once the pages are decided, decide whether access passes down. Record the choice in a
-decision record scoped `access` and `planner/pages`.
-
-*Releases:* Milestone Access-0.1.
 
 ### TODO-4 — Let a traveller change a trip while offline
 
@@ -66,22 +47,6 @@ trip held online as the only copy anyone changes. That way, two changes never ne
 
 *Proposal:* Decide how changes made on two phones while apart are reconciled. Record it in a
 decision record that supersedes ADR-0004.
-
-*Releases:* Nothing is planned for it yet.
-
-### TODO-5 — Find a place's time zone from the place itself
-
-*Tags:* shared/trip-time
-*Written:* 2026-11-12
-
-*Problem:* trip-time takes the time zone of each date and time from the component that gives it
-the date or time. It cannot find the time zone of a place such as Lyon or Narita airport.
-
-*Reason:* The first requirements for trip-time leave the lookup to the caller
-(`SHR:TRIP-TIME-NR1`). A lookup that works offline needs a list of places held on the phone.
-
-*Proposal:* Decide where a place's time zone comes from, and which component finds it. Then write
-its requirements.
 
 *Releases:* Nothing is planned for it yet.
 
@@ -112,5 +77,95 @@ Then add the requirements to trip-time.
 other languages travellers need is not known yet.
 
 *Proposal:* Decide which languages to support first, and add the requirements to trip-time.
+
+*Releases:* Nothing is planned for it yet.
+
+### TODO-11 — Find the city a traveller is in, for the home page
+
+*Tags:* planner, web
+*Written:* 2026-11-14
+
+*Problem:* A trip's home page links to the page for the country the traveller is in, but not to the
+page for their city.
+
+*Reason:* The phone works out its country from its own location, with a small map of country
+borders held on it (ADR-0014, a trip opens on a home page for each traveller). Finding the city
+needs a far larger list of places on the phone, and pages that remember the place they are about.
+The country was enough to start with (`PLN-NR7`).
+
+*Proposal:* Decide where the list of places comes from, and how a page records its place. Then
+add the requirements to the planner and the web app.
+
+*Releases:* Nothing is planned for it yet.
+
+### TODO-13 — Merge two travellers' edits to one page automatically
+
+*Tags:* planner/pages, planner/trip-host, web
+*Written:* 2026-11-14
+
+*Problem:* When two travellers edit the same page at once, the second save is refused, and the
+second traveller combines the two texts by hand.
+
+*Reason:* Refusing a save made from an older version of a page loses no work, and is simple to
+build (`PLN-NR8`). Merging edits as they are made changes how a page's text is stored and sent.
+
+*Proposal:* Look into merging edits automatically, such as with a CRDT, a data type built so that
+edits made at once on two devices always combine into the same text. Record the choice in a
+decision record scoped `planner`.
+
+*Releases:* Nothing is planned for it yet.
+
+### TODO-14 — Read a booking in from its confirmation email
+
+*Tags:* bookings, bookings/flight, bookings/stay
+*Written:* 2026-11-14
+
+*Problem:* A traveller copies every booking in by hand, from a confirmation they already hold as
+an email.
+
+*Reason:* Reading confirmations from many airlines and hotels is the largest part of the bookings
+system, and travellers needed their bookings before it could be built (ADR-0016, a trip's bookings
+are entered by hand, as one of four kinds, and kept with the trip online). It left open whether
+Itinero should import bookings at all.
+
+*Proposal:* Decide whether Itinero should import bookings at all. If it should, decide how a
+confirmation reaches Itinero, such as by forwarding it to an address of the trip, and how its
+booking is matched to a trip and its travellers, and record it in a decision record scoped
+`bookings`.
+
+*Releases:* Nothing is planned for it yet.
+
+### TODO-15 — Hold a file with a booking, such as a ticket or a boarding pass
+
+*Tags:* bookings, bookings/list, web
+*Written:* 2026-11-14
+
+*Problem:* A booking holds text only, so a traveller opens a ticket's file from their email, which
+may need a connection.
+
+*Reason:* Files would fill the free plan's storage, and every phone's copy of a trip, faster than
+every other part of a trip together (`BKG-NR2`).
+
+*Proposal:* Decide whether a booking should hold files at all. If it should, decide where files are
+kept, how large one may be, and whether each phone keeps a copy of its traveller's files to read
+with no connection, and record it in a decision record scoped `bookings`.
+
+*Releases:* Nothing is planned for it yet.
+
+### TODO-16 — Sign a lost device out from another device
+
+*Tags:* access/accounts, web
+*Written:* 2026-11-14
+
+*Problem:* A traveller who loses a phone cannot sign it out from another device, so the lost phone
+keeps its copy of every trip, and its session, until it goes 180 days unused.
+
+*Reason:* Each device signs out for itself (`ACC:ACCOUNTS-NR3`). A device's copy is protected by
+the device's own lock alone (ADR-0017, a trip's copy on a device is protected by the device's own
+lock, and deleted when its traveller signs out).
+
+*Proposal:* Consider listing the devices a traveller is signed in on, and letting them sign out
+any or all of them, so that each deletes its copy the next time it connects. Decide it in a
+decision record scoped `access/accounts` and `web`.
 
 *Releases:* Nothing is planned for it yet.

@@ -262,7 +262,7 @@ set to. ^shr-trip-time-nfr2
 
 | Identifier | trip-time does not | Because |
 |---|---|---|
-| **SHR:TRIP-TIME-NR1** | Find the time zone of a place | The caller gives each value's time zone. Finding it from a place is future work |
+| **SHR:TRIP-TIME-NR1** | Find the time zone of a place | The caller gives each value's time zone. The web app finds it from its list of places (`WEB-F9`) |
 | **SHR:TRIP-TIME-NR2** | Show a value in any time zone but its own | Future work. A traveller reads each value in the local time of its place |
 | **SHR:TRIP-TIME-NR3** | Write text in any language but English | Future work |
 | **SHR:TRIP-TIME-NR4** | Hold seconds, or anything finer | Tickets, timetables and bookings give minutes |

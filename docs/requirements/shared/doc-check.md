@@ -97,8 +97,8 @@ that form. ^shr-doc-check-f3
 
 ### SHR:DOC-CHECK-F4 — Every citation in the vault resolves
 
-Every link, requirement identifier, decision record identifier and section citation in the vault
-names something that exists. doc-check reports each one that does not. ^shr-doc-check-f4
+Every link, requirement identifier, decision record identifier, section citation and milestone
+citation in the vault names something that exists. doc-check reports each one that does not. ^shr-doc-check-f4
 
 - **Verification:** on a copy of the vault, confirm that each of these is reported
     - a relative link whose target file does not exist
@@ -109,6 +109,8 @@ names something that exists. doc-check reports each one that does not. ^shr-doc-
     - a section citation against a document that numbers no sections, such as a decision record
     - a section citation after a link on the same line, naming a section the linked document lacks,
       even where the document it sits in has that section
+    - a milestone citation naming a milestone that its system's roadmap does not head, or a system
+      that has no roadmap
 
 > **What does this buy?** A reader arrives at a document by random access, and trusts a citation
 > only if it lands. A renumbered section, a moved document or a deleted requirement breaks

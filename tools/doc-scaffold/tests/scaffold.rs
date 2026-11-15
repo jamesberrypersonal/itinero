@@ -234,33 +234,68 @@ fn a_shared_component_joins_the_registry_the_tags_and_both_indexes() {
 #[test]
 fn a_component_of_a_system_with_no_folder_gets_its_folders_and_their_indexes() {
     let root = real_vault();
+    register_system_without_folders(&root);
     scaffold_cleanly(
         &root,
         &[
             "component",
-            "web",
+            "phone",
             "offline-copy",
-            "WEB:OFFLINE",
+            "PHN:OFFLINE",
             "The copy of a trip a phone keeps",
         ],
     );
     let req = read(&root, "requirements/README.md");
-    assert!(req.find("| [web/](web/README.md)") < req.find("| [shared/]"));
-    assert!(read(&root, "spec/web/README.md").contains("| [offline-copy.md](offline-copy.md) |"));
+    assert!(req.find("| [phone/](phone/README.md)") < req.find("| [shared/]"));
+    assert!(read(&root, "spec/phone/README.md").contains("| [offline-copy.md](offline-copy.md) |"));
     let reg = read(&root, "components.md");
     assert!(reg.find("| [pages]") < reg.find("| [offline-copy]"));
     assert!(reg.find("| [offline-copy]") < reg.find("| [doc-check]"));
 }
 
+/// Registers `phone`, a system with no folders yet, in a copy of the vault. Every system of the real
+/// vault has its folders, so the tests that need one without make their own.
+fn register_system_without_folders(root: &Path) {
+    let insert_after = |rel: &str, after: &str, row: &str| {
+        let path = root.join("docs").join(rel);
+        let text = fs::read_to_string(&path).unwrap();
+        let at = text.find(after).unwrap_or_else(|| panic!("{rel} holds no {after:?}"));
+        let end = at + text[at..].find('\n').unwrap() + 1;
+        fs::write(&path, format!("{}{row}\n{}", &text[..end], &text[end..])).unwrap();
+    };
+    insert_after("components.md", "| web | WEB |", "| phone | PHN | | The app a phone keeps a trip in |");
+    insert_after("TODO.md", "| web |", "| phone | The app a phone keeps a trip in |");
+}
+
+/// Registers `phone/offline-copy` in a copy of the vault without writing its documents, as a
+/// component registered before anyone documents it is.
+fn register_without_documents(root: &Path) {
+    register_system_without_folders(root);
+    let insert_after = |rel: &str, after: &str, row: &str| {
+        let path = root.join("docs").join(rel);
+        let text = fs::read_to_string(&path).unwrap();
+        let at = text.find(after).unwrap_or_else(|| panic!("{rel} holds no {after:?}"));
+        let end = at + text[at..].find('\n').unwrap() + 1;
+        fs::write(&path, format!("{}{row}\n{}", &text[..end], &text[end..])).unwrap();
+    };
+    insert_after(
+        "components.md",
+        "| [pages](spec/planner/pages.md) | planner |",
+        "| offline-copy | phone | PHN:OFFLINE | | | The copy of a trip a phone keeps |",
+    );
+    insert_after("TODO.md", "| phone |", "| phone/offline-copy | The copy of a trip a phone keeps |");
+}
+
 #[test]
 fn a_registered_component_gets_both_its_documents_and_a_linked_registry_row() {
     let root = real_vault();
-    let out = scaffold_cleanly(&root, &["docs", "planner", "itinerary"]);
+    register_without_documents(&root);
+    let out = scaffold_cleanly(&root, &["docs", "phone", "offline-copy"]);
     for line in [
-        "created docs/requirements/planner/itinerary.md",
-        "created docs/spec/planner/itinerary.md",
-        "created docs/requirements/planner/README.md",
-        "created docs/spec/planner/README.md",
+        "created docs/requirements/phone/offline-copy.md",
+        "created docs/spec/phone/offline-copy.md",
+        "created docs/requirements/phone/README.md",
+        "created docs/spec/phone/README.md",
         "changed docs/components.md",
         "changed docs/requirements/README.md",
         "changed docs/spec/README.md",
@@ -270,30 +305,32 @@ fn a_registered_component_gets_both_its_documents_and_a_linked_registry_row() {
     // The address already has its tag, so the live list is left alone.
     assert!(!out.contains("docs/TODO.md"), "{out}");
     let reg = read(&root, "components.md");
-    assert!(
-        reg.contains("| [itinerary](spec/planner/itinerary.md) | planner | PLN:ITINERARY | | | ")
-    );
-    assert!(read(&root, "requirements/planner/itinerary.md").contains("### PLN:ITINERARY-F1 — "));
-    assert!(read(&root, "spec/planner/README.md").contains("| [itinerary.md](itinerary.md) | "));
+    assert!(reg.contains(
+        "| [offline-copy](spec/phone/offline-copy.md) | phone | PHN:OFFLINE | | | "
+    ));
+    assert!(read(&root, "requirements/phone/offline-copy.md").contains("### PHN:OFFLINE-F1 — "));
+    assert!(read(&root, "spec/phone/README.md").contains("| [offline-copy.md](offline-copy.md) | "));
 }
 
 #[test]
 fn a_registered_component_with_one_document_gets_the_other() {
     let root = real_vault();
-    fs::remove_file(root.join("docs/spec/shared/trip-time.md")).unwrap();
+    register_without_documents(&root);
+    scaffold_cleanly(&root, &["docs", "phone", "offline-copy"]);
+    fs::remove_file(root.join("docs/spec/phone/offline-copy.md")).unwrap();
     let before = findings(&root);
     assert!(
         !before.is_empty(),
         "removing a specification leaves findings"
     );
-    let out = scaffold_keeping_lines(&root, &["docs", "shared", "trip-time"]).stdout;
+    let out = scaffold_keeping_lines(&root, &["docs", "phone", "offline-copy"]).stdout;
     assert!(
-        out.contains("created docs/spec/shared/trip-time.md"),
+        out.contains("created docs/spec/phone/offline-copy.md"),
         "{out}"
     );
-    assert!(!out.contains("requirements/shared/trip-time.md"), "{out}");
+    assert!(!out.contains("requirements/phone/offline-copy.md"), "{out}");
     // The index row and the registry link are already there, so neither file changes.
-    assert!(!out.contains("docs/spec/shared/README.md"), "{out}");
+    assert!(!out.contains("docs/spec/phone/README.md"), "{out}");
     assert!(!out.contains("docs/components.md"), "{out}");
     // SHR:DOC-SCAFFOLD-F2: on a vault with findings, the command adds none.
     let after = findings(&root);
@@ -332,22 +369,22 @@ fn a_new_system_takes_components_decisions_and_guides() {
         &root,
         &[
             "system",
-            "bookings",
-            "BKG",
-            "Bookings, and the trips they belong to",
+            "journal",
+            "JRN",
+            "Journals, and the trips they belong to",
             "A Keeper",
         ],
     );
-    assert!(read(&root, "roadmap/bookings.md").contains("Milestone Bookings-0.1"));
+    assert!(read(&root, "roadmap/journal.md").contains("Milestone Journal-0.1"));
     assert!(read(&root, "roadmap/README.md").contains("| A Keeper |"));
     scaffold_cleanly(
         &root,
         &[
             "component",
-            "bookings",
+            "journal",
             "email-parser",
-            "BKG:PARSER",
-            "Reads a confirmation email",
+            "JRN:PARSER",
+            "Reads a journal entry sent by email",
         ],
     );
     let n = next_record(&root);
@@ -355,8 +392,8 @@ fn a_new_system_takes_components_decisions_and_guides() {
         &root,
         &[
             "decision",
-            "Bookings are matched to trips by date",
-            "bookings",
+            "Journal entries are matched to trips by date",
+            "journal",
             "shared/trip-time",
             "--date",
             "2026-11-11",
@@ -364,25 +401,25 @@ fn a_new_system_takes_components_decisions_and_guides() {
     );
     let record = read(
         &root,
-        &format!("decisions/{n}-bookings-are-matched-to-trips-by-date.md"),
+        &format!("decisions/{n}-journal-entries-are-matched-to-trips-by-date.md"),
     );
-    assert!(record.contains("- **Date:** 2026-11-11\n- **Scope:** bookings, shared/trip-time\n"));
-    // The new subject sorts after web, the last system, and before the components.
+    assert!(record.contains("- **Date:** 2026-11-11\n- **Scope:** journal, shared/trip-time\n"));
+    // The new subject sorts after bookings, the last system, and before the components.
     let index = read(&root, "decisions/README.md");
-    assert!(index.find("### web") < index.find("### bookings"));
-    assert!(index.find("### bookings") < index.find("### shared/doc-check"));
+    assert!(index.find("### bookings") < index.find("### journal"));
+    assert!(index.find("### journal") < index.find("### shared/doc-check"));
     assert!(index.find("### shared/doc-check") < index.find("### shared/trip-time"));
     scaffold_cleanly(
         &root,
         &[
             "guide",
-            "bookings",
-            "forwarding-a-booking",
-            "Forwarding a booking",
-            "Sending a confirmation email to a trip",
+            "journal",
+            "emailing-a-journal-entry",
+            "Emailing a journal entry",
+            "Sending a day's notes to a trip by email",
         ],
     );
-    assert!(read(&root, "guides/README.md").contains("## Bookings\n\n| Guide | Covers |"));
+    assert!(read(&root, "guides/README.md").contains("## Journal\n\n| Guide | Covers |"));
 }
 
 #[test]
@@ -478,8 +515,8 @@ fn a_refused_command_writes_nothing_and_says_why() {
     let root = real_vault();
     let cases: &[(&[&str], &str)] = &[
         (
-            &["component", "bookings", "parser", "BKG:PARSER", "x"],
-            "the system bookings is not registered",
+            &["component", "journal", "parser", "JRN:PARSER", "x"],
+            "the system journal is not registered",
         ),
         (
             &["component", "shared", "doc-check", "SHR:DOC-CHECK2", "x"],

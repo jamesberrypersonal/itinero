@@ -4,6 +4,51 @@ What has been done, newest first. The live work list, `TODO.md`, numbers each pi
 owed, such as TODO-9. An entry that finishes one of those items names it, so a reader can find what
 became of its number. `documentation-system.md` sets the rules.
 
+## 2026-11-14 — TODO-5, a place's time zone is filled in from the place
+
+*By:* James Berry, with Claude
+
+The web app fills in a place's time zone when a traveller enters an airport's code or a town's name
+(ADR-0019, a place's time zone is filled in from a list of places, kept on the phone one country at
+a time). A device holds every airport, and the towns of 1,000 people or more of each country its
+trips visit, fetched in the background after sign-in and read with no connection. The towns come
+from GeoNames, and the airports from OurAirports. The traveller can still choose another zone.
+`web/places` holds the list.
+
+## 2026-11-14 — TODO-12, Itinero's online side runs on Cloudflare
+
+*By:* James Berry, with Claude
+
+Itinero's online side runs on Cloudflare's free plan, and travellers sign in with Google alone
+(ADR-0015, Itinero's online side runs on Cloudflare's free plan, and travellers sign in with Google
+alone). Requests are served by a Cloudflare Worker. Each trip is held in a Durable Object of its
+own, which applies its changes one at a time. Accounts and membership are held in a D1 database,
+and invitations are sent through Resend. Apple's sign-in was dropped, because offering it on a
+website costs $99 a year. Itinero's only running cost is its domain name.
+
+## 2026-11-14 — TODO-10, a trip opens on a home page for each traveller
+
+*By:* James Berry, with Claude
+
+A trip opens on a home page for each traveller (ADR-0014, a trip opens on a home page for each
+traveller). A trip has its own first and last dates, and each traveller sets their own within them.
+Before their dates, the home page counts the days left. During them, it says which day of their
+trip it is. It lists the traveller's bookings for today and the next ones, and links to the page
+for the country the phone is in. The phone works out its country itself, and its location never
+leaves it. A trip's bookings have a page of their own, and its calendar is seen only by the
+travellers an admin chooses (ADR-0013, which supersedes ADR-0010).
+
+## 2026-11-14 — TODO-3, access to a page passes down the tree
+
+*By:* James Berry, with Claude
+
+Access to a page passes down to the pages beneath it (ADR-0012, access to a page passes down to the
+pages beneath it). An admin gives each traveller view or edit access to the trip, and it passes to
+every page, including pages added later. An admin can change a traveller's access for a branch. A
+traveller who may see a page may see every page above it. A new page takes its parent's access,
+and a moved page takes its new place's, once the traveller moving it confirms any move that lets
+more travellers see it.
+
 ## 2026-11-14 — TODO-9, the style guide's final pass from a Claude skill
 
 *By:* James Berry, with Claude
@@ -18,6 +63,18 @@ them as a newcomer. The skill then applies its fixes, and rewraps at 100 columns
 it changed. Last, it runs the documentation checker, `just check-docs`, and the test suites,
 `just test-docs`. It asks before it edits a decision record that has been accepted, because an
 accepted record is never changed.
+
+## 2026-11-14 — TODO-2, a trip's pages form a tree
+
+*By:* James Berry, with Claude
+
+A trip's pages form a tree, nested to any depth, and any page can link to any other, across
+branches (ADR-0011, a trip's pages form a tree, with links between any two). A page holds Markdown
+text, with no structure imposed. A traveller creating a trip chooses its countries, and each gets a
+page. A stretch or a firm item on the trip's calendar can link to a page. Deleting a page moves it,
+with the pages under it, to the trip's graveyard, once the traveller confirms. Each traveller sees
+the graveyard as a list of the deleted pages they could see, and only an admin reads or restores a
+page in it.
 
 ## 2026-11-12 — TODO-8, the documents of a registered component from one command
 

@@ -1,9 +1,10 @@
-//! §4.3.17 sections, §4.3.18 live-list-citations and §4.3.19 live-list-shape.
+//! §4.3.17 sections, §4.3.18 live-list-citations, §4.3.19 live-list-shape and §4.3.24 milestones.
 
 use super::{Ctx, resolved};
 use crate::markdown::{self, Kind, Line};
 use crate::tables::item_heading;
 use crate::vault::{Doc, repo_path};
+use std::collections::{BTreeMap, BTreeSet};
 
 pub fn check(ctx: &mut Ctx) {
     let mut found: Vec<(&'static str, String, usize, String, Option<String>)> = Vec::new();
@@ -12,8 +13,75 @@ pub fn check(ctx: &mut Ctx) {
         live_list_citations(ctx, doc, &mut found);
     }
     live_list_shape(ctx, &mut found);
+    milestones(ctx, &mut found);
     for (rule, path, line, text, pass) in found {
         ctx.report(rule, path, line, text, pass);
+    }
+}
+
+/// Each milestone citation names a milestone heading in its system's roadmap (§4.3.24).
+fn milestones(ctx: &Ctx, found: &mut Vec<(&'static str, String, usize, String, Option<String>)>) {
+    if !ctx.vault.dirs.contains("roadmap") {
+        return;
+    }
+    // Each roadmap's milestones, by the slug that names it.
+    let mut defined: BTreeMap<String, BTreeSet<String>> = BTreeMap::new();
+    for doc in ctx.vault.docs.values() {
+        let Some(slug) = doc
+            .rel
+            .strip_prefix("roadmap/")
+            .and_then(|n| n.strip_suffix(".md"))
+            .filter(|n| !n.contains('/'))
+        else {
+            continue;
+        };
+        let heads = defined.entry(slug.to_string()).or_default();
+        for line in doc.read_lines() {
+            let Some(text) = line.heading_text() else {
+                continue;
+            };
+            let chars: Vec<char> = text.chars().collect();
+            if let Some((_, cited)) = markdown::milestones(&chars).into_iter().next()
+                && (text == cited || text.starts_with(&format!("{cited} — ")))
+            {
+                heads.insert(cited);
+            }
+        }
+    }
+    for doc in ctx.vault.docs.values() {
+        for line in doc.read_lines() {
+            for (slug, cited) in markdown::milestones(&line.without_targets()) {
+                let roadmap = format!("roadmap/{slug}.md");
+                let heads = defined.get(&slug);
+                if heads.is_some_and(|h| h.contains(&cited)) {
+                    continue;
+                }
+                let (text, pass) = match heads {
+                    None => (
+                        format!(
+                            "{cited} has no roadmap: {} does not exist",
+                            repo_path(&roadmap)
+                        ),
+                        None,
+                    ),
+                    Some(h) if h.is_empty() => (
+                        format!(
+                            "{cited} is not a milestone of {}, which heads none",
+                            repo_path(&roadmap)
+                        ),
+                        None,
+                    ),
+                    Some(h) => (
+                        format!("{cited} is not a milestone of {}", repo_path(&roadmap)),
+                        Some(format!(
+                            "its roadmap heads {}",
+                            h.iter().cloned().collect::<Vec<_>>().join(", ")
+                        )),
+                    ),
+                };
+                found.push(("milestones", doc.path(), line.no, text, pass));
+            }
+        }
     }
 }
 

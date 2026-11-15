@@ -444,10 +444,10 @@ Node's type definitions.
 | [SHR:TRIP-TIME-F5](../../requirements/shared/trip-time.md#^shr-trip-time-f5) | `duration`, from the moments each value covers (§4.5, §4.7). |
 | [SHR:TRIP-TIME-F6](../../requirements/shared/trip-time.md#^shr-trip-time-f6) | The `span-order` refusal of §4.7. |
 | [SHR:TRIP-TIME-F7](../../requirements/shared/trip-time.md#^shr-trip-time-f7) | The sort key of §4.6, and the fixed hours of §4.5. |
-| [SHR:TRIP-TIME-F8](../../requirements/shared/trip-time.md#^shr-trip-time-f8) | `format` and `formatDuration`, in §4.8. Where the traveller chooses the styles is the web app, whose specification is not yet written. |
+| [SHR:TRIP-TIME-F8](../../requirements/shared/trip-time.md#^shr-trip-time-f8) | `format` and `formatDuration`, in §4.8. Where the traveller chooses the styles is `web/screens`. |
 | [SHR:TRIP-TIME-F9](../../requirements/shared/trip-time.md#^shr-trip-time-f9) | `relativeTo`, in §4.9. Reading the device's clock is the caller. |
-| [SHR:TRIP-TIME-NFR1](../../requirements/shared/trip-time.md#^shr-trip-time-nfr1) | No network code, and every function working from the loaded rules (§6). Bundling, fetching and storing the rules file is the web app, whose specification is not yet written (ADR-0008). |
-| [SHR:TRIP-TIME-NFR2](../../requirements/shared/trip-time.md#^shr-trip-time-nfr2) | Never reading the device's time zone (§4), and the tests under two time zones (§4.12). One rules file on every device is the web app (ADR-0008). |
+| [SHR:TRIP-TIME-NFR1](../../requirements/shared/trip-time.md#^shr-trip-time-nfr1) | No network code, and every function working from the loaded rules (§6). Bundling, fetching and storing the rules file is `web/shell` (ADR-0008). |
+| [SHR:TRIP-TIME-NFR2](../../requirements/shared/trip-time.md#^shr-trip-time-nfr2) | Never reading the device's time zone (§4), and the tests under two time zones (§4.12). One rules file on every device is `web/shell` (ADR-0008). |
 
 ## 8. Open
 
