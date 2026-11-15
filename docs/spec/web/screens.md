@@ -94,10 +94,11 @@ Behaviour crossing every screen:
   changes the trip is left out, not greyed (`WEB:SCREENS-F1`).
 - **A version too old.** While `web/shell`'s `updateRequired` is true, every screen shows a bar in
   place of the offline one. It says Itinero needs a new version before it can reach the
-  traveller's trips, and that they should save any text they are writing elsewhere first. Its
+  traveller's trips, and that they should copy any text they are writing somewhere safe first. Its
   button, Update now, calls the shell's `applyUpdate`, and shows once `updateWaiting` is true. Every
   control that changes a trip is left out, as offline, except the editor a traveller already has
-  open, which keeps its text (`WEB:SHELL-F5`).
+  open, which keeps its text until the traveller updates. Updating reloads every window, which the
+  bar says (`WEB:SHELL-F5`).
 - **What to offer.** A control that changes something is shown only where `access/permissions`'
   `authorise`, asked of the copy's grants, pages and `you`, allows it. A change the copy held online
   refuses all the same shows the refusal's message.
@@ -113,16 +114,17 @@ Behaviour crossing every screen:
 The sign-in screen loads Google Identity Services, and draws its button. On a computer, where the
 screen is wider than 720 pixels and the device has no touch screen, it says that the trips it opens
 stay on the computer until the traveller signs out (`WEB:SCREENS-F9`). A sign-in asks
-`POST /api/auth/nonce`, gives the nonce to Google, and sends the ID token with `POST /api/auth/sign-in`. On
-success it calls the trip store's `signedIn`. Where the sign-in gives `named` as false, it opens
-`/name` first. Otherwise it opens the screen the traveller came for, such as an invitation, or the
-list of trips.
+`POST /api/auth/nonce`, gives the nonce to Google, and sends the ID token with
+`POST /api/auth/sign-in`. On success it calls the trip store's `signedIn`. Where the sign-in gives
+`named` as false, it opens `/name` first. Otherwise it opens the screen the traveller came for, such
+as an invitation, or the list of trips.
 
 `/name` asks for the name other travellers will see, filled with the `name` the sign-in gave, and
-sends it with `PUT /api/auth/name`. A `bad-name` refusal shows its message beside the box. Once the name
-is set, the screen the traveller came for opens, so an invitation is accepted only after its new
-member has chosen their name (`WEB:SCREENS-F10`, `ACC-F13`). Leaving `/name` without saving keeps
-`named` false, and the next sign-in asks again.
+sends it with `PUT /api/auth/name`. A `bad-name` refusal shows its message beside the box. Once the
+name is set, the screen the traveller came for opens, so an invitation is accepted only after its
+new member has chosen their name (`WEB:SCREENS-F10`, `ACC-F13`). `/name` offers no way to any other
+screen until the name is saved. A traveller who closes Itinero there keeps `named` false, and is
+asked again the next time Itinero opens.
 
 Signing out calls the trip store's `signOut`, which deletes every trip, and opens the sign-in
 screen.
@@ -149,7 +151,7 @@ The home page shows (`WEB:SCREENS-F2`):
   Against the traveller's own dates, from the copy's `mine`, it says `3 days to go`, `Day 4 of 8`,
   or `Your trip is over`
 - **their bookings.** Those of the bookings' `onDate` for today, then the first three of `notOver`
-  that do not start today. `now` is made as `spec/bookings/list.md` §4.4 gives
+  whose `first` is after today. `now` is made as `spec/bookings/list.md` §4.4 gives
 - **their country**, once found, as below
 
 The country is found only when the traveller taps Find the country I'm in. The screen then asks
@@ -185,7 +187,10 @@ phone (`WEB:SCREENS-F3`). Each day shows:
 A stretch or a firm item that names a page links to it, and the link shows not available where the
 pages' `state` is not `tree` or the page is hidden (`PLN-F11`). A traveller with edit access to the
 calendar drags a stretch's ends to resize it, or taps it to change its place or dates, and adds a
-stretch or a firm item from a day (`PLN-F1`, `PLN-F3`, `PLN-F4`). A firm item's form sends a
+stretch or a firm item from a day (`PLN-F1`, `PLN-F3`, `PLN-F4`). A firm item of travel asks how
+it goes, and for each end its place and its time, with the zone filled in as §4.5 gives. The
+calendar shows its duration, the itinerary's `travelDuration`, as trip-time's `formatDuration`
+writes it. A firm item's form sends a
 `change-firm` with the revision it was opened from. A `stale` refusal shows the item as it now
 stands, from `details.item`, beside the traveller's own, to start again from
 (`PLN:ITINERARY-F11`). A traveller with no calendar in
@@ -219,9 +224,9 @@ stands, from `details.booking`, beside the traveller's own, to start again from 
 
 *Invoked from:* the pages in a trip's bar, a link, a search, and the home page's country.
 
-The tree of pages is the pages' `tree` of the copy, each branch folded or open. A traveller with edit
-access drags a page to move it. The move is sent with no `agreed`. Where the copy held online refuses
-it with `agree-first`, the screen says how many more travellers will see the page, from
+The tree of pages is the pages' `tree` of the copy, each branch folded or open. A traveller with
+edit access drags a page to move it. The move is sent with no `agreed`. Where the copy held online
+refuses it with `agree-first`, the screen says how many more travellers will see the page, from
 `details.count`. It sends the move again, with `agreed` set to that number, once the traveller
 confirms (`ACC-F9`). The device never counts them itself, because a copy holds only its own
 traveller's access unless they are an admin.
@@ -232,8 +237,9 @@ is (`WEB:SCREENS-NR4`). It also empties the destination of every link that is no
 `https:` or a `mailto:` address, or an address within the page, and the screens leave that setting
 as it is.
 
-micromark gives the page as HTML, and the screens then go through its links. Each link whose
-destination the pages' `linkTarget` reads is a page of the trip. It opens that page where the page
+micromark gives the page as HTML, and the screens then go through its links. Where the pages'
+`linkTarget` reads a page's identifier from a link's destination, the link is to a page of the
+trip. It opens that page where the page
 is in the copy's tree, and otherwise shows Page not available, without a title (`PLN-F9`,
 `ACC-F8`). Every other link opens in a new tab, with no referrer.
 
@@ -244,8 +250,8 @@ by side, from `details.text`, and the traveller saves again from that revision (
 
 Search runs the pages' `search` over the copy, with or without a connection, and lists each page
 found with the words around each match (`PLN-F12`). The graveyard lists the titles of the copy's
-`graveyard`, each with the number of pages that went with it. An admin, online, opens a page there with the trip store's `buried`, and restores it
-with a `restore` change (`PLN-F13`).
+`graveyard`, each with the number of pages that went with it. An admin, online, opens a page there
+with the trip store's `buried`, and restores it with a `restore` change (`PLN-F13`).
 
 ### 4.7 The members and their access
 
@@ -267,7 +273,8 @@ from the copy's `grants`. Online, an admin can:
 
 A level for a page that `applyGrant` refuses with `hidden-above` names the page above to open first.
 Inviting, withdrawing, making an admin and removing are the trip store's `invite`, `withdraw`,
-`makeAdmin` and `remove`. Every other change is a grant change to the trip, sent with its `send`.
+`makeAdmin` and `remove`. Every other change is a grant change to the trip, sent with the trip
+store's `send`.
 
 `/invitations/{invitation}` takes the token from the address the email gave, asks the traveller to
 sign in where they have not, and to choose their name where they have not (§4.1), and accepts with
@@ -322,8 +329,10 @@ domain. A build script, `npm run build-borders` in `apps/web/`, reads its shapef
   holds it
 
 A position is in a country where it is inside an odd number of the country's rings, counted by
-casting a ray east from it. The file is fetched only once the traveller first asks for their
-country, and kept by the service worker as one of the version's files (`WEB:SCREENS-NFR2`).
+casting a ray east from it. The file is one of the version's files, which the service worker holds
+before Itinero says it is ready offline. The country is therefore found with no connection from the
+first launch. The screens read the file into memory only once the traveller first asks for their
+country (`WEB:SCREENS-NFR2`).
 
 Natural Earth draws each border as it stands on the ground. A traveller in a disputed place is shown
 the country that holds it.
@@ -349,8 +358,8 @@ and the packages of the trip's parts, which `spec/web/shell.md` §5 lists.
   phone, and neither the position nor the country is stored or sent.
 - **Nothing offered that would be refused** (`WEB:SCREENS-F1`). Controls follow `authorise` and the
   connection.
-- **Quick to draw** (`WEB:SCREENS-NFR1`). The home page reads only today's and the next bookings, and
-  the calendar and the bookings page draw the rows on screen first.
+- **Quick to draw** (`WEB:SCREENS-NFR1`). The home page reads only today's and the next bookings,
+  and the calendar and the bookings page draw the rows on screen first.
 
 ## 7. Requirements this satisfies
 

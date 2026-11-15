@@ -309,9 +309,11 @@ dates.
 A traveller's dates are refused with `outside-trip` where the trip has no dates, or where either
 date falls outside the trip's. New dates for the trip are refused with `travellers-outside` where
 any traveller's own dates would fall outside them. The itinerary does not check who sets the dates.
-The caller lets only the trip's creator set the trip's, and each traveller set their own
-(ADR-0014, a trip opens on a home page for each traveller). A traveller removed from the trip
-keeps their entry, which does nothing.
+The caller, `planner/trip-host` for the copy held online, lets only the trip's creator set the
+trip's, and each traveller set their own (ADR-0014, a trip opens on a home page for each traveller).
+A `traveller-dates` change with no `dates` removes a traveller's entry, and is never refused with
+`outside-trip`. `planner/trip-host` makes one for each traveller removed from the trip, so that a
+removed traveller's dates never stop a change to the trip's.
 
 ## 5. Resources
 

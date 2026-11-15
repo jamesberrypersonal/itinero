@@ -43,10 +43,9 @@ None. The web app shows the sign-in button Google supplies, and a sign-out comma
 ### 3.2 Application interface
 
 The accounts component answers four requests over HTTPS, each with a JSON body. It also checks the
-version of the web app behind every request of the online side, before any component answers
-(§4.7). Every response
-that refuses gives a status of 400 or 401, and a JSON body `{ "code": ..., "message": ... }`, whose
-message is one English sentence the web app may show.
+version of the web app behind every request of the online side, before any component answers (§4.7).
+Every response that refuses gives a status of 400, 401 or 426, and a JSON body
+`{ "code": ..., "message": ... }`, whose message is one English sentence the web app may show.
 
 | Request | Body | Gives |
 |---|---|---|
@@ -70,7 +69,7 @@ request without handling it.
 
 ### 3.3 Programming interface
 
-Inside the online side, the accounts component gives one function to the component holding the
+Inside the online side, the accounts component gives two functions to the component holding the
 copy of each trip online:
 
 ```ts
@@ -123,9 +122,10 @@ Behaviour crossing every operation:
 
 ### 4.1 The nonce
 
-*Porcelain:* `POST /api/auth/nonce` gives a nonce, and stores nothing. A nonce is 16 random bytes and
-the time it was made, followed by their HMAC-SHA256, a code made from them with the Worker's secret
-`NONCE_KEY`, all written in base64url. Only the online side can make a nonce whose code checks.
+*Porcelain:* `POST /api/auth/nonce` gives a nonce, and stores nothing. A nonce is 16 random bytes
+and the time it was made, followed by a code made from both. The code is their HMAC-SHA256, made
+with the Worker's secret `NONCE_KEY`. All three are written in base64url. Only the online side can
+make a nonce whose code checks.
 Asking for any number of nonces therefore writes no record, so it costs the free plan's daily
 writes nothing.
 
@@ -176,16 +176,16 @@ request.
 
 ### 4.4 Signing out
 
-*Porcelain:* `POST /api/auth/sign-out` forgets the session sent with it, and clears the cookie. Sessions
-on the account's other devices are unchanged. Signing out with no session, or one already ended,
-succeeds and does nothing.
+*Porcelain:* `POST /api/auth/sign-out` forgets the session sent with it, and clears the cookie.
+Sessions on the account's other devices are unchanged. Signing out with no session, or one already
+ended, succeeds and does nothing.
 
 ### 4.5 Choosing a name
 
-*Porcelain:* `PUT /api/auth/name` sets the name of the account behind the request's session, and sets
-`named` to true (`ACC:ACCOUNTS-F5`). The name is trimmed of white space at both ends, and refused
-with `bad-name` where it is then empty, or longer than 60 characters, counted as Unicode code
-points. A request with no session is refused with `no-session`. Setting the name an account
+*Porcelain:* `PUT /api/auth/name` sets the name of the account behind the request's session, and
+sets `named` to true (`ACC:ACCOUNTS-F5`). The name is trimmed of white space at both ends, and
+refused with `bad-name` where it is then empty, or longer than 60 characters, counted as Unicode
+code points. A request with no session is refused with `no-session`. Setting the name an account
 already holds sets `named`, and changes nothing else.
 
 ### 4.6 The test suite
@@ -199,15 +199,18 @@ repository.
 
 ### 4.7 A version of the web app too old to answer
 
-*Porcelain:* every request whose path begins `/api/` carries a header named `Itinero-Api`, holding
-the whole number its version of the web app was built for, as `spec/web/shell.md` §4.7 gives. The
-Worker holds the oldest number it answers, as `OLDEST_API`. It refuses a request whose number is
+*Porcelain:* every request whose path begins `/api/` carries a header named `Itinero-Api`. The
+header holds a whole number, which names the form of request and record the web app sending it was
+built for, as `spec/web/shell.md` §4.7 gives. The Worker holds the oldest number it answers, as
+`OLDEST_API`. It refuses a request whose number is
 lower, or that carries none, with `update-first`, before it looks for a session or passes the
 request to any component (`WEB:SHELL-F5`). Nothing is read or written for a request so refused.
 
-One request carries no number: the one that opens a trip's WebSocket, on which a browser sets no
-header of its own. The socket carries only a sequence, and the catch-up that follows it is checked
-like any other request.
+The Worker makes one exception. It does not refuse the request that opens a trip's WebSocket, a
+connection the online side holds open to tell a device each time the trip changes, for carrying no
+number. A browser lets no page add a header to that request. The socket carries only a count of the
+trip's changes. The device then asks for the changes themselves with a request checked like any
+other.
 
 ## 5. Resources
 
@@ -218,7 +221,7 @@ database.
 |---|---|---|
 | Account | Its identifier, its provider, the provider's `sub`, its email address, `emailVerified`, its `name` and `named`, and when it was made | For as long as Itinero runs. Deleting an account is future work |
 | Session | The SHA-256 digest of the session, its account, and when it was last used | Until signed out, or 180 days unused |
-| Nonce | The SHA-256 digest of a nonce a sign-in used, and when it was made | Until 10 minutes after it was made, when §4.2 refuses it for its age anyway |
+| Nonce | The SHA-256 digest of a nonce a sign-in used, and when it was made | Until the daily task below deletes it, once it is 10 minutes old and §4.2 refuses it for its age anyway |
 
 The pair of the provider and `sub` is unique across accounts. A provider of `google` is the only one
 written today. The column is kept, so that an account's provider is never guessed. A scheduled task
@@ -228,8 +231,8 @@ nonce past its 10 minutes.
 Itinero's client identifier at Google is set as a variable of the Worker, named `GOOGLE_CLIENT_ID`,
 in its Wrangler configuration. `NONCE_KEY` is 32 random bytes, set as a secret of the Worker with
 Wrangler, and never in the repository. Changing it refuses every nonce not yet used, which costs a
-traveller signing in at that moment one more try. `OLDEST_API` is a constant of the Worker's code, so that it changes
-only with a deploy.
+traveller signing in at that moment one more try. `OLDEST_API` is a constant of the Worker's code,
+so that it changes only with a deploy.
 
 | Resource | Path | Owned by |
 |---|---|---|

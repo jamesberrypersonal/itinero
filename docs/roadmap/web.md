@@ -45,17 +45,17 @@ theirs, in Milestone Planner-0.2 and Milestone Access-0.1.
 
 - Write a trial app and a trial Worker, deployed to Cloudflare's free plan, that do one thing of
   each kind the design rests on: sign a traveller in with Google, hold one page in a Durable Object,
-  catch a phone up, and show the page with no connection. The trial is thrown away. Nothing of it
-  becomes `@itinero/web` or the online side.
+  bring a phone's copy of the page up to date, and show the page with no connection. The trial is
+  thrown away. Nothing of it becomes `@itinero/web` or the online side.
 - Try signing in with Google's button on an iPhone, in Safari and from the home screen, and on an
-  Android phone. Close the item that `spec/web/screens.md` §8 and `spec/access/accounts.md` §8 leave
-  open. Where the button fails from the home screen, add the request it needs to
-  `spec/access/accounts.md`.
-- Add the trial app to an iPhone's home screen, catch it up, and confirm it opens and shows its page
-  with no connection, after the phone is restarted.
+  Android phone. Settle the question that `spec/web/screens.md` §8 and `spec/access/accounts.md` §8
+  leave open. Where the button fails from the home screen, add to `spec/access/accounts.md` the
+  request a sign-in through Google's own page needs.
+- Add the trial app to an iPhone's home screen, bring it up to date, and confirm it opens and shows
+  its page with no connection, after the phone is restarted.
 - Measure the processor time of the trial's Durable Object on the free plan. Measure a request that
-  loads a file the size of the time-zone rules, and one that reads 500 rows. Close the item that
-  `spec/planner/trip-host.md` §8 leaves open.
+  loads a file the size of the time-zone rules, and one that reads 500 rows. Settle the question
+  that `spec/planner/trip-host.md` §8 leaves open.
 - Record what the trial found in each specification it changes, and in a decision record where it
   changes a decision.
 
@@ -89,8 +89,8 @@ theirs, in Milestone Planner-0.2 and Milestone Access-0.1.
 **Waits on:** Milestone Bookings-1.5
 
 - Build the first screens of `web/screens`, as its specification gives them: signing in and
-  choosing a name, accepting an invitation, the list of trips and a new trip, the home page, the bookings, the pages of
-  research with their search, and the settings.
+  choosing the name other travellers see, accepting an invitation, the list of trips and a new trip,
+  the home page, the bookings, the pages of research with their search, and the settings.
 - Prove the requirements of `web/screens` those screens meet, by the verification each carries:
   `WEB:SCREENS-F1`, `WEB:SCREENS-F2`, `WEB:SCREENS-F4`, `WEB:SCREENS-F5`, and `WEB:SCREENS-F7` to
   `WEB:SCREENS-F10`.
@@ -98,8 +98,8 @@ theirs, in Milestone Planner-0.2 and Milestone Access-0.1.
 #### Milestone Web-1.5 — The calendar, and the screens an admin manages a trip on
 
 - Build the rest of `web/screens`: the calendar, the members and their access, inviting a traveller,
-  and the graveyard.
+  and the graveyard of deleted pages. An admin is a traveller who may manage the trip.
 - Prove `WEB:SCREENS-F3` and `WEB:SCREENS-F6`, and the non-functional requirements of
   `web/screens`, by the verification each carries.
-- Prove the web app's own requirements, and those of the planner, access and bookings systems that
-  need a phone, on a phone and on a computer.
+- Prove the web app's own requirements on a phone and on a computer. Prove there too the
+  requirements of the planner, access and bookings systems that only a phone can prove.

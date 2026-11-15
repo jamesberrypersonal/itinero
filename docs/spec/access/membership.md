@@ -46,7 +46,7 @@ invitation email (§4.3) is the one thing the membership component shows a perso
 
 The membership component answers these requests over HTTPS, each with a JSON body, from a device
 signed in through `access/accounts`. Each has a path beginning `/api/`, as every request of the
-online side has. A refusal gives a status of 400, 403, 404 or 409, and a JSON
+online side has. A refusal gives a status of 400, 403, 404, 409 or 502, and a JSON
 body `{ "code": ..., "message": ... }`.
 
 | Request | Body | Gives |
@@ -93,13 +93,13 @@ type Change = GrantChange | { op: "admin"; traveller: AccountId };
 function onChange(listener: (trip: string, change: Change) => Promise<void>): void;
 ```
 
-`member` gives the member an account is on a trip, or `undefined`, including for a former
-member. The caller passes
-`{ traveller: account, admin }` from it to every function of `@itinero/permissions`. `onChange`
-names the listener that applies to a trip's grants each `add` and `remove` the membership component
-makes (§4.4, §4.5). The listener is also given `{ op: "admin", traveller }` for each member made an
-admin, so that the trip's open devices are told (§4.1). `joined` is the moment the member joined, in the text form of an ISO 8601 UTC
-time.
+`member` gives the member an account is on a trip, and `undefined` for an account that is not on it,
+a former member included. The caller passes `{ traveller: account, admin }` from it to every
+function of `@itinero/permissions`. `onChange` names the listener that applies to a trip's grants
+each `add` and `remove` the membership component makes (§4.4, §4.5). The listener is also given
+`{ op: "admin", traveller }` for each member made an admin. `planner/trip-host` then tells every
+device that has the trip open (§4.1). `joined` is the moment the member joined, in the text form of
+an ISO 8601 UTC time.
 
 ### 3.4 Systems this drives
 
@@ -111,7 +111,8 @@ token. The email is plain text with one link.
 Resend sends to any address only from a domain whose ownership it has checked, through records
 added to the domain's DNS. Invitations are therefore sent from an address at Itinero's own domain,
 such as `invitations@` that domain. An invitation Resend refuses to send, such as one past the
-day's 100, closes the request with the refusal `not-sent`, and leaves no invitation open.
+day's 100, closes the request with the refusal `not-sent`. Nothing is written for it, so an earlier
+invitation to the same address stays open (§4.2).
 
 ## 4. Behaviour
 
@@ -140,32 +141,37 @@ Behaviour crossing every operation:
 `creator` true (`ACC:MEMBERSHIP-F1`). The component holding the copy online calls it as it creates
 the trip, and gives the creator edit access in the trip's grants.
 
-`POST /api/trips/{trip}/admins` makes a member an admin, and is refused with `admin-only` from a member
-who is not one. Making an admin of a member who already is one succeeds, and changes no record. No
-request takes the role away.
+`POST /api/trips/{trip}/admins` makes a member an admin, and is refused with `admin-only` from a
+member who is not one. Making an admin of a member who already is one succeeds, and changes no
+record. No request takes the role away.
 
-Either way, the listener of `onChange` is then given `{ op: "admin", traveller }`. No grant changes,
-because an admin's access comes from the role. `planner/trip-host` raises the trip's sequence for
-it, so that every open device catches up. The new admin's device then holds everything an admin
-sees, and every other device marks them an admin. A request whose listener fails is refused, and
-making it again tells the devices.
+Whether or not the member was an admin already, the listener of `onChange` is then given
+`{ op: "admin", traveller }`. No grant changes, because an admin's access comes from the role.
+`planner/trip-host` raises the trip's sequence, the count of its changes, for it, so that every open
+device catches up. The new admin's device then holds everything an admin sees, and every other
+device marks them an admin. A request whose listener fails is refused, and making it again tells the
+devices.
 
 ### 4.2 Inviting, and withdrawing
 
-*Porcelain:* `POST /api/trips/{trip}/invitations` is refused with `admin-only` from a member who is not
-an admin (`ACC:MEMBERSHIP-F2`). It is refused with `bad-email` where the address has no `@`, has
+*Porcelain:* `POST /api/trips/{trip}/invitations` is refused with `admin-only` from a member who is
+not an admin (`ACC:MEMBERSHIP-F2`). It is refused with `bad-email` where the address has no `@`, has
 nothing before or after it, or is longer than 254 characters. It is refused with `already-a-member`
 where a member's account holds the address. Otherwise it:
 
-1. withdraws any open invitation to the same address on the same trip
-2. makes an invitation with a new identifier and a token of 32 random bytes, written in base64url.
+1. makes an invitation with a new identifier and a token of 32 random bytes, written in base64url.
    It keeps only the token's SHA-256 digest (`ACC:MEMBERSHIP-NFR1`)
-3. sets the invitation to expire 14 days, of 24 hours each, after it is made
-4. sends the email of §4.3, holding the token
+2. sets the invitation to expire 14 days, of 24 hours each, after it is made
+3. sends the email of §4.3, holding the token
+4. once Resend has accepted the email, in one batch, closes any open invitation to the same address
+   on the same trip as replaced, and stores the new invitation
 
-`DELETE /api/trips/{trip}/invitations/{invitation}` withdraws an open invitation, and is refused with
-`admin-only` from a member who is not an admin. Withdrawing one already closed succeeds and does
-nothing.
+An invitation whose batch fails after its email was sent is never stored. Its link is then refused
+with `bad-invitation`, and an admin invites the address again.
+
+`DELETE /api/trips/{trip}/invitations/{invitation}` withdraws an open invitation, and is refused
+with `admin-only` from a member who is not an admin. Withdrawing one already closed succeeds and
+does nothing.
 
 ### 4.3 The invitation email
 
@@ -178,7 +184,8 @@ https://<Itinero's address>/invitations/<invitation>#<token>
 ```
 
 The link's address is a screen of the web app, outside `/api/`. The token sits after the `#`, which
-a browser never sends in a request, so it stays out of every server's logs. The web app reads it from the address, and passes it in the body of the acceptance.
+a browser never sends in a request, so it stays out of every server's logs. The web app reads it
+from the address, and passes it in the body of the acceptance.
 
 ### 4.4 Accepting
 
@@ -208,31 +215,31 @@ listener is given `{ op: "remove", traveller }`, and the acceptance is refused w
 
 ### 4.5 Removing a member
 
-*Porcelain:* `DELETE /api/trips/{trip}/members/{account}` is refused with `admin-only` from a member who
-is not an admin, and with `creator` for the trip's creator (`ACC:MEMBERSHIP-F4`). Otherwise the
+*Porcelain:* `DELETE /api/trips/{trip}/members/{account}` is refused with `admin-only` from a member
+who is not an admin, and with `creator` for the trip's creator (`ACC:MEMBERSHIP-F4`). Otherwise the
 listener of `onChange` is given `{ op: "remove", traveller }`, which takes away every grant the
-member holds. Once the listener returns, the member is removed: their record is kept, with
-`removed` set to the moment of the removal, and `admin` set false. Every request of theirs about the
-trip is then refused with `not-a-member`, as for any account not on it.
+member holds. Once the listener returns, the member is removed: their record is kept, with `removed`
+set to the moment of the removal, and `admin` set false. Every request of theirs about the trip is
+then refused with `not-a-member`, as for any account not on it.
 
 A former member is kept so that what still names them, such as a booking, still shows who they
 were. An invitation is not refused for a former member's address, and accepting it makes them a
 member again: `removed` is cleared, and `joined` is set to the acceptance.
 
 A removal that stops after the listener returns leaves a member with no grant. `planner/trip-host`
-refuses every request of such a member with `not-a-member`, so they have lost the trip already. They
+refuses every request of such a member with `not-a-member`, because its grants no longer hold them,
+so they have lost the trip already. They
 are still listed as a member, and an admin removes them again to finish.
 
 ### 4.6 Who is on a trip
 
-*Porcelain:* `GET /api/trips/{trip}/members` gives any member every member of the trip, with `admin`,
-`creator` and `joined`, and the `name` `access/accounts`' `account` gives for it
+*Porcelain:* `GET /api/trips/{trip}/members` gives any member every member of the trip, with
+`admin`, `creator` and `joined`, and the `name` `access/accounts`' `account` gives for it
 (`ACC:MEMBERSHIP-F5`, `ACC-F13`). It also gives each former member, with `removed`, so that their
 name can be shown where something names them. To an admin, it also gives each open invitation's
 identifier, address, access and expiry. A member who is not an admin is given no invitations, so
-that the addresses invited stay with the admins. `trips`
-gives the trips an account is a member of, in the order they were joined, and no trip it has been
-removed from.
+that the addresses invited stay with the admins. `trips` gives the trips an account is a member of,
+in the order they were joined, and no trip it has been removed from.
 
 ### 4.7 The test suite
 
@@ -248,13 +255,13 @@ database.
 | Record | Holds | Kept |
 |---|---|---|
 | Member | The trip, the account, `admin`, `creator`, when they joined, and when they were removed, for a former member | For as long as the trip is kept, so that a former member's name still shows |
-| Invitation | Its identifier, the trip, the address, the access to the trip and the calendar, who sent it, the token's SHA-256 digest, when it expires, and whether it is open, withdrawn, replaced or accepted | For 90 days after it closes, so that an admin can see what became of it |
+| Invitation | Its identifier, the trip, the address, the access to the trip and the calendar, who sent it, the token's SHA-256 digest, when it expires, and whether it is open, withdrawn, replaced, expired or accepted | For 90 days after it closes, so that an admin can see what became of it |
 
 A trip has exactly one member whose `creator` is true. The pair of the trip and the account is
 unique among members.
 
 A scheduled task of the Worker, which Cloudflare runs once a day, deletes every invitation 90 days
-after it closed, and closes every open invitation past its expiry.
+after it closed, and closes every open invitation past its expiry as expired.
 
 | Resource | Path | Owned by |
 |---|---|---|
@@ -270,11 +277,13 @@ after it closed, and closes every open invitation past its expiry.
 - **Says nothing of trips a traveller is not on** (`ACC-NFR1`). Every request about such a trip is
   refused the same way.
 - **Every trip keeps its creator** (`ACC:MEMBERSHIP-F1`). No request removes the creator, or takes
-  away an admin's role.
+  away the role of an admin who stays on the trip. A removed admin returns, if invited back, as a
+  member who is not one.
 - **Grants and members agree, or nobody gets in.** The grants of a trip gain a traveller only as
-  they accept, and lose them only as they are removed (§4.4, §4.5). An operation that stops part way
-  leaves a grant with no member, or a member with no grant. Neither opens the trip to anyone, and
-  the same request made again finishes it (§4).
+  they create the trip or accept an invitation. They lose a traveller only as the traveller is
+  removed, or as an acceptance that came too late is undone (§4.4, §4.5). An operation that stops
+  part way leaves a grant with no member, or a member with no grant. Neither opens the trip to
+  anyone, and the same request made again finishes it (§4).
 
 ## 7. Requirements this satisfies
 
@@ -295,5 +304,6 @@ after it closed, and closes every open invitation past its expiry.
 
 - **A grant left without a member.** An acceptance that stops part way, and is never made again,
   leaves a grant for an account that is not a member. It opens the trip to nobody. It is still
-  counted when `access/permissions` counts the travellers a moved page would be shown to. Clearing
+  counted when `access/permissions` counts the travellers who would come to see a page moved
+  elsewhere in the trip. Clearing
   such grants is not designed.

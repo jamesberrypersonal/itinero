@@ -16,30 +16,31 @@ beneath it, and an admin can hide a page, with its whole branch, from a travelle
 to a page passes down to the pages beneath it). A page beneath a hidden page has no setting of its
 own. It is hidden only because the page above it is.
 
-A deleted page restored while its parent is in the graveyard has no old place to return to. Returned
-to the top of the trip, it would take each traveller's access to the trip. A page from a hidden
-branch, such as plans for a surprise, would then be shown to the travellers it was hidden from, and
-nothing would tell the admin.
+A deleted page restored while its parent is in the graveyard has no old place to return to. The
+only place left for it is the top of the trip. There, each traveller would see it as they see the
+trip as a whole. A page from a hidden branch, such as plans for a surprise, would then be shown to
+the travellers it was hidden from, and nothing would tell the admin.
 
 ## Decision
 
 A deleted page is restored only to its old place, under its old parent.
 
 **The graveyard lists only the highest deleted page of each branch.** A page deleted with the page
-above it is not listed. It belongs to the listed page, and returns with it. A page deleted before a
-page above it was is not listed either, for as long as that page is in the graveyard.
+above it is not listed. It belongs to the listed page, and returns with it. A page deleted earlier
+than a page above it is not listed either, while the page above it is in the graveyard.
 
 **A page whose parent is in the graveyard cannot be restored.** The planner refuses, and names the
-listed page above it to restore first. Once that page is back in the tree, a page beneath it that
-was deleted before it is listed, and restores to its old place.
+listed page above it to restore first. Restoring that page lists, in its turn, each page beneath it
+that was deleted earlier. Each of those then restores to its old place.
 
-**No restore moves a page.** A restored page has the parent and the place it had when it was
-deleted. Each traveller's access to it is therefore what the tree gives it there.
+**A restore never changes where a page sits.** A restored page has the parent it had when it was
+deleted, and its old position among the pages under that parent. Each traveller's access to it is
+therefore what the tree gives it there.
 
 > [!NOTE]
 > **History.** ADR-0011 (a trip's pages form a tree, with links between any two) returned a
 > restored page to the top of the trip when its old parent was in the graveyard too. This record
-> replaces that one rule. Everything else ADR-0011 decided stands.
+> replaces that one rule. Everything else ADR-0011 decided stands, so ADR-0011 stays Accepted.
 
 ## Consequences
 
@@ -47,8 +48,8 @@ deleted. Each traveller's access to it is therefore what the tree gives it there
 - An admin who wants one page of a deleted branch restores the branch from its highest deleted
   page, then deletes again what they do not want. That takes more steps than restoring the one page.
 - `planner/pages`, the component that holds a trip's pages, lists in the graveyard only the pages
-  whose parent is in the tree, and refuses to restore any other. `spec/planner/pages.md` changes to
-  hold both.
+  whose parent is in the tree, and refuses to restore any other. `spec/planner/pages.md` holds the
+  listing and the refusal.
 - A restore needs no warning about who will see the page, unlike a move, which asks first when it
   lets more travellers see a page.
 
@@ -58,7 +59,7 @@ deleted. Each traveller's access to it is therefore what the tree gives it there
   many more travellers would see the page. The page would still leave its branch, and an admin who
   agreed in haste would show it.
 - **Returning the page to the top of the trip, hidden from each traveller who could not see it.**
-  Restoring would write access settings of its own, which an admin would later find and not
-  recognise.
+  The restore would have to write a setting of who may see the page, which an admin would later
+  find and not recognise.
 - **Restoring the pages above it at the same time.** One restore would bring back pages the admin
   did not ask for.

@@ -205,7 +205,8 @@ as the traveller likes. Following a link opens the page it points to. The link s
 page after that page is renamed or moved. A link to a page in the graveyard stays in the text, and
 shows that its page is in the graveyard. ^pln-f9
 
-- **Verification:** on the trip that `PLN-F8`'s verification sets up, with a page Transport at the
+- **Verification:** on the trip that `PLN-F8`'s verification sets up, as it stands before Santiago
+  is deleted, with a page Transport at the
   top,
     - link Transport's text to Santiago and to W trek, and confirm each link opens its page
     - rename Santiago to Santiago de Chile, move it to the top, and confirm the link still opens it
@@ -234,7 +235,8 @@ the top of the trip for each, titled with the country's name. Each is then an or
 A traveller links a stretch or a firm item on the trip's calendar to one page of the same trip.
 Following the link opens the page. ^pln-f11
 
-- **Verification:** on a trip with Santiago pencilled in, and a page titled Santiago,
+- **Verification:** on a trip with Santiago pencilled in, a page titled Santiago, and a page Eating
+  in Santiago beneath it,
     - link the stretch to the page, and confirm following the link opens it
     - link a planned market visit to the page Eating in Santiago, and confirm following the link
       opens it
@@ -253,7 +255,8 @@ tree whose title or text holds it, with the words around its matches, whether ca
 match or not. Search works the same on a phone with no connection, over the pages the phone holds:
 the pages of the tree the traveller may see. It never finds a page in the graveyard. ^pln-f12
 
-- **Verification:** on the trip that `PLN-F8`'s verification sets up, with "Try the empanadas in
+- **Verification:** on the trip that `PLN-F8`'s verification sets up, as it stands before Santiago
+  is deleted, with "Try the empanadas in
   Valparaíso" in the text of Eating in Santiago,
     - search for "empanadas", and confirm Eating in Santiago is listed, with the words around the
       match

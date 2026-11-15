@@ -42,7 +42,7 @@ opens the next time. A version is used whole, never mixed with another's files. 
 > downloaded never breaks the app.
 
 > **Does a new version ever take over an open window?** Only when the traveller asks it to, once
-> the online side no longer answers the version they have (`WEB:SHELL-F5`).
+> the online side no longer accepts the version they have (`WEB:SHELL-F5`).
 
 ### WEB:SHELL-F3 — Itinero can be added to a phone's home screen, and asks the browser to keep what it stores
 
@@ -79,22 +79,27 @@ holds. ^web-shell-f4
 
 ### WEB:SHELL-F5 — A version too old for the online side says so, keeps its trips readable, and updates when the traveller asks
 
-When the online side no longer answers the version of Itinero a device runs, the device says so on
-every screen. Every trip it holds stays readable, as with no connection, and it offers no way to
-change one. The shell fetches the newest version, and the traveller starts it from the notice,
-without closing Itinero. Nothing the traveller has typed is lost before they do. ^web-shell-f5
+Itinero's online side, which holds each trip and answers every device, can stop accepting requests
+from an older version of Itinero, such as after a change to the form of its records. A device
+running such a version then says so, in a notice on every screen. Every trip it holds stays
+readable, as with no connection, and it offers no way to change one. The shell fetches the newest
+version, and the traveller starts it from the notice, without closing Itinero. Starting it reloads
+every window of Itinero, which the notice says first. Nothing the traveller has typed is lost before
+they start it. ^web-shell-f5
 
 - **Verification:** with Itinero open on a device, on a page a traveller is editing,
-    - publish a version whose online side no longer answers the older one, and confirm the next
-      request shows the notice, and that the text typed is still in the editor
+    - publish a version whose online side no longer accepts the older one, and confirm the notice
+      shows the next time the device reaches the online side, with the text typed still in the
+      editor
     - confirm every trip the device holds still opens, and that no screen offers to change one
-    - start the new version from the notice, and confirm it opens, catches every trip up, and shows
-      no notice
+    - start the new version from the notice, and confirm it opens, brings every trip up to date, and
+      shows no notice
     - with a second window open, start the new version in the first, and confirm the second runs it
       too
 
-> **What does this buy?** An app installed weeks ago never sends the online side something it can
-> no longer read, or shows a trip it cannot read. The traveller is told what to do, in one step.
+> **What does this buy?** An app installed weeks ago never sends the online side something the
+> online side can no longer read, and never misreads what it is given. The traveller is told what to
+> do, in one step.
 
 > **Why not update without asking?** Starting a new version reloads every window, and would lose a
 > page the traveller is in the middle of writing (`WEB:SHELL-F2`).

@@ -21,7 +21,7 @@ address that Google, which every traveller signs in with, vouched for.
 When a traveller creates a trip, the membership component makes them its first member, its admin,
 and its creator. Nothing removes the creator from the trip, or takes away their admin role. An
 admin can make any other member an admin, and the membership component tells its caller of each
-one made. Nothing takes the role away again. ^acc-membership-f1
+one made. Nothing takes the role away from a member who stays on the trip. ^acc-membership-f1
 
 - **Verification:** against the membership component,
     - create a trip, and confirm its creator is its only member, an admin and the creator

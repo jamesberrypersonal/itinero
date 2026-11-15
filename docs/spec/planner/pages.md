@@ -133,7 +133,7 @@ is one English sentence saying what was refused and why. A caller may show it to
 | `cycle` | `apply` | A move under the page itself, or under a page beneath it |
 | `in-graveyard` | `apply` | A `rename`, `write`, `move` or `bury` of a page in the graveyard |
 | `not-in-graveyard` | `apply` | A `restore` of a page in the tree |
-| `parent-in-graveyard` | `apply` | A `restore` of a page whose parent is in the graveyard. `details.page` names the page the graveyard lists it under |
+| `parent-in-graveyard` | `apply` | A `restore` of a page whose parent is in the graveyard. `details.page` names the nearest page above it that `graveyard` lists |
 | `stale` | `apply` | A `write` whose `base` is not the page's `revision`. `details.text` holds the page's text as it stands, and `details.revision` its revision |
 | `no-words` | `search` | Words that are empty once trimmed |
 | `unknown-format` | `pageFromText` | A page whose `format` is not 1 |
@@ -234,9 +234,9 @@ parent (`PLN:PAGES-F4`). It lists the highest `buried` first, so the most recent
 first. `went` counts the pages beneath a listed page that return with it, stopping at any page that
 has `buried` of its own.
 
-A page with `buried` whose parent is in the graveyard is not listed. It was deleted before a page
-above it was, and it stays in the graveyard when that page is restored. Its parent is then in the
-tree, so `graveyard` lists it from then on. Every page in the graveyard is therefore reached by
+A page with `buried` whose parent is in the graveyard is not listed. It was deleted earlier than a
+page above it, and it stays in the graveyard when that page is restored. Once every page above it
+is back in the tree, `graveyard` lists it. Every page in the graveyard is therefore reached by
 restoring the listed page above it first (ADR-0021, a deleted page is restored only to its old
 place).
 
@@ -251,10 +251,14 @@ it that has no `buried` of its own (`PLN:PAGES-F4`). It removes the page's `buri
 `parent` and `order`, so the page returns to its old place.
 
 A `restore` of a page whose parent is in the graveyard is refused with `parent-in-graveyard`
-(ADR-0021). That covers a page in the graveyard only because a page above it was deleted, and a
-page deleted before a page above it was. `details.page` names the page to restore first: the
-nearest page above it that `graveyard` lists. No restore therefore moves a page, and none returns a
-page to the top of the trip unless it was deleted from there.
+(ADR-0021). The refusal covers two cases:
+
+- a page in the graveyard only because a page above it was deleted
+- a page deleted earlier than a page above it
+
+`details.page` names the page to restore first: the nearest page above it that `graveyard` lists.
+No restore therefore changes where a page sits, and none returns a page to the top of the trip
+unless it was deleted from there.
 
 ### 4.6 Links
 
@@ -267,11 +271,11 @@ written:
 ```
 
 Every Markdown reader shows it as a link, because the form is a standard inline link. The
-destination opens with `#`, so a reader takes it for a place within the page, and no reader takes
-`page` for a kind of address it must refuse. micromark, which the web app draws pages with, empties
-the destination of any link whose kind of address it does not know, and would empty `page:a17f`. Nothing in the
-link holds the page's title or place, so a rename, a move, a delete or a restore leaves it naming
-its page.
+destination opens with `#`, so a reader takes it for a place within the page. micromark, which the
+web app draws pages with, empties the destination of any link whose protocol it does not know. A
+protocol is the part of an address before its colon, such as `https`. The same link written without
+the `#`, as `page:a17f`, would be emptied. Nothing in the link holds the page's title or place, so a
+rename, a move, a delete or a restore leaves it naming its page.
 
 - `pageLink(id, words)` writes the link, putting a backslash before each `\`, `[` and `]` in the
   words.
@@ -351,8 +355,8 @@ written in sorted order. A page in the tree and a page in the graveyard read:
 ```
 
 ```json
-{ "buried": 3, "format": 1, "id": "c3e2", "order": "a", "revision": 7,
-  "text": "", "title": "Santiago", "trip": "6f1e" }
+{ "buried": 3, "format": 1, "id": "b8e4", "order": "a", "revision": 7,
+  "text": "", "title": "Valparaíso", "trip": "6f1e" }
 ```
 
 A change is written the same way, as an object holding its `op` and its fields.

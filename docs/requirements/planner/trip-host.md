@@ -113,8 +113,8 @@ of the trip is made an admin. ^pln-host-f6
 - **Verification:** with two devices holding the trip of `PLN:HOST-F1` open,
     - from the first, rename Chile, and confirm the second shows the new title within 2 seconds
     - close the second, rename Chile again, reopen it, and confirm it shows the newer title
-    - hide a page from the second device's traveller, make them an admin, and confirm the device
-      shows the page within 2 seconds
+    - hide a page from the second device's traveller, make them an admin, who sees every page, and
+      confirm the device shows the page within 2 seconds
 
 > **What does this buy?** Travellers planning together see each other's changes as they are made
 > (`PLN-F6`).
@@ -137,12 +137,14 @@ connects. ^pln-host-f7
 
 ### PLN:HOST-F8 — An admin reads and restores a page in the graveyard
 
-The trip host gives an admin the title and text of any page in the trip's graveyard, and restores a
-page an admin asks it to. It refuses either for a traveller who is not an admin. ^pln-host-f8
+The trip host lists for each traveller the deleted pages they could see when each was deleted. It
+gives an admin the title and text of any page in the trip's graveyard, and restores a page an admin
+asks it to. It refuses either for a traveller who is not an admin. It refuses to restore a page
+whose parent is in the graveyard, naming the page to restore first. ^pln-host-f8
 
 - **Verification:** on the trip of `PLN:HOST-F1`, with the page Argentina deleted,
     - as a traveller who could see Argentina when it was deleted, confirm the graveyard lists it,
-      and keeps listing it after an admin hides its branch from them
+      and keeps listing it after an admin gives them no access to it
     - as the creator, read Argentina, and confirm its text reads as it was written
     - as a traveller who is not an admin, read it, and confirm it is refused
     - as the creator, restore it, and confirm it returns at the top of the trip
@@ -155,8 +157,9 @@ page an admin asks it to. It refuses either for a traveller who is not an admin.
 
 The trip host holds a trip's bookings beside its calendar, pages and grants. It applies a change to
 a booking only from a traveller who may change the booking both before and after the change, and
-only where every traveller the booking names is on the trip. A device is given, and keeps, only the
-bookings its traveller may see. ^pln-host-f9
+only where every traveller it newly names is on the trip. A traveller removed from the trip stays
+named on the bookings that named them. A device is given, and keeps, only the bookings its
+traveller may see. ^pln-host-f9
 
 - **Verification:** on the trip of `PLN:HOST-F1`, with a second and a third traveller holding edit
   access to the trip,
@@ -204,7 +207,8 @@ the free plan Itinero's online side runs on. ^pln-host-nfr2
 
 - **Verification:**
     - with ten devices holding a trip open for four hours, making a change a minute between them,
-      confirm the day's requests, rows read and storage stay within the free plan's daily limits
+      confirm the day's requests, rows read from the trip's database, and storage stay within the
+      free plan's daily limits
     - on a trip of 500 pages and 300 bookings, confirm no request uses more processor time than the
       free plan allows one
 

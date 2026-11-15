@@ -97,7 +97,7 @@ across from the Worker. Nothing outside the online side can reach them.
 ```ts
 import type { GrantChange, Who } from "@itinero/permissions";
 
-type Member = Who & { creator: boolean };        // the caller gives it, from access/membership
+type Member = Who & { creator: boolean };        // the Worker gives it (§4)
 
 class TripHost {
   create(trip: string, creator: Member, name: string, first: string, last: string,
@@ -114,9 +114,10 @@ class TripHost {
 }
 ```
 
-`grant` is the listener `access/membership` names with its `onChange`, and is the only way an `add`
-or a `remove` reaches a trip's grants. The Worker passes that listener's `admin` change, which
-names a member made an admin, to `touch`. `Sync` is the body of §4.4.
+`access/membership` tells a listener of each change it makes, which it is given with its
+`onChange`. The Worker gives that listener. It passes each `add` and `remove` to the trip's
+`grant`, the only way either reaches a trip's grants. It passes each `admin` change, which names a
+member made an admin, to the trip's `touch`. `Sync` is the body of §4.4.
 
 ### 3.4 Systems this drives
 
@@ -154,16 +155,17 @@ Behaviour crossing every operation:
 | Table | Holds |
 |---|---|
 | `trip` | One row: the trip, in the itinerary's text form, its `changed`, and the trip's `sequence` |
-| `pages` | One row for each page: its `changed`, its text and title, each other field of the page in a column of its own, and `seenBy` for a page deleted itself (§4.6) |
+| `pages` | One row for each page: its `changed`, its text and title, each other field of the page in a column of its own, and `seenBy` for a page a `bury` named (§4.6) |
 | `grants` | One row: the trip's grants, in the permissions' text form |
 | `bookings` | One row for each booking, keyed by its identifier, in the bookings' text form, with its `changed` |
 | `creator` | One row: the creator's account |
 
-The trip host reads a page's text only for a page a request names. Every request needs the tree,
-to work out what the traveller may see, and the tree needs each page's parent, order and `buried`
-alone. The trip host therefore builds the pages it gives `@itinero/pages` and
-`@itinero/permissions` from the columns, with the text of only the pages the request reads or
-writes. No function it calls reads the text of any other page. It writes a page's text form, for a
+The trip host reads a page's text only where it gives or writes that text: for a page a request
+names, or for a page a catch-up gives because it changed since the device's last one. Every request
+needs the tree, to work out what the traveller may see, and the tree needs each page's parent,
+order and `buried` alone. The trip host therefore builds the pages it gives `@itinero/pages` and
+`@itinero/permissions` from the columns, with the text of only the pages it gives or writes. No
+function it calls reads the text of any other page. It writes a page's text form, for a
 device, from the same row.
 
 The itinerary and the bookings need the world's time-zone rules, which `shared/trip-time` loads
@@ -185,6 +187,8 @@ other rules (`PLN:ITINERARY-F6`).
    calendar
 4. stores all three, with a `sequence` of 1
 
+The Worker gives `create` the creator as `{ traveller, admin: true, creator: true }`, from the
+account `access/accounts` names, because the traveller becomes a member only once the trip is made.
 The Worker then calls `access/membership`'s `createTrip`, which makes the traveller the trip's
 creator and admin. A trip whose `createTrip` fails has no member, so no request reaches it.
 
@@ -199,20 +203,20 @@ one's name and dates, from its `summary`.
    creator, or is refused with `creator-only`. A `traveller-dates` change for the traveller's own
    dates needs only that they are on the trip, whatever their access to the calendar (`PLN-F14`).
    One for another traveller needs an admin, or is refused with `own-dates-only`. Any other change
-   needs edit access to the calendar. For `pages`, the change is asked of `authorise` as a `change-page`. For `grants`, an
-   `add` or a `remove` is refused with `membership-only`, and any other change is asked as a
-   `grant`. For `bookings`, the trip host reads the booking held with the change's identifier, and
-   takes the bookings' `touches`. It asks `authorise` for a `change-booking` naming `before`, where
-   `before` names anyone, and for one naming `after`, where `after` names anyone. Each traveller of
-   `after` must be held in the grants, or named in `before`, or the change is refused with
-   `unknown-traveller` (`PLN:HOST-F9`). A booking therefore keeps a traveller removed from the
-   trip, and a change cannot add one.
+   needs edit access to the calendar. For `pages`, the change is asked of `authorise` as a
+   `change-page`. For `grants`, an `add` or a `remove` is refused with `membership-only`, and any
+   other change is asked as a `grant`. For `bookings`, the trip host reads the booking held with the
+   change's identifier, and takes the bookings' `touches`. It asks `authorise` for a
+   `change-booking` naming `before`, where `before` names anyone, and for one naming `after`, where
+   `after` names anyone. Each traveller of `after` must be held in the grants, or named in `before`,
+   or the change is refused with `unknown-traveller` (`PLN:HOST-F9`). A booking therefore keeps a
+   traveller removed from the trip, and a change cannot add one.
 2. **A move that widens who may see a page** (`PLN:HOST-F4`). For a `move`, the trip host asks
    `access/permissions`'s `widens`. Where it gives more than 0, and more than `agreed`, the change
    is refused with `agree-first`, with the count in `details.count`.
 3. **The change itself.** The change is applied with its package's `apply`: the itinerary's, the
-   pages', `applyGrant`, or the bookings', given the booking held. Any refusal is returned unchanged, such as the pages' `stale`, which
-   holds the page's text as it stands (`PLN:HOST-F3`).
+   pages', `applyGrant`, or the bookings', given the booking held. Any refusal is returned
+   unchanged, such as the pages' `stale`, which holds the page's text as it stands (`PLN:HOST-F3`).
 
 Where every check passes, the trip host raises the `sequence`, and stores each record the change
 wrote: the trip, the one page `apply` wrote, the grants, or the one booking `apply` gave. A removed
@@ -230,10 +234,15 @@ stopped part way by sending the same change again:
   calendar to those given, and keeps their exceptions
 - a `remove` for a traveller the grants do not hold succeeds, and changes nothing
 
+A `remove` also applies to the calendar a `traveller-dates` change with no `dates` for the
+traveller, in the same transaction, so that their own dates leave with them
+(`spec/planner/itinerary.md` §4.9).
+
 `touch`, from `access/membership`, raises the `sequence`, tells every open socket of it, and writes
 nothing else (`PLN:HOST-F6`). `access/membership` calls it when a member is made an admin, which
 changes no record the trip host holds. Each open device then catches up. The new admin's device is
-given everything an admin may see, and every other device its new list of members.
+given everything an admin may see. Every other device, whose catch-up fetches the trip's members
+again, marks them an admin.
 
 ### 4.4 Catching a device up
 
@@ -259,8 +268,8 @@ A `since` that is absent counts as 0, so every page holds its text form. The dev
 - drops the calendar where `calendar` is `null`
 - drops each booking it holds that `bookings` does not list, since it was removed, or the traveller
   may no longer see it (`PLN:HOST-F9`)
-- fetches, with `POST /api/trips/{trip}/bookings`, each booking `bookings` lists without its text that
-  the device does not hold, such as every booking of a trip once its traveller is made an admin
+- fetches, with `POST /api/trips/{trip}/bookings`, each booking `bookings` lists without its text
+  that the device does not hold, such as every booking of a trip once its traveller is made an admin
 
 `pages(who, ids)` gives the text form of each page named that `seen` holds, and leaves out any
 other, without saying why. `bookings(who, ids)` does the same for each booking named whose
@@ -275,10 +284,10 @@ A device whose `sync` is refused with `not-a-member` deletes its copy of the tri
 
 ### 4.5 Telling open devices of changes
 
-*Porcelain:* `GET /api/trips/{trip}/live` opens a WebSocket to the trip's Durable Object, which accepts
-it for hibernation, tagged with the traveller's account (`PLN:HOST-F6`). After every change, the
-Durable Object sends each open socket one message, `{ "sequence": ... }`. A device that receives a
-sequence newer than its own catches up with `sync`.
+*Porcelain:* `GET /api/trips/{trip}/live` opens a WebSocket to the trip's Durable Object, which
+accepts it for hibernation, tagged with the traveller's account (`PLN:HOST-F6`). After every change,
+the Durable Object sends each open socket one message, `{ "sequence": ... }`. A device that receives
+a sequence newer than its own catches up with `sync`.
 
 The message names no part of the trip, so a socket tells a traveller nothing they may not see. A
 device whose socket closes reopens it after 1 second, then after twice as long each time, up to
@@ -293,15 +302,17 @@ is in the graveyard, with `parent-in-graveyard`, and the trip host returns the r
 A restored page therefore always returns to its old place, and to the access of that place.
 
 *Plumbing:* each traveller is shown in the graveyard the deleted pages they could see when each was
-deleted (`ACC-F10`). The trip host records it as it applies a `bury`. Before the change is made,
-it asks `access/permissions`'s `pageLevel` of each traveller the grants hold who is not an admin.
+deleted (`ACC-F10`). The trip host records who could see each page as it applies a `bury`. Before
+the change is made, it asks `access/permissions`'s `pageLevel` of each traveller the grants hold,
+as a traveller who is not an admin. An admin is shown every page whatever `seenBy` holds.
 It then stores, in the buried page's `seenBy`, the accounts whose level was view or edit. A
 `restore` clears `seenBy`.
 
 A page deleted only because a page above it was deleted holds no `seenBy`, because the pages'
-`graveyard` does not list it. A page deleted before a page above it keeps its own `seenBy`, and is
-shown by it once the page above is restored (ADR-0021, a deleted page is restored only to its old
-place). A traveller who joins after a delete could not see the page then, and is not shown it.
+`graveyard` does not list it. A page deleted earlier than a page above it keeps its own `seenBy`.
+Once the page above is restored, it is shown to the travellers its `seenBy` holds (ADR-0021, a
+deleted page is restored only to its old place). A traveller who joins after a delete could not see
+the page then, and is not shown it.
 
 ### 4.7 The test suite
 
@@ -333,8 +344,8 @@ runs it from anywhere in the repository.
 | The recipe | `test-online`, in the `justfile` at the repository root | Whoever keeps the planner's roadmap |
 
 The Worker's runtime dependencies are `@itinero/itinerary`, `@itinero/pages`,
-`@itinero/permissions`, `@itinero/bookings` and `@itinero/trip-time`. A trip's database is deleted with nothing, since a
-trip cannot be deleted yet (`ACC-NR4`).
+`@itinero/permissions`, `@itinero/bookings` and `@itinero/trip-time`. Nothing deletes a trip's
+database, since a trip cannot be deleted yet (`ACC-NR4`).
 
 ## 6. Quality attributes
 
@@ -350,8 +361,9 @@ trip cannot be deleted yet (`ACC-NR4`).
 - **Costs nothing at this scale** (`PLN:HOST-NFR2`). A change is one request to the Durable Object,
   and each open device's catch-up is one more. Ten devices making a change a minute for four hours
   make about 3,000 requests, against a free allowance of 100,000 a day. Hibernating sockets cost
-  nothing while idle. A catch-up of a trip of 500 pages and 300 bookings reads 800 rows and no
-  page's text, so the day reads about 2.4 million rows, against a free allowance of 5 million.
+  nothing while idle. A catch-up of a trip of 500 pages and 300 bookings reads 800 rows, and the
+  text only of the pages changed since the device's last catch-up. The day reads about 2.4 million
+  rows, against a free allowance of 5 million.
 - **One set of rules.** The time-zone rules the Worker carries are the ones every change is checked
   against. A device with other rules is corrected by the next catch-up.
 

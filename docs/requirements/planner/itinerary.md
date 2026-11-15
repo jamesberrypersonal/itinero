@@ -238,20 +238,23 @@ traveller's dates outside them, naming each such traveller. ^pln-itinerary-f10
 
 ### PLN:ITINERARY-F11 — A change to a firm item made from an older version is refused, with the item as it stands
 
-A change to a firm item names the version of the item it was made from. Where the item has changed
+Each firm item has a revision of its own, a number the itinerary raises each time the item
+changes. A change to a firm item names the revision it was made from. Where the item has changed
 since, the itinerary refuses the change, and gives the item as it now stands. ^pln-itinerary-f11
 
 - **Verification:** on a trip with a museum visit as a firm item,
-    - change its time from the version held, and confirm it is accepted
-    - change its title from the version before that change, and confirm it is refused, with the
+    - change its time from its current revision, and confirm it is accepted
+    - change its title from the revision before that change, and confirm it is refused, with the
       museum visit as it now stands
-    - move a stretch twice from the same version, and confirm the second move is accepted and stands
+    - move a stretch, then move it again from a copy of the trip that has not seen the first move,
+      and confirm the second move is accepted and stands
 
 > **What does this buy?** Two travellers correcting one firm item at once never lose a change
 > without being told, as with a page and a booking (`PLN-F16`, `BKG-F5`).
 
-> **Why not a stretch too?** A stretch is changed one value at a time, such as its dates by a drag,
-> so the later change is the one the traveller meant.
+> **Why not a stretch too?** A stretch is changed one value at a time, such as its dates by a drag.
+> A firm item's form changes every value at once, so a second form saved over the first would undo
+> changes its traveller never saw.
 
 ---
 

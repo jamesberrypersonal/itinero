@@ -4,8 +4,8 @@ What the component `web/trip-store` promises to `web/screens`, the component tha
 through it to travellers. The trip store keeps each trip's copy on a device: it brings the copy up
 to date, is told of each change while a trip is open, sends each change a traveller makes, and
 deletes every copy when its traveller signs out. It also carries every other request a traveller
-makes about a trip, such as creating one or inviting a traveller. The component registry, `components.md`, gives it
-the prefix `WEB:STORE`.
+makes about a trip, such as creating one or inviting a traveller. The component registry,
+`components.md`, gives it the prefix `WEB:STORE`.
 
 A trip's copy holds what its traveller may see of the trip: its name and dates, their own dates,
 their pages, the titles of the deleted pages they could see, the calendar where an admin has
@@ -118,8 +118,8 @@ in any window, every window is told. ^web-store-f6
 The trip store carries each request a traveller makes about a trip that is not a change to it:
 creating a trip, accepting an invitation, an admin's requests about members and invitations, and an
 admin's reading of a deleted page. It sends each only while the device is online, and returns a
-refusal unchanged. Once a request is answered, the device's copy holds what it did before the trip
-store says so. An admin's copy holds every traveller's access and the invitations not yet
+refusal unchanged. The trip store reports a request answered only once the device's copy holds what
+the request did. An admin's copy holds every traveller's access and the invitations not yet
 accepted. ^web-store-f7
 
 - **Verification:** with an admin signed in on a device,
@@ -127,7 +127,7 @@ accepted. ^web-store-f7
     - invite an address, and confirm the copy holds the invitation, then withdraw it, and confirm
       the copy holds none
     - make a member an admin, and confirm the copy marks them one
-    - remove a member, and confirm the copy no longer holds them, or their access
+    - remove a member, and confirm the copy marks them removed, and holds no access of theirs
     - read a deleted page, and confirm it is given, and is not in the device's storage afterwards
     - as a traveller who is not an admin, confirm the copy holds no other traveller's access and no
       invitation

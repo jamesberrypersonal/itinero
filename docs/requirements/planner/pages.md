@@ -110,8 +110,8 @@ refuses to restore it, naming the listed page above it to restore first. ^pln-pa
 > (`PLN:PAGES-NR2`).
 
 > **Why is a page not restored apart from the page above it?** It would have no place to return to
-> but the top of the trip, where travellers its branch was hidden from could see it (ADR-0021, a
-> deleted page is restored only to its old place).
+> but the top of the trip. There, a traveller who could not see it in its old place might see it
+> (ADR-0021, a deleted page is restored only to its old place).
 
 > **Can a page be deleted for good?** No. The graveyard only grows (`PLN:PAGES-NR5`).
 

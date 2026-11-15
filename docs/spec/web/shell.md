@@ -38,13 +38,15 @@ web app carries itself (ADR-0008, trip-time carries its own copy of the time-zon
 
 ### 3.1 User interface
 
-The shell shows two things of its own, which `web/screens` places:
+The shell shows three things of its own, which `web/screens` places:
 
 - **a notice that Itinero is ready offline**, once the service worker holds every file of the
   version
 - **a notice on an iPhone that Itinero is not on the home screen**, saying to tap Share, then Add
   to Home Screen, so that its trips stay when the phone goes unused for some days. It also says the
-  traveller signs in once more there
+  traveller signs in once more there, since Itinero on the home screen keeps its own storage (§4.3)
+- **a notice that a new version is required**, once the online side refuses the version running,
+  with a button that starts the new version (§4.7)
 
 ### 3.2 Application interface
 
@@ -76,7 +78,7 @@ type ShellState = {
   updateWaiting: boolean;   // a new version is held, and opens once every window closes
   updateRequired: boolean;  // the online side no longer answers this version (§4.7)
   rulesVersion: string;     // the IANA release of the rules loaded, such as "2026a"
-  suggestInstall: boolean;  // an iPhone, not opened from the home screen
+  suggestInstall: boolean;  // an iPhone or an iPad, not opened from the home screen
 };
 
 function start(): Promise<ShellState>;                        // before any screen shows a time
@@ -114,9 +116,10 @@ detail.
 - **Install.** The service worker fetches `/version.json`, then every file it lists, into a cache
   named `itinero-<version>`. The install fails, and is tried again on the next launch, if any file
   fails.
-- **Activate.** Once it takes over, it deletes every cache named `itinero-` but its own. It calls
-  `skipWaiting`, which lets a waiting service worker take over open windows, only when a window asks
-  it to (§4.7). Otherwise a new version takes over only once no window uses the old one.
+- **Wait.** A new service worker, once installed, waits while any window uses the old one. It
+  calls `skipWaiting`, which ends the wait and lets it take over open windows, only when a window
+  asks it to (§4.7). Otherwise it takes over once no window uses the old one.
+- **Activate.** Once it takes over, it deletes every cache named `itinero-` but its own.
 - **Fetch.** It answers a request for a page with the cached `index.html`, and a request for any
   other file its version lists from the cache. Every other request, including every request to the
   online side and for `/time-zone-rules.json`, goes to the network untouched.
@@ -135,7 +138,8 @@ never share a name for different contents, and a version is always used whole.
 4. gives the `ShellState`
 
 `offlineReady` is true once the service worker holding this version is active. `updateWaiting` is
-true while a newer service worker waits. `onChange` tells its listener each time either changes.
+true while a newer service worker waits. `onChange` tells its listener each time any field of the
+`ShellState` changes.
 
 ### 4.3 Adding Itinero to a home screen
 
@@ -147,10 +151,10 @@ it, and carries the `apple-touch-icon` that Safari reads (`WEB:SHELL-F3`).
 `navigator.standalone` is not true. `web/screens` shows the notice of §3.1 while it is true, on the
 home page and on the list of trips.
 
-An iPhone keeps what Itinero stores from the home screen apart from what it stores in Safari,
-the session included. A traveller who signed in in Safari, such as from an invitation's email,
-therefore signs in once more the first time they open Itinero from the home screen. The notice says
-so.
+An iPhone keeps two stores for Itinero apart: one for Itinero opened from the home screen, and one
+for Itinero in Safari. The session is in one store only. A traveller who signed in in Safari, such
+as from an invitation's email, therefore signs in once more the first time they open Itinero from
+the home screen. The notice says so.
 
 ### 4.4 The time-zone rules
 
@@ -190,9 +194,14 @@ in the repository. It covers all three of the web app's components.
 The build:
 
 1. bundles the web app's TypeScript, Preact and every package it imports
-2. copies the newest rules file of `@itinero/trip-time` into the version's files, and to
-   `/time-zone-rules.json`
-3. writes `version.json`, naming the version by the hash of every other file, and listing them
+2. copies the newest rules file of `@itinero/trip-time` into the version's files, and, apart from
+   them, to `/time-zone-rules.json`
+3. writes `version.json`, naming the version by the hash of the version's files, and listing them
+
+`/time-zone-rules.json` is not one of the version's files, so newer rules change no version's name.
+A maintainer publishes newer rules without a new version with `npm run build-rules` in `apps/web/`.
+It writes `/time-zone-rules.json` alone, from the newest rules file of `@itinero/trip-time`, and a
+deploy then serves it beside the version already served (`WEB:SHELL-F4`).
 
 The online side's Wrangler configuration serves `apps/web/dist/` as the Worker's static files. It
 passes every path under `/api/` to the Worker, and answers any other path it does not hold with
@@ -201,15 +210,17 @@ with it (ADR-0018).
 
 ### 4.7 A version the online side no longer answers
 
-*Porcelain:* each version holds `API`, a whole number naming the form of the online side's requests
-and records it was built for (`WEB:SHELL-F5`). `web/trip-store` and `web/screens` send it with every
-request to the online side, in a header named `Itinero-Api`. The online side refuses a number lower
-than the oldest it answers, with `update-first`, as `spec/access/accounts.md` §4.7 gives.
+*Porcelain:* each version holds `API`, a whole number (`WEB:SHELL-F5`). It names the form of request
+and record the version was built to send and to read. `web/trip-store` and `web/screens` send it
+with every request to the online side, in a header named `Itinero-Api`. The online side refuses a
+number lower than the oldest it answers, with `update-first`, as `spec/access/accounts.md` §4.7
+gives.
 
 A maintainer raises `API`, and the oldest number the online side answers, in the same change. They
 do so only when an older version could not read what the online side would give it, or would send
 what the online side could not read, such as a record in a new format. A deploy carries the web app
-and the online side together, so the two numbers are never apart (ADR-0018).
+and the online side together, so the online side never refuses the version deployed with it
+(ADR-0018).
 
 `updateFirst()` sets `updateRequired`, tells the listeners of `onChange`, and asks the browser to
 check for a new service worker. `web/trip-store` calls it on an `update-first` refusal. Once the new
@@ -256,7 +267,7 @@ shows: `@itinero/trip-time`, `@itinero/itinerary`, `@itinero/pages`, `@itinero/p
 | Requirement | What this component contributes |
 |---|---|
 | [WEB:SHELL-F1](../../requirements/web/shell.md#^web-shell-f1) | The service worker of §4.1. |
-| [WEB:SHELL-F2](../../requirements/web/shell.md#^web-shell-f2) | A cache for each version, and no `skipWaiting`, in §4.1. |
+| [WEB:SHELL-F2](../../requirements/web/shell.md#^web-shell-f2) | A cache for each version, and `skipWaiting` called only when the traveller asks, in §4.1. |
 | [WEB:SHELL-F3](../../requirements/web/shell.md#^web-shell-f3) | The manifest and `suggestInstall`, in §4.3, and `persist`, in §4.2. |
 | [WEB:SHELL-F4](../../requirements/web/shell.md#^web-shell-f4) | The two rules files, and `online`, in §4.4. |
 | [WEB:SHELL-F5](../../requirements/web/shell.md#^web-shell-f5) | `API`, `updateFirst` and `applyUpdate`, in §4.7. The refusal is `access/accounts`, and the notice is `web/screens`. |

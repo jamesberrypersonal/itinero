@@ -5,15 +5,17 @@ and the alternatives that were rejected. `documentation-system.md` sets the rule
 keeps:
 
 - a record is numbered in order, and named `NNNN-short-slug.md`
-- its `Scope` line names every registered address the decision binds, or `workspace`
-- once accepted and acted on, a record is never edited. A changed decision is a new record that
-  supersedes it
-- the status and scope lines may change at any time, and this index changes in the same commit
+- its `Scope` line names everything the decision binds, by the address `components.md` registers
+  for it, such as `planner/pages`, or `workspace` for a decision that binds everything
+- once a record is accepted, and something has been built or specified from it, its reasoning is
+  never edited. A changed decision is a new record that supersedes it
+- its status and scope lines are the exception, and may change at any time. This index changes in
+  the same commit
 
 | Status | Means |
 |---|---|
 | Proposed | Open. Editable, and settles nothing |
-| Proposed until an item is done | Open, and held until the named items of the live work list are done |
+| Proposed until an item is done | Open, until the items of `TODO.md`, the live work list, that its status line names are done |
 | Accepted | In force |
 | Rejected | Considered and not adopted |
 | Superseded by another record | Was in force, and the named record now governs |
@@ -44,6 +46,7 @@ keeps:
 | [0019](0019-a-place-time-zone-comes-from-a-list.md) | A place's time zone is filled in from a list of places, kept on the phone one country at a time | web | Accepted |
 | [0020](0020-a-milestone-names-what-it-waits-on.md) | A milestone names the milestones of other systems it waits on | workspace | Accepted |
 | [0021](0021-a-deleted-page-is-restored-only-to-its-old-place.md) | A deleted page is restored only to its old place | planner | Accepted |
+| [0022](0022-each-tree-index-defines-its-shared-words.md) | Each tree's index defines the words its documents share | workspace | Accepted |
 
 ## By subject
 
@@ -56,6 +59,7 @@ keeps:
 | [0005](0005-itinero-records-no-telemetry.md) | Itinero records no telemetry, so the documents reserve no place for it | Accepted |
 | [0009](0009-a-finished-item-leaves-the-list-when-finished.md) | A finished item leaves the live list in the commit that finishes it | Accepted |
 | [0020](0020-a-milestone-names-what-it-waits-on.md) | A milestone names the milestones of other systems it waits on | Accepted |
+| [0022](0022-each-tree-index-defines-its-shared-words.md) | Each tree's index defines the words its documents share | Accepted |
 
 ### planner
 

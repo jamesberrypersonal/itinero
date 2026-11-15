@@ -51,8 +51,9 @@ return.
 
 ### 3.2 Application interface
 
-None. The permissions component has no network or service interface. A request reaches it through
-`planner/trip-host`, the component holding the copy of each trip online.
+None. The permissions component has no network or service interface. A request made online reaches
+it through `planner/trip-host`, the component holding the copy of each trip online. The web app
+calls it on the copy on a phone (§2).
 
 ### 3.3 Programming interface
 
@@ -305,7 +306,7 @@ The package's one runtime dependency is `@itinero/pages`. Its development depend
 | [ACC:PERMISSIONS-F2](../../requirements/access/permissions.md#^acc-permissions-f2) | `applyGrant` and the `hidden-above` refusal, in §4.1. |
 | [ACC:PERMISSIONS-F3](../../requirements/access/permissions.md#^acc-permissions-f3) | `calendarLevel` and `bookingLevel`, in §4.3. |
 | [ACC:PERMISSIONS-F4](../../requirements/access/permissions.md#^acc-permissions-f4) | `authorise`, in §4.4. |
-| [ACC:PERMISSIONS-F5](../../requirements/access/permissions.md#^acc-permissions-f5) | `seen`, in §4.5. |
+| [ACC:PERMISSIONS-F5](../../requirements/access/permissions.md#^acc-permissions-f5) | `seen`, in §4.5, for the pages and the calendar, and `bookingLevel`, in §4.3, for the bookings. |
 | [ACC:PERMISSIONS-F6](../../requirements/access/permissions.md#^acc-permissions-f6) | The `add` and `remove` changes of §4.1. |
 | [ACC:PERMISSIONS-F7](../../requirements/access/permissions.md#^acc-permissions-f7) | `widens`, in §4.6. |
 | [ACC:PERMISSIONS-F8](../../requirements/access/permissions.md#^acc-permissions-f8) | The text form of §4.7 and §5.1, and every check made before anything is changed, in §4.1. |

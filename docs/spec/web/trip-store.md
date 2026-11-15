@@ -66,7 +66,8 @@ type Copy = {
   id: string; name: string; dates: Dates; mine: Dates;   // mine: the traveller's own dates
   you: { admin: boolean; creator: boolean; grant: Grant };
   calendar?: Trip;                                        // absent: not granted
-  pages: Pages; graveyard: readonly { id: string; title: string; went: number }[];
+  pages: Pages; graveyard: readonly { id: string; title: string;
+                                       went: number }[];   // went: the pages deleted with it
   bookings: readonly Booking[]; members: readonly Member[];
   grants?: Grants;                                        // an admin's copy alone: everyone's access
   invitations?: readonly Invitation[];                    // an admin's copy alone: those still open
@@ -101,7 +102,8 @@ function buried(id: string, page: string): Promise<Result<Page>>;
 `change` is in the text form of its target's package, as `planner/trip-host` takes it. `send`
 returns every refusal from the online side unchanged, and refuses with its own code `offline`,
 whose message says the device has no connection, where it sends nothing. The seven functions from
-`create` to `buried` refuse in the same two ways (§4.8).
+`create` to `buried` refuse in the same ways. Once the online side has refused this version of the
+web app, each of them, `send` included, refuses with `update-first` (§4).
 
 ### 3.4 Systems this drives
 
@@ -140,11 +142,12 @@ Behaviour crossing every operation:
 - **Each catch-up is one transaction.** A catch-up is written in one IndexedDB transaction, after
   every request it needs has answered, so a copy is brought up to date whole or not at all
   (`WEB:STORE-F2`).
-- **A version too old stops everything but reading.** Every request carries the shell's `API` in
-  the header `Itinero-Api`. Any request refused with `update-first` writes nothing, and the trip
-  store calls the shell's `updateFirst` (`WEB:SHELL-F5`). It then sends no request until the
-  window reloads, and refuses every `send` and every function of §4.8 with `update-first`. Every
-  copy stays as it is, and is still read.
+- **A version too old stops everything but reading.** Every request carries, in the header
+  `Itinero-Api`, the shell's `API`: the number of the form of request this version sends
+  (`spec/web/shell.md` §4.7). Any request refused with `update-first` writes nothing. The trip store
+  then calls the shell's `updateFirst`, which has the shell fetch the new version (`WEB:SHELL-F5`).
+  It then sends no request until the window reloads, and refuses with `update-first` every `send`,
+  and every function from `create` to `buried`. Every copy stays as it is, and is still read.
 - **A session that has ended deletes everything.** Any request refused with `no-session` signs the
   device out, as §4.5 gives, before anything else is done (`WEB:STORE-F5`).
 
@@ -173,16 +176,17 @@ caught up from the start the next time the device is online.
   front
 - every 60 seconds while the device is offline, which it learns by trying
 
-It first asks `GET /api/trips`. It deletes each trip it holds that the answer does not list, and adds
-each that it lists and the device does not hold. It then catches each trip up in turn, and tells
-`web/shell` the device is online.
+It first asks `GET /api/trips`. It deletes each trip it holds that the answer does not list, and
+adds each that it lists and the device does not hold. It then catches each trip up in turn, and
+tells `web/shell` the device is online.
 
 To catch one trip up, the trip store:
 
-1. sends `POST /api/trips/{trip}/sync`, with `since` set to the trip's `sequence`, or absent for a trip
-   not yet held, and `holdsCalendar` set to whether it holds the calendar
+1. sends `POST /api/trips/{trip}/sync`, with `since` set to the trip's `sequence`, or absent for a
+   trip not yet held, and `holdsCalendar` set to whether it holds the calendar
 2. sends `POST /api/trips/{trip}/pages` for every page the answer lists without its text that the
-   device does not hold, and `POST /api/trips/{trip}/bookings` for every such booking, in groups of 100
+   device does not hold, and `POST /api/trips/{trip}/bookings` for every such booking, in groups of
+   100
 3. sends `GET /api/trips/{trip}/members`, which gives an admin the open invitations too
 4. in one transaction, writes the trip's record, with the grants and the invitations where the
    answers hold them, writes every page and booking it was given, deletes every page and booking
@@ -195,8 +199,9 @@ writes nothing, and the trip keeps its old `sequence`, so the next catch-up asks
 ### 4.3 The open trip
 
 *Porcelain:* `watch(id, listener)` gives the listener the trip's `Copy` at once, and again each time
-the copy changes (`WEB:STORE-F3`). While any window watches a trip and the device is online, the
-trip store holds a WebSocket open to `GET /api/trips/{trip}/live`. A message holding a `sequence`
+the copy changes (`WEB:STORE-F3`). Each window runs a trip store of its own. While a window
+watches a trip and the device is online, its trip store holds a WebSocket open to
+`GET /api/trips/{trip}/live`. A message holding a `sequence`
 higher than the copy's catches the trip up.
 
 A socket that closes is opened again after 1 second, then after twice as long each time, up to 1
@@ -207,8 +212,8 @@ has been removed. The socket is closed once no window watches the trip.
 ### 4.4 Sending a change
 
 *Porcelain:* `send(id, target, change, agreed)` refuses with `offline` where `isOnline()` is false,
-and sends nothing (`WEB:STORE-F4`). Otherwise it sends `POST /api/trips/{trip}/changes`. A refusal is
-returned unchanged. A request that fails on the network refuses with `offline`, and the change is
+and sends nothing (`WEB:STORE-F4`). Otherwise it sends `POST /api/trips/{trip}/changes`. A refusal
+is returned unchanged. A request that fails on the network refuses with `offline`, and the change is
 not sent again.
 
 Where the change is accepted, the trip store catches the trip up before it returns the sequence. The
@@ -229,8 +234,9 @@ in, and catches every trip up.
    account and `signOutOwed` set
 3. sends `POST /api/auth/sign-out`, and clears `signOutOwed` once it is answered
 
-Where the device is offline, `signOutOwed` stays set, and `open` sends `POST /api/auth/sign-out` the
-next time the device is online, before anything else. While `signOutOwed` is set, `open` gives no
+Where the device is offline, `signOutOwed` stays set. The trip store sends `POST /api/auth/sign-out`
+the next time it learns the device is online, whether in `open` or in a later catch-up, before
+anything else. While `signOutOwed` is set, `open` gives no
 account, so the web app shows the sign-in screen. A sign-in clears it.
 
 A session ended by `access/accounts`, after 180 days unused, is learned from the first request it
@@ -303,8 +309,9 @@ and seats. It is protected by the device's own lock, and deleted on sign-out (AD
   and a sign-out owed is sent on the next connection.
 - **Quick to read** (`WEB:STORE-NFR1`). A trip is read in one transaction, with one record for each
   page and booking.
-- **Costs little online** (`PLN:HOST-NFR2`). A catch-up is three requests, with more only for pages
-  and bookings newly seen, and an open trip holds one socket.
+- **Costs little online** (`PLN:HOST-NFR2`). Catching one trip up is two requests, with more only
+  for pages and bookings newly seen, and catching every trip up adds one `GET /api/trips`. Each
+  window holds one socket for each trip it shows.
 
 ## 7. Requirements this satisfies
 

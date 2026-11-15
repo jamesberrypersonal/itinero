@@ -442,13 +442,14 @@ rules for the register are in [style.md](style.md).
 
 ### The tree's index
 
-The requirements `README.md` holds two things. Prefixes are not among them, because the component
+The requirements `README.md` holds three things. Prefixes are not among them, because the component
 registry owns them.
 
 | Section | Holds |
 |---|---|
 | Folders | One row per system folder, then `shared/` and `concerns/`: what the folder's documents promise about |
 | People | Every role the documents refer to, so a requirement names a role rather than saying "operator" |
+| Words | Each word that more than one document of the tree uses without defining, and what it means (ADR-0022, each tree's index defines the words its documents share) |
 
 Each folder's own `README.md` lists its documents: what each makes promises about, and how those
 promises are verified.
@@ -541,10 +542,11 @@ traceable one, and what makes a missing contribution visible.
 
 ### The tree's index
 
-The specification `README.md` holds one table with a row per folder. Each folder's own
-`README.md` holds one row per document: what the thing **is**, and where it **runs** or is applied.
-Below its table, a short paragraph says which documents are programs, which are artefacts, and
-which are anything else, so a reader can see the folder's shape at once.
+The specification `README.md` holds one table with a row per folder, then a Words table: each word
+that more than one specification uses without defining, and what it means (ADR-0022). Each folder's
+own `README.md` holds one row per document: what the thing **is**, and where it **runs** or is
+applied. Below its table, a short paragraph says which documents are programs, which are artefacts,
+and which are anything else, so a reader can see the folder's shape at once.
 
 ---
 
@@ -862,7 +864,9 @@ are verified by the verification clauses those requirements carry, not when the 
 finished. A roadmap defines nothing: it cites the requirements, specifications and records that
 do.
 
-The tree's `README.md` holds one table with a row per roadmap: what it plans, and who keeps it.
+The tree's `README.md` holds one table with a row per roadmap: what it plans, and who keeps it. A
+Words table follows it: each word that more than one roadmap uses without defining, and what it
+means (ADR-0022).
 
 ---
 

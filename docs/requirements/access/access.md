@@ -5,16 +5,18 @@ the invitations that bring travellers onto a trip, and who may see and change ea
 The component registry, `components.md`, gives it the prefix `ACC`.
 
 Two roles appear below, the traveller and the admin, which `requirements/README.md` defines. A
-trip, its calendar and its pages are the planner's, the system that holds each trip:
+trip, its calendar and its pages are the planner's, the system that holds each trip. Its bookings
+are the bookings system's:
 
 - **A trip's calendar** holds the stretches a traveller pencils in, each a place and rough dates,
-  and the firm items fixed to a date, such as a booked tour.
+  and the firm items fixed to a date but not booked, such as a day to move on.
 - **A trip's pages** hold the research travellers write by hand. They form a tree, in which each
   page sits under one other page, its parent, or at the top of the trip.
 - **The graveyard** holds the pages travellers have deleted, until an admin restores them.
-- **A trip's bookings**, such as a booked flight or tour, have a page of their own, apart from the
-  calendar. Each booking names the travellers it is for (ADR-0013, a trip's bookings have a page of
-  their own, and its calendar is seen only by the travellers an admin chooses).
+- **A trip's bookings**, such as a booked flight or tour, have a page of their own. The calendar
+  shows them too, to a traveller who may see it. Each booking names the travellers it is for
+  (ADR-0013, a trip's bookings have a page of their own, and its calendar is seen only by the
+  travellers an admin chooses).
 
 Access to a page is one of three levels: edit access, view access, or none. A traveller with edit
 access to a page may also see it. Access passes down the tree, from the trip as its root (ADR-0012,
@@ -127,8 +129,8 @@ traveller with view access sees the calendar, and cannot change it. ^acc-f5
 > **Can part of the calendar be hidden from a traveller?** No. The calendar is granted whole
 > (`ACC-NR5`).
 
-> **Does a traveller with no access to the calendar see their bookings?** Yes. Bookings are apart
-> from the calendar (`ACC-F6`).
+> **Does a traveller with no access to the calendar see their bookings?** Yes, on the bookings
+> page. Seeing a booking needs no access to the calendar (`ACC-F6`).
 
 ### ACC-F6 — A traveller sees only the bookings that name them
 
@@ -210,8 +212,9 @@ deleted. Only an admin opens a page in the graveyard to read it, or restores it.
     - as the traveller, confirm the graveyard does not list Santiago
     - delete Chile, and confirm the graveyard lists Chile for the traveller, and refuses to open it
     - as an admin, open and restore Chile, and confirm each is accepted
-    - delete Chile again, hide Chile from the traveller, and confirm the graveyard still lists Chile
-      for them, since they could see it when it was deleted
+    - delete Chile again, then give the traveller no access to Chile, as an admin may for a page in
+      the graveyard as for any other. Confirm the graveyard still lists Chile for them, since they
+      could see it when it was deleted
 
 > **What does this buy?** Deleting a page never shows it to someone who could not see it before. A
 > branch deleted by mistake is still recovered by an admin.
@@ -301,7 +304,7 @@ see, and never changes one they may not edit, whatever their device asks for. ^a
 | **ACC-NR1** | Let a traveller sign in with a password, or with any account but a Google one | Travellers sign in with an account they already have. Apple's sign-in costs $99 a year (ADR-0015, Itinero's online side runs on Cloudflare's free plan) |
 | **ACC-NR2** | Let a traveller leave a trip by themselves | Only an admin removes a traveller, for now |
 | **ACC-NR3** | Make an admin an ordinary traveller again | Admins are kept as they are made, for now |
-| **ACC-NR4** | Hand a trip's creator's role to another traveller, or delete a trip | A trip outlives no decision yet on who may end it. Both are future work |
+| **ACC-NR4** | Hand a trip's creator's role to another traveller, or delete a trip | Nobody has yet decided who may end a trip, or hand it on. Both are future work |
 | **ACC-NR5** | Set access to the calendar's stretches and firm items one by one | An admin grants the calendar whole, as one view or edit access for each traveller |
 | **ACC-NR6** | Invite a traveller by a shared link | A forwarded link would let in someone the admin never chose |
 | **ACC-NR7** | Delete a traveller's account | Deleting an account, and what it holds of theirs, is future work |

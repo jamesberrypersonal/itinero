@@ -92,13 +92,14 @@ every booking is edit. ^acc-permissions-f3
 
 Given a traveller, whether they are an admin, and a request, the permissions component allows the
 request or refuses it, saying why. A request reads or changes a page, the calendar, a booking or the
-trip's grants. It also reads or restores a page in the graveyard. ^acc-permissions-f4
+trip's grants. It also reads or restores a page in the graveyard. A move needs edit access to the
+page and to the place it moves to. ^acc-permissions-f4
 
 - **Verification:** on the trip that `ACC:PERMISSIONS-F1`'s verification sets up,
     - ask to read Santiago as the traveller, and confirm it is allowed
     - ask to rename Santiago, and confirm it is refused, because the traveller may only view it
-    - ask to move a page the traveller may edit under a page they may only view, and confirm it is
-      refused, with the reason
+    - give the traveller edit access to one page, ask to move it under a page they may only view,
+      and confirm it is refused, with the reason
     - ask to restore a page in the graveyard, and to make a grant, and confirm each is refused,
       because only an admin may
     - make each request as an admin, and confirm each is allowed
@@ -123,12 +124,13 @@ calendar only where their level for it is view or edit. ^acc-permissions-f5
       calendar, and confirm it does
 
 > **What does this buy?** Each traveller, and each phone, holds what the traveller may see and
-> nothing more (`ACC-F8`, `ACC-F10`, `ACC-F12`).
+> nothing more (`ACC-F8`, `ACC-F12`).
 
 > **What decides whether a traveller sees a page in the graveyard?** Their level for the page when
-> it was deleted. `planner/trip-host`, which holds the copy of each trip online, asks the
-> permissions component for it at the delete, and keeps it (ADR-0012, access to a page passes down
-> to the pages beneath it).
+> it was deleted. The permissions component gives that level as it gives any page's.
+> `planner/trip-host`, which holds the copy of each trip online, asks for it at the delete, and
+> keeps it. A later change of access therefore does not change what the graveyard shows them
+> (ADR-0012, access to a page passes down to the pages beneath it).
 
 ### ACC:PERMISSIONS-F6 — A traveller added to or removed from a trip gains or loses every grant at once
 
@@ -150,13 +152,13 @@ after which their level for everything is none. ^acc-permissions-f6
 Given a page and a place it would move to, the permissions component gives the number of travellers
 who would be able to see the page there, and cannot see it now. ^acc-permissions-f7
 
-- **Verification:** on a trip with a page Surprise that an exception hides from three travellers,
-  and a page Chile those three may see,
+- **Verification:** on a trip with a page Surprise under a page Private that an exception hides from
+  three travellers, and the pages Chile and Peru at the top, which those three may see,
     - count the move of Surprise under Chile, and confirm it gives 3
-    - count the move of Chile to the top of the trip, and confirm it gives 0
+    - count the move of Chile under Peru, and confirm it gives 0
 
-> **What does this buy?** The traveller moving a page is told who else would see it, before the
-> move is made (`ACC-F9`).
+> **What does this buy?** The traveller moving a page is told how many more travellers would see
+> it, before the move is made (`ACC-F9`).
 
 ### ACC:PERMISSIONS-F8 — A trip's grants are written as text, read back unchanged, and changed the same way everywhere
 
