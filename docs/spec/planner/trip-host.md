@@ -109,12 +109,14 @@ class TripHost {
   bookings(who: Member, ids: readonly string[]): Promise<Result<readonly string[]>>;
   buried(who: Member, page: string): Promise<Result<string>>;
   grant(change: GrantChange): Promise<Result<{ sequence: number }>>;   // from access/membership
+  touch(): Promise<{ sequence: number }>;                              // from access/membership
   summary(): Promise<{ name: string; first: string; last: string }>;
 }
 ```
 
 `grant` is the listener `access/membership` names with its `onChange`, and is the only way an `add`
-or a `remove` reaches a trip's grants. `Sync` is the body of §4.4.
+or a `remove` reaches a trip's grants. The Worker passes that listener's `admin` change, which
+names a member made an admin, to `touch`. `Sync` is the body of §4.4.
 
 ### 3.4 Systems this drives
 
@@ -217,6 +219,11 @@ stopped part way by sending the same change again:
   calendar to those given, and keeps their exceptions
 - a `remove` for a traveller the grants do not hold succeeds, and changes nothing
 
+`touch`, from `access/membership`, raises the `sequence`, tells every open socket of it, and writes
+nothing else (`PLN:HOST-F6`). `access/membership` calls it when a member is made an admin, which
+changes no record the trip host holds. Each open device then catches up. The new admin's device is
+given everything an admin may see, and every other device its new list of members.
+
 ### 4.4 Catching a device up
 
 *Porcelain:* `sync(who, since, holdsCalendar)` gives the device this body (`PLN:HOST-F5`):
@@ -270,7 +277,9 @@ device whose socket closes reopens it after 1 second, then after twice as long e
 
 *Porcelain:* `buried(who, page)` asks `authorise` for a `read-buried` request, and gives the page's
 text form to an admin (`PLN:HOST-F8`). A restore is a `restore` change to `pages`, which
-`authorise` allows only to an admin.
+`authorise` allows only to an admin. The pages' `apply` refuses a restore of a page whose parent
+is in the graveyard, with `parent-in-graveyard`, and the trip host returns the refusal unchanged.
+A restored page therefore always returns to its old place, and to the access of that place.
 
 ### 4.7 The test suite
 
@@ -330,7 +339,7 @@ trip cannot be deleted yet (`ACC-NR4`).
 | [PLN:HOST-F3](../../requirements/planner/trip-host.md#^pln-host-f3) | The pages' `stale` refusal, returned unchanged (§4.3). |
 | [PLN:HOST-F4](../../requirements/planner/trip-host.md#^pln-host-f4) | `agreed`, `widens` and the `agree-first` refusal, in §4.3. |
 | [PLN:HOST-F5](../../requirements/planner/trip-host.md#^pln-host-f5) | `sync` and `pages`, in §4.4. |
-| [PLN:HOST-F6](../../requirements/planner/trip-host.md#^pln-host-f6) | The sockets of §4.5. |
+| [PLN:HOST-F6](../../requirements/planner/trip-host.md#^pln-host-f6) | The sockets of §4.5, and `touch`, in §4.3, for a member made an admin. |
 | [PLN:HOST-F7](../../requirements/planner/trip-host.md#^pln-host-f7) | `grant`, safe to repeat, in §4.3, and `not-a-member` on catching up, in §4.4. |
 | [PLN:HOST-F8](../../requirements/planner/trip-host.md#^pln-host-f8) | `buried`, and the `restore` change, in §4.6. |
 | [PLN:HOST-F9](../../requirements/planner/trip-host.md#^pln-host-f9) | The `bookings` table of §4.1, the checks of a booking change in §4.3, and `bookings` in the catch-up of §4.4. |

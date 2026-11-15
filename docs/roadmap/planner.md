@@ -37,6 +37,9 @@ the planner's itinerary. The planner is the first system that needs that compone
   countries each get a page, and the calendar links to pages. A deleted page goes to the trip's
   graveyard. Only an admin, a traveller who may manage the trip, reads or restores a page there
   (ADR-0011, a trip's pages form a tree).
+- A deleted page is restored only to its old place. The graveyard lists only the highest deleted
+  page of each branch, and a page beneath it returns with it, or after it (ADR-0021, a deleted page
+  is restored only to its old place).
 - The planner system's requirements promise the tree, the links between pages, a page for each
   chosen country, and links from the calendar to pages.
 - Each pencilled stretch and each firm item on a trip's calendar, which `planner/itinerary` holds,

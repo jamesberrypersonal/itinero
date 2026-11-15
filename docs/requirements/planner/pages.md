@@ -88,16 +88,18 @@ The pages component lists the pages deleted, most recently deleted first. Each p
 title, and the number of pages that went to the graveyard with it. It gives the title and the text
 of any page in the graveyard. Restoring a page in the graveyard returns it to the tree, with every
 page that went to the graveyard with it, under its old parent, in its old place among the pages
-there. It returns at the top of the trip, after the pages there, when its old parent is not in the
-tree. ^pln-pages-f4
+there. A deleted page whose parent is in the graveyard is not listed, and the pages component
+refuses to restore it, naming the listed page above it to restore first. ^pln-pages-f4
 
 - **Verification:** on the trip that `PLN:PAGES-F1`'s verification sets up, with Santiago deleted,
     - confirm the graveyard lists Santiago, with one page that went with it
     - read Eating in Santiago, and confirm its text reads as it was written
     - restore Santiago, and confirm it returns under Chile, in its old place, with Eating in
       Santiago beneath it
-    - delete Santiago, then Chile, and confirm the graveyard lists Chile first, then Santiago
-    - restore Santiago, and confirm it returns at the top of the trip, after every page there
+    - delete Santiago, then Chile, and confirm the graveyard lists Chile, and not Santiago
+    - restore Santiago, and confirm it is refused, naming Chile
+    - restore Chile, confirm the graveyard then lists Santiago, restore Santiago, and confirm it
+      returns under Chile
 
 > **What does this buy?** A traveller sees, by title, what has been deleted, and an admin restores
 > a branch deleted by mistake (`PLN-F13`).
@@ -106,6 +108,10 @@ tree. ^pln-pages-f4
 > deleted pages they could see before the delete. Only an admin reads or restores one. The caller
 > decides both, with the access system, which handles accounts and invitations
 > (`PLN:PAGES-NR2`).
+
+> **Why is a page not restored apart from the page above it?** It would have no place to return to
+> but the top of the trip, where travellers its branch was hidden from could see it (ADR-0021, a
+> deleted page is restored only to its old place).
 
 > **Can a page be deleted for good?** No. The graveyard only grows (`PLN:PAGES-NR5`).
 

@@ -270,8 +270,9 @@ the pages of the tree the traveller may see. It never finds a page in the gravey
 Each traveller on a trip sees its graveyard as a list of the deleted pages they could see before the
 delete. Each is listed with its title and the number of pages that went with it. Only an admin can
 open a page in the graveyard to read it, or restore it. A restored page returns, with every page
-that went to the graveyard with it, under its old parent. It returns to the top of the trip when its
-old parent is in the graveyard too. Nothing deletes a page from the graveyard. ^pln-f13
+that went to the graveyard with it, under its old parent. A deleted page whose parent is in the
+graveyard is not listed, and is restored only after the page above it. Nothing deletes a page from
+the graveyard. ^pln-f13
 
 - **Verification:** on the trip that `PLN-F8`'s verification sets up, with Santiago deleted,
     - as a traveller who is not an admin, and who could see Santiago, confirm the graveyard lists
@@ -280,10 +281,15 @@ old parent is in the graveyard too. Nothing deletes a page from the graveyard. ^
     - as an admin, open Santiago and Eating in Santiago, and confirm each reads as it was written
     - restore Santiago, and confirm it returns under Chile with Eating in Santiago beneath it, and
       that links to it open it again
-    - delete Santiago, then Chile, restore Santiago, and confirm it returns at the top of the trip
+    - delete Santiago, then Chile, and confirm the graveyard lists Chile, and not Santiago
+    - restore Chile, then Santiago, and confirm Santiago returns under Chile
 
 > **What does this buy?** A branch of research deleted by mistake, such as a country's, is not
 > lost. Restoring it is left to an admin, because who may read each page is set page by page.
+
+> **Why is a page restored only after the page above it?** Restored alone, it could return only to
+> the top of the trip. Travellers its branch was hidden from could see it there (ADR-0021, a
+> deleted page is restored only to its old place).
 
 > **Is the graveyard on a phone with no connection?** No. The phone's copy of a trip holds only the
 > pages in the tree, so the graveyard never makes it larger. With no connection, a link to a page in

@@ -88,13 +88,15 @@ type Listed = Member & { name: string };   // as GET /api/trips/{trip}/members g
 function createTrip(trip: string, creator: AccountId): Promise<Member>;
 function member(trip: string, account: AccountId): Promise<Member | undefined>;
 function trips(account: AccountId): Promise<readonly string[]>;
-function onChange(listener: (trip: string, change: GrantChange) => Promise<void>): void;
+type Change = GrantChange | { op: "admin"; traveller: AccountId };
+function onChange(listener: (trip: string, change: Change) => Promise<void>): void;
 ```
 
 `member` gives the member an account is on a trip, or `undefined`. The caller passes
 `{ traveller: account, admin }` from it to every function of `@itinero/permissions`. `onChange`
 names the listener that applies to a trip's grants each `add` and `remove` the membership component
-makes (§4.4, §4.5). `joined` is the moment the member joined, in the text form of an ISO 8601 UTC
+makes (§4.4, §4.5). The listener is also given `{ op: "admin", traveller }` for each member made an
+admin, so that the trip's open devices are told (§4.1). `joined` is the moment the member joined, in the text form of an ISO 8601 UTC
 time.
 
 ### 3.4 Systems this drives
@@ -137,8 +139,14 @@ Behaviour crossing every operation:
 the trip, and gives the creator edit access in the trip's grants.
 
 `POST /api/trips/{trip}/admins` makes a member an admin, and is refused with `admin-only` from a member
-who is not one. Making an admin of a member who already is one succeeds and does nothing. No request
-takes the role away.
+who is not one. Making an admin of a member who already is one succeeds, and changes no record. No
+request takes the role away.
+
+Either way, the listener of `onChange` is then given `{ op: "admin", traveller }`. No grant changes,
+because an admin's access comes from the role. `planner/trip-host` raises the trip's sequence for
+it, so that every open device catches up. The new admin's device then holds everything an admin
+sees, and every other device marks them an admin. A request whose listener fails is refused, and
+making it again tells the devices.
 
 ### 4.2 Inviting, and withdrawing
 

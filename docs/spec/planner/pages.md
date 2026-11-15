@@ -134,6 +134,7 @@ is one English sentence saying what was refused and why. A caller may show it to
 | `cycle` | `apply` | A move under the page itself, or under a page beneath it |
 | `in-graveyard` | `apply` | A `rename`, `write`, `move` or `bury` of a page in the graveyard |
 | `not-in-graveyard` | `apply` | A `restore` of a page in the tree |
+| `parent-in-graveyard` | `apply` | A `restore` of a page whose parent is in the graveyard. `details.page` names the page the graveyard lists it under |
 | `stale` | `apply` | A `write` whose `base` is not the page's `revision`. `details.text` holds the page's text as it stands, and `details.revision` its revision |
 | `no-words` | `search` | Words that are empty once trimmed |
 | `unknown-format` | `pageFromText` | A page whose `format` is not 1 |
@@ -184,7 +185,7 @@ the pages given are unchanged. Every check is made before anything is changed.
 | `write` | Sets the page's text, where `base` is the page's `revision` | The page | `unknown-id`, `in-graveyard`, `stale`, `text-length` |
 | `move` | Puts the page at the place `to` gives. Every page beneath it moves with it, unwritten | The page | `unknown-id`, `in-graveyard`, `cycle`, and any refusal of §4.3 |
 | `bury` | Deletes the page, with every page beneath it (§4.4) | The page | `unknown-id`, `in-graveyard` |
-| `restore` | Returns the page to the tree (§4.5) | The page | `unknown-id`, `not-in-graveyard` |
+| `restore` | Returns the page to the tree (§4.5) | The page | `unknown-id`, `not-in-graveyard`, `parent-in-graveyard` |
 
 A new page's `revision` is 1. Apart from raising `revision`, a change sets whole fields, and never
 adds to or subtracts from them.
@@ -229,9 +230,16 @@ or 1 for the trip's first delete. Nothing else is written. Every page beneath it
 graveyard because a page above it has `buried`, so a branch of any size is deleted by writing one
 record.
 
-`graveyard(pages)` lists every page with `buried`, highest `buried` first, so the most recent
-delete comes first (`PLN:PAGES-F4`). `went` counts the pages beneath it, stopping at any page that
-has `buried` of its own, because that page was deleted before and is listed for itself.
+`graveyard(pages)` lists every page with `buried` whose parent is in the tree, or that has no
+parent (`PLN:PAGES-F4`). It lists the highest `buried` first, so the most recent delete comes
+first. `went` counts the pages beneath a listed page that return with it, stopping at any page that
+has `buried` of its own.
+
+A page with `buried` whose parent is in the graveyard is not listed. It was deleted before a page
+above it was, and it stays in the graveyard when that page is restored. Its parent is then in the
+tree, so `graveyard` lists it from then on. Every page in the graveyard is therefore reached by
+restoring the listed page above it first (ADR-0021, a deleted page is restored only to its old
+place).
 
 `page(pages, id)` gives any page the trip holds, in the tree or in the graveyard. The caller gives a
 page in the graveyard only to an admin. It shows each traveller only the pages of `graveyard` that
@@ -239,16 +247,15 @@ the traveller could see before the delete (`PLN:PAGES-NR2`).
 
 ### 4.5 Restoring
 
-*Porcelain:* a `restore` returns the page to the tree, with every page beneath it that has no
-`buried` of its own (`PLN:PAGES-F4`). It removes the page's `buried`, if it has one. Then:
+*Porcelain:* a `restore` returns a page that `graveyard` lists to the tree, with every page beneath
+it that has no `buried` of its own (`PLN:PAGES-F4`). It removes the page's `buried`, and keeps its
+`parent` and `order`, so the page returns to its old place.
 
-- where its parent is in the tree, or it has none, its `parent` and `order` are kept, so it returns
-  to its old place
-- where its parent is in the graveyard, its `parent` is removed, and it takes an `order` after every
-  page at the top of the trip
-
-A page in the graveyard only because a page above it was deleted can be restored on its own. Its
-parent is then in the graveyard, so it returns to the top of the trip.
+A `restore` of a page whose parent is in the graveyard is refused with `parent-in-graveyard`
+(ADR-0021). That covers a page in the graveyard only because a page above it was deleted, and a
+page deleted before a page above it was. `details.page` names the page to restore first: the
+nearest page above it that `graveyard` lists. No restore therefore moves a page, and none returns a
+page to the top of the trip unless it was deleted from there.
 
 ### 4.6 Links
 

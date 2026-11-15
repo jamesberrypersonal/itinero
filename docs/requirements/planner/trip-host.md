@@ -107,11 +107,14 @@ given everything it may hold. ^pln-host-f5
 ### PLN:HOST-F6 — A device with the trip open is told of each change at once
 
 While a device has a trip open with a connection, the trip host tells it of each change to the trip
-as it is applied, so that the device catches up. ^pln-host-f6
+as it is applied, so that the device catches up. It tells the device in the same way when a member
+of the trip is made an admin. ^pln-host-f6
 
 - **Verification:** with two devices holding the trip of `PLN:HOST-F1` open,
     - from the first, rename Chile, and confirm the second shows the new title within 2 seconds
     - close the second, rename Chile again, reopen it, and confirm it shows the newer title
+    - hide a page from the second device's traveller, make them an admin, and confirm the device
+      shows the page within 2 seconds
 
 > **What does this buy?** Travellers planning together see each other's changes as they are made
 > (`PLN-F6`).
@@ -141,6 +144,8 @@ page an admin asks it to. It refuses either for a traveller who is not an admin.
     - as the creator, read Argentina, and confirm its text reads as it was written
     - as a traveller who is not an admin, read it, and confirm it is refused
     - as the creator, restore it, and confirm it returns at the top of the trip
+    - add a page beneath Argentina, delete Argentina, restore the page beneath it, and confirm it
+      is refused, naming Argentina as the page to restore
 
 > **What does this buy?** A branch of research deleted by mistake is recovered (`PLN-F13`).
 
