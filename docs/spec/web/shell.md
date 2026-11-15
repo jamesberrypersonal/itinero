@@ -41,7 +41,8 @@ The shell shows two things of its own, which `web/screens` places:
 - **a notice that Itinero is ready offline**, once the service worker holds every file of the
   version
 - **a notice on an iPhone that Itinero is not on the home screen**, saying to tap Share, then Add
-  to Home Screen, so that its trips stay when the phone goes unused for some days
+  to Home Screen, so that its trips stay when the phone goes unused for some days. It also says the
+  traveller signs in once more there
 
 ### 3.2 Application interface
 
@@ -137,6 +138,11 @@ it, and carries the `apple-touch-icon` that Safari reads (`WEB:SHELL-F3`).
 `suggestInstall` is true where the browser's user agent names an iPhone or an iPad, and
 `navigator.standalone` is not true. `web/screens` shows the notice of §3.1 while it is true, on the
 home page and on the list of trips.
+
+An iPhone keeps what Itinero stores from the home screen apart from what it stores in Safari,
+the session included. A traveller who signed in in Safari, such as from an invitation's email,
+therefore signs in once more the first time they open Itinero from the home screen. The notice says
+so.
 
 ### 4.4 The time-zone rules
 

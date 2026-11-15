@@ -154,14 +154,23 @@ Behaviour crossing every operation:
 | Table | Holds |
 |---|---|
 | `trip` | One row: the trip, in the itinerary's text form, its `changed`, and the trip's `sequence` |
-| `pages` | One row for each page, in the pages' text form, with its `changed` |
+| `pages` | One row for each page: its `changed`, its text and title, and each other field of the page in a column of its own |
 | `grants` | One row: the trip's grants, in the permissions' text form |
 | `bookings` | One row for each booking, keyed by its identifier, in the bookings' text form, with its `changed` |
 | `creator` | One row: the creator's account |
 
-The itinerary needs the world's time-zone rules, which `shared/trip-time` loads from a rules file.
-The Worker carries the rules file as one of its files, and the Durable Object loads it as it starts.
-Its result is the one that stands when a device holds other rules (`PLN:ITINERARY-F6`).
+The trip host reads a page's text only for a page a request names. Every request needs the tree,
+to work out what the traveller may see, and the tree needs each page's parent, order and `buried`
+alone. The trip host therefore builds the pages it gives `@itinero/pages` and
+`@itinero/permissions` from the columns, with the text of only the pages the request reads or
+writes. No function it calls reads the text of any other page. It writes a page's text form, for a
+device, from the same row.
+
+The itinerary and the bookings need the world's time-zone rules, which `shared/trip-time` loads
+from a rules file. The Worker carries the rules file as one of its files. The Durable Object loads
+it the first time a change to the calendar or to a booking needs it, and not as it starts, so
+that catching a device up never waits on it. Its result is the one that stands when a device holds
+other rules (`PLN:ITINERARY-F6`).
 
 ### 4.2 Creating a trip
 
@@ -294,8 +303,10 @@ runs it from anywhere in the repository.
 - **Leak tests** catch up, as a traveller hidden from part of a trip, from every sequence the trip
   has held, and confirm nothing given names a page, a stretch, a grant or a booking that traveller
   may not see (`PLN:HOST-NFR1`).
-- **Cost tests** count the requests and the storage of the day of `PLN:HOST-NFR2`, and confirm
-  they are within the free plan's limits.
+- **Cost tests** count the requests, the rows read and the storage of the day of `PLN:HOST-NFR2`,
+  and confirm they are within the free plan's limits. They also measure the processor time of each
+  kind of request on a trip of 500 pages and 300 bookings, the first after the Durable Object
+  wakes included, and fail where one takes over 10 milliseconds.
 
 ## 5. Resources
 
@@ -326,7 +337,8 @@ trip cannot be deleted yet (`ACC-NR4`).
 - **Costs nothing at this scale** (`PLN:HOST-NFR2`). A change is one request to the Durable Object,
   and each open device's catch-up is one more. Ten devices making a change a minute for four hours
   make about 3,000 requests, against a free allowance of 100,000 a day. Hibernating sockets cost
-  nothing while idle.
+  nothing while idle. A catch-up of a trip of 500 pages and 300 bookings reads 800 rows and no
+  page's text, so the day reads about 2.4 million rows, against a free allowance of 5 million.
 - **One set of rules.** The time-zone rules the Worker carries are the ones every change is checked
   against. A device with other rules is corrected by the next catch-up.
 
@@ -362,5 +374,11 @@ trip cannot be deleted yet (`ACC-NR4`).
 
 - **Merging edits.** Two travellers' edits to one page are refused, not merged. Merging them
   automatically is future work, and would change how a page's text is stored and sent.
+- **Processor time on the free plan.** Cloudflare gives a Worker on its free plan 10 milliseconds
+  of processor time for each request. Its documents do not say plainly whether a Durable Object on
+  the free plan has the same limit, or the 30 seconds its paid plan gives. The cost tests of §4.7
+  hold every request to 10 milliseconds. Loading the rules file is the request most likely to pass
+  it. Where it does, the choice is a rules file split by region, or the paid plan (ADR-0015,
+  Itinero's online side runs on Cloudflare's free plan).
 - **A trip left without a member.** A trip whose `createTrip` failed keeps its Durable Object, which
   no request reaches. Clearing such objects is not designed.

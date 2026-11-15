@@ -259,21 +259,25 @@ page to the top of the trip unless it was deleted from there.
 
 ### 4.6 Links
 
-*Porcelain:* a link to a page is a Markdown link whose destination is `page:` followed by the page's
-identifier (`PLN:PAGES-F5`). A link to the page `a17f`, showing the words "the city", is written:
+*Porcelain:* a link to a page is a Markdown link whose destination is `#page:` followed by the
+page's identifier (`PLN:PAGES-F5`). A link to the page `a17f`, showing the words "the city", is
+written:
 
 ```markdown
-[the city](page:a17f)
+[the city](#page:a17f)
 ```
 
-Every Markdown reader shows it as a link, because the form is a standard inline link. Nothing in the
+Every Markdown reader shows it as a link, because the form is a standard inline link. The
+destination opens with `#`, so a reader takes it for a place within the page, and no reader takes
+`page` for a kind of address it must refuse. micromark, which the web app draws pages with, empties
+the destination of any link whose kind of address it does not know, and would empty `page:a17f`. Nothing in the
 link holds the page's title or place, so a rename, a move, a delete or a restore leaves it naming
 its page.
 
 - `pageLink(id, words)` writes the link, putting a backslash before each `\`, `[` and `]` in the
   words.
-- `linkTarget(href)` gives the identifier in a link's destination where it is `page:` followed by an
-  identifier, and `undefined` otherwise. The web app calls it for each link it shows.
+- `linkTarget(href)` gives the identifier in a link's destination where it is `#page:` followed by
+  an identifier, and `undefined` otherwise. The web app calls it for each link it shows.
 - `state(pages, id)` says whether the page named is in the tree, in the graveyard, or not held.
 
 The trip's calendar, which `planner/itinerary` holds, names a page by the same identifier, from a
@@ -343,7 +347,7 @@ written in sorted order. A page in the tree and a page in the graveyard read:
 
 ```json
 { "format": 1, "id": "a17f", "order": "V", "parent": "c3e2", "revision": 4,
-  "text": "Try the empanadas in Valparaíso. See [transport](page:d81b).",
+  "text": "Try the empanadas in Valparaíso. See [transport](#page:d81b).",
   "title": "Eating in Santiago", "trip": "6f1e" }
 ```
 

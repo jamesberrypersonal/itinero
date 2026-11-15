@@ -219,9 +219,14 @@ traveller's access unless they are an admin.
 
 A page shows its title and its text drawn from Markdown with micromark, with its extension for
 GitHub's tables and lists. micromark writes no HTML found in the text, which is shown as the text it
-is (`WEB:SCREENS-NR4`). Each link whose target the pages' `linkTarget` reads is a page of the trip.
-It opens that page where the page is in the copy's tree, and otherwise shows Page not available,
-without a title (`PLN-F9`, `ACC-F8`). Every other link opens in a new tab, with no referrer.
+is (`WEB:SCREENS-NR4`). It also empties the destination of every link that is not an `http:`, an
+`https:` or a `mailto:` address, or an address within the page, and the screens leave that setting
+as it is.
+
+micromark gives the page as HTML, and the screens then go through its links. Each link whose
+destination the pages' `linkTarget` reads is a page of the trip. It opens that page where the page
+is in the copy's tree, and otherwise shows Page not available, without a title (`PLN-F9`,
+`ACC-F8`). Every other link opens in a new tab, with no referrer.
 
 A page is edited as its Markdown text, in a plain text box, with the formatted page beside it on a
 computer and a tab to switch on a phone. Saving sends a `write` with the revision the editor was
@@ -328,7 +333,8 @@ and the packages of the trip's parts, which `spec/web/shell.md` §5 lists.
 ## 6. Quality attributes
 
 - **Nothing a page writes runs** (`WEB:SCREENS-NR4`). micromark writes no HTML from a page's text,
-  and every link outside the trip opens in a new tab with no referrer.
+  and empties the destination of a link that would run a script. Every link outside the trip opens
+  in a new tab with no referrer.
 - **The location stays on the phone** (`WEB-F6`). The country is found from a file already on the
   phone, and neither the position nor the country is stored or sent.
 - **Nothing offered that would be refused** (`WEB:SCREENS-F1`). Controls follow `authorise` and the
@@ -397,4 +403,8 @@ and the packages of the trip's parts, which `spec/web/shell.md` §5 lists.
 
 ## 8. Open
 
-None.
+- **Signing in from an iPhone's home screen.** Google's button opens Google's sign-in in a second
+  window, and an app opened from an iPhone's home screen may never be given that window's answer.
+  Google's documents say nothing of such apps. The sign-in of §4.1 is to be tried on an iPhone
+  before any screen is built on it. Where it fails, Google's button can instead leave Itinero for
+  Google's page and return, which needs a request of its own from `access/accounts`.

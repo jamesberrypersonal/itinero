@@ -202,7 +202,9 @@ the free plan Itinero's online side runs on. ^pln-host-nfr2
 
 - **Verification:**
     - with ten devices holding a trip open for four hours, making a change a minute between them,
-      confirm the day's requests and storage stay within the free plan's daily limits
+      confirm the day's requests, rows read and storage stay within the free plan's daily limits
+    - on a trip of 500 pages and 300 bookings, confirm no request uses more processor time than the
+      free plan allows one
 
 > **What does this buy?** Itinero is personal software, and costs nothing to run beyond its domain
 > name (ADR-0015, Itinero's online side runs on Cloudflare's free plan, and travellers sign in with
