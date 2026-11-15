@@ -20,8 +20,8 @@ Three things act on them:
 - **A traveller**, through the screens of §3.1.
 - **`web/trip-store`** gives each trip's copy, and tells the screens when it changes or the device
   goes offline.
-- **`web/shell`** says when Itinero is ready offline, when a new version waits, and when to suggest
-  adding Itinero to an iPhone's home screen.
+- **`web/shell`** says when Itinero is ready offline, when a new version waits or is required, and
+  when to suggest adding Itinero to an iPhone's home screen.
 
 Deliberately absent:
 
@@ -92,6 +92,12 @@ Behaviour crossing every screen:
 - **Offline.** While `web/trip-store`'s `isOnline()` is false, every screen of a trip shows a bar
   saying it is offline, and when the copy was last caught up, from `caughtUp`. Every control that
   changes the trip is left out, not greyed (`WEB:SCREENS-F1`).
+- **A version too old.** While `web/shell`'s `updateRequired` is true, every screen shows a bar in
+  place of the offline one. It says Itinero needs a new version before it can reach the
+  traveller's trips, and that they should save any text they are writing elsewhere first. Its
+  button, Update now, calls the shell's `applyUpdate`, and shows once `updateWaiting` is true. Every
+  control that changes a trip is left out, as offline, except the editor a traveller already has
+  open, which keeps its text (`WEB:SHELL-F5`).
 - **What to offer.** A control that changes something is shown only where `access/permissions`'
   `authorise`, asked of the copy's grants, pages and `you`, allows it. A change the copy held online
   refuses all the same shows the refusal's message.
@@ -357,6 +363,7 @@ and the packages of the trip's parts, which `spec/web/shell.md` §5 lists.
 | [WEB:SCREENS-F9](../../requirements/web/screens.md#^web-screens-f9) | Signing in and out, in §4.1. |
 | [WEB:SCREENS-F10](../../requirements/web/screens.md#^web-screens-f10) | `/name` at the first sign-in, before an invitation is accepted (§4.1, §4.7), and changing the name in the settings (§4.8). |
 | [ACC-F13](../../requirements/access/access.md#^acc-f13) | Asking for a name at the first sign-in, and changing it later (§4.1, §4.8). |
+| [WEB:SHELL-F5](../../requirements/web/shell.md#^web-shell-f5) | The bar and its button, and no control that changes a trip while a new version is required (§4). |
 | [WEB:SCREENS-NFR1](../../requirements/web/screens.md#^web-screens-nfr1) | Drawing what is on screen first (§6), and the timing tests of §4.9. |
 | [WEB:SCREENS-NFR2](../../requirements/web/screens.md#^web-screens-nfr2) | The map's rounded coordinates (§5.1). |
 | [WEB-F1](../../requirements/web/web.md#^web-f1) | Every screen at a phone's width and a computer's (§3.1). Adding Itinero to a home screen is `web/shell`. |

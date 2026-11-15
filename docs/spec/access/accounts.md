@@ -42,7 +42,9 @@ None. The web app shows the sign-in button Google supplies, and a sign-out comma
 
 ### 3.2 Application interface
 
-The accounts component answers four requests over HTTPS, each with a JSON body. Every response
+The accounts component answers four requests over HTTPS, each with a JSON body. It also checks the
+version of the web app behind every request of the online side, before any component answers
+(§4.7). Every response
 that refuses gives a status of 400 or 401, and a JSON body `{ "code": ..., "message": ... }`, whose
 message is one English sentence the web app may show.
 
@@ -63,6 +65,7 @@ request without handling it.
 | `bad-nonce` | 401 | A nonce the accounts component did not give, already used, or older than 10 minutes |
 | `bad-name` | 400 | A name that is empty once trimmed, or longer than 60 characters (§4.5) |
 | `no-session` | 401 | A request with no session, or with one that has ended (§4.3) |
+| `update-first` | 426 | A request of the online side from a version of the web app too old to answer (§4.7) |
 | `malformed` | 400 | A body not in the form above |
 
 ### 3.3 Programming interface
@@ -183,6 +186,18 @@ of §3.2, and that the stored records hold no session and no password. It runs w
 on the developer's machine. The recipe `just test-online` runs it from anywhere in the
 repository.
 
+### 4.7 A version of the web app too old to answer
+
+*Porcelain:* every request whose path begins `/api/` carries a header named `Itinero-Api`, holding
+the whole number its version of the web app was built for, as `spec/web/shell.md` §4.7 gives. The
+Worker holds the oldest number it answers, as `OLDEST_API`. It refuses a request whose number is
+lower, or that carries none, with `update-first`, before it looks for a session or passes the
+request to any component (`WEB:SHELL-F5`). Nothing is read or written for a request so refused.
+
+One request carries no number: the one that opens a trip's WebSocket, on which a browser sets no
+header of its own. The socket carries only a sequence, and the catch-up that follows it is checked
+like any other request.
+
 ## 5. Resources
 
 The accounts component stores three kinds of record, each a table of the online side's D1
@@ -200,7 +215,8 @@ of the Worker, which Cloudflare runs once a day, deletes every session past its 
 nonce past its 10 minutes.
 
 Itinero's client identifier at Google is set as a variable of the Worker, named `GOOGLE_CLIENT_ID`,
-in its Wrangler configuration.
+in its Wrangler configuration. `OLDEST_API` is a constant of the Worker's code, so that it changes
+only with a deploy.
 
 | Resource | Path | Owned by |
 |---|---|---|
@@ -230,6 +246,7 @@ in its Wrangler configuration.
 | [ACC:ACCOUNTS-F5](../../requirements/access/accounts.md#^acc-accounts-f5) | A new account's name from its provider, and `named`, in §4.2, and `PUT /api/auth/name`, in §4.5. |
 | [ACC-F13](../../requirements/access/access.md#^acc-f13) | Each account's name, starting as its Google account's, and changed by its traveller (§4.2, §4.5). Asking for it is `web/screens`, and showing it on a trip is `access/membership`. |
 | [ACC:ACCOUNTS-NFR1](../../requirements/access/accounts.md#^acc-accounts-nfr1) | Digests in place of sessions and nonces, and no password, in §4.3 and §5. |
+| [WEB:SHELL-F5](../../requirements/web/shell.md#^web-shell-f5) | The `update-first` refusal, made before anything else, in §4.7. Sending the number, and updating, are `web/shell`. |
 | [ACC-F1](../../requirements/access/access.md#^acc-f1) | Signing in with Google, and staying signed in (§4.2, §4.3). Showing the sign-in buttons is `web/screens`. |
 | [ACC-NFR1](../../requirements/access/access.md#^acc-nfr1) | Naming, for certain, the account behind each request (§4.3). What that account may do is `access/permissions`. |
 

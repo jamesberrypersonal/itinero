@@ -139,6 +139,11 @@ Behaviour crossing every operation:
 - **Each catch-up is one transaction.** A catch-up is written in one IndexedDB transaction, after
   every request it needs has answered, so a copy is brought up to date whole or not at all
   (`WEB:STORE-F2`).
+- **A version too old stops everything but reading.** Every request carries the shell's `API` in
+  the header `Itinero-Api`. Any request refused with `update-first` writes nothing, and the trip
+  store calls the shell's `updateFirst` (`WEB:SHELL-F5`). It then sends no request until the
+  window reloads, and refuses every `send` and every function of §4.8 with `update-first`. Every
+  copy stays as it is, and is still read.
 - **A session that has ended deletes everything.** Any request refused with `no-session` signs the
   device out, as §4.5 gives, before anything else is done (`WEB:STORE-F5`).
 
@@ -312,6 +317,7 @@ and seats. It is protected by the device's own lock, and deleted on sign-out (AD
 | [WEB:STORE-F6](../../requirements/web/trip-store.md#^web-store-f6) | The BroadcastChannel of §4.6. |
 | [WEB:STORE-F7](../../requirements/web/trip-store.md#^web-store-f7) | The seven functions of §4.8, and the grants and invitations of an admin's copy, in §4.1 and §4.2. |
 | [WEB:STORE-NFR1](../../requirements/web/trip-store.md#^web-store-nfr1) | One transaction for each trip read (§4.1, §6). |
+| [WEB:SHELL-F5](../../requirements/web/shell.md#^web-shell-f5) | Sending `API` with every request, and stopping on `update-first` with every copy kept (§4). |
 | [WEB-F2](../../requirements/web/web.md#^web-f2) | Every trip given offline, with `caughtUp` and `isOnline` (§4.1, §4.4). Saying so on every screen, and offering no change offline, is `web/screens`. |
 | [WEB-F3](../../requirements/web/web.md#^web-f3) | A copy that stays until sign-out (§4.5). Keeping the browser from clearing it is `web/shell`. |
 | [WEB-F4](../../requirements/web/web.md#^web-f4) | Catching up on connecting, and the socket of an open trip (§4.2, §4.3). |

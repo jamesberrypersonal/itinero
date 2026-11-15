@@ -41,6 +41,9 @@ opens the next time. A version is used whole, never mixed with another's files. 
 > **What does this buy?** A traveller is never interrupted mid-task by an update, and a version half
 > downloaded never breaks the app.
 
+> **Does a new version ever take over an open window?** Only when the traveller asks it to, once
+> the online side no longer answers the version they have (`WEB:SHELL-F5`).
+
 ### WEB:SHELL-F3 — Itinero can be added to a phone's home screen, and asks the browser to keep what it stores
 
 Itinero offers what a phone needs to add it to the home screen, with its own name and icon, opening
@@ -73,6 +76,28 @@ holds. ^web-shell-f4
 > **What does this buy?** Every device orders and measures times with the same rules, and works
 > offline from its first launch (`WEB-F8`, ADR-0008, trip-time carries its own copy of the time-zone
 > rules).
+
+### WEB:SHELL-F5 — A version too old for the online side says so, keeps its trips readable, and updates when the traveller asks
+
+When the online side no longer answers the version of Itinero a device runs, the device says so on
+every screen. Every trip it holds stays readable, as with no connection, and it offers no way to
+change one. The shell fetches the newest version, and the traveller starts it from the notice,
+without closing Itinero. Nothing the traveller has typed is lost before they do. ^web-shell-f5
+
+- **Verification:** with Itinero open on a device, on a page a traveller is editing,
+    - publish a version whose online side no longer answers the older one, and confirm the next
+      request shows the notice, and that the text typed is still in the editor
+    - confirm every trip the device holds still opens, and that no screen offers to change one
+    - start the new version from the notice, and confirm it opens, catches every trip up, and shows
+      no notice
+    - with a second window open, start the new version in the first, and confirm the second runs it
+      too
+
+> **What does this buy?** An app installed weeks ago never sends the online side something it can
+> no longer read, or shows a trip it cannot read. The traveller is told what to do, in one step.
+
+> **Why not update without asking?** Starting a new version reloads every window, and would lose a
+> page the traveller is in the middle of writing (`WEB:SHELL-F2`).
 
 ---
 
