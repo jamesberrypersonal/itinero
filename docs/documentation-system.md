@@ -794,9 +794,8 @@ it.
 
 **`roadmap/` holds one roadmap per system, and no other roadmaps.** Several people work on this
 workspace at once, each on different systems, and one list ordering all of their work would be
-edited by everyone and kept by no one. The web app's milestones are not the bookings system's,
-and neither waits on the other. Each roadmap is named by its system's slug, as `roadmap/planner.md`
-is.
+edited by everyone and kept by no one. Each roadmap is named by its system's slug, as
+`roadmap/planner.md` is.
 
 **A system's roadmap holds its components' plans as well as its own.** Its milestones prove the
 system's requirements and its components' alike, and a milestone that belongs to one component
@@ -822,6 +821,21 @@ whose *Releases* line names the milestone.
 **Milestones are linear.** Work for a milestone never happens after the next one has started. To
 start the next milestone before a milestone's work is finished, the unfinished work moves to the
 next milestone, or a later one, and the roadmap says so.
+
+**A milestone names the milestones of other systems it waits on** (ADR-0020, a milestone names the
+milestones of other systems it waits on). A milestone in the pending half may open with a line
+written `**Waits on:**`, directly below its heading, naming each milestone of another system that
+must be complete before it starts, by its full name. Only the waiting roadmap holds the line, and
+the roadmap waited on is not changed. The line leaves the pending half with its milestone. There is
+no roadmap above the systems': the order between them is the sum of these lines.
+
+```markdown
+#### Milestone Web-1.1 — Reading a trip with no connection
+
+**Waits on:** Milestone Planner-1.2, Milestone Access-1.1
+
+- Store each trip on the device, and show it with no connection.
+```
 
 **A roadmap has two halves, laid out the same way in every roadmap:**
 
@@ -961,6 +975,7 @@ A citation names a stable address, and the checker resolves it.
 |---|---|---|
 | A requirement | `SHR:DOC-CHECK-F3`, in backticks, prefixed; or a link carrying its block ID, `[SHR:DOC-CHECK-F3](../requirements/shared/doc-check.md#^shr-doc-check-f3)` | The heading or table row that defines it, in the document that owns the prefix |
 | A decision | `ADR-0001`, or a link to its file | The record on disk and the index |
+| A milestone | Its full name, such as Milestone Planner-0.1 | The milestone's heading in its system's roadmap |
 | A section of a specification | `§4`, `§3.2`, after naming the document | The numbered headings the cited document defines |
 | A system, component or concern | Its address, such as `planner/api`, or a link to its specification | The component registry |
 | Documentation outside the vault that stays | Its repository-relative path, in backticks. Documentation a migration will delete is never cited | Nothing: it is outside the vault |
@@ -1012,6 +1027,7 @@ the checker cannot run rather than skipping: a check that quietly stops running 
 | Every functional and non-functional requirement has a **Verification:** clause | A promise with no stated way to prove it is a wish |
 | No unprefixed identifiers, in heading, backtick, bold or parenthesis position | Per-document numbering, caught before it spreads |
 | Every `ADR-NNNN` in prose names a record on disk | A citation must resolve anywhere, as a requirement identifier's must |
+| Every milestone named in prose is a milestone heading in its system's roadmap | A milestone's Waits on line orders systems only while the milestones it names exist |
 | Every decision record's scope names registered addresses, or `workspace` | A scope that names nothing registered files the record nowhere |
 | Both views of the decision index match the files on disk: set, filenames, titles, statuses, scopes, supersession targets | The index is the permanent entry point someone reads cold |
 | Every specification an accepted record names in its Consequences cites that record back | A record can name a document that must move and have nothing happen |

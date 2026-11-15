@@ -555,6 +555,49 @@ pub fn numbered(chars: &[char], word: &str, digits: Option<usize>) -> Vec<(usize
     out
 }
 
+/// Every milestone citation, such as `Milestone Planner-0.1`, as `(slug, citation)`. The slug is the
+/// system's name in lower case, which names its roadmap (§4.3.24).
+pub fn milestones(chars: &[char]) -> Vec<(String, String)> {
+    let w: Vec<char> = "Milestone ".chars().collect();
+    let digits = |from: usize| {
+        chars[from.min(chars.len())..]
+            .iter()
+            .take_while(|c| c.is_ascii_digit())
+            .count()
+    };
+    let mut out = Vec::new();
+    let mut i = 0;
+    while i + w.len() < chars.len() {
+        let at_word = chars[i..i + w.len()] == w[..] && (i == 0 || !chars[i - 1].is_alphanumeric());
+        let name_from = i + w.len();
+        if !(at_word && chars[name_from].is_ascii_uppercase()) {
+            i += 1;
+            continue;
+        }
+        let name_len = chars[name_from..]
+            .iter()
+            .take_while(|c| c.is_ascii_alphabetic() || **c == '-')
+            .count();
+        let hyphen = name_from + name_len;
+        let phase = digits(hyphen);
+        let dot = hyphen + phase;
+        let number = if phase > 0 && chars.get(dot) == Some(&'.') {
+            digits(dot + 1)
+        } else {
+            0
+        };
+        let end = dot + 1 + number;
+        if name_len > 1 && chars[hyphen - 1] == '-' && number > 0 && ends_word(chars, end) {
+            let slug: String = chars[name_from..hyphen - 1].iter().collect();
+            out.push((slug.to_lowercase(), chars[i..end].iter().collect()));
+            i = end;
+        } else {
+            i = name_from;
+        }
+    }
+    out
+}
+
 /// Every section citation, such as §4.2, as `(position, number)`.
 pub fn section_citations(chars: &[char]) -> Vec<(usize, String)> {
     let mut out = Vec::new();
@@ -720,6 +763,33 @@ mod tests {
                 ("BKG:PARSER-NR3", "BKG:PARSER", "NR")
             ]
         );
+    }
+
+    #[test]
+    fn a_milestone_takes_its_slug_from_the_system_name() {
+        let found = milestones(&chars(
+            "after Milestone Planner-0.1, Milestone Trip-sharing-1.12 and `Milestone Web-2.3`.",
+        ));
+        let pairs: Vec<_> = found
+            .iter()
+            .map(|(slug, cited)| (slug.as_str(), cited.as_str()))
+            .collect();
+        assert_eq!(
+            pairs,
+            [
+                ("planner", "Milestone Planner-0.1"),
+                ("trip-sharing", "Milestone Trip-sharing-1.12"),
+                ("web", "Milestone Web-2.3"),
+            ]
+        );
+    }
+
+    #[test]
+    fn a_milestone_template_is_not_a_milestone() {
+        let found = milestones(&chars(
+            "Milestone <System>-<Phase>.<Milestone>, Milestone Web-1, Milestone web-1.1, Milestone Web-1.1a, the Milestone Planner-",
+        ));
+        assert!(found.is_empty());
     }
 
     #[test]

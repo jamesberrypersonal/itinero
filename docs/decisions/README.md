@@ -42,6 +42,7 @@ keeps:
 | [0017](0017-a-device-copy-is-protected-by-its-lock.md) | A trip's copy on a device is protected by the device's own lock, and deleted when its traveller signs out | web | Accepted |
 | [0018](0018-the-web-app-is-built-with-preact.md) | The web app is built with Preact, and served by Itinero's own Worker | web | Accepted |
 | [0019](0019-a-place-time-zone-comes-from-a-list.md) | A place's time zone is filled in from a list of places, kept on the phone one country at a time | web | Accepted |
+| [0020](0020-a-milestone-names-what-it-waits-on.md) | A milestone names the milestones of other systems it waits on | workspace | Accepted |
 
 ## By subject
 
@@ -53,6 +54,7 @@ keeps:
 | [0003](0003-the-checker-is-built-in-rust-and-run-through-just.md) | The documentation checker is built in Rust and run through just | Accepted |
 | [0005](0005-itinero-records-no-telemetry.md) | Itinero records no telemetry, so the documents reserve no place for it | Accepted |
 | [0009](0009-a-finished-item-leaves-the-list-when-finished.md) | A finished item leaves the live list in the commit that finishes it | Accepted |
+| [0020](0020-a-milestone-names-what-it-waits-on.md) | A milestone names the milestones of other systems it waits on | Accepted |
 
 ### planner
 
