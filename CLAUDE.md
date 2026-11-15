@@ -5,11 +5,16 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## What is here
 
 Itinero is a trip planner: build itineraries day by day, organise bookings, keep every detail in
-one place. The repository is documentation-first. The product itself is not built yet, and the only
-code is `tools/doc-check`, the checker that holds the documentation to its rules, and
-`tools/doc-scaffold`, which starts new documents as skeletons that pass it.
+one place. The repository is documentation-first. The product is being built one component at a
+time, in the order `docs/roadmap/` gives, as TypeScript packages in an npm workspace under
+`packages/`. Beside them, `tools/doc-check` is the checker that holds the documentation to its
+rules, and `tools/doc-scaffold` starts new documents as skeletons that pass it.
 
 - `docs/` is the documentation, read both as an Obsidian vault and rendered on GitHub.
+- `packages/` holds the product's packages: `packages/trip-time/` (`@itinero/trip-time`),
+  `packages/itinerary/` (`@itinero/itinerary`), which uses it, and `packages/pages/`
+  (`@itinero/pages`), which imports only its types.
+  `package.json` at the root declares the npm workspace.
 - `tools/doc-check/` and `tools/doc-scaffold/` are Rust packages, run through `just`.
 - `tools/hooks/pre-commit` is an optional hook that runs the checker before each commit.
 
@@ -21,6 +26,10 @@ repository root.
 ```
 just check-docs                 # check every document in docs/ (exit 0 clean, 1 findings, 2 could not run)
 just test-docs                  # the whole test suites of doc-check and doc-scaffold
+just test-trip-time             # the test suite of @itinero/trip-time
+just test-itinerary             # the test suite of @itinero/itinerary
+just test-pages                 # the test suite of @itinero/pages
+npm test                        # the test suites of every package in the npm workspace
 just install-hook               # install the pre-commit hook
 just new-component <system> <slug> <PREFIX> "<description>"   # start a component's documents and rows
 just new-docs <system> <slug>                                 # start the missing documents of a registered component
@@ -43,6 +52,25 @@ cargo run -p doc-check -- --root tools/doc-check/tests/rules/links/breaks   # ru
 ```
 
 The toolchain is pinned to Rust 1.94.1 in `rust-toolchain.toml`.
+
+## The product's packages
+
+Each package is built as its specification gives it, and its tests prove each requirement it
+claims by the verification that requirement carries. Constraints shared by every package:
+
+- **TypeScript, run directly.** Node.js 24 or later runs the `.ts` sources with its type stripping,
+  so there is no build step. Imports name `.ts` files, and only erasable syntax is allowed: no
+  enums, namespaces or parameter properties. `npm test` in a package runs `tsc` first, as a type
+  check only, then Node's built-in test runner over `test/**/*.test.ts`.
+- **No runtime dependencies** outside the workspace. A package depends on another workspace package
+  by its exact version, and imports its `.ts` sources through npm's link, which Node resolves to
+  the real path, so type stripping still applies.
+- **One test file per process.** Node's test runner gives each test file a process of its own, so
+  a module's state, such as trip-time's loaded rules, starts empty in each file.
+
+`@itinero/trip-time` never uses `Date`, Intl, Temporal, network calls or Node modules in `src/`,
+and `test/source.test.ts` fails if it does. Its rules file is rebuilt from an IANA release with
+`npm run build-rules -- <release>` in `packages/trip-time/` (spec §4.11).
 
 ## The documentation system
 
@@ -157,4 +185,5 @@ request.
 
 `.github/workflows/check-docs.yml` runs on every push and pull request. It runs `just test-docs`,
 then `just check-docs --summary "$GITHUB_STEP_SUMMARY"`. A pull request with findings fails its
-check.
+check. `.github/workflows/test-packages.yml` runs `npm ci` and `npm test` with Node.js 24, on every
+push and pull request.

@@ -337,16 +337,24 @@ repository.
   confirm every `order` stays in the form of §4.3.
 - **Round-trip tests** confirm that a page with every field, and text holding every kind of
   character, reads back equal to itself (`PLN:PAGES-F8`).
-- **Device independence tests** run the search tests with the `LANG` environment variable set to
-  `en_GB.UTF-8` and to `tr_TR.UTF-8`, and the `TZ` variable set to `Europe/London` and to
-  `Asia/Tokyo`, and confirm every result is the same (`PLN:PAGES-NFR1`).
+- **Device independence tests** run the same searches in two processes, one with the `LANG` and
+  `LC_ALL` environment variables set to `en_GB.UTF-8` and the `TZ` variable to `Europe/London`,
+  and one with them set to `tr_TR.UTF-8` and `Asia/Tokyo`, and confirm every result is the same
+  (`PLN:PAGES-NFR1`).
+- **Source tests** confirm that no module of the package uses `Date`, Intl, Temporal, any network
+  call, any Node module, any function whose result depends on the device's language, such as
+  `toLocaleLowerCase`, or anything but types from another package (§4, §6).
+
+The workflow `.github/workflows/test-packages.yml` runs the suite on every push and pull request,
+with every other package of the npm workspace.
 
 ## 5. Resources
 
 ### 5.1 The text form of a page
 
 A page is one JSON object, and a trip's pages are stored as one such object for each page. Keys are
-written in sorted order. A page in the tree and a page in the graveyard read:
+written in sorted order, with no white space between tokens. A page in the tree and a page in the
+graveyard read as below, spread over lines only to be read:
 
 ```json
 { "format": 1, "id": "a17f", "order": "V", "parent": "c3e2", "revision": 4,

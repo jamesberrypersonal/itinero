@@ -199,6 +199,10 @@ moment, `L − o`, which is kept when the zone's offset at that moment is `o`.
 | None | A gap: the clocks went forward over `L` | `L` minus the offset in force before the gap |
 | Two | A repeat: the clocks went back over `L` | The earlier candidate, or the later for a clock time marked `second` |
 
+A value's zone can be missing from rules loaded after the value was made, though the IANA database
+keeps an old name as an alias. Every function but `create` and `parse` then counts the zone as UTC,
+so that each still gives a result.
+
 ### 4.3 create
 
 *Porcelain:* `create(fields)` checks a value's fields, and returns the value, frozen. A caller
@@ -209,7 +213,9 @@ Each of the three applies to every clock time in the value, a window's two ends 
 
 - **A gap.** A clock time with no candidate (§4.2) is refused with `skipped-time`. The details
   give `before`, the last whole minute before the gap, and `after`, the first minute after it, both
-  as local times. For Paris on 2026-03-29 these are 01:59 and 03:00 (`SHR:TRIP-TIME-F3`).
+  as local clock times. For Paris on 2026-03-29 these are 01:59 and 03:00 (`SHR:TRIP-TIME-F3`).
+  They also give `beforeDate` and `afterDate`, the local date of each, because a gap at midnight
+  puts `before` on the date before.
 - **A mark on a time that does not repeat.** A clock time marked `second` with one candidate is
   refused with `not-repeated` (`SHR:TRIP-TIME-F4`).
 - **A window out of order.** A window whose end's moment is not after its start's is refused with
@@ -240,7 +246,8 @@ which §4.1 resolves instead. `toText(value)` writes the text form, and never re
 The hours of each part of a day are fixed for every zone: morning from 06:00 to 12:00, afternoon
 from 12:00 to 18:00, evening from 18:00 to 22:00, and night from 22:00 to 06:00 on the next date.
 The start of a date is the moment of its 00:00. Where 00:00 falls in a gap, as in a zone whose
-clocks go forward at midnight, it is the first moment after the gap.
+clocks go forward at midnight, it is the first moment after the gap. Each end of a part of a day's
+hours is found the same way. Where one falls in a repeated hour, it is the earlier moment.
 
 ### 4.6 compare and sort
 
@@ -354,9 +361,14 @@ release order. trip-time does not compare them. The caller does.
 ### 4.11 The build script
 
 *Plumbing:* `npm run build-rules -- <release>` in `packages/trip-time/` makes the rules file from
-one IANA release, such as `2026a`, that a maintainer has downloaded:
+one IANA release, such as `2026a`, that a maintainer has downloaded. The maintainer unpacks the
+release's data and its code, `tzdata<release>.tar.gz` and `tzcode<release>.tar.gz`, into
+`packages/trip-time/tzdb/<release>/`, which git ignores. The script refuses a folder whose
+`version` file names another release. Then:
 
-1. It compiles the release's source files with the release's own zic, into one TZif file per zone.
+1. It builds the release's own zic, with `make zic`. It compiles the source files of the release's
+   default build with it, less `factory`, whose one zone is no place. zic writes one TZif file per
+   zone, in its slim form, which lists no change the POSIX TZ string already gives.
 2. For each zone, it reads the offset changes from 1970 on, the offset in force at 1970-01-01, and
    the POSIX TZ string at the end of the file.
 3. It reads the release's list of aliases, the links, mapping each to its canonical zone.
@@ -365,8 +377,10 @@ one IANA release, such as `2026a`, that a maintainer has downloaded:
 
 ### 4.12 The test suite
 
-The suite runs with `npm test` in `packages/trip-time/`, using Node's built-in test runner, and a
-just recipe, `just test-trip-time`, runs it from anywhere in the repository.
+The suite runs with `npm test` in `packages/trip-time/`, using Node's built-in test runner, after
+TypeScript checks the package's types. A just recipe, `just test-trip-time`, runs it from anywhere
+in the repository. The workflow `.github/workflows/test-packages.yml` runs `npm test` for every
+package of the npm workspace, on every push and pull request.
 
 - **Unit tests** cover each refusal of §3.3, each row of every table in §4, and every check in the
   verification of each requirement trip-time claims.
@@ -374,9 +388,11 @@ just recipe, `just test-trip-time`, runs it from anywhere in the repository.
   marks.
 - **Rule-change tests** load two rules files that differ for one zone, and confirm a stored value
   keeps its local time under both (`SHR:TRIP-TIME-F2`).
-- **Time-zone independence tests** run the suite with the `TZ` environment variable set to
-  `Europe/London` and to `Asia/Tokyo`, and confirm every result is the same
-  (`SHR:TRIP-TIME-NFR2`).
+- **Time-zone independence tests** write, sort and measure the same values in two processes, with
+  the `TZ` environment variable set to `Europe/London` in one and to `Asia/Tokyo` in the other, and
+  confirm every result is the same (`SHR:TRIP-TIME-NFR2`).
+- **Source tests** confirm that no module of the package uses `Date`, Intl, Temporal, any network
+  call or any Node module (§4, §6).
 
 ## 5. Resources
 
@@ -413,8 +429,10 @@ The rules file is a JSON object, made by the build script (§4.11) and read by `
 |---|---|---|
 | The package | `packages/trip-time/` | Whoever keeps the planner's roadmap |
 | The rules files | `packages/trip-time/rules/<release>.json`, one per release built, committed to the repository | Whoever keeps the planner's roadmap |
+| The unpacked releases | `packages/trip-time/tzdb/<release>/`, read by the build script, never committed | The maintainer who builds the rules file |
 | The npm workspace membership | `packages/trip-time` in the workspaces of `package.json` at the repository root | Whoever keeps the planner's roadmap |
 | The recipe | `test-trip-time`, in the `justfile` at the repository root | Whoever keeps the planner's roadmap |
+| The workflow | `.github/workflows/test-packages.yml`, which tests every package of the npm workspace | Whoever keeps the planner's roadmap |
 | The served copy | A fixed path on the web app's own host, served as a static file | The web app (ADR-0008) |
 
 The package declares no runtime dependencies. Its development dependencies are TypeScript and

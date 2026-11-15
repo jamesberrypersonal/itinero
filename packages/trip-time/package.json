@@ -1,0 +1,28 @@
+{
+  "name": "@itinero/trip-time",
+  "version": "0.1.0",
+  "private": true,
+  "description": "A trip's dates and times, in the local time of the place each one happens (docs/spec/shared/trip-time.md)",
+  "license": "SEE LICENSE IN ../../LICENSE",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./rules/*": "./rules/*"
+  },
+  "files": [
+    "src",
+    "rules"
+  ],
+  "scripts": {
+    "typecheck": "tsc --project .",
+    "test": "tsc --project . && node --test \"test/**/*.test.ts\"",
+    "build-rules": "node scripts/build-rules.ts"
+  },
+  "devDependencies": {
+    "@types/node": "24.19.2",
+    "typescript": "7.0.2"
+  },
+  "engines": {
+    "node": ">=24"
+  }
+}

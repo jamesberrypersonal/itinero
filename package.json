@@ -1,0 +1,17 @@
+{
+  "name": "itinero",
+  "private": true,
+  "description": "Itinero's npm workspace: the product's TypeScript packages (ADR-0007)",
+  "license": "SEE LICENSE IN LICENSE",
+  "workspaces": [
+    "packages/trip-time",
+    "packages/itinerary",
+    "packages/pages"
+  ],
+  "scripts": {
+    "test": "npm test --workspaces"
+  },
+  "engines": {
+    "node": ">=24"
+  }
+}

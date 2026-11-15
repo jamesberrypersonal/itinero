@@ -294,9 +294,14 @@ recipe, `just test-itinerary`, runs it from anywhere in the repository.
   equal (`PLN:ITINERARY-F6`).
 - **Round-trip tests** confirm that a trip holding every kind of stretch and firm item reads back
   equal to itself, after another rules file is loaded (`PLN:ITINERARY-F8`).
-- **Time-zone independence tests** run the suite with the `TZ` environment variable set to
-  `Europe/London` and to `Asia/Tokyo`, and confirm every result is the same
-  (`PLN:ITINERARY-NFR1`).
+- **Time-zone independence tests** lay out the same days of the same trip, and write it as text, in
+  two processes, with the `TZ` environment variable set to `Europe/London` in one and to
+  `Asia/Tokyo` in the other, and confirm every result is the same (`PLN:ITINERARY-NFR1`).
+- **Source tests** confirm that no module of the package uses `Date`, Intl, Temporal, any network
+  call, any Node module, or any package but `@itinero/trip-time` (§4, §6).
+
+The workflow `.github/workflows/test-packages.yml` runs the suite on every push and pull request,
+with every other package of the npm workspace.
 
 ### 4.9 A trip's dates and each traveller's
 
@@ -320,7 +325,8 @@ removed traveller's dates never stop a change to the trip's.
 ### 5.1 The text form of a trip
 
 A trip is one JSON object. Every time is held as a string in trip-time's text form, as
-`spec/shared/trip-time.md` §4.1 gives it. Keys are written in sorted order.
+`spec/shared/trip-time.md` §4.1 gives it. Keys are written in sorted order, with no white space
+between tokens. The example below is spread over lines only to be read.
 
 ```json
 {

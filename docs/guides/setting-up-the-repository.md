@@ -210,7 +210,40 @@ It prints:
 just 1.59.0
 ```
 
-### 8. Check the documentation
+### 8. Install Node.js, and run the packages' tests
+
+Node.js runs the product's packages, such as `@itinero/trip-time`, which are written in
+TypeScript. npm, which comes with it, installs what the packages need to build and test:
+
+```
+brew install node
+node --version
+```
+
+It prints a version of 24 or later, such as:
+
+```
+v25.9.0
+```
+
+Install the packages' development tools, then run trip-time's tests:
+
+```
+npm ci
+just test-trip-time
+```
+
+`npm ci` ends with `found 0 vulnerabilities`. The tests end with lines like these, saying
+`fail 0`:
+
+```
+ℹ tests 136
+ℹ suites 27
+ℹ pass 136
+ℹ fail 0
+```
+
+### 9. Check the documentation
 
 doc-check reads every document in `docs/`, and reports each place a
 document breaks the rules in `docs/documentation-system.md`. The first run builds it, which takes
@@ -229,7 +262,7 @@ doc-check: clean
 When a document breaks a rule, doc-check prints one line for it instead, naming the file, the
 line, the rule, and what would fix it.
 
-### 9. Run doc-check's own tests
+### 10. Run doc-check's own tests
 
 You need this step only if you will change doc-check itself, in
 `tools/doc-check/`:
@@ -246,7 +279,7 @@ test result: ok. 14 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; fin
 test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.15s
 ```
 
-### 10. Optionally, check the documentation before every commit
+### 11. Optionally, check the documentation before every commit
 
 A commit is one saved change in
 the repository's history. A pre-commit hook is a script Git runs before each commit, and this
@@ -272,7 +305,7 @@ error: recipe `check-docs` failed on line 5 with exit code 1
 pre-commit: the commit is refused. Fix the findings above, then commit again.
 ```
 
-### 11. Install Obsidian, and open the documentation in it
+### 12. Install Obsidian, and open the documentation in it
 
 Obsidian is the editor the
 documentation is written in. It shows each document formatted, and follows the links between
@@ -285,7 +318,7 @@ brew install --cask obsidian
 Open Obsidian, choose Open folder as vault, and choose the `docs` folder inside
 `~/projects/itinero`. A vault is Obsidian's name for a folder of documents it manages.
 
-### 12. Set Obsidian's three settings
+### 13. Set Obsidian's three settings
 
 Each one keeps the links Obsidian writes working on GitHub
 as well, and `docs/documentation-system.md` says why. Open Settings, from the gear at the
@@ -330,6 +363,6 @@ complete.
 | What you see | What it means, and what to do |
 |---|---|
 | `command not found: brew` | Homebrew is not yet in your Terminal. Run the Next steps commands its installer printed, then quit Terminal and open it again |
-| `command not found: rustc`, or the same for `cargo` or `just` | Terminal was not reopened after the install. Quit it, open it again, and move back into the repository |
+| `command not found: rustc`, or the same for `cargo`, `just`, `node` or `npm` | Terminal was not reopened after the install. Quit it, open it again, and move back into the repository |
 | `ERROR: Repository not found.` from `git clone`, or `Could not resolve to a Repository` from `gh repo clone` | Your GitHub account has no access yet. Accept the invitation to the repository, or ask its owner for one |
 | `git@github.com: Permission denied (publickey).` | GitHub does not recognise your SSH key. Repeat way B of step 4, and check `ssh -T git@github.com` before cloning |

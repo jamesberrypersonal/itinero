@@ -70,6 +70,9 @@ theirs, in Milestone Planner-0.2 and Milestone Access-0.1.
 - Build `web/shell` in it, as its specification gives it: launching with no connection, adding it
   to a phone's home screen, and keeping the time-zone rules up to date.
 - Prove each requirement of `web/shell` by the verification it carries.
+- Prove `SHR:TRIP-TIME-NFR1` on a phone, by the checks of its verification that need one.
+  Milestone Planner-1.1 proved the rest of `shared/trip-time`, and moved these checks here, since
+  they need the shell.
 
 #### Milestone Web-1.2 — Places
 
@@ -83,6 +86,12 @@ theirs, in Milestone Planner-0.2 and Milestone Access-0.1.
 
 - Build `web/trip-store`, as its specification gives it.
 - Prove each requirement of `web/trip-store` by the verification it carries.
+- Prove `PLN:ITINERARY-NFR1` on a phone with no connection, by the checks of its verification that
+  need one. Milestone Planner-1.2 proved the rest of `planner/itinerary`, and moved these checks
+  here, since they need a trip's copy on the device.
+- Prove `PLN:PAGES-NFR1` on a phone with no connection, by the checks of its verification that
+  need one. Milestone Planner-1.3 proved the rest of `planner/pages`, and moved these checks here,
+  for the same reason.
 
 #### Milestone Web-1.4 — The screens a traveller reads a trip on
 
