@@ -89,6 +89,9 @@ theirs, in Milestone Planner-0.2 and Milestone Access-0.1.
 - Prove `PLN:ITINERARY-NFR1` on a phone with no connection, by the checks of its verification that
   need one. Milestone Planner-1.2 proved the rest of `planner/itinerary`, and moved these checks
   here, since they need a trip's copy on the device.
+- Prove `PLN:PAGES-NFR1` on a phone with no connection, by the checks of its verification that
+  need one. Milestone Planner-1.3 proved the rest of `planner/pages`, and moved these checks here,
+  for the same reason.
 
 #### Milestone Web-1.4 — The screens a traveller reads a trip on
 

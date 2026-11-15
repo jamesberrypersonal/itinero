@@ -11,8 +11,9 @@ time, in the order `docs/roadmap/` gives, as TypeScript packages in an npm works
 rules, and `tools/doc-scaffold` starts new documents as skeletons that pass it.
 
 - `docs/` is the documentation, read both as an Obsidian vault and rendered on GitHub.
-- `packages/` holds the product's packages: `packages/trip-time/` (`@itinero/trip-time`) and
-  `packages/itinerary/` (`@itinero/itinerary`), which uses it.
+- `packages/` holds the product's packages: `packages/trip-time/` (`@itinero/trip-time`),
+  `packages/itinerary/` (`@itinero/itinerary`), which uses it, and `packages/pages/`
+  (`@itinero/pages`), which imports only its types.
   `package.json` at the root declares the npm workspace.
 - `tools/doc-check/` and `tools/doc-scaffold/` are Rust packages, run through `just`.
 - `tools/hooks/pre-commit` is an optional hook that runs the checker before each commit.
@@ -27,6 +28,7 @@ just check-docs                 # check every document in docs/ (exit 0 clean, 1
 just test-docs                  # the whole test suites of doc-check and doc-scaffold
 just test-trip-time             # the test suite of @itinero/trip-time
 just test-itinerary             # the test suite of @itinero/itinerary
+just test-pages                 # the test suite of @itinero/pages
 npm test                        # the test suites of every package in the npm workspace
 just install-hook               # install the pre-commit hook
 just new-component <system> <slug> <PREFIX> "<description>"   # start a component's documents and rows

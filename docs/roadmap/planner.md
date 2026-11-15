@@ -14,6 +14,13 @@ the planner's itinerary. The planner is the first system that needs that compone
 
 ### Phase 1 — Build
 
+#### Milestone Planner-1.3 — Pages
+
+- `planner/pages` is built as `@itinero/pages`, in `packages/pages/`, as its specification gives
+  it. It imports only types from `@itinero/trip-time`, and has no runtime dependency.
+- Its test suite proves each requirement of `planner/pages` by the verification it carries, except
+  the checks of `PLN:PAGES-NFR1` that need a phone.
+
 #### Milestone Planner-1.2 — The itinerary
 
 - `planner/itinerary` is built as `@itinero/itinerary`, in `packages/itinerary/`, as its
@@ -96,11 +103,6 @@ the planner's itinerary. The planner is the first system that needs that compone
 ## Pending
 
 ### Phase 1 — Build
-
-#### Milestone Planner-1.3 — Pages
-
-- Build `planner/pages` as `@itinero/pages`, in `packages/pages/`, as its specification gives it.
-- Prove each requirement of `planner/pages` by the verification it carries.
 
 #### Milestone Planner-1.4 — The trip held online
 
