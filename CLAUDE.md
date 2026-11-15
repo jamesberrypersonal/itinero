@@ -11,7 +11,8 @@ time, in the order `docs/roadmap/` gives, as TypeScript packages in an npm works
 rules, and `tools/doc-scaffold` starts new documents as skeletons that pass it.
 
 - `docs/` is the documentation, read both as an Obsidian vault and rendered on GitHub.
-- `packages/` holds the product's packages, such as `packages/trip-time/` (`@itinero/trip-time`).
+- `packages/` holds the product's packages: `packages/trip-time/` (`@itinero/trip-time`) and
+  `packages/itinerary/` (`@itinero/itinerary`), which uses it.
   `package.json` at the root declares the npm workspace.
 - `tools/doc-check/` and `tools/doc-scaffold/` are Rust packages, run through `just`.
 - `tools/hooks/pre-commit` is an optional hook that runs the checker before each commit.
@@ -25,6 +26,7 @@ repository root.
 just check-docs                 # check every document in docs/ (exit 0 clean, 1 findings, 2 could not run)
 just test-docs                  # the whole test suites of doc-check and doc-scaffold
 just test-trip-time             # the test suite of @itinero/trip-time
+just test-itinerary             # the test suite of @itinero/itinerary
 npm test                        # the test suites of every package in the npm workspace
 just install-hook               # install the pre-commit hook
 just new-component <system> <slug> <PREFIX> "<description>"   # start a component's documents and rows
@@ -58,7 +60,9 @@ claims by the verification that requirement carries. Constraints shared by every
   so there is no build step. Imports name `.ts` files, and only erasable syntax is allowed: no
   enums, namespaces or parameter properties. `npm test` in a package runs `tsc` first, as a type
   check only, then Node's built-in test runner over `test/**/*.test.ts`.
-- **No runtime dependencies**, unless a decision record allows one.
+- **No runtime dependencies** outside the workspace. A package depends on another workspace package
+  by its exact version, and imports its `.ts` sources through npm's link, which Node resolves to
+  the real path, so type stripping still applies.
 - **One test file per process.** Node's test runner gives each test file a process of its own, so
   a module's state, such as trip-time's loaded rules, starts empty in each file.
 

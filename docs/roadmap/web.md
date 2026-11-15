@@ -86,6 +86,9 @@ theirs, in Milestone Planner-0.2 and Milestone Access-0.1.
 
 - Build `web/trip-store`, as its specification gives it.
 - Prove each requirement of `web/trip-store` by the verification it carries.
+- Prove `PLN:ITINERARY-NFR1` on a phone with no connection, by the checks of its verification that
+  need one. Milestone Planner-1.2 proved the rest of `planner/itinerary`, and moved these checks
+  here, since they need a trip's copy on the device.
 
 #### Milestone Web-1.4 — The screens a traveller reads a trip on
 

@@ -4,7 +4,8 @@
   "description": "Itinero's npm workspace: the product's TypeScript packages (ADR-0007)",
   "license": "SEE LICENSE IN LICENSE",
   "workspaces": [
-    "packages/trip-time"
+    "packages/trip-time",
+    "packages/itinerary"
   ],
   "scripts": {
     "test": "npm test --workspaces"

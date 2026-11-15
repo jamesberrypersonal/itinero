@@ -17,7 +17,7 @@ system, component or concern is added here before any document names it.
 
 | Component | System | Prefix | Packages | Outside the vault | Is |
 |---|---|---|---|---|---|
-| [itinerary](spec/planner/itinerary.md) | planner | PLN:ITINERARY | | | How a trip's pencilled stretches and firm items are stored and changed |
+| [itinerary](spec/planner/itinerary.md) | planner | PLN:ITINERARY | `@itinero/itinerary` | | How a trip's pencilled stretches and firm items are stored and changed |
 | [pages](spec/planner/pages.md) | planner | PLN:PAGES | | | The pages of a trip, where travellers write up their research by hand |
 | [trip-host](spec/planner/trip-host.md) | planner | PLN:HOST | | | The copy of each trip held online, in a Durable Object of its own, which applies every change and keeps each traveller's devices up to date |
 | [accounts](spec/access/accounts.md) | access | ACC:ACCOUNTS | | | Travellers' accounts, and signing in with a Google account |

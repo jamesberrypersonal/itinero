@@ -12,6 +12,10 @@ test-docs:
 test-trip-time:
     @npm test --workspace @itinero/trip-time
 
+# Run the test suite of @itinero/itinerary (docs/spec/planner/itinerary.md §4.8).
+test-itinerary:
+    @npm test --workspace @itinero/itinerary
+
 # Write the skeleton documents and index rows for a new component.
 new-component *args:
     @cargo run --release --quiet --package doc-scaffold -- component "$@"

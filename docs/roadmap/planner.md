@@ -14,6 +14,13 @@ the planner's itinerary. The planner is the first system that needs that compone
 
 ### Phase 1 — Build
 
+#### Milestone Planner-1.2 — The itinerary
+
+- `planner/itinerary` is built as `@itinero/itinerary`, in `packages/itinerary/`, as its
+  specification gives it, with the list of every country ISO 3166-1 assigns.
+- Its test suite proves each requirement of `planner/itinerary` by the verification it carries,
+  except the checks of `PLN:ITINERARY-NFR1` that need a phone.
+
 #### Milestone Planner-1.1 — Dates and times
 
 - The npm workspace, in `package.json` at the repository root, holds the product's packages under
@@ -89,12 +96,6 @@ the planner's itinerary. The planner is the first system that needs that compone
 ## Pending
 
 ### Phase 1 — Build
-
-#### Milestone Planner-1.2 — The itinerary
-
-- Build `planner/itinerary` as `@itinero/itinerary`, in `packages/itinerary/`, as its specification
-  gives it.
-- Prove each requirement of `planner/itinerary` by the verification it carries.
 
 #### Milestone Planner-1.3 — Pages
 
