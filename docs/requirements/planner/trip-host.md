@@ -174,8 +174,8 @@ bookings its traveller may see. ^pln-host-f9
 ### PLN:HOST-NFR1 — Nothing leaves the trip host that the traveller asking may not see
 
 The trip host gives a traveller's device nothing of a trip that the traveller may not see: no page,
-no title, no part of the calendar and no other traveller's grants. That holds whatever the device
-asks for. ^pln-host-nfr1
+no title and no part of the calendar. It gives another traveller's grants only to an admin. That
+holds whatever the device asks for. ^pln-host-nfr1
 
 - **Verification:** with a device altered to send any request, as a traveller with no access to the
   page Argentina or to the calendar,
@@ -183,8 +183,12 @@ asks for. ^pln-host-nfr1
     - ask for the calendar, and confirm it is refused
     - catch up from the start, and confirm nothing given names Argentina, a stretch, or another
       traveller's access
+    - catch up as an admin, and confirm every traveller's grants are given
 
 > **What does this buy?** Access means nothing if one request can get round it (`ACC-NFR1`).
+
+> **Why is an admin given every traveller's grants?** An admin sets each traveller's access, and
+> has to see what it is before changing it (`ACC-F7`).
 
 ### PLN:HOST-NFR2 — A trip used by a few travellers costs nothing to host
 

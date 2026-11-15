@@ -54,20 +54,21 @@ None. The web app shows what the trip host gives.
 ### 3.2 Application interface
 
 The trip host answers these requests over HTTPS, each with a JSON body, from a device signed in
-through `access/accounts`. A refusal gives a status of 400, 403, 404 or 409, and a JSON body
+through `access/accounts`. Every request of the online side has a path beginning `/api/`, which no
+screen of the web app has. A refusal gives a status of 400, 403, 404 or 409, and a JSON body
 `{ "code": ..., "message": ..., "details": ... }`. The `message` is one English sentence the web app
 may show.
 
 | Request | Body | Gives |
 |---|---|---|
-| `POST /trips` | `{ "name": ..., "first": ..., "last": ..., "countries": [ ... ] }` | `{ "trip": ... }`, the new trip's identifier (§4.2) |
-| `GET /trips` | None | Each trip the account is on, with its name and dates (§4.2) |
-| `POST /trips/{trip}/changes` | `{ "target": "calendar" \| "pages" \| "grants" \| "bookings", "change": ..., "agreed": ... }` | `{ "sequence": ... }` (§4.3) |
-| `POST /trips/{trip}/sync` | `{ "since": ..., "holdsCalendar": ... }` | What the device may hold that changed since (§4.4) |
-| `POST /trips/{trip}/pages` | `{ "pages": [ ... ] }` | The pages named that the traveller may see (§4.4) |
-| `POST /trips/{trip}/bookings` | `{ "bookings": [ ... ] }` | The bookings named that the traveller may see (§4.4) |
-| `GET /trips/{trip}/buried/{page}` | None | A page in the graveyard, to an admin (§4.6) |
-| `GET /trips/{trip}/live` | None | A WebSocket that is told of each change (§4.5) |
+| `POST /api/trips` | `{ "name": ..., "first": ..., "last": ..., "countries": [ ... ] }` | `{ "trip": ... }`, the new trip's identifier (§4.2) |
+| `GET /api/trips` | None | Each trip the account is on, with its name and dates (§4.2) |
+| `POST /api/trips/{trip}/changes` | `{ "target": "calendar" \| "pages" \| "grants" \| "bookings", "change": ..., "agreed": ... }` | `{ "sequence": ... }` (§4.3) |
+| `POST /api/trips/{trip}/sync` | `{ "since": ..., "holdsCalendar": ... }` | What the device may hold that changed since (§4.4) |
+| `POST /api/trips/{trip}/pages` | `{ "pages": [ ... ] }` | The pages named that the traveller may see (§4.4) |
+| `POST /api/trips/{trip}/bookings` | `{ "bookings": [ ... ] }` | The bookings named that the traveller may see (§4.4) |
+| `GET /api/trips/{trip}/buried/{page}` | None | A page in the graveyard, to an admin (§4.6) |
+| `GET /api/trips/{trip}/live` | None | A WebSocket that is told of each change (§4.5) |
 
 A `change` is written in the text form of its package: the itinerary's for `calendar`, the pages'
 for `pages`, the permissions' for `grants`, and the bookings' for `bookings`. `countries` is a list of country codes, from the
@@ -76,7 +77,7 @@ agreed would come to see a moved page.
 
 | Refusal code | Status | When |
 |---|---|---|
-| `not-a-member` | 404 | A request about a trip the account is not on, whether or not the trip exists |
+| `not-a-member` | 404 | A request about a trip the account is not on, whether or not the trip exists, or from a member the trip's grants do not hold |
 | `creator-only` | 403 | A `rename` or a `trip-dates` change by a traveller who is not the trip's creator |
 | `own-dates-only` | 403 | A `traveller-dates` change for another traveller, by a traveller who is not an admin |
 | `membership-only` | 403 | An `add` or a `remove` grant sent by a device. Only `access/membership` sends them |
@@ -132,7 +133,9 @@ Behaviour crossing every operation:
 
 - **Every request names its member.** The Worker passes each request to the trip's Durable Object
   only with the member `access/membership` gives for the account. An account not on the trip is
-  refused with `not-a-member`, before the Durable Object is reached.
+  refused with `not-a-member`, before the Durable Object is reached. The Durable Object refuses in
+  the same way a member its grants do not hold, such as one whose removal stopped part way
+  (`spec/access/membership.md` §4.5).
 - **Every change and every read is asked of `access/permissions` first**, with the trip's grants,
   pages and member, by its `authorise` (ACC-NFR1). A refusal is returned unchanged, and nothing is
   read or written.
@@ -160,7 +163,7 @@ Its result is the one that stands when a device holds other rules (`PLN:ITINERAR
 
 ### 4.2 Creating a trip
 
-*Porcelain:* `POST /trips` makes the trip's identifier with `crypto.randomUUID()`, and calls
+*Porcelain:* `POST /api/trips` makes the trip's identifier with `crypto.randomUUID()`, and calls
 `create` on the new trip's Durable Object (`PLN:HOST-F1`). `create`:
 
 1. makes the trip with the itinerary's `newTrip`, and sets its dates with a `trip-dates` change,
@@ -174,7 +177,7 @@ Its result is the one that stands when a device holds other rules (`PLN:ITINERAR
 The Worker then calls `access/membership`'s `createTrip`, which makes the traveller the trip's
 creator and admin. A trip whose `createTrip` fails has no member, so no request reaches it.
 
-`GET /trips` takes the trips `access/membership`'s `trips` gives for the account, and gives each
+`GET /api/trips` takes the trips `access/membership`'s `trips` gives for the account, and gives each
 one's name and dates, from its `summary`.
 
 ### 4.3 Applying a change
@@ -207,6 +210,13 @@ then tells every open socket of the new sequence (§4.5), and gives `{ "sequence
 who sent it (`PLN:HOST-F7`). After a `remove`, the trip host closes every socket of that traveller,
 with the close code 4403.
 
+`grant` is safe to repeat, so that `access/membership` finishes an acceptance or a removal that
+stopped part way by sending the same change again:
+
+- an `add` for a traveller the grants already hold sets their access to the trip and to the
+  calendar to those given, and keeps their exceptions
+- a `remove` for a traveller the grants do not hold succeeds, and changes nothing
+
 ### 4.4 Catching a device up
 
 *Porcelain:* `sync(who, since, holdsCalendar)` gives the device this body (`PLN:HOST-F5`):
@@ -216,6 +226,7 @@ with the close code 4403.
 | `sequence` | The trip's sequence now. The device keeps it, and gives it as `since` next time |
 | `trip` | The trip's name, its dates and the traveller's own dates, which every traveller may see |
 | `you` | Whether the traveller is an admin and the creator, and the traveller's own grant |
+| `grants` | The trip's grants, in the permissions' text form, where the traveller is an admin. Absent for any other traveller |
 | `calendar` | The stretches and firm items, where the traveller's level for the calendar is view or edit, and the trip changed after `since`, or `holdsCalendar` is false. `null` where their level is none, and absent where nothing changed |
 | `pages` | For each page of `seen`, from `access/permissions`, its identifier and its `changed`. A page whose `changed` is after `since` also holds its text form |
 | `graveyard` | The identifiers and titles of the pages in the graveyard the traveller may see |
@@ -224,25 +235,29 @@ with the close code 4403.
 A `since` that is absent counts as 0, so every page holds its text form. The device then:
 
 - drops each page it holds that `pages` does not list, since the traveller may no longer see it
-- fetches, with `POST /trips/{trip}/pages`, each page `pages` lists without its text that the
+- fetches, with `POST /api/trips/{trip}/pages`, each page `pages` lists without its text that the
   device does not hold. Such a page has become visible through a change of access, not a change
   to the page
 - drops the calendar where `calendar` is `null`
 - drops each booking it holds that `bookings` does not list, since it was removed, or the traveller
   may no longer see it (`PLN:HOST-F9`)
-- fetches, with `POST /trips/{trip}/bookings`, each booking `bookings` lists without its text that
+- fetches, with `POST /api/trips/{trip}/bookings`, each booking `bookings` lists without its text that
   the device does not hold, such as every booking of a trip once its traveller is made an admin
 
 `pages(who, ids)` gives the text form of each page named that `seen` holds, and leaves out any
 other, without saying why. `bookings(who, ids)` does the same for each booking named whose
-`bookingLevel` for the traveller is view or edit. `you` holds only the traveller's own grant, so that no traveller learns
-another's access (`PLN:HOST-NFR1`).
+`bookingLevel` for the traveller is view or edit.
+
+`you` holds only the traveller's own grant, and `grants` is given to an admin alone. A traveller
+who is not an admin therefore never learns another's access (`PLN:HOST-NFR1`). An admin is given
+every grant on each catch-up, whatever `since` holds, because an admin sets each traveller's access
+and must see it first.
 
 A device whose `sync` is refused with `not-a-member` deletes its copy of the trip (`PLN:HOST-F7`).
 
 ### 4.5 Telling open devices of changes
 
-*Porcelain:* `GET /trips/{trip}/live` opens a WebSocket to the trip's Durable Object, which accepts
+*Porcelain:* `GET /api/trips/{trip}/live` opens a WebSocket to the trip's Durable Object, which accepts
 it for hibernation, tagged with the traveller's account (`PLN:HOST-F6`). After every change, the
 Durable Object sends each open socket one message, `{ "sequence": ... }`. A device that receives a
 sequence newer than its own catches up with `sync`.
@@ -292,8 +307,12 @@ trip cannot be deleted yet (`ACC-NR4`).
 
 - **One change at a time** (`PLN:HOST-F2`). A Durable Object handles one request at a time, and
   stores each change in one transaction.
-- **Nothing leaks** (`PLN:HOST-NFR1`). Every read goes through `seen`, `bookingLevel` or `authorise`, every refusal
-  for a trip the account is not on is the same, and a socket carries only a sequence.
+- **Nothing leaks** (`PLN:HOST-NFR1`). Every read goes through `seen`, `bookingLevel` or
+  `authorise`, and only an admin is given another traveller's grant. Every refusal for a trip the
+  account is not on is the same, and a socket carries only a sequence.
+- **Grants and members agree, or nobody gets in.** A grant with no member is never reached, and a
+  member with no grant is refused with `not-a-member`. `grant` is safe to repeat, so either is put
+  right by sending the same change again (§4.3).
 - **Fails closed** (`ACC-NFR1`). A request with no account, no member or no access reaches no data.
 - **Costs nothing at this scale** (`PLN:HOST-NFR2`). A change is one request to the Durable Object,
   and each open device's catch-up is one more. Ten devices making a change a minute for four hours
@@ -306,16 +325,16 @@ trip cannot be deleted yet (`ACC-NR4`).
 
 | Requirement | What this component contributes |
 |---|---|
-| [PLN:HOST-F1](../../requirements/planner/trip-host.md#^pln-host-f1) | `POST /trips` and `create`, in §4.2. |
+| [PLN:HOST-F1](../../requirements/planner/trip-host.md#^pln-host-f1) | `POST /api/trips` and `create`, in §4.2. |
 | [PLN:HOST-F2](../../requirements/planner/trip-host.md#^pln-host-f2) | The checks and the transaction of §4.3, and one request at a time (§4). |
 | [PLN:HOST-F3](../../requirements/planner/trip-host.md#^pln-host-f3) | The pages' `stale` refusal, returned unchanged (§4.3). |
 | [PLN:HOST-F4](../../requirements/planner/trip-host.md#^pln-host-f4) | `agreed`, `widens` and the `agree-first` refusal, in §4.3. |
 | [PLN:HOST-F5](../../requirements/planner/trip-host.md#^pln-host-f5) | `sync` and `pages`, in §4.4. |
 | [PLN:HOST-F6](../../requirements/planner/trip-host.md#^pln-host-f6) | The sockets of §4.5. |
-| [PLN:HOST-F7](../../requirements/planner/trip-host.md#^pln-host-f7) | `grant`, in §4.3, and `not-a-member` on catching up, in §4.4. |
+| [PLN:HOST-F7](../../requirements/planner/trip-host.md#^pln-host-f7) | `grant`, safe to repeat, in §4.3, and `not-a-member` on catching up, in §4.4. |
 | [PLN:HOST-F8](../../requirements/planner/trip-host.md#^pln-host-f8) | `buried`, and the `restore` change, in §4.6. |
 | [PLN:HOST-F9](../../requirements/planner/trip-host.md#^pln-host-f9) | The `bookings` table of §4.1, the checks of a booking change in §4.3, and `bookings` in the catch-up of §4.4. |
-| [PLN:HOST-NFR1](../../requirements/planner/trip-host.md#^pln-host-nfr1) | `seen` for every read, `you` holding only the traveller's own grant, and sockets carrying only a sequence (§4.4, §4.5). |
+| [PLN:HOST-NFR1](../../requirements/planner/trip-host.md#^pln-host-nfr1) | `seen` for every read, `you` holding only the traveller's own grant, `grants` given to an admin alone, and sockets carrying only a sequence (§4.4, §4.5). |
 | [PLN:HOST-NFR2](../../requirements/planner/trip-host.md#^pln-host-nfr2) | One request for each change and each catch-up, and hibernating sockets (§6). |
 | [PLN-F6](../../requirements/planner/planner.md#^pln-f6) | The one copy every change is applied to, and the sockets that tell open devices of each change (§4.3, §4.5). Showing the change is `web/screens`. |
 | [PLN-F10](../../requirements/planner/planner.md#^pln-f10) | A page for each country chosen, at creation (§4.2). |

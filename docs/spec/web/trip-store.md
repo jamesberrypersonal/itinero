@@ -7,6 +7,8 @@
 The trip store is the part of the web app that keeps each trip's copy on a device. It catches each
 copy up with `planner/trip-host`, the component that holds each trip online, listens for changes
 while a trip is open, sends each change a traveller makes, and deletes every copy on sign-out. It
+also carries every other request a traveller makes about a trip, such as creating one or inviting a
+traveller. It
 gives `web/screens` each trip as values of the planner's, the access system's and the bookings
 system's packages, ready to show.
 
@@ -14,11 +16,13 @@ system's packages, ready to show.
 
 The trip store covers the device's copy of each trip, catching it up, the live connection to an
 open trip, sending changes, whether the device is online, signing out, and sharing the copy between
-windows.
+windows. It also covers creating a trip, the requests about a trip's members and invitations, and
+reading a page in the graveyard.
 
 Two things act on it:
 
-- **`web/screens`** reads trips, watches the one open, sends changes and signs out (§3.3).
+- **`web/screens`** reads trips, watches the one open, sends changes, makes the requests of §4.8
+  and signs out (§3.3).
 - **`planner/trip-host`**, **`access/accounts`** and **`access/membership`**, on the online side,
   answer its requests (§3.4).
 
@@ -48,12 +52,14 @@ None. The trip store answers no requests. It sends the requests of §3.4.
 
 ```ts
 import type { Trip, Dates } from "@itinero/itinerary";
-import type { Pages } from "@itinero/pages";
+import type { Page, Pages } from "@itinero/pages";
 import type { Booking } from "@itinero/bookings";
-import type { Grant } from "@itinero/permissions";
+import type { Grant, Grants, Level, TripLevel } from "@itinero/permissions";
 import type { Result } from "@itinero/trip-time";
 
 type Member = { account: string; name: string; admin: boolean; creator: boolean; joined: string };
+type Invitation = { id: string; email: string; trip: TripLevel; calendar: Level;
+                    expires: string };                    // expires: an ISO 8601 UTC time
 
 type Copy = {
   id: string; name: string; dates: Dates; mine: Dates;   // mine: the traveller's own dates
@@ -61,6 +67,8 @@ type Copy = {
   calendar?: Trip;                                        // absent: not granted
   pages: Pages; graveyard: readonly { id: string; title: string }[];
   bookings: readonly Booking[]; members: readonly Member[];
+  grants?: Grants;                                        // an admin's copy alone: everyone's access
+  invitations?: readonly Invitation[];                    // an admin's copy alone: those still open
   sequence: number; caughtUp: number;                     // caughtUp: milliseconds since 1970 UTC
 };
 type Summary = { id: string; name: string; dates: Dates; caughtUp: number };
@@ -77,11 +85,22 @@ function isOnline(): boolean;
 function onOnline(listener: (online: boolean) => void): () => void;
 function signedIn(account: string): Promise<void>;
 function signOut(): Promise<void>;
+
+function create(name: string, dates: Dates,
+                countries: readonly string[]): Promise<Result<{ trip: string }>>;
+function accept(invitation: string, token: string): Promise<Result<{ trip: string }>>;
+function invite(id: string, email: string, trip: TripLevel,
+                calendar: Level): Promise<Result<Invitation>>;
+function withdraw(id: string, invitation: string): Promise<Result<true>>;
+function makeAdmin(id: string, account: string): Promise<Result<true>>;
+function remove(id: string, account: string): Promise<Result<true>>;
+function buried(id: string, page: string): Promise<Result<Page>>;
 ```
 
 `change` is in the text form of its target's package, as `planner/trip-host` takes it. `send`
 returns every refusal from the online side unchanged, and refuses with its own code `offline`,
-whose message says the device has no connection, where it sends nothing.
+whose message says the device has no connection, where it sends nothing. The seven functions from
+`create` to `buried` refuse in the same two ways (§4.8).
 
 ### 3.4 Systems this drives
 
@@ -90,13 +109,18 @@ on its own:
 
 | Request | Answered by | Used for |
 |---|---|---|
-| `GET /trips` | `planner/trip-host` | The trips the traveller is on (§4.2) |
-| `POST /trips/{trip}/sync` | `planner/trip-host` | Catching a trip up (§4.2) |
-| `POST /trips/{trip}/pages`, `POST /trips/{trip}/bookings` | `planner/trip-host` | Pages and bookings the traveller may now see (§4.2) |
-| `GET /trips/{trip}/members` | `access/membership` | The trip's members (§4.2) |
-| `GET /trips/{trip}/live` | `planner/trip-host` | The WebSocket told of each change (§4.3) |
-| `POST /trips/{trip}/changes` | `planner/trip-host` | Sending a change (§4.4) |
-| `POST /auth/sign-out` | `access/accounts` | Ending the session (§4.5) |
+| `GET /api/trips` | `planner/trip-host` | The trips the traveller is on (§4.2) |
+| `POST /api/trips/{trip}/sync` | `planner/trip-host` | Catching a trip up (§4.2) |
+| `POST /api/trips/{trip}/pages`, `POST /api/trips/{trip}/bookings` | `planner/trip-host` | Pages and bookings the traveller may now see (§4.2) |
+| `GET /api/trips/{trip}/members` | `access/membership` | The trip's members (§4.2) |
+| `GET /api/trips/{trip}/live` | `planner/trip-host` | The WebSocket told of each change (§4.3) |
+| `POST /api/trips/{trip}/changes` | `planner/trip-host` | Sending a change (§4.4) |
+| `POST /api/auth/sign-out` | `access/accounts` | Ending the session (§4.5) |
+| `POST /api/trips` | `planner/trip-host` | Creating a trip (§4.8) |
+| `GET /api/trips/{trip}/buried/{page}` | `planner/trip-host` | Reading a page in the graveyard (§4.8) |
+| `POST /api/invitations/{invitation}/accept` | `access/membership` | Accepting an invitation (§4.8) |
+| `POST /api/trips/{trip}/invitations`, `DELETE /api/trips/{trip}/invitations/{invitation}` | `access/membership` | Inviting a traveller, and withdrawing an invitation (§4.8) |
+| `POST /api/trips/{trip}/admins`, `DELETE /api/trips/{trip}/members/{account}` | `access/membership` | Making a member an admin, and removing one (§4.8) |
 
 `spec/planner/trip-host.md`, `spec/access/membership.md` and `spec/access/accounts.md` give each
 request's body and refusals.
@@ -126,7 +150,7 @@ stores:
 | Object store | Key | Holds |
 |---|---|---|
 | `account` | `"me"` | The account signed in, and `signOutOwed` where the session is still to be ended (§4.5) |
-| `trips` | The trip's identifier | The trip's name, its dates, the traveller's own, `you`, the calendar in the itinerary's text form or `null`, the graveyard's titles, the members, `sequence` and `caughtUp` |
+| `trips` | The trip's identifier | The trip's name, its dates, the traveller's own, `you`, the calendar in the itinerary's text form or `null`, the graveyard's titles, the members, `sequence` and `caughtUp`. For an admin, also the trip's grants in the permissions' text form, and the open invitations |
 | `pages` | The trip's identifier and the page's | The page in the pages' text form, and its `changed` |
 | `bookings` | The trip's identifier and the booking's | The booking in the bookings' text form, and its `changed` |
 
@@ -143,19 +167,20 @@ caught up from the start the next time the device is online.
   front
 - every 60 seconds while the device is offline, which it learns by trying
 
-It first asks `GET /trips`. It deletes each trip it holds that the answer does not list, and adds
+It first asks `GET /api/trips`. It deletes each trip it holds that the answer does not list, and adds
 each that it lists and the device does not hold. It then catches each trip up in turn, and tells
 `web/shell` the device is online.
 
 To catch one trip up, the trip store:
 
-1. sends `POST /trips/{trip}/sync`, with `since` set to the trip's `sequence`, or absent for a trip
+1. sends `POST /api/trips/{trip}/sync`, with `since` set to the trip's `sequence`, or absent for a trip
    not yet held, and `holdsCalendar` set to whether it holds the calendar
-2. sends `POST /trips/{trip}/pages` for every page the answer lists without its text that the
-   device does not hold, and `POST /trips/{trip}/bookings` for every such booking, in groups of 100
-3. sends `GET /trips/{trip}/members`
-4. in one transaction, writes the trip's record, writes every page and booking it was given, deletes
-   every page and booking the answer did not list, and sets `sequence` and `caughtUp`
+2. sends `POST /api/trips/{trip}/pages` for every page the answer lists without its text that the
+   device does not hold, and `POST /api/trips/{trip}/bookings` for every such booking, in groups of 100
+3. sends `GET /api/trips/{trip}/members`, which gives an admin the open invitations too
+4. in one transaction, writes the trip's record, with the grants and the invitations where the
+   answers hold them, writes every page and booking it was given, deletes every page and booking
+   the answer did not list, and sets `sequence` and `caughtUp`
 
 `caughtUp` is the device's clock when the transaction is written. A catch-up refused with
 `not-a-member` deletes the trip. A catch-up that fails part way, such as on a lost connection,
@@ -165,7 +190,7 @@ writes nothing, and the trip keeps its old `sequence`, so the next catch-up asks
 
 *Porcelain:* `watch(id, listener)` gives the listener the trip's `Copy` at once, and again each time
 the copy changes (`WEB:STORE-F3`). While any window watches a trip and the device is online, the
-trip store holds a WebSocket open to `GET /trips/{trip}/live`. A message holding a `sequence`
+trip store holds a WebSocket open to `GET /api/trips/{trip}/live`. A message holding a `sequence`
 higher than the copy's catches the trip up.
 
 A socket that closes is opened again after 1 second, then after twice as long each time, up to 1
@@ -176,7 +201,7 @@ has been removed. The socket is closed once no window watches the trip.
 ### 4.4 Sending a change
 
 *Porcelain:* `send(id, target, change, agreed)` refuses with `offline` where `isOnline()` is false,
-and sends nothing (`WEB:STORE-F4`). Otherwise it sends `POST /trips/{trip}/changes`. A refusal is
+and sends nothing (`WEB:STORE-F4`). Otherwise it sends `POST /api/trips/{trip}/changes`. A refusal is
 returned unchanged. A request that fails on the network refuses with `offline`, and the change is
 not sent again.
 
@@ -196,9 +221,9 @@ in, and catches every trip up.
 1. closes every socket, and tells every other window, which closes its own
 2. deletes the `itinero` database, and makes it again with only the `account` record, holding no
    account and `signOutOwed` set
-3. sends `POST /auth/sign-out`, and clears `signOutOwed` once it is answered
+3. sends `POST /api/auth/sign-out`, and clears `signOutOwed` once it is answered
 
-Where the device is offline, `signOutOwed` stays set, and `open` sends `POST /auth/sign-out` the
+Where the device is offline, `signOutOwed` stays set, and `open` sends `POST /api/auth/sign-out` the
 next time the device is online, before anything else. While `signOutOwed` is set, `open` gives no
 account, so the web app shows the sign-in screen. A sign-in clears it.
 
@@ -218,8 +243,8 @@ sign-out sends `{ "signedOut": true }`, and every window shows the sign-in scree
 The trip store's tests run in the suite of `apps/web/`, which `spec/web/shell.md` §4.5 describes.
 
 - **Unit tests**, with Node's test runner, IndexedDB from the `fake-indexeddb` package, and a
-  stand-in for the online side, cover each step of §4.2, the refusals of §4.4, and §4.5 online and
-  offline.
+  stand-in for the online side, cover each step of §4.2, the refusals of §4.4, §4.5 online and
+  offline, and each function of §4.8.
 - **Cut tests** fail the stand-in at each request of a catch-up, and confirm the copy is unchanged
   (`WEB:STORE-F2`).
 - **Browser tests**, with Playwright and the online side running in Wrangler, open a trip in two
@@ -228,6 +253,29 @@ The trip store's tests run in the suite of `apps/web/`, which `spec/web/shell.md
 - **Timing tests** read a trip of 500 pages and 300 bookings ten times, and fail where a read takes
   over one second on the machine running them. The check on a phone of `WEB:STORE-NFR1` is made by
   hand before each release.
+
+### 4.8 Creating a trip, the members and the graveyard
+
+*Porcelain:* seven functions carry the requests a traveller makes that are not changes to a trip
+(`WEB:STORE-F7`). Each refuses with `offline` where `isOnline()` is false, as `send` does, and sends
+nothing. Otherwise each sends one request, and returns a refusal unchanged.
+
+| Function | Sends | Once it is answered |
+|---|---|---|
+| `create` | `POST /api/trips` | Catches every trip up, so `trips` lists the new trip |
+| `accept` | `POST /api/invitations/{invitation}/accept` | Catches every trip up, so `trips` lists the trip joined |
+| `invite` | `POST /api/trips/{trip}/invitations` | Catches the trip up, which fetches its invitations again |
+| `withdraw` | `DELETE /api/trips/{trip}/invitations/{invitation}` | Catches the trip up |
+| `makeAdmin` | `POST /api/trips/{trip}/admins` | Catches the trip up, which fetches its members again |
+| `remove` | `DELETE /api/trips/{trip}/members/{account}` | Catches the trip up |
+| `buried` | `GET /api/trips/{trip}/buried/{page}` | Reads the page with the pages' `pageFromText`, and gives it |
+
+Each function returns only once its catch-up is written, so the copy holds what the request did.
+`buried` stores nothing, so a page in the graveyard is never on the device (`PLN-F13`).
+
+An admin's copy holds the trip's `grants` and its open `invitations`, which each catch-up replaces
+whole. A copy whose traveller is no longer an admin is given neither, and the catch-up deletes
+both.
 
 ## 5. Resources
 
@@ -262,6 +310,7 @@ and seats. It is protected by the device's own lock, and deleted on sign-out (AD
 | [WEB:STORE-F4](../../requirements/web/trip-store.md#^web-store-f4) | `send`, in §4.4. |
 | [WEB:STORE-F5](../../requirements/web/trip-store.md#^web-store-f5) | `signOut`, `signOutOwed` and the session ended, in §4.5. |
 | [WEB:STORE-F6](../../requirements/web/trip-store.md#^web-store-f6) | The BroadcastChannel of §4.6. |
+| [WEB:STORE-F7](../../requirements/web/trip-store.md#^web-store-f7) | The seven functions of §4.8, and the grants and invitations of an admin's copy, in §4.1 and §4.2. |
 | [WEB:STORE-NFR1](../../requirements/web/trip-store.md#^web-store-nfr1) | One transaction for each trip read (§4.1, §6). |
 | [WEB-F2](../../requirements/web/web.md#^web-f2) | Every trip given offline, with `caughtUp` and `isOnline` (§4.1, §4.4). Saying so on every screen, and offering no change offline, is `web/screens`. |
 | [WEB-F3](../../requirements/web/web.md#^web-f3) | A copy that stays until sign-out (§4.5). Keeping the browser from clearing it is `web/shell`. |

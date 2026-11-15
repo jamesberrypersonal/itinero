@@ -45,17 +45,18 @@ invitation email (§4.3) is the one thing the membership component shows a perso
 ### 3.2 Application interface
 
 The membership component answers these requests over HTTPS, each with a JSON body, from a device
-signed in through `access/accounts`. A refusal gives a status of 400, 403, 404 or 409, and a JSON
+signed in through `access/accounts`. Each has a path beginning `/api/`, as every request of the
+online side has. A refusal gives a status of 400, 403, 404 or 409, and a JSON
 body `{ "code": ..., "message": ... }`.
 
 | Request | Body | Gives |
 |---|---|---|
-| `GET /trips/{trip}/members` | None | The members, admins and creator, and to an admin the open invitations (§4.6) |
-| `POST /trips/{trip}/invitations` | `{ "email": ..., "trip": "view" \| "edit", "calendar": "none" \| "view" \| "edit" }` | The invitation, without its token (§4.2) |
-| `DELETE /trips/{trip}/invitations/{invitation}` | None | Nothing, and withdraws it (§4.2) |
-| `POST /invitations/{invitation}/accept` | `{ "token": ... }` | The trip joined (§4.4) |
-| `POST /trips/{trip}/admins` | `{ "account": ... }` | Nothing, and makes the member an admin (§4.1) |
-| `DELETE /trips/{trip}/members/{account}` | None | Nothing, and removes the member (§4.5) |
+| `GET /api/trips/{trip}/members` | None | The members, admins and creator, and to an admin the open invitations (§4.6) |
+| `POST /api/trips/{trip}/invitations` | `{ "email": ..., "trip": "view" \| "edit", "calendar": "none" \| "view" \| "edit" }` | The invitation, without its token (§4.2) |
+| `DELETE /api/trips/{trip}/invitations/{invitation}` | None | Nothing, and withdraws it (§4.2) |
+| `POST /api/invitations/{invitation}/accept` | `{ "token": ... }` | The trip joined (§4.4) |
+| `POST /api/trips/{trip}/admins` | `{ "account": ... }` | Nothing, and makes the member an admin (§4.1) |
+| `DELETE /api/trips/{trip}/members/{account}` | None | Nothing, and removes the member (§4.5) |
 
 | Refusal code | Status | When |
 |---|---|---|
@@ -82,7 +83,7 @@ import type { AccountId } from "access/accounts";            // as spec/access/a
 import type { GrantChange } from "@itinero/permissions";
 
 type Member = { account: AccountId; admin: boolean; creator: boolean; joined: string };
-type Listed = Member & { name: string };   // as GET /trips/{trip}/members gives each member
+type Listed = Member & { name: string };   // as GET /api/trips/{trip}/members gives each member
 
 function createTrip(trip: string, creator: AccountId): Promise<Member>;
 function member(trip: string, account: AccountId): Promise<Member | undefined>;
@@ -122,6 +123,12 @@ Behaviour crossing every operation:
   transaction. An invitation is closed by an update that names its state as open, and the operation
   stops where the update changes no row. So an invitation is never accepted twice, nor accepted as
   it is withdrawn.
+- **A trip's grants change first, and its members last.** An acceptance and a removal each change
+  two stores: the members in D1, and the grants in the trip's Durable Object, the program that
+  holds the trip online. No transaction covers both. The membership component therefore hands the
+  grant change to the listener of `onChange` first, and writes its own records only once the
+  listener returns. The listener's change is safe to repeat, as `spec/planner/trip-host.md` §4.3
+  gives. An operation that stops between the two is finished by making the same request again.
 
 ### 4.1 Creating a trip, and admins
 
@@ -129,13 +136,13 @@ Behaviour crossing every operation:
 `creator` true (`ACC:MEMBERSHIP-F1`). The component holding the copy online calls it as it creates
 the trip, and gives the creator edit access in the trip's grants.
 
-`POST /trips/{trip}/admins` makes a member an admin, and is refused with `admin-only` from a member
+`POST /api/trips/{trip}/admins` makes a member an admin, and is refused with `admin-only` from a member
 who is not one. Making an admin of a member who already is one succeeds and does nothing. No request
 takes the role away.
 
 ### 4.2 Inviting, and withdrawing
 
-*Porcelain:* `POST /trips/{trip}/invitations` is refused with `admin-only` from a member who is not
+*Porcelain:* `POST /api/trips/{trip}/invitations` is refused with `admin-only` from a member who is not
 an admin (`ACC:MEMBERSHIP-F2`). It is refused with `bad-email` where the address has no `@`, has
 nothing before or after it, or is longer than 254 characters. It is refused with `already-a-member`
 where a member's account holds the address. Otherwise it:
@@ -146,7 +153,7 @@ where a member's account holds the address. Otherwise it:
 3. sets the invitation to expire 14 days, of 24 hours each, after it is made
 4. sends the email of §4.3, holding the token
 
-`DELETE /trips/{trip}/invitations/{invitation}` withdraws an open invitation, and is refused with
+`DELETE /api/trips/{trip}/invitations/{invitation}` withdraws an open invitation, and is refused with
 `admin-only` from a member who is not an admin. Withdrawing one already closed succeeds and does
 nothing.
 
@@ -160,12 +167,12 @@ one link:
 https://<Itinero's address>/invitations/<invitation>#<token>
 ```
 
-The token sits after the `#`, which a browser never sends in a request, so it stays out of every
-server's logs. The web app reads it from the address, and passes it in the body of the acceptance.
+The link's address is a screen of the web app, outside `/api/`. The token sits after the `#`, which
+a browser never sends in a request, so it stays out of every server's logs. The web app reads it from the address, and passes it in the body of the acceptance.
 
 ### 4.4 Accepting
 
-*Porcelain:* `POST /invitations/{invitation}/accept` accepts only where every check passes
+*Porcelain:* `POST /api/invitations/{invitation}/accept` accepts only where every check passes
 (`ACC:MEMBERSHIP-F3`):
 
 1. the invitation is known and open, has not expired, and the digest of the token given is its own,
@@ -173,21 +180,37 @@ server's logs. The web app reads it from the address, and passes it in the body 
 2. the account that sent it holds the invited address, with `emailVerified` true, or it is refused
    with `wrong-account`
 
-The account then becomes a member, with `admin` and `creator` false, and the invitation is closed as
-accepted. The listener of `onChange` is given `{ op: "add", traveller, trip, calendar }`, with the
-access the invitation named, and the acceptance succeeds once it returns. An account already a
-member when it accepts closes the invitation, and stays as it was.
+An account already a member when it accepts closes the invitation, and stays as it was. Otherwise
+the acceptance takes two steps, in this order:
+
+1. the listener of `onChange` is given `{ op: "add", traveller, trip, calendar }`, with the access
+   the invitation named
+2. once the listener returns, one batch makes the account a member, with `admin` and `creator`
+   false, and closes the invitation as accepted
+
+The acceptance succeeds once the batch is written. An acceptance that stops after the first step
+leaves the invitation open and the account not a member, so the traveller accepts again, and the
+same `add` is given again.
+
+Where the batch finds the invitation no longer open, such as one withdrawn in the same moment, the
+listener is given `{ op: "remove", traveller }`, and the acceptance is refused with
+`bad-invitation`.
 
 ### 4.5 Removing a member
 
-*Porcelain:* `DELETE /trips/{trip}/members/{account}` is refused with `admin-only` from a member who
+*Porcelain:* `DELETE /api/trips/{trip}/members/{account}` is refused with `admin-only` from a member who
 is not an admin, and with `creator` for the trip's creator (`ACC:MEMBERSHIP-F4`). Otherwise the
-member is removed, and the listener of `onChange` is given `{ op: "remove", traveller }`. Every
-request of theirs about the trip is then refused with `not-a-member`.
+listener of `onChange` is given `{ op: "remove", traveller }`, which takes away every grant the
+member holds. Once the listener returns, the member is removed. Every request of theirs about the
+trip is then refused with `not-a-member`.
+
+A removal that stops after the listener returns leaves a member with no grant. `planner/trip-host`
+refuses every request of such a member with `not-a-member`, so they have lost the trip already. They
+are still listed as a member, and an admin removes them again to finish.
 
 ### 4.6 Who is on a trip
 
-*Porcelain:* `GET /trips/{trip}/members` gives any member every member of the trip, with `admin`,
+*Porcelain:* `GET /api/trips/{trip}/members` gives any member every member of the trip, with `admin`,
 `creator` and `joined`, and the `name` `access/accounts`' `account` gives for it
 (`ACC:MEMBERSHIP-F5`, `ACC-F13`). To an admin, it also gives each open invitation's
 identifier, address, access and expiry. A member who is not an admin is given no invitations, so
@@ -231,8 +254,10 @@ after it closed, and closes every open invitation past its expiry.
   refused the same way.
 - **Every trip keeps its creator** (`ACC:MEMBERSHIP-F1`). No request removes the creator, or takes
   away an admin's role.
-- **Grants follow membership.** The grants of a trip gain a traveller only as they accept, and lose
-  them only as they are removed (§4.4, §4.5).
+- **Grants and members agree, or nobody gets in.** The grants of a trip gain a traveller only as
+  they accept, and lose them only as they are removed (§4.4, §4.5). An operation that stops part way
+  leaves a grant with no member, or a member with no grant. Neither opens the trip to anyone, and
+  the same request made again finishes it (§4).
 
 ## 7. Requirements this satisfies
 
@@ -251,4 +276,7 @@ after it closed, and closes every open invitation past its expiry.
 
 ## 8. Open
 
-None. The platform is decided (ADR-0015).
+- **A grant left without a member.** An acceptance that stops part way, and is never made again,
+  leaves a grant for an account that is not a member. It opens the trip to nobody. It is still
+  counted when `access/permissions` counts the travellers a moved page would be shown to. Clearing
+  such grants is not designed.

@@ -48,10 +48,10 @@ message is one English sentence the web app may show.
 
 | Request | Body | Gives |
 |---|---|---|
-| `POST /auth/nonce` | None | `{ "nonce": ... }`: a single-use value for the next sign-in (§4.1) |
-| `POST /auth/sign-in` | `{ "provider": "google", "idToken": ..., "nonce": ... }` | `{ "account": ..., "email": ..., "name": ..., "named": ... }`, and sets the session (§4.2) |
-| `PUT /auth/name` | `{ "name": ... }` | `{ "name": ... }`, and sets the account's name (§4.5) |
-| `POST /auth/sign-out` | None | Nothing, and ends the session sent with it (§4.4) |
+| `POST /api/auth/nonce` | None | `{ "nonce": ... }`: a single-use value for the next sign-in (§4.1) |
+| `POST /api/auth/sign-in` | `{ "provider": "google", "idToken": ..., "nonce": ... }` | `{ "account": ..., "email": ..., "name": ..., "named": ... }`, and sets the session (§4.2) |
+| `PUT /api/auth/name` | `{ "name": ... }` | `{ "name": ... }`, and sets the account's name (§4.5) |
+| `POST /api/auth/sign-out` | None | Nothing, and ends the session sent with it (§4.4) |
 
 The session is set as a cookie named `itinero_session`, marked `Secure`, `HttpOnly` and
 `SameSite=Lax`, so that a script on the page cannot read it. The web app sends it with every
@@ -120,13 +120,13 @@ Behaviour crossing every operation:
 
 ### 4.1 The nonce
 
-*Porcelain:* `POST /auth/nonce` gives a nonce of 32 random bytes, written in base64url, and keeps a
+*Porcelain:* `POST /api/auth/nonce` gives a nonce of 32 random bytes, written in base64url, and keeps a
 SHA-256 digest of it with the time it was made. A sign-in naming it uses it up. A nonce not used
 within 10 minutes is thrown away.
 
 ### 4.2 Signing in
 
-*Porcelain:* `POST /auth/sign-in` accepts an ID token only when every check below passes
+*Porcelain:* `POST /api/auth/sign-in` accepts an ID token only when every check below passes
 (`ACC:ACCOUNTS-F1`):
 
 1. the nonce given is one the accounts component made, unused and under 10 minutes old, or the
@@ -162,13 +162,13 @@ request.
 
 ### 4.4 Signing out
 
-*Porcelain:* `POST /auth/sign-out` forgets the session sent with it, and clears the cookie. Sessions
+*Porcelain:* `POST /api/auth/sign-out` forgets the session sent with it, and clears the cookie. Sessions
 on the account's other devices are unchanged. Signing out with no session, or one already ended,
 succeeds and does nothing.
 
 ### 4.5 Choosing a name
 
-*Porcelain:* `PUT /auth/name` sets the name of the account behind the request's session, and sets
+*Porcelain:* `PUT /api/auth/name` sets the name of the account behind the request's session, and sets
 `named` to true (`ACC:ACCOUNTS-F5`). The name is trimmed of white space at both ends, and refused
 with `bad-name` where it is then empty, or longer than 60 characters, counted as Unicode code
 points. A request with no session is refused with `no-session`. Setting the name an account
@@ -227,7 +227,7 @@ in its Wrangler configuration.
 | [ACC:ACCOUNTS-F2](../../requirements/access/accounts.md#^acc-accounts-f2) | The email address and `emailVerified` set at each sign-in, in §4.2, and `account` in §3.3. |
 | [ACC:ACCOUNTS-F3](../../requirements/access/accounts.md#^acc-accounts-f3) | Sessions, and their 180 days, in §4.3, and signing out in §4.4. |
 | [ACC:ACCOUNTS-F4](../../requirements/access/accounts.md#^acc-accounts-f4) | `whoSent`, in §3.3 and §4.3. |
-| [ACC:ACCOUNTS-F5](../../requirements/access/accounts.md#^acc-accounts-f5) | A new account's name from its provider, and `named`, in §4.2, and `PUT /auth/name`, in §4.5. |
+| [ACC:ACCOUNTS-F5](../../requirements/access/accounts.md#^acc-accounts-f5) | A new account's name from its provider, and `named`, in §4.2, and `PUT /api/auth/name`, in §4.5. |
 | [ACC-F13](../../requirements/access/access.md#^acc-f13) | Each account's name, starting as its Google account's, and changed by its traveller (§4.2, §4.5). Asking for it is `web/screens`, and showing it on a trip is `access/membership`. |
 | [ACC:ACCOUNTS-NFR1](../../requirements/access/accounts.md#^acc-accounts-nfr1) | Digests in place of sessions and nonces, and no password, in §4.3 and §5. |
 | [ACC-F1](../../requirements/access/access.md#^acc-f1) | Signing in with Google, and staying signed in (§4.2, §4.3). Showing the sign-in buttons is `web/screens`. |

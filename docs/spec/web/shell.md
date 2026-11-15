@@ -49,15 +49,18 @@ The shell serves these files, each from Itinero's own address:
 
 | Path | Holds |
 |---|---|
-| `/` and any path the online side does not answer | `index.html`, which loads the app |
+| `/`, and any path outside `/api/` that names no file | `index.html`, which loads the app |
 | `/assets/...` | The built scripts, styles, fonts and images, each named with a hash of its contents |
 | `/manifest.webmanifest` | The web app manifest (§4.3) |
 | `/sw.js` | The service worker (§4.1) |
 | `/version.json` | `{ "version": ..., "files": [ ... ] }`: the version, and every file it needs |
 | `/time-zone-rules.json` | The newest rules file of `shared/trip-time` (§4.4) |
 
-The paths of the online side, such as `/auth/...`, `/trips/...` and `/invitations/...`, are the
-Worker's, and the shell never answers them.
+Every request of the online side has a path beginning `/api/`, such as `/api/auth/sign-in` and
+`/api/trips`. Those paths are the Worker's, and the shell never answers them. Every screen's
+address is outside `/api/`, such as `/trips/{trip}/members` and `/invitations/{invitation}`. A
+screen's address therefore always gives `index.html`, whether a traveller opens it from a link or
+reloads it.
 
 ### 3.3 Programming interface
 
@@ -175,8 +178,9 @@ The build:
    `/time-zone-rules.json`
 3. writes `version.json`, naming the version by the hash of every other file, and listing them
 
-The online side's Wrangler configuration serves `apps/web/dist/` as the Worker's static files, with
-any path it does not hold answered by `index.html`. Deploying the online side deploys the web app
+The online side's Wrangler configuration serves `apps/web/dist/` as the Worker's static files. It
+passes every path under `/api/` to the Worker, and answers any other path it does not hold with
+`index.html`. Deploying the online side deploys the web app
 with it (ADR-0018).
 
 ## 5. Resources

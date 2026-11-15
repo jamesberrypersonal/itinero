@@ -25,8 +25,8 @@ Three things act on them:
 
 Deliberately absent:
 
-- keeping or catching up a copy, or sending a request, which `web/trip-store` does. The one request
-  the screens send themselves is the sign-in of §4.1
+- keeping or catching up a copy, or sending a request, which `web/trip-store` does. The only
+  requests the screens send themselves are those of signing in and of choosing a name (§4.1, §4.8)
 - deciding what a traveller may do. The screens ask `access/permissions` only to choose what to
   offer, and the copy held online decides
 - the rules of each part of a trip, which the planner's, the access system's and the bookings
@@ -67,7 +67,8 @@ members. A screen wider than 720 pixels lays itself out for a computer.
 
 ### 3.2 Application interface
 
-None. Every request but the sign-in goes through `web/trip-store` (§3.4).
+None. Every request but those of signing in and choosing a name goes through `web/trip-store`
+(§3.4).
 
 ### 3.3 Programming interface
 
@@ -76,8 +77,8 @@ None. The screens are the top of the web app, and nothing calls them.
 ### 3.4 Systems this drives
 
 - **`web/trip-store`**, through its functions in `spec/web/trip-store.md` §3.3.
-- **`access/accounts`**, for signing in, with `POST /auth/nonce` and `POST /auth/sign-in`, as
-  `spec/access/accounts.md` gives.
+- **`access/accounts`**, for signing in, with `POST /api/auth/nonce` and `POST /api/auth/sign-in`,
+  and for choosing a name, with `PUT /api/auth/name`, as `spec/access/accounts.md` gives.
 - **Google Identity Services**, Google's script that draws the Sign in with Google button and gives
   the web app an ID token: a signed statement from Google of who signed in, which
   `access/accounts` checks. Google's own documentation for Sign in with Google gives the detail.
@@ -106,13 +107,13 @@ Behaviour crossing every screen:
 The sign-in screen loads Google Identity Services, and draws its button. On a computer, where the
 screen is wider than 720 pixels and the device has no touch screen, it says that the trips it opens
 stay on the computer until the traveller signs out (`WEB:SCREENS-F9`). A sign-in asks
-`POST /auth/nonce`, gives the nonce to Google, and sends the ID token with `POST /auth/sign-in`. On
+`POST /api/auth/nonce`, gives the nonce to Google, and sends the ID token with `POST /api/auth/sign-in`. On
 success it calls the trip store's `signedIn`. Where the sign-in gives `named` as false, it opens
 `/name` first. Otherwise it opens the screen the traveller came for, such as an invitation, or the
 list of trips.
 
 `/name` asks for the name other travellers will see, filled with the `name` the sign-in gave, and
-sends it with `PUT /auth/name`. A `bad-name` refusal shows its message beside the box. Once the name
+sends it with `PUT /api/auth/name`. A `bad-name` refusal shows its message beside the box. Once the name
 is set, the screen the traveller came for opens, so an invitation is accepted only after its new
 member has chosen their name (`WEB:SCREENS-F10`, `ACC-F13`). Leaving `/name` without saving keeps
 `named` false, and the next sign-in asks again.
@@ -129,8 +130,8 @@ The list shows each trip of the trip store's `trips`, with its name and dates, n
 screen.
 
 A new trip asks for its name, its first and last dates, and its countries, chosen from the
-itinerary's `countries()` by typing part of a name (`PLN-F10`). It sends `POST /trips` through the
-trip store, which catches up and lists the new trip.
+itinerary's `countries()` by typing part of a name (`PLN-F10`). It calls the trip store's `create`,
+which catches up and lists the new trip.
 
 ### 4.3 The home page
 
@@ -210,9 +211,11 @@ stands, from `details.booking`, beside the traveller's own, to start again from 
 *Invoked from:* the pages in a trip's bar, a link, a search, and the home page's country.
 
 The tree of pages is the pages' `tree` of the copy, each branch folded or open. A traveller with edit
-access drags a page to move it. A move asks the copy's `widens` first, and where it gives more than
-0 says how many more travellers will see the page, and sends the move with `agreed` set to that
-number once the traveller confirms (`ACC-F9`).
+access drags a page to move it. The move is sent with no `agreed`. Where the copy held online refuses
+it with `agree-first`, the screen says how many more travellers will see the page, from
+`details.count`. It sends the move again, with `agreed` set to that number, once the traveller
+confirms (`ACC-F9`). The device never counts them itself, because a copy holds only its own
+traveller's access unless they are an admin.
 
 A page shows its title and its text drawn from Markdown with micromark, with its extension for
 GitHub's tables and lists. micromark writes no HTML found in the text, which is shown as the text it
@@ -227,8 +230,8 @@ by side, from `details.text`, and the traveller saves again from that revision (
 
 Search runs the pages' `search` over the copy, with or without a connection, and lists each page
 found with the words around each match (`PLN-F12`). The graveyard lists the titles of the copy's
-`graveyard`. An admin, online, opens a page there through the trip store, and restores it
-(`PLN-F13`).
+`graveyard`. An admin, online, opens a page there with the trip store's `buried`, and restores it
+with a `restore` change (`PLN-F13`).
 
 ### 4.7 The members and their access
 
@@ -236,8 +239,10 @@ found with the words around each match (`PLN-F12`). The graveyard lists the titl
 
 The members screen lists the copy's members by name, with the creator and the admins marked
 (`ACC-F2`). Every other screen names a traveller in the same way, such as each traveller a booking
-names. An
-admin also sees, online, the open invitations, and can:
+names.
+
+An admin also sees the open invitations, from the copy's `invitations`, and each member's access,
+from the copy's `grants`. Online, an admin can:
 
 - invite an address, with view or edit access to the trip and none, view or edit for the calendar
   (`ACC-F3`)
@@ -246,11 +251,12 @@ admin also sees, online, the open invitations, and can:
   for any page, which covers the branch beneath it (`ACC-F5`, `ACC-F7`)
 
 A level for a page that `applyGrant` refuses with `hidden-above` names the page above to open first.
-Inviting, withdrawing, making an admin and removing are requests of `access/membership`, and every
-other change is a grant change to the trip, each sent through the trip store.
+Inviting, withdrawing, making an admin and removing are the trip store's `invite`, `withdraw`,
+`makeAdmin` and `remove`. Every other change is a grant change to the trip, sent with its `send`.
 
 `/invitations/{invitation}` takes the token from the address the email gave, asks the traveller to
-sign in where they have not, and to choose their name where they have not (§4.1), and accepts with `POST /invitations/{invitation}/accept`. A
+sign in where they have not, and to choose their name where they have not (§4.1), and accepts with
+the trip store's `accept`. A
 `wrong-account` refusal says which address the invitation was sent to.
 
 ### 4.8 The clock and date order
@@ -260,7 +266,7 @@ sign in where they have not, and to choose their name where they have not (§4.1
 The settings list the countries whose places the device holds, offer to fetch another while online
 with `web/places`' `fetchCountry`, and say `Place names from GeoNames, under CC BY 4.0`.
 
-The settings show the traveller's name, which they change online with `PUT /auth/name`. A trip
+The settings show the traveller's name, which they change online with `PUT /api/auth/name`. A trip
 store catch-up then brings the new name to every trip's members (`WEB:SCREENS-F10`).
 
 The traveller chooses a 12-hour or a 24-hour clock, and day first or month first (`WEB:SCREENS-F7`).
@@ -339,7 +345,7 @@ and the packages of the trip's parts, which `spec/web/shell.md` §5 lists.
 | [WEB:SCREENS-F3](../../requirements/web/screens.md#^web-screens-f3) | The calendar, in §4.4. |
 | [WEB:SCREENS-F4](../../requirements/web/screens.md#^web-screens-f4) | The bookings page, a booking's screen and its forms, in §4.5. |
 | [WEB:SCREENS-F5](../../requirements/web/screens.md#^web-screens-f5) | The pages, search and graveyard, in §4.6. |
-| [WEB:SCREENS-F6](../../requirements/web/screens.md#^web-screens-f6) | The members screen, in §4.7, and asking before a move, in §4.6. |
+| [WEB:SCREENS-F6](../../requirements/web/screens.md#^web-screens-f6) | The members screen, in §4.7, with each member's access from an admin's copy, and asking before a move, in §4.6. |
 | [WEB:SCREENS-F7](../../requirements/web/screens.md#^web-screens-f7) | The style of §4.8, used for every time (§4). |
 | [WEB:SCREENS-F8](../../requirements/web/screens.md#^web-screens-f8) | Asking first, in §4. |
 | [WEB:SCREENS-F9](../../requirements/web/screens.md#^web-screens-f9) | Signing in and out, in §4.1. |
