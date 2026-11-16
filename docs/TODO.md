@@ -169,21 +169,3 @@ any or all of them, so that each deletes its copy the next time it connects. Dec
 decision record scoped `access/accounts` and `web`.
 
 *Releases:* Nothing is planned for it yet.
-
-### TODO-17 — Read back a stored window whose two ends fall in one skipped hour
-
-*Tags:* shared/trip-time
-*Written:* 2026-11-16
-
-*Problem:* trip-time's `parse` refuses, with `window-order`, a window that `toText` wrote, once
-newer rules skip the hour its ends fall in, such as 02:00 to 03:00 on 29 March 2026 in Paris.
-
-*Reason:* `parse` resolves each end of a window in a gap to the moment it had at the offset before
-the gap, so both ends can resolve to one moment. It then applies the same window-order check as
-`create` (`spec/shared/trip-time.md` §4.4), which breaks the promise that `parse` reads any text
-`toText` wrote, under any later rules (§4.1, §6).
-
-*Proposal:* Decide what such a window reads back as, such as `parse` not applying the window-order
-check, and change trip-time's specification and its code to match.
-
-*Releases:* Nothing is planned for it yet.

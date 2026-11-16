@@ -14,6 +14,23 @@ theirs, in Milestone Planner-0.2 and Milestone Access-0.1.
 
 ### Phase 0 — Design
 
+#### Milestone Web-0.2 — A trial on a real phone
+
+- A trial app and a trial Worker, deployed to Cloudflare's free plan, signed a traveller in with
+  Google, held one page in a Durable Object, brought an iPhone's copy of the page up to date, and
+  showed it with no connection. Nothing of the trial became `@itinero/web` or the online side.
+- Google's button signs a traveller in from an iPhone's home screen as it does in Safari, in a
+  second window that gives the ID token back to Itinero (`spec/web/screens.md` §4.1). The online
+  side therefore needs no request for a sign-in through Google's own page.
+- Adding Itinero to an iPhone's home screen carries Safari's session into it, so a traveller signed
+  in in Safari need not sign in once more there (`spec/web/shell.md` §4.3).
+- Itinero, added to an iPhone's home screen and brought up to date, opens and shows its page with
+  no connection after the phone is restarted.
+- A Durable Object on the free plan is not held to the 10 milliseconds of processor time a Worker
+  is. It loaded the rules file in 6 to 23 milliseconds, and read 500 rows in 1 to 4
+  (`spec/planner/trip-host.md` §4.7).
+- Nothing the trial found changes a decision.
+
 #### Milestone Web-0.1 — Reading and changing a trip
 
 - The web app is registered.
@@ -38,26 +55,6 @@ theirs, in Milestone Planner-0.2 and Milestone Access-0.1.
   list of places, kept on the phone one country at a time). `web/places` holds it.
 
 ## Pending
-
-### Phase 0 — Design
-
-#### Milestone Web-0.2 — A trial on a real phone
-
-- Write a trial app and a trial Worker, deployed to Cloudflare's free plan, that do one thing of
-  each kind the design rests on: sign a traveller in with Google, hold one page in a Durable Object,
-  bring a phone's copy of the page up to date, and show the page with no connection. The trial is
-  thrown away. Nothing of it becomes `@itinero/web` or the online side.
-- Try signing in with Google's button on an iPhone, in Safari and from the home screen, and on an
-  Android phone. Settle the question that `spec/web/screens.md` §8 and `spec/access/accounts.md` §8
-  leave open. Where the button fails from the home screen, add to `spec/access/accounts.md` the
-  request a sign-in through Google's own page needs.
-- Add the trial app to an iPhone's home screen, bring it up to date, and confirm it opens and shows
-  its page with no connection, after the phone is restarted.
-- Measure the processor time of the trial's Durable Object on the free plan. Measure a request that
-  loads a file the size of the time-zone rules, and one that reads 500 rows. Settle the question
-  that `spec/planner/trip-host.md` §8 leaves open.
-- Record what the trial found in each specification it changes, and in a decision record where it
-  changes a decision.
 
 ### Phase 1 — Build
 

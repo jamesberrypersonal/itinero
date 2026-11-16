@@ -111,7 +111,9 @@ Behaviour crossing every screen:
 
 *Invoked from:* opening Itinero with no account, a trip's menu, and `/settings`.
 
-The sign-in screen loads Google Identity Services, and draws its button. On a computer, where the
+The sign-in screen loads Google Identity Services, and draws its button, which opens Google's
+sign-in in a second window and gives the ID token back to the screen. It does so from an iPhone's
+home screen as well as in Safari, as Milestone Web-0.2's trial showed. On a computer, where the
 screen is wider than 720 pixels and the device has no touch screen, it says that the trips it opens
 stay on the computer until the traveller signs out (`WEB:SCREENS-F9`). A sign-in asks
 `POST /api/auth/nonce`, gives the nonce to Google, and sends the ID token with
@@ -424,8 +426,4 @@ and the packages of the trip's parts, which `spec/web/shell.md` §5 lists.
 
 ## 8. Open
 
-- **Signing in from an iPhone's home screen.** Google's button opens Google's sign-in in a second
-  window, and an app opened from an iPhone's home screen may never be given that window's answer.
-  Google's documents say nothing of such apps. The sign-in of §4.1 is to be tried on an iPhone
-  before any screen is built on it. Where it fails, Google's button can instead leave Itinero for
-  Google's page and return, which needs a request of its own from `access/accounts`.
+None. Nothing in this specification is undecided.

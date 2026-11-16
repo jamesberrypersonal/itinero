@@ -162,8 +162,9 @@ function readOffset(text: string): number {
 }
 
 /**
- * Checks fields and builds the frozen value. `create` refuses a skipped time and a mark on a time
- * that does not repeat. `parse` resolves both instead (§4.1), using the offset each clock time carried.
+ * Checks fields and builds the frozen value. `create` refuses a skipped time, a mark on a time that
+ * does not repeat, and a window out of order. `parse` resolves the first two instead (§4.1), using
+ * the offset each clock time carried, and reads a window in any order.
  */
 function build(input: unknown, mode: "create" | "parse"): Result<TripTime> {
   const shape = checkShape(input, mode);
@@ -224,7 +225,8 @@ function build(input: unknown, mode: "create" | "parse"): Result<TripTime> {
     moments.push(found.kind === "repeat" ? (second ? found.second : found.first) : found.moment);
   }
 
-  if (fields.kind === "window" && !(moments[1]! > moments[0]!)) {
+  // parse reads back a window that later rules put out of order, so only create checks the order (§4.4).
+  if (mode === "create" && fields.kind === "window" && !(moments[1]! > moments[0]!)) {
     const start = `${fields.date} ${fields.from.time}`;
     const end = `${fields.endDate} ${fields.to.time}`;
     return refuse("window-order", `The window's end, ${end}, is not after its start, ${start}.`);

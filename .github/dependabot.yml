@@ -1,0 +1,37 @@
+# Keeps the npm workspace's dev dependencies and the workflows' actions up to date.
+# Cargo is left out: doc-check and doc-scaffold use the Rust standard library only (NFR5).
+version: 2
+
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    labels:
+      - deps
+    commit-message:
+      prefix: chore
+      include: scope
+    groups:
+      npm:
+        patterns:
+          - "*"
+    ignore:
+      # The packages run on Node.js 24, so @types/node stays on its major version.
+      - dependency-name: "@types/node"
+        update-types:
+          - version-update:semver-major
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    labels:
+      - deps
+    commit-message:
+      prefix: chore
+      include: scope
+    groups:
+      github-actions:
+        patterns:
+          - "*"

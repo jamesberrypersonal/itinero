@@ -43,8 +43,7 @@ The shell shows three things of its own, which `web/screens` places:
 - **a notice that Itinero is ready offline**, once the service worker holds every file of the
   version
 - **a notice on an iPhone that Itinero is not on the home screen**, saying to tap Share, then Add
-  to Home Screen, so that its trips stay when the phone goes unused for some days. It also says the
-  traveller signs in once more there, since Itinero on the home screen keeps its own storage (§4.3)
+  to Home Screen, so that its trips stay when the phone goes unused for some days (§4.3)
 - **a notice that a new version is required**, once the online side refuses the version running,
   with a button that starts the new version (§4.7)
 
@@ -152,9 +151,10 @@ it, and carries the `apple-touch-icon` that Safari reads (`WEB:SHELL-F3`).
 home page and on the list of trips.
 
 An iPhone keeps two stores for Itinero apart: one for Itinero opened from the home screen, and one
-for Itinero in Safari. The session is in one store only. A traveller who signed in in Safari, such
-as from an invitation's email, therefore signs in once more the first time they open Itinero from
-the home screen. The notice says so.
+for Itinero in Safari. Adding Itinero to the home screen copies Safari's cookies into the first, so
+a traveller signed in in Safari, such as from an invitation's email, is still signed in the first
+time they open Itinero from the home screen. Milestone Web-0.2's trial showed this, on an iPhone
+with Safari 27.2.
 
 ### 4.4 The time-zone rules
 
