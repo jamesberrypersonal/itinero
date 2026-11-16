@@ -9,13 +9,13 @@ jobs:
   check-docs:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       # rustup, preinstalled on the runner, installs the toolchain rust-toolchain.toml pins.
       - name: Show the pinned toolchain
         run: rustc --version
 
-      - uses: extractions/setup-just@v2
+      - uses: extractions/setup-just@v4
 
       - name: Test doc-check
         run: just test-docs
