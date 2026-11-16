@@ -12,6 +12,16 @@ the travellers it names and the admins (ADR-0013, a trip's bookings have a page 
 
 ## Completed
 
+### Phase 1 — Build
+
+#### Milestone Bookings-1.1 — What every booking has
+
+- `bookings/list` is built as `@itinero/bookings`, in `packages/bookings/`, as its specification
+  gives it, with one table that reaches each kind of booking. A booking of a kind not yet built is
+  refused with `unknown-kind`.
+- Its test suite proves the checks of `bookings/list` that need no kind of booking: the form of a
+  change and of its text, `touches`, and the refusals of `apply` made before a booking's own checks.
+
 ### Phase 0 — Design
 
 #### Milestone Bookings-0.1 — The bookings page
@@ -34,30 +44,30 @@ the travellers it names and the admins (ADR-0013, a trip's bookings have a page 
 
 ### Phase 1 — Build
 
-#### Milestone Bookings-1.1 — What every booking has
-
-**Waits on:** Milestone Planner-1.1
-
-- Build `bookings/list` as `@itinero/bookings`, in `packages/bookings/`, as its specification
-  gives it.
-- Prove each requirement of `bookings/list` by the verification it carries.
-
 #### Milestone Bookings-1.2 — Flights
 
 - Add `bookings/flight` to `@itinero/bookings`, as its specification gives it.
 - Prove each requirement of `bookings/flight` by the verification it carries.
+- Prove `BKG:LIST-F2`, `BKG:LIST-F3` and `BKG:LIST-F6`, whose verification uses a flight.
+  Milestone Bookings-1.1 moved them here, since each needs a booking of some kind.
 
 #### Milestone Bookings-1.3 — Stays
 
 - Add `bookings/stay` to `@itinero/bookings`, as its specification gives it.
 - Prove each requirement of `bookings/stay` by the verification it carries.
+- Prove `BKG:LIST-F1`, whose verification uses a flight and a stay. Milestone Bookings-1.1 moved it
+  here, for the same reason.
 
 #### Milestone Bookings-1.4 — Journeys
 
 - Add `bookings/journey` to `@itinero/bookings`, as its specification gives it.
 - Prove each requirement of `bookings/journey` by the verification it carries.
+- Prove `BKG:LIST-F5`, whose verification uses a stay and a bus. Milestone Bookings-1.1 moved it
+  here, for the same reason.
 
 #### Milestone Bookings-1.5 — Activities
 
 - Add `bookings/activity` to `@itinero/bookings`, as its specification gives it.
 - Prove each requirement of `bookings/activity` by the verification it carries.
+- Prove `BKG:LIST-F4`, `BKG:LIST-F7`, `BKG:LIST-NFR1` and `BKG:LIST-NFR2`, whose verification
+  uses bookings of several kinds. Milestone Bookings-1.1 moved them here, for the same reason.

@@ -265,7 +265,8 @@ stored once can always be read back. `bookingFromText(bookingToText(b))` gives a
 ### 4.6 The test suite
 
 The suite runs with `npm test` in `packages/bookings/`, using Node's built-in test runner. The recipe
-`just test-bookings` runs it from anywhere in the repository. It covers the four kinds as well.
+`just test-bookings` runs it from anywhere in the repository. It covers the four kinds as well, and
+a check that needs a booking of some kind is in the test file of the kind it uses.
 
 - **Unit tests** cover each refusal of §3.3 and of each kind, each row of the tables of §4.1 and
   §4.2, and every check in the verification of each requirement the package's specifications claim.
@@ -273,11 +274,18 @@ The suite runs with `npm test` in `packages/bookings/`, using Node's built-in te
   same (`BKG:LIST-F4`).
 - **Round-trip tests** confirm a booking of each kind, holding every field, reads back equal to
   itself, after another rules file is loaded (`BKG:LIST-F7`).
-- **Time-zone independence tests** run the suite with the `TZ` environment variable set to
-  `Europe/London` and to `Asia/Tokyo`, and confirm every result is the same (`BKG:LIST-NFR1`).
+- **Time-zone independence tests** work out the same results in two processes, one with the `TZ`
+  environment variable set to `Europe/London` and one with it set to `Asia/Tokyo`, and confirm
+  every result is the same (`BKG:LIST-NFR1`).
 - **Speed tests** order 1,000 bookings of every kind, and find those not yet over, and fail where
   either takes over 50 milliseconds in Node.js on the machine running them. They run on a phone of
   `BKG:LIST-NFR2` before each release (`BKG:LIST-NFR2`).
+- **Source tests** confirm that no module of the package uses `Date`, Intl, Temporal, any network
+  call, any Node module, any function whose result depends on the device's language, such as
+  `localeCompare`, or any package but `@itinero/trip-time` (§4, §6).
+
+The workflow `.github/workflows/test-packages.yml` runs the suite on every push and pull request,
+with every other package of the npm workspace.
 
 ## 5. Resources
 

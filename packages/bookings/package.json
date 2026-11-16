@@ -1,0 +1,28 @@
+{
+  "name": "@itinero/bookings",
+  "version": "0.1.0",
+  "private": true,
+  "description": "A trip's bookings: what every booking has, and its flights, stays, journeys and activities (docs/spec/bookings/list.md)",
+  "license": "SEE LICENSE IN ../../LICENSE",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "files": [
+    "src"
+  ],
+  "scripts": {
+    "typecheck": "tsc --project .",
+    "test": "tsc --project . && node --test \"test/**/*.test.ts\""
+  },
+  "dependencies": {
+    "@itinero/trip-time": "0.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "24.19.2",
+    "typescript": "7.0.2"
+  },
+  "engines": {
+    "node": ">=24"
+  }
+}

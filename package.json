@@ -6,7 +6,8 @@
   "workspaces": [
     "packages/trip-time",
     "packages/itinerary",
-    "packages/pages"
+    "packages/pages",
+    "packages/bookings"
   ],
   "scripts": {
     "test": "npm test --workspaces"
