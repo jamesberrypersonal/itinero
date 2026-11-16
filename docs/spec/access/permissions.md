@@ -236,7 +236,8 @@ calendar where its level is not none, and each booking whose `bookingLevel` is n
 for the page is none now, and would be view or edit after a move of the page under `to.parent`, or
 to the top of the trip where `to` has no parent (`ACC:PERMISSIONS-F7`). The level after the move
 is worked out as §4.2 gives, on the pages with the move made and the exceptions as they stand.
-Admins are not counted, because their level is always edit.
+`widens` is not told who is an admin (`ACC:PERMISSIONS-NR2`), so it counts each traveller by their
+grant alone. An admin is counted only where an exception of their own hides the page from them now.
 
 ### 4.7 The text form
 

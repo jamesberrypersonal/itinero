@@ -91,6 +91,7 @@ function member(trip: string, account: AccountId): Promise<Member | undefined>;
 function trips(account: AccountId): Promise<readonly string[]>;
 type Change = GrantChange | { op: "admin"; traveller: AccountId };
 function onChange(listener: (trip: string, change: Change) => Promise<void>): void;
+function onTitle(title: (trip: string) => Promise<string | undefined>): void;
 ```
 
 `member` gives the member an account is on a trip, and `undefined` for an account that is not on it,
@@ -99,7 +100,8 @@ function of `@itinero/permissions`. `onChange` names the listener that applies t
 each `add` and `remove` the membership component makes (§4.4, §4.5). The listener is also given
 `{ op: "admin", traveller }` for each member made an admin. `planner/trip-host` then tells every
 device that has the trip open (§4.1). `joined` is the moment the member joined, in the text form of
-an ISO 8601 UTC time.
+an ISO 8601 UTC time. `onTitle` names the function that gives a trip's title, for the invitation
+email (§4.3). `planner/trip-host` gives it too, since it holds each trip.
 
 ### 3.4 Systems this drives
 
@@ -176,14 +178,16 @@ does nothing.
 ### 4.3 The invitation email
 
 *Plumbing:* the email goes to the address invited. Its subject is "You are invited to a trip on
-Itinero". It names the admin who sent it and the trip, says when the invitation expires, and holds
-one link:
+Itinero". It names the admin who sent it, by their account's name, and the trip, by the title
+`onTitle` gives, or as "a trip" where it gives none. It says when the invitation expires, in UTC,
+and holds one link:
 
 ```
 https://<Itinero's address>/invitations/<invitation>#<token>
 ```
 
-The link's address is a screen of the web app, outside `/api/`. The token sits after the `#`, which
+Itinero's address is the one the invitation's request was sent to. The link's address is a screen
+of the web app, outside `/api/`. The token sits after the `#`, which
 a browser never sends in a request, so it stays out of every server's logs. The web app reads it
 from the address, and passes it in the body of the acceptance.
 
@@ -244,7 +248,8 @@ in the order they were joined, and no trip it has been removed from.
 ### 4.7 The test suite
 
 The suite runs the checks in the verification of each requirement the membership component claims,
-against an email stand-in that keeps each message sent. It also checks each refusal of §3.2. It runs
+against an email stand-in that keeps each message sent, and a listener stand-in in place of
+`planner/trip-host`. It also checks each refusal of §3.2. It runs
 with the accounts component's suite, with `npm test` in `services/online/`, inside Wrangler.
 
 ## 5. Resources
@@ -267,6 +272,7 @@ after it closed, and closes every open invitation past its expiry as expired.
 |---|---|---|
 | The tables `members` and `invitations` | The online side's D1 database | Whoever keeps the access system's roadmap |
 | The Resend key | `RESEND_API_KEY`, a secret of the Worker, set with Wrangler and never in the repository | Whoever keeps the access system's roadmap |
+| The address invitations are sent from | `INVITATIONS_FROM`, a variable in the Worker's Wrangler configuration | Whoever keeps the access system's roadmap |
 | The domain invitations are sent from, and its DNS records for Resend | Itinero's own domain | Whoever keeps the access system's roadmap |
 
 ## 6. Quality attributes

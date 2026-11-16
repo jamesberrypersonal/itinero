@@ -7,7 +7,9 @@
     "packages/trip-time",
     "packages/itinerary",
     "packages/pages",
-    "packages/bookings"
+    "packages/bookings",
+    "packages/permissions",
+    "services/online"
   ],
   "scripts": {
     "test": "npm test --workspaces"

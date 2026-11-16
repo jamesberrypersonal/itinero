@@ -56,7 +56,8 @@ Every response that refuses gives a status of 400, 401 or 426, and a JSON body
 
 The session is set as a cookie named `itinero_session`, marked `Secure`, `HttpOnly` and
 `SameSite=Lax`, so that a script on the page cannot read it. The web app sends it with every
-request without handling it.
+request without handling it. The cookie lasts 180 days, and is set again each time the session's
+last use is written (§4.3), so that it lasts as long as the session does.
 
 | Refusal code | Status | When |
 |---|---|---|
@@ -156,7 +157,8 @@ one is made, with a new identifier. Where the token holds an `email`, the accoun
 were. The address is kept in lower case.
 
 A new account's `name` is the token's `name`, trimmed and cut to 60 characters, or the part of its
-email address before the `@` where the token holds no name. Its `named` is false. A sign-in to an
+email address before the `@` where the token holds no name. Where the token holds neither, it is
+`Traveller`. Its `named` is false. A sign-in to an
 account that already exists never changes its name (`ACC:ACCOUNTS-F5`). The sign-in gives `name`
 and `named`, so that the web app asks a traveller for their name while `named` is false.
 
@@ -194,8 +196,9 @@ The suite runs the checks in the verification of each requirement the accounts c
 against a provider stand-in that signs ID tokens with a key of its own. It also checks each refusal
 of §3.2, and that the stored records hold no session and no password. It runs with `npm test` in
 `services/online/`, inside Wrangler, Cloudflare's own tool, which runs the Worker and a D1 database
-on the developer's machine. The recipe `just test-online` runs it from anywhere in the
-repository.
+on the developer's machine. The suite uses Cloudflare's Vitest integration, which runs each test
+file in the Workers runtime, with the Worker's Wrangler configuration and a D1 database of its own.
+The recipe `just test-online` runs it from anywhere in the repository.
 
 ### 4.7 A version of the web app too old to answer
 

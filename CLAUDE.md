@@ -15,7 +15,10 @@ rules, and `tools/doc-scaffold` starts new documents as skeletons that pass it.
   `packages/itinerary/` (`@itinero/itinerary`), which uses it, `packages/pages/`
   (`@itinero/pages`), which imports only its types, and `packages/bookings/`
   (`@itinero/bookings`), which uses trip-time, and holds the bookings list and each kind of booking.
-  `package.json` at the root declares the npm workspace.
+  `packages/permissions/` (`@itinero/permissions`) uses pages, and decides what each traveller may
+  see and change. `package.json` at the root declares the npm workspace.
+- `services/online/` (`@itinero/online`) is the Worker of the online side, on Cloudflare, with its
+  D1 database. It holds `access/accounts` and `access/membership`.
 - `tools/doc-check/` and `tools/doc-scaffold/` are Rust packages, run through `just`.
 - `tools/hooks/pre-commit` is an optional hook that runs the checker before each commit.
 
@@ -31,6 +34,8 @@ just test-trip-time             # the test suite of @itinero/trip-time
 just test-itinerary             # the test suite of @itinero/itinerary
 just test-pages                 # the test suite of @itinero/pages
 just test-bookings              # the test suite of @itinero/bookings
+just test-permissions           # the test suite of @itinero/permissions
+just test-online                # the test suite of the online side, in Wrangler
 npm test                        # the test suites of every package in the npm workspace
 just install-hook               # install the pre-commit hook
 just new-component <system> <slug> <PREFIX> "<description>"   # start a component's documents and rows
@@ -69,6 +74,14 @@ claims by the verification that requirement carries. Constraints shared by every
   the real path, so type stripping still applies.
 - **One test file per process.** Node's test runner gives each test file a process of its own, so
   a module's state, such as trip-time's loaded rules, starts empty in each file.
+
+The online side, in `services/online/`, is a Cloudflare Worker. It keeps the first two constraints,
+but Wrangler bundles it, and `npm test` runs `tsc`, then Vitest with Cloudflare's integration,
+which runs each test file in the Workers runtime with a local D1 database of its own. The suite
+replaces Google with a stand-in that signs ID tokens with a key of its own, and Resend with one
+that keeps each email sent. The SQL migrations in
+`services/online/migrations/` make its D1 tables. Its secrets are set with Wrangler, never in the
+repository.
 
 `@itinero/trip-time` never uses `Date`, Intl, Temporal, network calls or Node modules in `src/`,
 and `test/source.test.ts` fails if it does. Its rules file is rebuilt from an IANA release with

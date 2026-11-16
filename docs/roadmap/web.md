@@ -89,6 +89,9 @@ theirs, in Milestone Planner-0.2 and Milestone Access-0.1.
 - Prove `PLN:PAGES-NFR1` on a phone with no connection, by the checks of its verification that
   need one. Milestone Planner-1.3 proved the rest of `planner/pages`, and moved these checks here,
   for the same reason.
+- Prove `ACC:PERMISSIONS-NFR1` on a phone with no connection and in a browser, by the checks of its
+  verification that need them. Milestone Access-1.2 proved the rest of `access/permissions`, and
+  moved these checks here, for the same reason.
 
 #### Milestone Web-1.4 — The screens a traveller reads a trip on
 

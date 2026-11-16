@@ -1,0 +1,29 @@
+{
+  "name": "@itinero/permissions",
+  "version": "0.1.0",
+  "private": true,
+  "description": "What each traveller may see and change of a trip: its grants, each traveller's level for a page, the calendar and a booking, and the check of each request (docs/spec/access/permissions.md)",
+  "license": "SEE LICENSE IN ../../LICENSE",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "files": [
+    "src"
+  ],
+  "scripts": {
+    "typecheck": "tsc --project .",
+    "test": "tsc --project . && node --test \"test/**/*.test.ts\""
+  },
+  "dependencies": {
+    "@itinero/pages": "0.1.0"
+  },
+  "devDependencies": {
+    "@itinero/trip-time": "0.1.0",
+    "@types/node": "24.19.2",
+    "typescript": "7.0.2"
+  },
+  "engines": {
+    "node": ">=24"
+  }
+}
