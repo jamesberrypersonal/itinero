@@ -106,6 +106,10 @@ theirs, in Milestone Planner-0.2 and Milestone Access-0.1.
 - Prove `BKG:LIST-NFR2` on a phone at least four years old, by the checks of its verification.
   Milestone Bookings-1.5 proved the rest of `bookings/list`, and moved these checks here, since they
   need a phone.
+- Prove the bookings system's requirements that need the bookings page or a phone, by the
+  verification each carries: `BKG-F2`, `BKG-F3`, `BKG-F4`, `BKG-F6` and `BKG-NFR1`, and the check
+  of `BKG-F5` that a removed booking is gone from every traveller's bookings page. Milestone
+  Planner-1.4 proves the rest of the bookings system.
 
 #### Milestone Web-1.5 — The calendar, and the screens an admin manages a trip on
 
