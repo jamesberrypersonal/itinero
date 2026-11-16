@@ -1,0 +1,24 @@
+{
+  "name": "@itinero/online",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Itinero's online side: one Cloudflare Worker, holding accounts and membership in D1 (docs/spec/access/accounts.md)",
+  "license": "SEE LICENSE IN ../../LICENSE",
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc --project .",
+    "test": "tsc --project . && vitest run",
+    "dev": "wrangler dev",
+    "deploy": "wrangler d1 migrations apply DB --remote && wrangler deploy"
+  },
+  "devDependencies": {
+    "@cloudflare/vitest-plugin": "1.4.11",
+    "@cloudflare/workers-types": "5.20261031.1",
+    "typescript": "7.0.2",
+    "vitest": "4.1.12",
+    "wrangler": "4.156.0"
+  },
+  "engines": {
+    "node": ">=24"
+  }
+}

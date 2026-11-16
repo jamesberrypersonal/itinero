@@ -20,7 +20,7 @@ system, component or concern is added here before any document names it.
 | [itinerary](spec/planner/itinerary.md) | planner | PLN:ITINERARY | `@itinero/itinerary` | | How a trip's pencilled stretches and firm items are stored and changed |
 | [pages](spec/planner/pages.md) | planner | PLN:PAGES | `@itinero/pages` | | The pages of a trip, where travellers write up their research by hand |
 | [trip-host](spec/planner/trip-host.md) | planner | PLN:HOST | | | The copy of each trip held online, in a Durable Object of its own, which applies every change and keeps each traveller's devices up to date |
-| [accounts](spec/access/accounts.md) | access | ACC:ACCOUNTS | | | Travellers' accounts, and signing in with a Google account |
+| [accounts](spec/access/accounts.md) | access | ACC:ACCOUNTS | `@itinero/online` | | Travellers' accounts, and signing in with a Google account |
 | [membership](spec/access/membership.md) | access | ACC:MEMBERSHIP | | | Who is on each trip: its admins, the invitations that bring travellers in, and removing them |
 | [permissions](spec/access/permissions.md) | access | ACC:PERMISSIONS | | | What each traveller may see and change of a trip's pages, calendar and bookings |
 | [places](spec/web/places.md) | web | WEB:PLACES | | | The places a device knows the time zone of: every airport, and the towns of each country its trips visit |
