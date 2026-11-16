@@ -378,7 +378,7 @@ describe("BKG:LIST-F6 — a booking's reference, provider, link, notes and page,
 
   test("check gives the booking frozen, and leaves what it was given alone", () => {
     const given = la800("f", { travellers: ["b", "a"] });
-    const checked = ok(check(given));
+    const checked = ok(check(given)) as FlightBooking;
     assert.deepEqual(checked.travellers, ["a", "b"]);
     assert.deepEqual(given.travellers, ["b", "a"]);
     assert.ok(Object.isFrozen(checked) && Object.isFrozen(checked.legs) && Object.isFrozen(checked.legs[0]) && Object.isFrozen(checked.details));

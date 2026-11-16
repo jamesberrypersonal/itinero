@@ -5,7 +5,7 @@ import { readFileSync, readdirSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { create, loadRules, type TripTime } from "@itinero/trip-time";
-import type { Airport, Details, FlightBooking, Leg, Result } from "../src/index.ts";
+import type { Airport, Details, FlightBooking, Leg, Result, StayBooking } from "../src/index.ts";
 
 const tripTimeRoot = join(dirname(fileURLToPath(import.meta.resolve("@itinero/trip-time"))), "..");
 
@@ -74,3 +74,16 @@ export const la800 = (id = "la800", extra: Partial<FlightBooking> = {}): FlightB
     [leg("LA 800", airport("SCL", "Santiago"), exact(SANTIAGO, december(6), "07:05"), airport("PUQ", "Punta Arenas"), exact(PUNTA_ARENAS, december(6), "10:30"))],
     extra,
   );
+
+export const stay = (id: string, name: string, checkIn: TripTime, checkOut: TripTime, extra: Partial<StayBooking> = {}): StayBooking => ({
+  ...common(id),
+  kind: "stay",
+  name,
+  checkIn,
+  checkOut,
+  ...extra,
+});
+
+/** Hostal Lady Florence, from 9 to 12 December, in Punta Arenas time, as BKG:STAY-F1 gives it. */
+export const ladyFlorence = (id = "5d1a", extra: Partial<StayBooking> = {}): StayBooking =>
+  stay(id, "Hostal Lady Florence", date(PUNTA_ARENAS, december(9)), date(PUNTA_ARENAS, december(12)), extra);

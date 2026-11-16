@@ -9,6 +9,8 @@ export type {
   Seat,
 } from "./flight.ts";
 
+export type { StayBooking } from "./stay.ts";
+
 export type {
   Booking,
   Change,
@@ -28,4 +30,5 @@ export type {
 
 export { check, touches, apply, extent, label, order, onDate, notOver } from "./list.ts";
 export { checkFlight, flightTimes, flightLabel, legDurations, connections } from "./flight.ts";
+export { checkStay, stayTimes, stayLabel, nights } from "./stay.ts";
 export { bookingToText, bookingFromText, changeToText, changeFromText } from "./text.ts";
