@@ -24,6 +24,10 @@ test-pages:
 test-bookings:
     @npm test --workspace @itinero/bookings
 
+# Run the test suite of @itinero/permissions (docs/spec/access/permissions.md §4.8).
+test-permissions:
+    @npm test --workspace @itinero/permissions
+
 # Run the test suite of the online side, in Wrangler (docs/spec/access/accounts.md §4.6).
 test-online:
     @npm test --workspace @itinero/online

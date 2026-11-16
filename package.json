@@ -8,6 +8,7 @@
     "packages/itinerary",
     "packages/pages",
     "packages/bookings",
+    "packages/permissions",
     "services/online"
   ],
   "scripts": {

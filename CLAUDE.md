@@ -15,7 +15,8 @@ rules, and `tools/doc-scaffold` starts new documents as skeletons that pass it.
   `packages/itinerary/` (`@itinero/itinerary`), which uses it, `packages/pages/`
   (`@itinero/pages`), which imports only its types, and `packages/bookings/`
   (`@itinero/bookings`), which uses trip-time, and holds the bookings list and each kind of booking.
-  `package.json` at the root declares the npm workspace.
+  `packages/permissions/` (`@itinero/permissions`) uses pages, and decides what each traveller may
+  see and change. `package.json` at the root declares the npm workspace.
 - `services/online/` (`@itinero/online`) is the Worker of the online side, on Cloudflare, with its
   D1 database. It holds `access/accounts`.
 - `tools/doc-check/` and `tools/doc-scaffold/` are Rust packages, run through `just`.
@@ -33,6 +34,7 @@ just test-trip-time             # the test suite of @itinero/trip-time
 just test-itinerary             # the test suite of @itinero/itinerary
 just test-pages                 # the test suite of @itinero/pages
 just test-bookings              # the test suite of @itinero/bookings
+just test-permissions           # the test suite of @itinero/permissions
 just test-online                # the test suite of the online side, in Wrangler
 npm test                        # the test suites of every package in the npm workspace
 just install-hook               # install the pre-commit hook

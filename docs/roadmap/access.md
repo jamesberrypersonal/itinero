@@ -12,6 +12,14 @@ Access is set page by page, so its design follows the planner's pages, in Milest
 
 ### Phase 1 — Build
 
+#### Milestone Access-1.2 — Permissions
+
+- `access/permissions` is built as `@itinero/permissions`, in `packages/permissions/`, as its
+  specification gives it.
+- Its test suite proves each requirement of `access/permissions` by the verification it carries,
+  except the checks of `ACC:PERMISSIONS-NFR1` that need a phone or a browser. It makes the rest of
+  them on Node.js, under two languages and two time zones.
+
 #### Milestone Access-1.1 — Accounts and signing in
 
 - The Worker of the online side is started, in `services/online/`, as `@itinero/online`, with its
@@ -43,14 +51,6 @@ Access is set page by page, so its design follows the planner's pages, in Milest
 ## Pending
 
 ### Phase 1 — Build
-
-#### Milestone Access-1.2 — Permissions
-
-**Waits on:** Milestone Planner-1.3
-
-- Build `access/permissions` as `@itinero/permissions`, in `packages/permissions/`, as its
-  specification gives it.
-- Prove each requirement of `access/permissions` by the verification it carries.
 
 #### Milestone Access-1.3 — Membership and invitations
 
