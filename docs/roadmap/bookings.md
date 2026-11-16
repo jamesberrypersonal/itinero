@@ -14,6 +14,13 @@ the travellers it names and the admins (ADR-0013, a trip's bookings have a page 
 
 ### Phase 1 — Build
 
+#### Milestone Bookings-1.5 — Activities
+
+- `bookings/activity` is in `@itinero/bookings`, as its specification gives it.
+- Its test suite proves each requirement of `bookings/activity` by the verification it carries, and
+  `BKG:LIST-F4`, `BKG:LIST-F7` and `BKG:LIST-NFR1` by theirs.
+- Its test suite proves `BKG:LIST-NFR2` in Node.js, except the checks that need a phone.
+
 #### Milestone Bookings-1.4 — Journeys
 
 - `bookings/journey` is in `@itinero/bookings`, as its specification gives it.
@@ -60,14 +67,3 @@ the travellers it names and the admins (ADR-0013, a trip's bookings have a page 
   kinds of booking: `bookings/flight`, `bookings/stay`, `bookings/journey` and `bookings/activity`.
   Each has its requirements and its specification, and all five are built as one package,
   `@itinero/bookings`.
-
-## Pending
-
-### Phase 1 — Build
-
-#### Milestone Bookings-1.5 — Activities
-
-- Add `bookings/activity` to `@itinero/bookings`, as its specification gives it.
-- Prove each requirement of `bookings/activity` by the verification it carries.
-- Prove `BKG:LIST-F4`, `BKG:LIST-F7`, `BKG:LIST-NFR1` and `BKG:LIST-NFR2`, whose verification
-  uses bookings of several kinds. Milestone Bookings-1.1 moved them here, for the same reason.

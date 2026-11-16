@@ -5,7 +5,7 @@ import { readFileSync, readdirSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { create, loadRules, type TripTime } from "@itinero/trip-time";
-import type { Airport, Details, FlightBooking, JourneyBooking, Leg, Result, StayBooking } from "../src/index.ts";
+import type { ActivityBooking, Airport, Details, FlightBooking, JourneyBooking, Leg, Result, StayBooking } from "../src/index.ts";
 
 const tripTimeRoot = join(dirname(fileURLToPath(import.meta.resolve("@itinero/trip-time"))), "..");
 
@@ -102,5 +102,21 @@ export const journey = (id: string, by: JourneyBooking["by"], from: string, to: 
 export const busToNatales = (id = "bus", extra: Partial<JourneyBooking> = {}): JourneyBooking =>
   journey(id, "bus", "Punta Arenas", "Puerto Natales", exact(PUNTA_ARENAS, december(9), "13:00"), {
     arrives: exact(PUNTA_ARENAS, december(9), "16:00"),
+    ...extra,
+  });
+
+export const activity = (id: string, sort: ActivityBooking["sort"], title: string, starts: TripTime, extra: Partial<ActivityBooking> = {}): ActivityBooking => ({
+  ...common(id),
+  kind: "activity",
+  sort,
+  title,
+  starts,
+  ...extra,
+});
+
+/** The tour of BKG:ACTIVITY-F1: Torres del Paine full day, from 07:30 to 19:00 on 10 December. */
+export const torresDelPaine = (id = "tdp", extra: Partial<ActivityBooking> = {}): ActivityBooking =>
+  activity(id, "tour", "Torres del Paine full day", exact(PUNTA_ARENAS, december(10), "07:30"), {
+    ends: exact(PUNTA_ARENAS, december(10), "19:00"),
     ...extra,
   });

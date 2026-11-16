@@ -11,6 +11,7 @@ export type {
 
 export type { StayBooking } from "./stay.ts";
 export type { JourneyBooking, Way } from "./journey.ts";
+export type { ActivityBooking, Sort } from "./activity.ts";
 
 export type {
   Booking,
@@ -33,4 +34,5 @@ export { check, touches, apply, extent, label, order, onDate, notOver } from "./
 export { checkFlight, flightTimes, flightLabel, legDurations, connections } from "./flight.ts";
 export { checkStay, stayTimes, stayLabel, nights } from "./stay.ts";
 export { checkJourney, journeyTimes, journeyLabel, journeyDuration } from "./journey.ts";
+export { checkActivity, activityTimes, activityLabel } from "./activity.ts";
 export { bookingToText, bookingFromText, changeToText, changeFromText } from "./text.ts";

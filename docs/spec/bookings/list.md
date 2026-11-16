@@ -266,7 +266,8 @@ stored once can always be read back. `bookingFromText(bookingToText(b))` gives a
 
 The suite runs with `npm test` in `packages/bookings/`, using Node's built-in test runner. The recipe
 `just test-bookings` runs it from anywhere in the repository. It covers the four kinds as well, and
-a check that needs a booking of some kind is in the test file of the kind it uses.
+a check that needs a booking of some kind is in the test file of the kind it uses, or in
+`test/kinds.test.ts` where it uses several kinds.
 
 - **Unit tests** cover each refusal of §3.3 and of each kind, each row of the tables of §4.1 and
   §4.2, and every check in the verification of each requirement the package's specifications claim.

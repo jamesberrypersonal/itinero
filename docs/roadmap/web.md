@@ -103,6 +103,9 @@ theirs, in Milestone Planner-0.2 and Milestone Access-0.1.
 - Prove the requirements of `web/screens` those screens meet, by the verification each carries:
   `WEB:SCREENS-F1`, `WEB:SCREENS-F2`, `WEB:SCREENS-F4`, `WEB:SCREENS-F5`, and `WEB:SCREENS-F7` to
   `WEB:SCREENS-F10`.
+- Prove `BKG:LIST-NFR2` on a phone at least four years old, by the checks of its verification.
+  Milestone Bookings-1.5 proved the rest of `bookings/list`, and moved these checks here, since they
+  need a phone.
 
 #### Milestone Web-1.5 — The calendar, and the screens an admin manages a trip on
 

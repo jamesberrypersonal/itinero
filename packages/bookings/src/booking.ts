@@ -1,6 +1,7 @@
 // The table every kind is reached through (spec/bookings/list.md §4), and reading and writing a
 // booking whatever its kind (§3.3, §5.1).
 
+import { activityOps } from "./activity.ts";
 import { flightOps } from "./flight.ts";
 import { isRecord, plain, type Json, type TimeReader } from "./form.ts";
 import { journeyOps } from "./journey.ts";
@@ -10,7 +11,7 @@ import { fail, type Booking } from "./types.ts";
 
 type Table = { [K in Booking["kind"]]: KindOps<Extract<Booking, { kind: K }>> };
 
-const KINDS: Table = { flight: flightOps, stay: stayOps, journey: journeyOps };
+const KINDS: Table = { flight: flightOps, stay: stayOps, journey: journeyOps, activity: activityOps };
 
 export const KIND_NAMES: readonly string[] = Object.freeze(Object.keys(KINDS).sort());
 
