@@ -271,9 +271,3 @@ so that it changes only with a deploy.
 
 - **A traveller with two Google accounts** has two Itinero accounts, each with its own trips.
   Joining them is future work.
-- **Signing in from an iPhone's home screen.** The sign-in of §4.2 takes an ID token that Google's
-  button gives the web app from a second window. An app opened from an iPhone's home screen may
-  never be given it, as `spec/web/screens.md` §8 says. Google's button can instead send the ID token
-  to an address of the online side, by leaving Itinero for Google's page and returning. That needs a
-  request this specification does not yet hold, and is added only once a trial on an iPhone shows
-  it is needed.

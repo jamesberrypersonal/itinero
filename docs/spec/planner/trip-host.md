@@ -330,7 +330,10 @@ runs it from anywhere in the repository.
 - **Cost tests** count the requests, the rows read and the storage of the day of `PLN:HOST-NFR2`,
   and confirm they are within the free plan's limits. They also measure the processor time of each
   kind of request on a trip of 500 pages and 300 bookings, the first after the Durable Object
-  wakes included, and fail where one takes over 10 milliseconds.
+  wakes included, and fail where one takes over 10 milliseconds. That is the trip host's own
+  budget, well inside the free plan's limit: on the free plan, Milestone Web-0.2's trial ran a
+  Durable Object request of 374 milliseconds of processor time, and loaded the rules file in 6 to
+  23. A Worker on the free plan is held to 10 milliseconds, and a Durable Object is not.
 
 ## 5. Resources
 
@@ -400,11 +403,5 @@ database, since a trip cannot be deleted yet (`ACC-NR4`).
 
 - **Merging edits.** Two travellers' edits to one page are refused, not merged. Merging them
   automatically is future work, and would change how a page's text is stored and sent.
-- **Processor time on the free plan.** Cloudflare gives a Worker on its free plan 10 milliseconds
-  of processor time for each request. Its documents do not say plainly whether a Durable Object on
-  the free plan has the same limit, or the 30 seconds its paid plan gives. The cost tests of §4.7
-  hold every request to 10 milliseconds. Loading the rules file is the request most likely to pass
-  it. Where it does, the choice is a rules file split by region, or the paid plan (ADR-0015,
-  Itinero's online side runs on Cloudflare's free plan).
 - **A trip left without a member.** A trip whose `createTrip` failed keeps its Durable Object, which
   no request reaches. Clearing such objects is not designed.
