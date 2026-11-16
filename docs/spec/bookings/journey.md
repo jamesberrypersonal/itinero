@@ -109,9 +109,10 @@ is absent where the journey has none.
 `Hired car from Santiago to Mendoza`.
 
 `journeyDuration(booking)` gives trip-time's `duration` of the span from `leaves` to `arrives`, or
-`undefined` where the journey has no `arrives` (`BKG:JOURNEY-F2`). Where either time is not exact,
-its `shortest` and `longest` differ, and the web app writes it with trip-time's `formatDuration`,
-such as `about 4 hours`.
+`undefined` where the journey has no `arrives` (`BKG:JOURNEY-F2`). Where either time covers more
+than a moment, such as a window or a whole date, its `shortest` and `longest` differ, and the web
+app writes it with trip-time's `formatDuration`, such as `3–4 h`. An approximate time counts as its
+stated time, as trip-time counts it, so it gives no range.
 
 ## 5. Resources
 

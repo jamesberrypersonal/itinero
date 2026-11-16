@@ -12,6 +12,44 @@ the travellers it names and the admins (ADR-0013, a trip's bookings have a page 
 
 ## Completed
 
+### Phase 1 — Build
+
+#### Milestone Bookings-1.5 — Activities
+
+- `bookings/activity` is in `@itinero/bookings`, as its specification gives it.
+- Its test suite proves each requirement of `bookings/activity` by the verification it carries, and
+  `BKG:LIST-F4`, `BKG:LIST-F7` and `BKG:LIST-NFR1` by theirs.
+- Its test suite proves `BKG:LIST-NFR2` in Node.js, except the checks that need a phone.
+
+#### Milestone Bookings-1.4 — Journeys
+
+- `bookings/journey` is in `@itinero/bookings`, as its specification gives it.
+- Its test suite proves each requirement of `bookings/journey` by the verification it carries, and
+  `BKG:LIST-F5` by its own.
+- The verification of `BKG:JOURNEY-F2` measures a train leaving between 10:00 and 11:00. The
+  journey's requirement and specification say that an approximate time gives no range of durations
+  (`SHR:TRIP-TIME-F5`).
+
+#### Milestone Bookings-1.3 — Stays
+
+- `bookings/stay` is in `@itinero/bookings`, as its specification gives it.
+- Its test suite proves each requirement of `bookings/stay` by the verification it carries, and
+  `BKG:LIST-F1` by its own.
+
+#### Milestone Bookings-1.2 — Flights
+
+- `bookings/flight` is in `@itinero/bookings`, as its specification gives it.
+- Its test suite proves each requirement of `bookings/flight` by the verification it carries, and
+  `BKG:LIST-F2`, `BKG:LIST-F3` and `BKG:LIST-F6` by theirs.
+
+#### Milestone Bookings-1.1 — What every booking has
+
+- `bookings/list` is built as `@itinero/bookings`, in `packages/bookings/`, as its specification
+  gives it, with one table that reaches each kind of booking. A booking of a kind not yet built is
+  refused with `unknown-kind`.
+- Its test suite proves the checks of `bookings/list` that need no kind of booking: the form of a
+  change and of its text, `touches`, and the refusals of `apply` made before a booking's own checks.
+
 ### Phase 0 — Design
 
 #### Milestone Bookings-0.1 — The bookings page
@@ -29,35 +67,3 @@ the travellers it names and the admins (ADR-0013, a trip's bookings have a page 
   kinds of booking: `bookings/flight`, `bookings/stay`, `bookings/journey` and `bookings/activity`.
   Each has its requirements and its specification, and all five are built as one package,
   `@itinero/bookings`.
-
-## Pending
-
-### Phase 1 — Build
-
-#### Milestone Bookings-1.1 — What every booking has
-
-**Waits on:** Milestone Planner-1.1
-
-- Build `bookings/list` as `@itinero/bookings`, in `packages/bookings/`, as its specification
-  gives it.
-- Prove each requirement of `bookings/list` by the verification it carries.
-
-#### Milestone Bookings-1.2 — Flights
-
-- Add `bookings/flight` to `@itinero/bookings`, as its specification gives it.
-- Prove each requirement of `bookings/flight` by the verification it carries.
-
-#### Milestone Bookings-1.3 — Stays
-
-- Add `bookings/stay` to `@itinero/bookings`, as its specification gives it.
-- Prove each requirement of `bookings/stay` by the verification it carries.
-
-#### Milestone Bookings-1.4 — Journeys
-
-- Add `bookings/journey` to `@itinero/bookings`, as its specification gives it.
-- Prove each requirement of `bookings/journey` by the verification it carries.
-
-#### Milestone Bookings-1.5 — Activities
-
-- Add `bookings/activity` to `@itinero/bookings`, as its specification gives it.
-- Prove each requirement of `bookings/activity` by the verification it carries.

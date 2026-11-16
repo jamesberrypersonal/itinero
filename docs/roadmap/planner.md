@@ -106,7 +106,7 @@ the planner's itinerary. The planner is the first system that needs that compone
 
 #### Milestone Planner-1.4 — The trip held online
 
-**Waits on:** Milestone Access-1.3, Milestone Bookings-1.1, Milestone Web-0.2
+**Waits on:** Milestone Access-1.3, Milestone Bookings-1.5, Milestone Web-0.2
 
 - Rebuild `packages/trip-time/rules/2026f.json` with the build script, from IANA's own release,
   and confirm the test suite still passes. Milestone Planner-1.1 moved this here, since the release
@@ -116,3 +116,6 @@ the planner's itinerary. The planner is the first system that needs that compone
 - Prove each requirement of `planner/trip-host` by the verification it carries.
 - Prove the planner system's own requirements that need only the online side, such as changes
   shared between travellers. Those that need a phone wait for the web app.
+- Prove the bookings system's requirements that need only the online side, by the verification
+  each carries: `BKG-F1`, and `BKG-F5` but for its check that a removed booking is gone from every
+  traveller's bookings page. Milestone Web-1.4 proves the rest of the bookings system.

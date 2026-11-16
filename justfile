@@ -20,6 +20,10 @@ test-itinerary:
 test-pages:
     @npm test --workspace @itinero/pages
 
+# Run the test suite of @itinero/bookings, with its four kinds (docs/spec/bookings/list.md §4.6).
+test-bookings:
+    @npm test --workspace @itinero/bookings
+
 # Write the skeleton documents and index rows for a new component.
 new-component *args:
     @cargo run --release --quiet --package doc-scaffold -- component "$@"
