@@ -12,6 +12,13 @@ Access is set page by page, so its design follows the planner's pages, in Milest
 
 ### Phase 1 — Build
 
+#### Milestone Access-1.3 — Membership and invitations
+
+- `access/membership` is in the Worker, with the tables of its records, as its specification gives
+  it. It sends invitations through Resend.
+- Its test suite proves each requirement of `access/membership` by the verification it carries,
+  against a stand-in for Resend that keeps each email sent, and one for `planner/trip-host`.
+
 #### Milestone Access-1.2 — Permissions
 
 - `access/permissions` is built as `@itinero/permissions`, in `packages/permissions/`, as its
@@ -52,12 +59,6 @@ Access is set page by page, so its design follows the planner's pages, in Milest
 
 ### Phase 1 — Build
 
-#### Milestone Access-1.3 — Membership and invitations
-
-- Build `access/membership` in the Worker, with invitations sent through Resend, as its
-  specification gives it.
-- Prove each requirement of `access/membership` by the verification it carries.
-
 #### Milestone Access-1.4 — The online side on Cloudflare
 
 - Register Itinero with Google, and set its client identifier as `GOOGLE_CLIENT_ID` in the
@@ -67,3 +68,8 @@ Access is set page by page, so its design follows the planner's pages, in Milest
   to Cloudflare's free plan.
 - Sign in to the deployed Worker with two test accounts at Google, by the checks of the
   verification of `ACC:ACCOUNTS-F1`.
+- Have Resend check Itinero's domain, set the address invitations are sent from as
+  `INVITATIONS_FROM`, and set the Worker's secret `RESEND_API_KEY`. Milestone Access-1.3 moved
+  this here, for the same reason.
+- Invite an address from the deployed Worker, and confirm the email reaches it, by the first check
+  of the verification of `ACC:MEMBERSHIP-F2`.

@@ -12,6 +12,9 @@ crons = ["0 3 * * *"]
 # Itinero's client identifier at Google, which is public (docs/spec/access/accounts.md §5).
 # Replace it with the identifier Google gives once Itinero is registered there.
 GOOGLE_CLIENT_ID = "not-registered-yet.apps.googleusercontent.com"
+# The address invitations are sent from, at a domain Resend has checked
+# (docs/spec/access/membership.md §3.4). Replace it once Itinero's domain is set up at Resend.
+INVITATIONS_FROM = "Itinero <invitations@itinero.invalid>"
 
 # Accounts and membership, in one D1 database (ADR-0015). Replace database_id with the
 # identifier `wrangler d1 create itinero` gives, before the first deploy.
@@ -21,5 +24,5 @@ database_name = "itinero"
 database_id = "00000000-0000-0000-0000-000000000000"
 migrations_dir = "migrations"
 
-# NONCE_KEY is a secret, set with `wrangler secret put NONCE_KEY`, never in the repository.
+# NONCE_KEY and RESEND_API_KEY are secrets, set with `wrangler secret put`, never in the repository.
 # For `wrangler dev`, put it in .dev.vars, which git ignores.

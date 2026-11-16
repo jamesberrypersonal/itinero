@@ -1,9 +1,7 @@
 // A stand-in for Google (docs/spec/access/accounts.md §4.6). It signs ID tokens with a key of its
-// own, and answers the Worker's fetch of Google's key set with that key's public half.
+// own, and answers the Worker's fetch of Google's key set with that key's public half (outbound.ts).
 
-import { vi } from "vitest";
 import { toBase64url } from "../src/bytes.ts";
-import { GOOGLE_KEYS } from "../src/google.ts";
 
 export const CLIENT_ID = "itinero-test.apps.googleusercontent.com";
 
@@ -27,16 +25,12 @@ export const stranger = await newSigner();
 /** How many times the Worker has fetched the key set. */
 export let keyFetches = 0;
 
-const realFetch = globalThis.fetch;
-vi.spyOn(globalThis, "fetch").mockImplementation(async (input, init) => {
-  const url = input instanceof Request ? input.url : String(input);
-  if (url === GOOGLE_KEYS) {
-    keyFetches++;
-    const keys = [{ ...google.publicJwk, kid: google.kid, alg: "RS256", use: "sig" }];
-    return Response.json({ keys }, { headers: { "Cache-Control": "public, max-age=3600" } });
-  }
-  return realFetch(input, init);
-});
+/** The stand-in's answer to the Worker's fetch of Google's key set. */
+export function keySet(): Response {
+  keyFetches++;
+  const keys = [{ ...google.publicJwk, kid: google.kid, alg: "RS256", use: "sig" }];
+  return Response.json({ keys }, { headers: { "Cache-Control": "public, max-age=3600" } });
+}
 
 /** A person with an account at Google. */
 export type Person = { sub: string; email?: string; emailVerified?: boolean; name?: string };

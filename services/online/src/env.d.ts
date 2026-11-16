@@ -9,5 +9,9 @@ declare namespace Cloudflare {
     GOOGLE_CLIENT_ID: string;
     /** 32 random bytes in base64url, a secret of the Worker, that nonces are made with. */
     NONCE_KEY: string;
+    /** The key Itinero sends emails through Resend with, a secret of the Worker. */
+    RESEND_API_KEY: string;
+    /** The address invitations are sent from, at Itinero's own domain. */
+    INVITATIONS_FROM: string;
   }
 }

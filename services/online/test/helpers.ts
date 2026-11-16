@@ -4,6 +4,7 @@ import { env } from "cloudflare:test";
 import { expect } from "vitest";
 import { answer } from "../src/index.ts";
 import { idToken, type Person, type TokenOptions } from "./google.ts";
+import "./outbound.ts";
 
 export const ORIGIN = "https://itinero.test";
 

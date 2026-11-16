@@ -1,25 +1,17 @@
 // The Worker of Itinero's online side. It checks the version of the web app behind each request
 // (docs/spec/access/accounts.md §4.7), then passes the request to the component that answers it.
 
-import { authenticate, forgetExpired, makeNonce, setName, signIn, signOut, type Account } from "./accounts.ts";
+import { authenticate, forgetExpired, makeNonce, setName, signIn, signOut } from "./accounts.ts";
+import { closeExpired } from "./membership.ts";
 import { body, refused, type Refusal } from "./result.ts";
+import { membershipRoutes } from "./membership-routes.ts";
+import type { Route } from "./route.ts";
 import { clearSession, sessionOf, setSession } from "./session.ts";
 
 /** The oldest number in `Itinero-Api` the online side answers (§4.7). It changes only with a deploy. */
 export const OLDEST_API = 1;
 
-/** A request from a signed-in device: the account behind it, and the headers to answer with. */
-type SignedIn = { account: Account; headers: Headers };
-
-type Route = {
-  method: string;
-  path: RegExp;
-  /** Whether the request needs a session. */
-  signedIn: boolean;
-  answer: (request: Request, match: RegExpMatchArray, by: SignedIn | undefined) => Promise<Response>;
-};
-
-const routes: Route[] = [
+const accountRoutes: Route[] = [
   {
     method: "POST",
     path: /^\/api\/auth\/nonce$/,
@@ -70,6 +62,8 @@ function refusal(code: string, message: string): Refusal {
   return { code, message };
 }
 
+const routes: Route[] = [...accountRoutes, ...membershipRoutes];
+
 /** Whether a request carries a version of the web app the online side answers (§4.7). */
 function versionAnswered(request: Request): boolean {
   // A browser lets no page add a header to the request that opens a WebSocket.
@@ -79,6 +73,15 @@ function versionAnswered(request: Request): boolean {
 }
 
 export async function answer(request: Request): Promise<Response> {
+  try {
+    return await route(request);
+  } catch (error) {
+    console.error(error);
+    return Response.json({ code: "failed", message: "Something went wrong on Itinero's side. Try again." }, { status: 500 });
+  }
+}
+
+async function route(request: Request): Promise<Response> {
   const url = new URL(request.url);
   if (!url.pathname.startsWith("/api/")) {
     return refused(refusal("not-found", "Nothing is here."));
@@ -103,5 +106,6 @@ export default {
   fetch: (request, _env, _ctx) => answer(request),
   scheduled: async (controller, _env, _ctx) => {
     await forgetExpired(controller.scheduledTime);
+    await closeExpired(controller.scheduledTime);
   },
 } satisfies ExportedHandler<Cloudflare.Env>;

@@ -21,6 +21,15 @@ const STATUS: Record<string, number> = {
   "update-first": 426,
   malformed: 400,
   "not-found": 404,
+  // access/membership (docs/spec/access/membership.md §3.2)
+  "admin-only": 403,
+  "not-a-member": 404,
+  creator: 409,
+  "already-a-member": 409,
+  "bad-email": 400,
+  "bad-invitation": 404,
+  "wrong-account": 403,
+  "not-sent": 502,
 };
 
 /** The response a refusal is given: its status, and `{ code, message }`. */
