@@ -182,6 +182,9 @@ the loaded rules:
 - a clock time marked as the second occurrence, whose offset no longer matches a second occurrence,
   loses its mark, and means its only or first occurrence
 
+A window whose two ends fall in one gap then means a single moment, and `parse` refuses it with
+`window-order`, until TODO-17 is done.
+
 ### 4.2 From a local time to a moment
 
 *Plumbing:* the offset of a zone at a moment is found in the zone's entry of the rules file
@@ -447,7 +450,8 @@ Node's type definitions.
   tests of §4.12 run under two device time zones.
 - **Deterministic.** Every function but `loadRules` gives the same result for the same arguments
   and the same rules. `sort` keeps tied values in the order given.
-- **Readable forever.** `parse` reads any text `toText` wrote, under any later rules (§4.1).
+- **Readable forever.** `parse` reads any text `toText` wrote, under any later rules (§4.1), except
+  a window whose two ends fall in one gap under those rules, until TODO-17 is done.
 - **Fast.** Finding an offset is a binary search of one zone's changes. `sort` works out each
   value's sort key once, before it sorts.
 
