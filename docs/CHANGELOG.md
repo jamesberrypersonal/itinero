@@ -4,6 +4,16 @@ What has been done, newest first. The live work list, `TODO.md`, numbers each pi
 owed, such as TODO-9. An entry that finishes one of those items names it, so a reader can find what
 became of its number. `documentation-system.md` sets the rules.
 
+## 2026-11-16 — TODO-17, trip-time reads back a stored window in any order
+
+*By:* James Berry, with Claude
+
+trip-time's `parse` reads back every window `toText` wrote, under any later rules. Later rules
+could put a stored window out of order, when they skip the hour both its ends fall in, or when its
+end loses its mark as the second occurrence of a repeated time. `parse` refused such a window with
+`window-order`. It now reads a window in any order, and one whose end is not after its start covers
+only its start. `create` still refuses a window out of order.
+
 ## 2026-11-14 — TODO-5, a place's time zone is filled in from the place
 
 *By:* James Berry, with Claude

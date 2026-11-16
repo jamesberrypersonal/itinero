@@ -136,7 +136,7 @@ describe("not-repeated", () => {
 });
 
 describe("window-order", () => {
-  test("a window whose end is not after its start", () => {
+  test("a window whose end is not after its start, from create only", () => {
     const window = (from: string, to: string, endDate = "2026-06-03") => ({
       kind: "window",
       zone: PARIS,
@@ -148,7 +148,8 @@ describe("window-order", () => {
     assert.equal(code(window("16:00", "14:00")), "window-order");
     assert.equal(code(window("14:00", "14:00")), "window-order");
     assert.equal(code(window("14:00", "16:00", "2026-06-02")), "window-order");
-    assert.equal(parsed("2026-06-03T16:00/14:00[Europe/Paris]"), "window-order");
+    // parse reads stored text, which later rules can put out of order (spec §4.4).
+    assert.ok(parse("2026-06-03T16:00/14:00[Europe/Paris]").ok);
     assert.ok(create(window("23:00", "01:00", "2026-06-04") as TripTime).ok);
   });
 

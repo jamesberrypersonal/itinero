@@ -32,8 +32,11 @@ export function coverOf(value: TripTime): { earliest: number; latest: number } {
       const moment = clockMoment(zone, value.date, value.at);
       return { earliest: moment, latest: moment };
     }
-    case "window":
-      return { earliest: clockMoment(zone, value.date, value.from), latest: clockMoment(zone, value.endDate, value.to) };
+    case "window": {
+      // A window read back out of order covers only its start (§4.5).
+      const start = clockMoment(zone, value.date, value.from);
+      return { earliest: start, latest: Math.max(start, clockMoment(zone, value.endDate, value.to)) };
+    }
     case "part": {
       const [from, to] = PART_HOURS[value.part];
       const start = dayStart(value.date);

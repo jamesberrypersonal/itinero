@@ -108,7 +108,7 @@ The kinds map to the six kinds of the requirements: `exact` is an exact time, `d
 | `no-rules` | `create`, `parse`, `span` | No rules file has been loaded |
 | `skipped-time` | `create` | A clock time that falls in a gap (§4.2). The details give `before` and `after` |
 | `not-repeated` | `create` | A clock time marked `second` that does not happen twice on its date |
-| `window-order` | `create`, `parse` | A window whose end is not after its start |
+| `window-order` | `create` | A window whose end is not after its start |
 | `span-order` | `span` | A span that certainly ends before it starts (§4.7) |
 | `bad-rules` | `loadRules` | A rules file that is not in the form §5.1 gives |
 
@@ -182,8 +182,9 @@ the loaded rules:
 - a clock time marked as the second occurrence, whose offset no longer matches a second occurrence,
   loses its mark, and means its only or first occurrence
 
-A window whose two ends fall in one gap then means a single moment, and `parse` refuses it with
-`window-order`, until TODO-17 is done.
+A window `toText` wrote can then be out of order, with an end that is not after its start. Its two
+ends can fall in one gap, and both take one moment. Its end can lose its mark, and come before its
+start. `parse` reads such a window as it reads any other, and it covers only its start (§4.5).
 
 ### 4.2 From a local time to a moment
 
@@ -230,8 +231,9 @@ refuses them.
 ### 4.4 parse and toText
 
 *Porcelain:* `parse(text)` reads one value in the text form of §4.1, and refuses text in any
-other form with `malformed`. It applies the same checks as `create` except the gap and the mark,
-which §4.1 resolves instead. `toText(value)` writes the text form, and never refuses.
+other form with `malformed`. It applies the same checks as `create` except three. It resolves the
+gap and the mark as §4.1 gives, and it reads a window in any order, since later rules can put a
+stored window out of order. `toText(value)` writes the text form, and never refuses.
 
 ### 4.5 The moments a value covers
 
@@ -242,7 +244,7 @@ which §4.1 resolves instead. `toText(value)` writes the text form, and never re
 |---|---|---|
 | `exact` | Its moment | Its moment |
 | `approx` | The moment of its stated time | The same |
-| `window` | The moment of its start | The moment of its end |
+| `window` | The moment of its start | The moment of its end, or of its start where that is later |
 | `part` | The start of its hours | The end of its hours |
 | `date`, `tbd` | The start of its date | The start of the next date |
 
@@ -390,7 +392,8 @@ package of the npm workspace, on every push and pull request.
 - **Round-trip tests** confirm `parse(toText(v))` equals `v` for every kind, with and without
   marks.
 - **Rule-change tests** load two rules files that differ for one zone, and confirm a stored value
-  keeps its local time under both (`SHR:TRIP-TIME-F2`).
+  keeps its local time under both (`SHR:TRIP-TIME-F2`). They include a window each file puts out of
+  order, read back under the other.
 - **Time-zone independence tests** write, sort and measure the same values in two processes, with
   the `TZ` environment variable set to `Europe/London` in one and to `Asia/Tokyo` in the other, and
   confirm every result is the same (`SHR:TRIP-TIME-NFR2`).
@@ -450,8 +453,7 @@ Node's type definitions.
   tests of §4.12 run under two device time zones.
 - **Deterministic.** Every function but `loadRules` gives the same result for the same arguments
   and the same rules. `sort` keeps tied values in the order given.
-- **Readable forever.** `parse` reads any text `toText` wrote, under any later rules (§4.1), except
-  a window whose two ends fall in one gap under those rules, until TODO-17 is done.
+- **Readable forever.** `parse` reads any text `toText` wrote, under any later rules (§4.1).
 - **Fast.** Finding an offset is a binary search of one zone's changes. `sort` works out each
   value's sort key once, before it sorts.
 
