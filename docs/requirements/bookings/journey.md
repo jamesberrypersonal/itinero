@@ -37,17 +37,22 @@ place. For a hired car, it leaves when the car is collected, and arrives when th
 
 A journey whose arrival is certainly before its departure, in the time that really passes, is
 refused. A journey that holds both times gives how long it takes, as the shortest and the longest it
-can be where either time is not exact. A journey of more than 366 days is refused. ^bkg-journey-f2
+can be where either time covers more than a moment, such as a window. A journey of more than 366 days
+is refused. ^bkg-journey-f2
 
 - **Verification:**
     - on the bus of `BKG:JOURNEY-F1`, confirm it takes 3 hours
     - add a train leaving at 10:00 and arriving at 09:00 the same day, in one time zone, and confirm
       it is refused, with the reason
-    - add a train leaving at around 10:00 and arriving at 14:00, and confirm it gives the time it
-      takes as about 4 hours
+    - add a train leaving between 10:00 and 11:00 and arriving at 14:00, and confirm it gives the time
+      it takes as 3 to 4 hours
 
 > **What does this buy?** A time copied into the wrong day is caught when it is entered, and a
 > traveller sees how long they will be on the road.
+
+> **Why does a journey leaving at around 10:00 take a time with no range?** `shared/trip-time`
+> counts an approximate time as its stated time, since "around 10:00" has no edge to measure from
+> (`SHR:TRIP-TIME-F5`). A train leaving at around 10:00 and arriving at 14:00 takes 4 hours.
 
 ### BKG:JOURNEY-F3 — A journey can hold who runs it, its service and the traveller's seat, as written on the ticket
 

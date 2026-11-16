@@ -14,6 +14,15 @@ the travellers it names and the admins (ADR-0013, a trip's bookings have a page 
 
 ### Phase 1 — Build
 
+#### Milestone Bookings-1.4 — Journeys
+
+- `bookings/journey` is in `@itinero/bookings`, as its specification gives it.
+- Its test suite proves each requirement of `bookings/journey` by the verification it carries, and
+  `BKG:LIST-F5` by its own.
+- The verification of `BKG:JOURNEY-F2` measures a train leaving between 10:00 and 11:00. The
+  journey's requirement and specification say that an approximate time gives no range of durations
+  (`SHR:TRIP-TIME-F5`).
+
 #### Milestone Bookings-1.3 — Stays
 
 - `bookings/stay` is in `@itinero/bookings`, as its specification gives it.
@@ -55,13 +64,6 @@ the travellers it names and the admins (ADR-0013, a trip's bookings have a page 
 ## Pending
 
 ### Phase 1 — Build
-
-#### Milestone Bookings-1.4 — Journeys
-
-- Add `bookings/journey` to `@itinero/bookings`, as its specification gives it.
-- Prove each requirement of `bookings/journey` by the verification it carries.
-- Prove `BKG:LIST-F5`, whose verification uses a stay and a bus. Milestone Bookings-1.1 moved it
-  here, for the same reason.
 
 #### Milestone Bookings-1.5 — Activities
 

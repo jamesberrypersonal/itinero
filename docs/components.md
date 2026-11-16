@@ -38,7 +38,7 @@ system, component or concern is added here before any document names it.
 |---|---|---|---|---|---|
 | flight | BKG:FLIGHT | no | yes | `FlightBooking` | A flight, in one or more legs, each leaving and arriving in its own airport's local time |
 | stay | BKG:STAY | no | yes | `StayBooking` | One or more nights' stay, such as a hotel or a flat, from check-in to check-out |
-| journey | BKG:JOURNEY | no | yes | `JourneyBooking`, not built yet | A train, a bus, a ferry or a hired car, from one place to another, with a time at each end |
+| journey | BKG:JOURNEY | no | yes | `JourneyBooking` | A train, a bus, a ferry or a hired car, from one place to another, with a time at each end |
 | activity | BKG:ACTIVITY | no | yes | `ActivityBooking`, not built yet | A tour, a ticket or a table, at one place, on a date and perhaps at a time |
 
 ## Cross-cutting concerns

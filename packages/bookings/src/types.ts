@@ -3,6 +3,7 @@
 
 import type { LocalDate, Refusal, Result, TripTime } from "@itinero/trip-time";
 import type { FlightBooking } from "./flight.ts";
+import type { JourneyBooking } from "./journey.ts";
 import type { StayBooking } from "./stay.ts";
 
 export type { Duration, LocalDate, Refusal, Result, TripTime } from "@itinero/trip-time";
@@ -25,7 +26,7 @@ export type Details = {
 export type Common = { id: Id; revision: number; travellers: readonly TravellerId[]; details: Details };
 
 /** A booking of one of the kinds the package holds, each of which its own module gives. */
-export type Booking = FlightBooking | StayBooking;
+export type Booking = FlightBooking | StayBooking | JourneyBooking;
 
 export type Change =
   | { op: "add"; booking: Booking }
@@ -64,7 +65,10 @@ export type RefusalCode =
   // A stay's (spec/bookings/stay.md §3.3)
   | "zone-mismatch"
   | "stay-order"
-  | "stay-length";
+  | "stay-length"
+  // A journey's (spec/bookings/journey.md §3.3), beside travel-order
+  | "unknown-way"
+  | "too-long";
 
 /** A refusal of this package, thrown inside a check and caught where a Result is returned. */
 export class Refused extends Error {
