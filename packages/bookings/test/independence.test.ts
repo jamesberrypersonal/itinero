@@ -14,6 +14,6 @@ const run = (tz: string) => execFileSync(process.execPath, [script], { env: { ..
 test("BKG:LIST-NFR1 — the same results under London and Tokyo time", () => {
   const london = run("Europe/London");
   const tokyo = run("Asia/Tokyo");
-  assert.ok(JSON.parse(london).touches);
+  assert.ok(JSON.parse(london).order.length > 0);
   assert.equal(tokyo, london);
 });

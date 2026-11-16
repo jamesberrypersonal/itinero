@@ -2,6 +2,7 @@
 // module of the package throws inside a check and returns as a Result.
 
 import type { LocalDate, Refusal, Result, TripTime } from "@itinero/trip-time";
+import type { FlightBooking } from "./flight.ts";
 
 export type { Duration, LocalDate, Refusal, Result, TripTime } from "@itinero/trip-time";
 
@@ -22,8 +23,8 @@ export type Details = {
 
 export type Common = { id: Id; revision: number; travellers: readonly TravellerId[]; details: Details };
 
-/** A booking of a kind the package holds. Each kind's milestone narrows this to its own type. */
-export type Booking = Common & { kind: string };
+/** A booking of one of the kinds the package holds, each of which its own module gives. */
+export type Booking = FlightBooking;
 
 export type Change =
   | { op: "add"; booking: Booking }
@@ -47,7 +48,18 @@ export type RefusalCode =
   | "unknown-id"
   | "kind-change"
   | "stale"
-  | "unknown-format";
+  | "unknown-format"
+  // A flight's (spec/bookings/flight.md §3.3)
+  | "no-legs"
+  | "too-many-legs"
+  | "bad-flight"
+  | "bad-airport"
+  | "exact-only"
+  | "travel-order"
+  | "leg-order"
+  | "bad-seat"
+  | "seat-traveller"
+  | "duplicate-seat";
 
 /** A refusal of this package, thrown inside a check and caught where a Result is returned. */
 export class Refused extends Error {

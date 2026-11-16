@@ -3,6 +3,13 @@
 // section numbers are cited throughout.
 
 export type {
+  Airport,
+  FlightBooking,
+  Leg,
+  Seat,
+} from "./flight.ts";
+
+export type {
   Booking,
   Change,
   Common,
@@ -20,4 +27,5 @@ export type {
 } from "./types.ts";
 
 export { check, touches, apply, extent, label, order, onDate, notOver } from "./list.ts";
+export { checkFlight, flightTimes, flightLabel, legDurations, connections } from "./flight.ts";
 export { bookingToText, bookingFromText, changeToText, changeFromText } from "./text.ts";

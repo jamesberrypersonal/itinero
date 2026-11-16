@@ -14,7 +14,7 @@ before(() => {
 
 /** A booking as a caller holds it. touches and the checks before a booking's own never look at its kind's fields. */
 const held = (id: string, revision: number, travellers: string[], kind = "flight"): Booking =>
-  Object.freeze({ id, revision, travellers: Object.freeze(travellers), details: Object.freeze({}), kind });
+  Object.freeze({ id, revision, travellers: Object.freeze(travellers), details: Object.freeze({}), kind }) as unknown as Booking;
 
 describe("malformed", () => {
   test("a booking or a change not in the form of §3.3", () => {
@@ -41,7 +41,7 @@ describe("malformed", () => {
 
 describe("refusals of check and apply needing no kind", () => {
   test("unknown-kind", () => {
-    const plane = { id: "a", revision: 0, travellers: ["t1"], details: {}, kind: "plane" } as Booking;
+    const plane = { id: "a", revision: 0, travellers: ["t1"], details: {}, kind: "plane" } as unknown as Booking;
     const refused = refusal(check(plane));
     assert.equal(refused.code, "unknown-kind");
     assert.match(refused.message, /"plane"/);

@@ -5,7 +5,7 @@ import { readFileSync, readdirSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { create, loadRules, type TripTime } from "@itinero/trip-time";
-import type { Result } from "../src/index.ts";
+import type { Airport, Details, FlightBooking, Leg, Result } from "../src/index.ts";
 
 const tripTimeRoot = join(dirname(fileURLToPath(import.meta.resolve("@itinero/trip-time"))), "..");
 
@@ -48,3 +48,29 @@ export const window = (zone: string, on: string, from: string, to: string, endDa
 
 /** A date in December 2026, when every example of the specifications happens. */
 export const december = (d: number) => `2026-12-${String(d).padStart(2, "0")}`;
+
+export const PARIS = "Europe/Paris";
+export const NEW_YORK = "America/New_York";
+
+/** The fields every booking has, as a caller gives them. */
+export const common = (id: string, travellers: string[] = ["acct-1"], details: Details = {}) => ({ id, revision: 0, travellers, details });
+
+export const airport = (code: string, name?: string): Airport => (name === undefined ? { code } : { code, name });
+
+export const leg = (flight: string, from: Airport, leaves: TripTime, to: Airport, arrives: TripTime): Leg => ({ flight, from, to, leaves, arrives });
+
+export const flight = (id: string, legs: Leg[], extra: Partial<FlightBooking> = {}): FlightBooking => ({
+  ...common(id),
+  kind: "flight",
+  legs,
+  seats: [],
+  ...extra,
+});
+
+/** LA 800 from Santiago at 07:05 on 6 December to Punta Arenas at 10:30, as BKG:FLIGHT-F1 gives it. */
+export const la800 = (id = "la800", extra: Partial<FlightBooking> = {}): FlightBooking =>
+  flight(
+    id,
+    [leg("LA 800", airport("SCL", "Santiago"), exact(SANTIAGO, december(6), "07:05"), airport("PUQ", "Punta Arenas"), exact(PUNTA_ARENAS, december(6), "10:30"))],
+    extra,
+  );

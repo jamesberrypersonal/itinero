@@ -14,6 +14,12 @@ the travellers it names and the admins (ADR-0013, a trip's bookings have a page 
 
 ### Phase 1 — Build
 
+#### Milestone Bookings-1.2 — Flights
+
+- `bookings/flight` is in `@itinero/bookings`, as its specification gives it.
+- Its test suite proves each requirement of `bookings/flight` by the verification it carries, and
+  `BKG:LIST-F2`, `BKG:LIST-F3` and `BKG:LIST-F6` by theirs.
+
 #### Milestone Bookings-1.1 — What every booking has
 
 - `bookings/list` is built as `@itinero/bookings`, in `packages/bookings/`, as its specification
@@ -43,13 +49,6 @@ the travellers it names and the admins (ADR-0013, a trip's bookings have a page 
 ## Pending
 
 ### Phase 1 — Build
-
-#### Milestone Bookings-1.2 — Flights
-
-- Add `bookings/flight` to `@itinero/bookings`, as its specification gives it.
-- Prove each requirement of `bookings/flight` by the verification it carries.
-- Prove `BKG:LIST-F2`, `BKG:LIST-F3` and `BKG:LIST-F6`, whose verification uses a flight.
-  Milestone Bookings-1.1 moved them here, since each needs a booking of some kind.
 
 #### Milestone Bookings-1.3 — Stays
 
