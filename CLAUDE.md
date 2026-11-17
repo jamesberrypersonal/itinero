@@ -20,7 +20,9 @@ rules, and `tools/doc-scaffold` starts new documents as skeletons that pass it.
 - `services/online/` (`@itinero/online`) is the Worker of the online side, on Cloudflare, with its
   D1 database. It holds `access/accounts` and `access/membership`.
 - `apps/web/` (`@itinero/web`) is the web app, built with Preact and Vite, and served by the Worker
-  as its static files. It holds `web/shell`, and will hold the web app's other components.
+  as its static files. It holds `web/shell` and `web/places`, and will hold the web app's other
+  components. Its places, every country's towns and every airport, are built into
+  `apps/web/places/` by `npm run build-places -- <date>`.
 - `tools/doc-check/` and `tools/doc-scaffold/` are Rust packages, run through `just`.
 - `tools/hooks/pre-commit` is an optional hook that runs the checker before each commit.
 

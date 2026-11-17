@@ -26,6 +26,8 @@ export type Online = {
   publish(dir: string, oldestApi?: number): void;
   /** Deploys newer rules beside the version already served, as `npm run build-rules` does. */
   publishRules(file: string): void;
+  /** Deploys one file beside the version already served, such as a newer list of places. */
+  publishFile(path: string, file: string): void;
   /**
    * Makes the online side unreachable, or reachable again. Taking a browser offline does not stop
    * the browser's own checks for a new service worker in every engine, so the tests do both.
@@ -39,7 +41,7 @@ export type Online = {
 export async function startOnline(dir: string): Promise<Online> {
   let served = dir;
   let oldestApi = 1;
-  let rules: string | undefined;
+  let published = new Map<string, string>();
   let up = true;
   const requests: string[] = [];
 
@@ -61,18 +63,19 @@ export async function startOnline(dir: string): Promise<Online> {
       );
       return;
     }
-    if (url.pathname === "/time-zone-rules.json" && rules !== undefined) {
+    const file = published.get(url.pathname);
+    if (file !== undefined) {
       response.writeHead(200, { "Content-Type": TYPES[".json"]!, "Cache-Control": "no-cache" });
-      response.end(rules);
+      response.end(file);
       return;
     }
     const path = normalize(join(served, decodeURIComponent(url.pathname)));
-    const file = path.startsWith(served) && (await isFile(path)) ? path : join(served, "index.html");
+    const found = path.startsWith(served) && (await isFile(path)) ? path : join(served, "index.html");
     response.writeHead(200, {
-      "Content-Type": TYPES[extname(file)] ?? "application/octet-stream",
+      "Content-Type": TYPES[extname(found)] ?? "application/octet-stream",
       "Cache-Control": "public, max-age=0, must-revalidate",
     });
-    response.end(await readFile(file));
+    response.end(await readFile(found));
   });
 
   await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
@@ -83,10 +86,13 @@ export async function startOnline(dir: string): Promise<Online> {
     publish(next, oldest = 1) {
       served = next;
       oldestApi = oldest;
-      rules = undefined;
+      published = new Map();
     },
     publishRules(file) {
-      rules = file;
+      published.set("/time-zone-rules.json", file);
+    },
+    publishFile(path, file) {
+      published.set(path, file);
     },
     reachable(yes) {
       up = yes;

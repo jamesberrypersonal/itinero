@@ -14,6 +14,18 @@ theirs, in Milestone Planner-0.2 and Milestone Access-0.1.
 
 ### Phase 1 — Build
 
+#### Milestone Web-1.2 — Places
+
+- The build of the places, `npm run build-places`, makes every country's towns from GeoNames and
+  every airport from OurAirports, each airport in the time zone of the nearest town in its country.
+  Its files, built from the data of 2026-11-16, are in `apps/web/places/`, and each build of the web
+  app serves them beside its version.
+- `web/places` is built in `@itinero/web`, as its specification gives it. Each town in its files
+  carries its population, so that the towns of two countries are ordered against each other.
+- Its test suite proves each requirement of `web/places` by the verification it carries, the fetch
+  tests in Chromium, WebKit and Firefox against a stand-in trip store, except the check of
+  `WEB:PLACES-NFR1` on a phone.
+
 #### Milestone Web-1.1 — The shell
 
 - `@itinero/web` is started, in `apps/web/`, with Preact and Vite, and is served by the Worker of
@@ -75,17 +87,12 @@ theirs, in Milestone Planner-0.2 and Milestone Access-0.1.
 
 ### Phase 1 — Build
 
-#### Milestone Web-1.2 — Places
-
-- Write the build that makes the lists of airports and towns, and build `web/places`, as its
-  specification gives them.
-- Prove each requirement of `web/places` by the verification it carries.
-
 #### Milestone Web-1.3 — A trip's copy on a device
 
 **Waits on:** Milestone Planner-1.4, Milestone Access-1.3
 
-- Build `web/trip-store`, as its specification gives it.
+- Build `web/trip-store`, as its specification gives it, and start `web/places` from it, as
+  `spec/web/places.md` §3.3 gives.
 - Prove each requirement of `web/trip-store` by the verification it carries.
 - Prove `PLN:ITINERARY-NFR1` on a phone with no connection, by the checks of its verification that
   need one. Milestone Planner-1.2 proved the rest of `planner/itinerary`, and moved these checks
@@ -133,5 +140,8 @@ theirs, in Milestone Planner-0.2 and Milestone Access-0.1.
   and opening Itinero ten times within 300 milliseconds on a phone at least four years old, for
   `WEB:SHELL-NFR1`. Milestone Web-1.1 proved the rest of `web/shell` in three browser engines, and
   moved these checks here, since they need a phone.
+- Prove `WEB:PLACES-NFR1` on a phone at least four years old, by the check of its verification.
+  Milestone Web-1.2 proved the rest of `web/places`, and moved this check here, since it needs a
+  phone.
 - Prove `SHR:TRIP-TIME-NFR1` on a phone, by the checks of its verification. Milestone Web-1.1
   proved it with no connection in three browser engines, and moved the check on a phone here.

@@ -3,6 +3,7 @@
 
 import * as tripTime from "@itinero/trip-time";
 import { render } from "preact";
+import * as places from "./places/index.ts";
 import { App } from "./app.tsx";
 import * as shell from "./shell/index.ts";
 import "./styles.css";
@@ -11,8 +12,9 @@ import "./styles.css";
 declare const __ITINERO_TEST__: boolean;
 
 if (__ITINERO_TEST__) {
-  // The browser tests reach the shell and trip-time through these, and play web/trip-store's part.
-  Object.assign(window, { itineroShell: shell, itineroTripTime: tripTime });
+  // The browser tests reach the shell, trip-time and the places through these, and play
+  // web/trip-store's part.
+  Object.assign(window, { itineroShell: shell, itineroTripTime: tripTime, itineroPlaces: places });
 }
 
 const root = document.getElementById("app")!;

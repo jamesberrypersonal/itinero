@@ -15,6 +15,9 @@ target/
 .next/
 out/
 
+# GeoNames' and OurAirports' files, downloaded for the web app's build of its places (docs/spec/web/places.md §4.5)
+apps/web/places-data/
+
 # The web app's browser tests: the versions they build, and their traces (docs/spec/web/shell.md §4.5)
 test-results/
 playwright-report/

@@ -63,6 +63,14 @@ test("the version carries the newest rules of trip-time, and /time-zone-rules.js
   assert.equal(readFileSync(join(first, "time-zone-rules.json"), "utf8"), tripTimeRules.contents);
 });
 
+test("the places' files are copied beside the version, and are not among its files", () => {
+  const places = join(appRoot, "places");
+  for (const name of ["index.json", "airports.json", "CL.json"]) {
+    assert.equal(readFileSync(join(first, "places", name), "utf8"), readFileSync(join(places, name), "utf8"));
+  }
+  assert.ok(!listing(first).files.some((file) => file.startsWith("/places/")));
+});
+
 test("the same sources build the same version, and a change builds another", () => {
   assert.equal(listing(build("again")).version, listing(first).version);
   assert.notEqual(listing(build("changed", { ITINERO_BUILD_MARK: "changed" })).version, listing(first).version);

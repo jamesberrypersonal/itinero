@@ -49,13 +49,15 @@ self.addEventListener("activate", (event) => {
 });
 
 // Fetch: a page gets the cached index.html, and a file of the version comes from the cache. Every
-// other request, to the online side or for the newest rules, goes to the network untouched.
+// other request, to the online side, for the newest rules or for the places' files, goes to the
+// network untouched.
 self.addEventListener("fetch", (event) => {
   const request = event.request;
   if (request.method !== "GET") return;
   const url = new URL(request.url);
   if (url.origin !== self.location.origin) return;
-  if (url.pathname.startsWith("/api/") || url.pathname === "/time-zone-rules.json") return;
+  if (url.pathname.startsWith("/api/") || url.pathname.startsWith("/places/")) return;
+  if (url.pathname === "/time-zone-rules.json") return;
   const key = request.mode === "navigate" ? "/" : url.pathname;
   event.respondWith(fromCache(key, request));
 });

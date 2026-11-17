@@ -5,12 +5,14 @@
 // 2. writes the version into index.html, and writes /version.json
 // 3. writes /sw.js from src/shell/sw.ts, with the version in it
 // 4. writes /time-zone-rules.json, beside the version's files and not one of them
+// 5. copies the places' files into /places/, beside the version's files and not among them
+//    (docs/spec/web/places.md §3.2)
 //
 // It also gives the app the module `virtual:itinero-rules`: the version's own rules file, which it
 // copies from @itinero/trip-time into the version's files, named by a hash of its contents.
 
 import { createHash } from "node:crypto";
-import { readdirSync, readFileSync, writeFileSync } from "node:fs";
+import { cpSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join, relative, resolve, sep } from "node:path";
 import { transformWithOxc, type Plugin, type ResolvedConfig } from "vite";
 import { newestRules, type RulesFile } from "./rules-file.ts";
@@ -20,6 +22,8 @@ const RESOLVED_RULES = `\0${VIRTUAL_RULES}`;
 const VERSION_PLACEHOLDER = "__ITINERO_VERSION__";
 /** Files beside the version that are not part of it. */
 const OUTSIDE_VERSION = new Set(["sw.js", "version.json", "time-zone-rules.json", "index.html"]);
+/** The folder of the places' files, beside the version and not part of it. */
+const PLACES = "places";
 
 export function sha256(data: string | Uint8Array): string {
   return createHash("sha256").update(data).digest("hex");
@@ -60,6 +64,17 @@ export function shellPlugin(): Plugin {
     },
 
     configureServer(server) {
+      // In development, the places' files are served from the folder the build copies.
+      server.middlewares.use("/places", (request, response, next) => {
+        const name = (request.url ?? "").replace(/^\//, "").split("?")[0]!;
+        if (!/^[A-Za-z]+\.json$/.test(name)) return next();
+        try {
+          response.setHeader("Content-Type", "application/json");
+          response.end(readFileSync(join(config.root, PLACES, name)));
+        } catch {
+          next();
+        }
+      });
       // In development, the newest rules are served as the online side's address serves them.
       server.middlewares.use("/time-zone-rules.json", (_request, response) => {
         response.setHeader("Content-Type", "application/json");
@@ -97,7 +112,7 @@ function filesUnder(dir: string): string[] {
 async function writeVersion(outDir: string, root: string, rules: RulesFile): Promise<void> {
   const indexPath = join(outDir, "index.html");
   const index = readFileSync(indexPath, "utf8");
-  const others = filesUnder(outDir).filter((file) => !OUTSIDE_VERSION.has(file));
+  const others = filesUnder(outDir).filter((file) => !OUTSIDE_VERSION.has(file) && !file.startsWith(`${PLACES}/`));
 
   // The version is named by the hash of its files, index.html among them, so a version is never
   // named the same as another with different contents.
@@ -118,4 +133,6 @@ async function writeVersion(outDir: string, root: string, rules: RulesFile): Pro
   writeFileSync(join(outDir, "sw.js"), worker);
 
   writeFileSync(join(outDir, "time-zone-rules.json"), rules.contents);
+
+  cpSync(join(root, PLACES), join(outDir, PLACES), { recursive: true });
 }
