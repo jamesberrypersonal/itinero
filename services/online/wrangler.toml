@@ -13,23 +13,27 @@ run_worker_first = ["/api/*"]
 
 # Once a day: forget sessions past their 180 days and nonces past their 10 minutes
 # (docs/spec/access/accounts.md §5).
+# Itinero's own domain, served by the Worker as a custom domain of its Cloudflare zone.
+[[routes]]
+pattern = "useitinero.ca"
+custom_domain = true
+
 [triggers]
 crons = ["0 3 * * *"]
 
 [vars]
 # Itinero's client identifier at Google, which is public (docs/spec/access/accounts.md §5).
-# Replace it with the identifier Google gives once Itinero is registered there.
-GOOGLE_CLIENT_ID = "not-registered-yet.apps.googleusercontent.com"
+GOOGLE_CLIENT_ID = "221784151775-636kuilrnk6vkk71mbbbkbg0f09i5bd5.apps.googleusercontent.com"
 # The address invitations are sent from, at a domain Resend has checked
-# (docs/spec/access/membership.md §3.4). Replace it once Itinero's domain is set up at Resend.
-INVITATIONS_FROM = "Itinero <invitations@itinero.invalid>"
+# (docs/spec/access/membership.md §3.4).
+INVITATIONS_FROM = "Itinero <invitations@useitinero.ca>"
 
-# Accounts and membership, in one D1 database (ADR-0015). Replace database_id with the
-# identifier `wrangler d1 create itinero` gives, before the first deploy.
+# Accounts and membership, in one D1 database (ADR-0015). database_id is the identifier
+# `wrangler d1 create itinero` gave the online side's database.
 [[d1_databases]]
 binding = "DB"
 database_name = "itinero"
-database_id = "00000000-0000-0000-0000-000000000000"
+database_id = "682789ab-16c7-4b79-a411-87c257eadad2"
 migrations_dir = "migrations"
 
 # Each trip, in a Durable Object of its own with its own SQLite database

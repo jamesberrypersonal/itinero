@@ -12,6 +12,18 @@ Access is set page by page, so its design follows the planner's pages, in Milest
 
 ### Phase 1 — Build
 
+#### Milestone Access-1.4 — The online side on Cloudflare
+
+- Itinero is registered with Google, and its client identifier is set as `GOOGLE_CLIENT_ID` in
+  the Worker's Wrangler configuration.
+- The online side's D1 database is made, with the tables of `access/accounts` and
+  `access/membership`. The Worker is deployed to Cloudflare's free plan, at Itinero's own domain,
+  `useitinero.ca`, with its secret `NONCE_KEY`.
+- Resend has checked `useitinero.ca`. Invitations are sent from `invitations@useitinero.ca`, set
+  as `INVITATIONS_FROM`, with the Worker's secret `RESEND_API_KEY`.
+- The deployed Worker passes each check of the verification of `ACC:ACCOUNTS-F1`, with two test
+  accounts at Google, and the first check of the verification of `ACC:MEMBERSHIP-F2`.
+
 #### Milestone Access-1.3 — Membership and invitations
 
 - `access/membership` is in the Worker, with the tables of its records, as its specification gives
@@ -57,19 +69,5 @@ Access is set page by page, so its design follows the planner's pages, in Milest
 
 ## Pending
 
-### Phase 1 — Build
-
-#### Milestone Access-1.4 — The online side on Cloudflare
-
-- Register Itinero with Google, and set its client identifier as `GOOGLE_CLIENT_ID` in the
-  Worker's Wrangler configuration. Milestone Access-1.1 moved this here, with the deploy below,
-  since both need Itinero's own accounts at Google and Cloudflare.
-- Create the online side's D1 database, set the Worker's secret `NONCE_KEY`, and deploy the Worker
-  to Cloudflare's free plan.
-- Sign in to the deployed Worker with two test accounts at Google, by the checks of the
-  verification of `ACC:ACCOUNTS-F1`.
-- Have Resend check Itinero's domain, set the address invitations are sent from as
-  `INVITATIONS_FROM`, and set the Worker's secret `RESEND_API_KEY`. Milestone Access-1.3 moved
-  this here, for the same reason.
-- Invite an address from the deployed Worker, and confirm the email reaches it, by the first check
-  of the verification of `ACC:MEMBERSHIP-F2`.
+Nothing is pending. The checks of the access system's requirements that need a phone or the
+screens wait in the web app's roadmap.
