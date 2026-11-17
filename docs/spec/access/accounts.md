@@ -13,12 +13,14 @@ check of a request, such as what a traveller may see, starts from the account it
 The accounts component covers accounts, signing in, sessions, and naming the account behind a
 request.
 
-Two things act on it:
+Three things act on it:
 
 - **The web app**, the system travellers use on a computer or a phone, signs a traveller in and
   out, and sends its session with every request (§3.2).
 - **`planner/trip-host`**, the component holding the copy of each trip online, passes it each
   request, and is given the account that sent it.
+- **`access/membership`**, the component that holds who is on each trip, reads an account by its
+  identifier, to match an invitation's address and to name each member.
 
 Deliberately absent:
 
@@ -49,7 +51,7 @@ Every response that refuses gives a status of 400, 401 or 426, and a JSON body
 
 | Request | Body | Gives |
 |---|---|---|
-| `POST /api/auth/nonce` | None | `{ "nonce": ... }`: a single-use value for the next sign-in (§4.1) |
+| `POST /api/auth/nonce` | None | `{ "nonce": ..., "google": ... }`: a single-use value for the next sign-in (§4.1), and Itinero's client identifier at Google, which the sign-in screen draws Google's button with |
 | `POST /api/auth/sign-in` | `{ "provider": "google", "idToken": ..., "nonce": ... }` | `{ "account": ..., "email": ..., "name": ..., "named": ... }`, and sets the session (§4.2) |
 | `PUT /api/auth/name` | `{ "name": ... }` | `{ "name": ... }`, and sets the account's name (§4.5) |
 | `POST /api/auth/sign-out` | None | Nothing, and ends the session sent with it (§4.4) |
@@ -70,8 +72,8 @@ last use is written (§4.3), so that it lasts as long as the session does.
 
 ### 3.3 Programming interface
 
-Inside the online side, the accounts component gives two functions to the component holding the
-copy of each trip online:
+Inside the online side, the accounts component gives two functions to `planner/trip-host` and
+`access/membership`:
 
 ```ts
 type AccountId = string;      // "u-" and 22 characters of base64url, unique and never reused
@@ -127,8 +129,8 @@ Behaviour crossing every operation:
 and the time it was made, followed by a code made from both. The code is their HMAC-SHA256, made
 with the Worker's secret `NONCE_KEY`. All three are written in base64url. Only the online side can
 make a nonce whose code checks.
-Asking for any number of nonces therefore writes no record, so it costs the free plan's daily
-writes nothing.
+Asking for any number of nonces therefore writes no record, and so uses none of the rows the free
+plan lets the online side write each day.
 
 A sign-in naming a nonce uses it up, by storing its SHA-256 digest (§4.2). A nonce older than 10
 minutes is refused whether or not it was used.
@@ -148,13 +150,14 @@ minutes is refused whether or not it was used.
    `bad-nonce`
 
 Nothing is written before the fourth check, so a sign-in with a token Google did not sign for
-Itinero writes no record. The fourth check is one insert, which fails where the digest is held, so
-two sign-ins naming one nonce at once cannot both pass.
+Itinero writes no record. The fourth check is one insert, which fails when the digest is stored
+already, so two sign-ins naming one nonce at once cannot both pass.
 
 The account is then found by the pair of the provider and `sub`. Where no account holds the pair,
 one is made, with a new identifier. Where the token holds an `email`, the account's address and
-`emailVerified` are set from it (`ACC:ACCOUNTS-F2`). Where it holds none, they are kept as they
-were. The address is kept in lower case.
+`emailVerified` are set from it (`ACC:ACCOUNTS-F2`). Where it holds none, an account already made
+keeps its address as it was, and a new one is made with an empty address, not verified. The
+address is kept in lower case.
 
 A new account's `name` is the token's `name`, trimmed and cut to 60 characters, or the part of its
 email address before the `@` where the token holds no name. Where the token holds neither, it is
@@ -203,17 +206,17 @@ The recipe `just test-online` runs it from anywhere in the repository.
 ### 4.7 A version of the web app too old to answer
 
 *Porcelain:* every request whose path begins `/api/` carries a header named `Itinero-Api`. The
-header holds a whole number, which names the form of request and record the web app sending it was
-built for, as `spec/web/shell.md` §4.7 gives. The Worker holds the oldest number it answers, as
-`OLDEST_API`. It refuses a request whose number is
-lower, or that carries none, with `update-first`, before it looks for a session or passes the
-request to any component (`WEB:SHELL-F5`). Nothing is read or written for a request so refused.
+header holds a whole number. The number names the form of the requests and records that the version
+of the web app sending it was built to send and read, as `spec/web/shell.md` §4.7 gives. The Worker
+holds the oldest number it answers, as `OLDEST_API`. It refuses a request whose number is lower, or
+that carries none, with `update-first`, before it looks for a session or passes the request to any
+component (`WEB:SHELL-F5`). Nothing is read or written for a request so refused.
 
-The Worker makes one exception. It does not refuse the request that opens a trip's WebSocket, a
-connection the online side holds open to tell a device each time the trip changes, for carrying no
-number. A browser lets no page add a header to that request. The socket carries only a count of the
-trip's changes. The device then asks for the changes themselves with a request checked like any
-other.
+The Worker makes one exception: the request that opens a trip's WebSocket, a connection the online
+side holds open to tell a device each time the trip changes. That request carries no number, because
+a browser lets no page add a header to it, and the Worker does not refuse it for that. The socket
+carries only a count of the trip's changes. The device then asks for the changes themselves with a
+request checked like any other.
 
 ## 5. Resources
 
@@ -236,6 +239,15 @@ in its Wrangler configuration. `NONCE_KEY` is 32 random bytes, set as a secret o
 Wrangler, and never in the repository. Changing it refuses every nonce not yet used, which costs a
 traveller signing in at that moment one more try. `OLDEST_API` is a constant of the Worker's code,
 so that it changes only with a deploy.
+
+The web app's browser tests run the Worker on the developer's machine, over plain HTTP. They set
+three more variables of the Worker, which every deploy leaves unset:
+
+- `GOOGLE_KEYS_URL` points the Worker at a stand-in for Google's key set.
+- `SESSION_COOKIE_INSECURE`, set to `yes`, leaves `Secure` off the session cookie. WebKit, the
+  engine of Safari, keeps a cookie marked `Secure` only over HTTPS.
+- `OLDEST_API` takes the place of the constant of the same name, so that a test raises the oldest
+  number in `Itinero-Api` the Worker answers, as a deploy raises the constant.
 
 | Resource | Path | Owned by |
 |---|---|---|

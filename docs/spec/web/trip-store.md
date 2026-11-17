@@ -67,7 +67,7 @@ type Copy = {
   you: { admin: boolean; creator: boolean; grant: Grant };
   calendar?: Trip;                                        // absent: not granted
   pages: Pages; graveyard: readonly { id: string; title: string;
-                                       went: number }[];   // went: the pages deleted with it
+                                       went: number }[];   // went: how many pages went with it
   bookings: readonly Booking[]; members: readonly Member[];
   grants?: Grants;                                        // an admin's copy alone: everyone's access
   invitations?: readonly Invitation[];                    // an admin's copy alone: those still open
@@ -87,6 +87,7 @@ function isOnline(): boolean;
 function onOnline(listener: (online: boolean) => void): () => void;
 function signedIn(account: string): Promise<void>;
 function signOut(): Promise<void>;
+function onSignedOut(listener: () => void): () => void;   // this window or another signed out
 
 function create(name: string, dates: Dates,
                 countries: readonly string[]): Promise<Result<{ trip: string }>>;
@@ -99,7 +100,14 @@ function remove(id: string, account: string): Promise<Result<true>>;
 function buried(id: string, page: string): Promise<Result<Page>>;
 ```
 
-`change` is in the text form of its target's package, as `planner/trip-host` takes it. `send`
+`open` opens the device's database as the web app starts, and gives the account signed in on the
+device, or none (§4.5). `agreed` is the number of travellers the traveller agreed would come to see
+a moved page, as `planner/trip-host` takes it. `token` is the one the invitation's email carries in
+its link. A page's or a booking's `changed` is the trip's sequence at its last change.
+
+`change` is in the text form of its target's package, as `planner/trip-host` takes it. `onSignedOut`
+tells its listener once this window or another has signed out, or the session has ended, so that
+`web/screens` shows the sign-in screen (§4.6). `send`
 returns every refusal from the online side unchanged, and refuses with its own code `offline`,
 whose message says the device has no connection, where it sends nothing. The seven functions from
 `create` to `buried` refuse in the same ways. Once the online side has refused this version of the
@@ -143,11 +151,12 @@ Behaviour crossing every operation:
   every request it needs has answered, so a copy is brought up to date whole or not at all
   (`WEB:STORE-F2`).
 - **A version too old stops everything but reading.** Every request carries, in the header
-  `Itinero-Api`, the shell's `API`: the number of the form of request this version sends
-  (`spec/web/shell.md` §4.7). Any request refused with `update-first` writes nothing. The trip store
-  then calls the shell's `updateFirst`, which has the shell fetch the new version (`WEB:SHELL-F5`).
-  It then sends no request until the window reloads, and refuses with `update-first` every `send`,
-  and every function from `create` to `buried`. Every copy stays as it is, and is still read.
+  `Itinero-Api`, the shell's `API`. It numbers the form of the requests and records this version of
+  the web app sends and reads (`spec/web/shell.md` §4.7). Any request refused with `update-first`
+  writes nothing. The trip store then calls the shell's `updateFirst`, which has the shell fetch the
+  new version (`WEB:SHELL-F5`). It then sends no request until the window reloads, and refuses with
+  `update-first` every `send`, and every function from `create` to `buried`. Every copy stays as it
+  is, and is still read.
 - **A session that has ended deletes everything.** Any request refused with `no-session` signs the
   device out, as §4.5 gives, before anything else is done (`WEB:STORE-F5`).
 
@@ -174,16 +183,21 @@ caught up from the start the next time the device is online.
 - when it opens and the device is online
 - each time the browser fires its `online` event, and each time a window of Itinero comes to the
   front
-- every 60 seconds while the device is offline, which it learns by trying
+- every 60 seconds while the device is offline, since the trip store learns the device is online
+  again only by a request answered
 
 It first asks `GET /api/trips`. It deletes each trip it holds that the answer does not list, and
 adds each that it lists and the device does not hold. It then catches each trip up in turn, and
-tells `web/shell` the device is online.
+tells `web/shell` the device is online. Where no traveller is signed in, the trip store catches
+nothing up, and still tells `web/shell` the device is online, so that the shell takes newer
+time-zone rules. Only one catch-up of every trip runs at a time, and a trip is never caught up by
+two at once.
 
 To catch one trip up, the trip store:
 
-1. sends `POST /api/trips/{trip}/sync`, with `since` set to the trip's `sequence`, or absent for a
-   trip not yet held, and `holdsCalendar` set to whether it holds the calendar
+1. sends `POST /api/trips/{trip}/sync`, with `since` set to the trip's `sequence`, and
+   `holdsCalendar` set to whether it holds the calendar. `since` is absent for a trip not yet held,
+   or one with a record a package refused to read (§4.1)
 2. sends `POST /api/trips/{trip}/pages` for every page the answer lists without its text that the
    device does not hold, and `POST /api/trips/{trip}/bookings` for every such booking, in groups of
    100
@@ -256,12 +270,23 @@ The trip store's tests run in the suite of `apps/web/`, which `spec/web/shell.md
 
 - **Unit tests**, with Node's test runner, IndexedDB from the `fake-indexeddb` package, and a
   stand-in for the online side, cover each step of §4.2, the refusals of §4.4, §4.5 online and
-  offline, and each function of §4.8.
+  offline, and each function of §4.8. The stand-in runs the trip host's own logic,
+  `services/online/src/trip-core.ts`, on Node's SQLite, with membership and sessions in memory, so
+  a catch-up holds what the online side's does. Each device has its own database, fetch, socket and
+  BroadcastChannel, so two devices in one test do not hear each other.
 - **Cut tests** fail the stand-in at each request of a catch-up, and confirm the copy is unchanged
   (`WEB:STORE-F2`).
 - **Browser tests**, with Playwright and the online side running in Wrangler, open a trip in two
   windows and on two devices, and confirm each change is shown within five seconds
-  (`WEB:STORE-F3`, `WEB:STORE-F6`).
+  (`WEB:STORE-F3`, `WEB:STORE-F6`). The second device loses its connection for a minute, and takes
+  the change made meanwhile within five seconds of reconnecting. Each test file starts Wrangler on
+  a port of its own, serving a version the tests built, with a local D1 database seeded with an
+  account and its sessions, so no test signs in through Google. Both devices are the same
+  traveller's, since a second traveller joins only through an invitation's email.
+- **Offline tests**, in the same browsers, open the trip with no connection on two devices, one set
+  to English and London time and one to Turkish and Tokyo time. They make the checks of
+  `PLN:ITINERARY-NFR1`, `PLN:PAGES-NFR1` and `ACC:PERMISSIONS-NFR1` on the copy, and confirm both
+  devices and Node.js give the same results.
 - **Timing tests** read a trip of 500 pages and 300 bookings ten times, and fail where a read takes
   over one second on the machine running them. The check on a phone of `WEB:STORE-NFR1` is made by
   hand before each release.
@@ -283,7 +308,8 @@ nothing. Otherwise each sends one request, and returns a refusal unchanged.
 | `buried` | `GET /api/trips/{trip}/buried/{page}` | Reads the page with the pages' `pageFromText`, and gives it |
 
 Each function returns only once its catch-up is written, so the copy holds what the request did.
-`buried` stores nothing, so a page in the graveyard is never on the device (`PLN-F13`).
+`buried` stores nothing, so the text of a page in the graveyard is never on the device. The copy
+holds only the graveyard's titles (`PLN-F13`).
 
 An admin's copy holds the trip's `grants` and its open `invitations`, which each catch-up replaces
 whole. A copy whose traveller is no longer an admin is given neither, and the catch-up deletes
@@ -293,7 +319,7 @@ both.
 
 | Resource | Path | Owned by |
 |---|---|---|
-| The trip store | `apps/web/src/store/` | Whoever keeps the web app's roadmap |
+| The trip store | `apps/web/src/store/`: `store.ts` holds `createStore`, over the browser's IndexedDB, fetch, WebSocket and BroadcastChannel, and `index.ts` makes the window's own | Whoever keeps the web app's roadmap |
 | A device's copies | The IndexedDB database `itinero`, for Itinero's site | The device's browser |
 | The channel between windows | The BroadcastChannel `itinero` | The device's browser |
 

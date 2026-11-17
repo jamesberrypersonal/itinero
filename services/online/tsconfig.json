@@ -3,8 +3,13 @@
     "target": "es2023",
     "module": "esnext",
     "moduleResolution": "bundler",
-    "lib": ["es2023"],
-    "types": ["@cloudflare/workers-types", "@cloudflare/vitest-plugin/types"],
+    "lib": [
+      "es2023"
+    ],
+    "types": [
+      "@cloudflare/workers-types",
+      "@cloudflare/vitest-plugin/types"
+    ],
     "strict": true,
     "noUncheckedIndexedAccess": true,
     "exactOptionalPropertyTypes": true,
@@ -18,5 +23,11 @@
     "noEmit": true,
     "skipLibCheck": true
   },
-  "include": ["src", "test"]
+  "include": [
+    "src",
+    "test"
+  ],
+  "exclude": [
+    "test/node"
+  ]
 }

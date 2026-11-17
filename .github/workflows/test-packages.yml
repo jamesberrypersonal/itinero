@@ -1,8 +1,11 @@
 # Runs the test suite of every package in the npm workspace (docs/spec/shared/trip-time.md §4.12).
 name: test-packages
 
+# Runs on each pull request, and each push to main (ADR-0023). A push to another branch is checked
+# through its pull request, so each push to a pull request starts one run, not two.
 on:
   push:
+    branches: [main]
   pull_request:
 
 jobs:
@@ -19,5 +22,22 @@ jobs:
       - name: Install the workspace
         run: npm ci
 
+      - name: Install the browsers of the web app's tests
+        run: npx playwright install --with-deps chromium webkit firefox
+
       - name: Test every package
         run: npm test
+
+      # The trace and screenshot of each browser test that failed, to open with
+      # `npx playwright show-trace`.
+      - name: Keep the failed browser tests' traces
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: playwright-traces
+          path: |
+            apps/web/test-results/
+            !apps/web/test-results/versions/
+            !apps/web/test-results/wrangler-*/
+          retention-days: 14
+          if-no-files-found: ignore

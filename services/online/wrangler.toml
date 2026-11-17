@@ -3,6 +3,14 @@ name = "itinero"
 main = "src/index.ts"
 compatibility_date = "2026-10-28"
 
+# The web app, served as the Worker's static files (docs/spec/web/shell.md §4.6, ADR-0018). Every
+# path under /api/ goes to the Worker. Any other path names a file of the web app, or is a screen's
+# address, which gets index.html. Build the web app first, with `npm run build` in apps/web/.
+[assets]
+directory = "../../apps/web/dist"
+not_found_handling = "single-page-application"
+run_worker_first = ["/api/*"]
+
 # Once a day: forget sessions past their 180 days and nonces past their 10 minutes
 # (docs/spec/access/accounts.md §5).
 [triggers]
@@ -23,6 +31,16 @@ binding = "DB"
 database_name = "itinero"
 database_id = "00000000-0000-0000-0000-000000000000"
 migrations_dir = "migrations"
+
+# Each trip, in a Durable Object of its own with its own SQLite database
+# (docs/spec/planner/trip-host.md §3.4, §5).
+[[durable_objects.bindings]]
+name = "TRIPS"
+class_name = "TripHost"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["TripHost"]
 
 # NONCE_KEY and RESEND_API_KEY are secrets, set with `wrangler secret put`, never in the repository.
 # For `wrangler dev`, put it in .dev.vars, which git ignores.

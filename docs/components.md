@@ -1,14 +1,28 @@
 # The component registry
 
 Every system, component and concern in this workspace, with the requirement prefix each one owns
-and the packages that implement it. `documentation-system.md` says what each column holds. A
-system, component or concern is added here before any document names it.
+and the packages that implement it. A system, component or concern is added here before any
+document names it. `documentation-system.md` gives the rules of each column, and the columns hold:
+
+- Prefix: the start of the identifier of each of its requirements, such as `PLN-F1` or
+  `PLN:ITINERARY-F1`, the first of the planner's or of its itinerary's.
+- Packages: every package whose code implements it today.
+- Outside the vault: the package folder that still holds its documents, until they move into
+  `docs/`. It is empty once they have.
+- Imported and Manual: for a kind of booking, whether it can be read from a confirmation
+  email, and whether a traveller can enter it by hand.
+- Covered in each specification at: for a concern, a subject every component handles the same
+  way, such as personal data, the numbered section of every specification that covers it.
+
+`shared` is not a system. It holds the components several systems use, or that no system owns, and
+their prefixes open with `SHR`. Each kind of booking is a component of the system `bookings`, at
+`bookings/<kind>`.
 
 ## Systems
 
 | System | Prefix | Outside the vault | Is |
 |---|---|---|---|
-| planner | PLN | | The trip planner: each trip, the calendar it is pencilled in on, its firm dates, and its research pages |
+| planner | PLN | | The trip planner: each trip, its calendar of pencilled stretches and firm items, and its research pages |
 | access | ACC | | Accounts, invitations to a trip, and who may see and change each of its pages |
 | web | WEB | | The app travellers use on a computer or a phone, including reading a trip with no connection |
 | bookings | BKG | | A trip's bookings, such as flights, stays and tours, each for the travellers it names, and the page that lists them |
@@ -19,18 +33,18 @@ system, component or concern is added here before any document names it.
 |---|---|---|---|---|---|
 | [itinerary](spec/planner/itinerary.md) | planner | PLN:ITINERARY | `@itinero/itinerary` | | How a trip's pencilled stretches and firm items are stored and changed |
 | [pages](spec/planner/pages.md) | planner | PLN:PAGES | `@itinero/pages` | | The pages of a trip, where travellers write up their research by hand |
-| [trip-host](spec/planner/trip-host.md) | planner | PLN:HOST | | | The copy of each trip held online, in a Durable Object of its own, which applies every change and keeps each traveller's devices up to date |
+| [trip-host](spec/planner/trip-host.md) | planner | PLN:HOST | `@itinero/online` | | The copy of each trip held online, in a Durable Object of its own, which applies every change and keeps each traveller's devices up to date |
 | [accounts](spec/access/accounts.md) | access | ACC:ACCOUNTS | `@itinero/online` | | Travellers' accounts, and signing in with a Google account |
-| [membership](spec/access/membership.md) | access | ACC:MEMBERSHIP | `@itinero/online` | | Who is on each trip: its admins, the invitations that bring travellers in, and removing them |
+| [membership](spec/access/membership.md) | access | ACC:MEMBERSHIP | `@itinero/online` | | Who is on each trip: its admins, the invitations that bring travellers in, and removing members |
 | [permissions](spec/access/permissions.md) | access | ACC:PERMISSIONS | `@itinero/permissions` | | What each traveller may see and change of a trip's pages, calendar and bookings |
-| [places](spec/web/places.md) | web | WEB:PLACES | | | The places a device knows the time zone of: every airport, and the towns of each country its trips visit |
-| [screens](spec/web/screens.md) | web | WEB:SCREENS | | | What travellers see and use: the home page, the calendar, the bookings page, the pages of research and the trip's members |
-| [shell](spec/web/shell.md) | web | WEB:SHELL | | | The installable app itself: launching with no connection, adding it to a phone's home screen, and keeping the time-zone rules up to date |
-| [trip-store](spec/web/trip-store.md) | web | WEB:STORE | | | Each trip's copy on a device: catching it up, telling it of changes as they happen, sending changes, and deleting it on sign-out |
+| [places](spec/web/places.md) | web | WEB:PLACES | `@itinero/web` | | The places a device knows the time zone of: every airport, and the towns of each country its trips visit |
+| [screens](spec/web/screens.md) | web | WEB:SCREENS | `@itinero/web` | | What travellers see and use: the home page, the calendar, the bookings page, the pages of research and the trip's members |
+| [shell](spec/web/shell.md) | web | WEB:SHELL | `@itinero/web` | | The installable app itself: launching with no connection, adding it to a phone's home screen, and keeping the time-zone rules up to date |
+| [trip-store](spec/web/trip-store.md) | web | WEB:STORE | `@itinero/web` | | Each trip's copy on a device: catching it up, taking each change as it happens, sending changes, and deleting it on sign-out |
 | [list](spec/bookings/list.md) | bookings | BKG:LIST | `@itinero/bookings` | | A trip's bookings: adding, changing and removing each one, the travellers it names, and the order they happen in |
-| [doc-check](spec/shared/doc-check.md) | shared | SHR:DOC-CHECK | | | The checker that holds every document in this vault to the documentation system |
+| [doc-check](spec/shared/doc-check.md) | shared | SHR:DOC-CHECK | `doc-check` | | The checker that holds every document in this vault to the documentation system |
 | [doc-scaffold](spec/shared/doc-scaffold.md) | shared | SHR:DOC-SCAFFOLD | `doc-scaffold` | | The scaffolder that starts a new component, system, decision record or guide, with every row that names it |
-| [trip-time](spec/shared/trip-time.md) | shared | SHR:TRIP-TIME | `@itinero/trip-time` | | Dates and times in the local time of the place they happen, and the time zones between places |
+| [trip-time](spec/shared/trip-time.md) | shared | SHR:TRIP-TIME | `@itinero/trip-time` | | Dates and times in the local time of the place they happen, and the time zones of places |
 
 ## Booking kinds
 

@@ -1,6 +1,7 @@
 // Checking an ID token from Google, the one provider travellers sign in through
 // (docs/spec/access/accounts.md §3.4, §4.2, steps 2 and 3).
 
+import { env } from "cloudflare:workers";
 import { fromBase64url } from "./bytes.ts";
 import { accept, refuse, type Result } from "./result.ts";
 
@@ -23,14 +24,15 @@ async function readKeys(response: Response): Promise<Key[]> {
  * again where `fresh` is true, as when a token names a key the cached set does not hold.
  */
 async function keySet(fresh: boolean): Promise<Key[]> {
+  const address = env.GOOGLE_KEYS_URL ?? GOOGLE_KEYS;
   const cache = caches.default;
   if (!fresh) {
-    const cached = await cache.match(GOOGLE_KEYS);
+    const cached = await cache.match(address);
     if (cached) return readKeys(cached);
   }
-  const response = await fetch(GOOGLE_KEYS);
+  const response = await fetch(address);
   if (!response.ok) throw new Error(`Google's key set could not be fetched: status ${response.status}.`);
-  await cache.put(GOOGLE_KEYS, response.clone());
+  await cache.put(address, response.clone());
   return readKeys(response);
 }
 

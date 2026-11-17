@@ -1004,9 +1004,10 @@ The identifier makes it greppable; the gloss makes it readable.
 ## What is checked mechanically
 
 **The checker is `doc-check`, a Rust package in this workspace at `tools/doc-check`.** An author
-runs it with `just check-docs`, from any directory in the repository. Continuous integration runs
-it on every push and every pull request, and a pull request with findings fails its check. What it promises is
-[requirements/shared/doc-check.md](requirements/shared/doc-check.md), and how it reads a document
+runs it with `just check-docs`, from any directory in the repository. Continuous integration runs it
+on each pull request and each push to `main` (ADR-0023, continuous integration runs on each pull
+request and each push to main), and a pull request with findings fails its check. What it promises
+is [requirements/shared/doc-check.md](requirements/shared/doc-check.md), and how it reads a document
 is [spec/shared/doc-check.md](spec/shared/doc-check.md).
 
 Most of the rules above are checkable, so they are checked rather than remembered. The checker

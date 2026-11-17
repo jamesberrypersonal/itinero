@@ -9,6 +9,7 @@
     "packages/pages",
     "packages/bookings",
     "packages/permissions",
+    "apps/web",
     "services/online"
   ],
   "scripts": {

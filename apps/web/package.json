@@ -1,0 +1,39 @@
+{
+  "name": "@itinero/web",
+  "version": "0.1.0",
+  "private": true,
+  "description": "The web app travellers use on a computer or a phone, including reading a trip with no connection (docs/spec/web/shell.md)",
+  "license": "SEE LICENSE IN ../../LICENSE",
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc --project . && tsc --project tsconfig.sw.json",
+    "build": "vite build",
+    "build-rules": "node scripts/build-rules.ts",
+    "dev": "vite",
+    "test": "tsc --project . && tsc --project tsconfig.sw.json && node --test \"test/unit/**/*.test.ts\" && playwright test",
+    "test:unit": "node --test \"test/unit/**/*.test.ts\"",
+    "test:browser": "playwright test",
+    "build-places": "node scripts/build-places.ts",
+    "build-borders": "node scripts/build-borders.ts"
+  },
+  "dependencies": {
+    "@itinero/bookings": "0.1.0",
+    "@itinero/itinerary": "0.1.0",
+    "@itinero/pages": "0.1.0",
+    "@itinero/permissions": "0.1.0",
+    "@itinero/trip-time": "0.1.0",
+    "micromark": "4.0.3",
+    "micromark-extension-gfm": "3.0.0",
+    "preact": "11.2.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.65.1",
+    "@types/node": "24.19.2",
+    "typescript": "7.0.2",
+    "vite": "8.3.8",
+    "fake-indexeddb": "6.2.8"
+  },
+  "engines": {
+    "node": ">=24"
+  }
+}

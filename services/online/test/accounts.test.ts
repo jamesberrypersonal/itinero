@@ -5,7 +5,8 @@ import { createScheduledController, env } from "cloudflare:test";
 import { describe, expect, test } from "vitest";
 import { account, makeNonce, NONCE_LIFE, SESSION_LIFE, whoSent } from "../src/accounts.ts";
 import { digest } from "../src/bytes.ts";
-import worker, { answer } from "../src/index.ts";
+import worker from "../src/index.ts";
+import { answer } from "../src/answer.ts";
 import { google, idToken, keyFetches, stranger, type Person } from "./google.ts";
 import { api, expectRefused, json, nonce, rows, sessionSet, signIn } from "./helpers.ts";
 
@@ -297,5 +298,13 @@ describe("The refusals of §3.2", () => {
     expect(await rows("sessions")).toBe(before);
     const socket = new Request("https://itinero.test/api/auth/nonce", { method: "POST", headers: { Upgrade: "websocket" } });
     expect((await answer(socket)).status).toBe(200);
+  });
+});
+
+describe("§3.2 — a nonce comes with Itinero's client identifier at Google", () => {
+  test("the sign-in screen draws Google's button from the Worker's own variable", async () => {
+    const answer = await json<{ nonce: string; google: string }>(await api("/api/auth/nonce", { method: "POST" }));
+    expect(answer.google).toBe("itinero-test.apps.googleusercontent.com");
+    expect(answer.nonce).toBeTypeOf("string");
   });
 });

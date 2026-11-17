@@ -1,0 +1,6 @@
+3871336	Santiago	Santiago		-33.45694	-70.64827	P	PPLC	CL		12				4837295		570	America/Santiago	2024-01-01
+3874930	Puerto Natales	Puerto Natales		-51.72987	-72.50603	P	PPLA2	CL		12x				18505		15	America/Punta_Arenas	2024-01-01
+3874787	Punta Arenas	Punta Arenas		-53.15483	-70.91129	P	PPLA	CL		12x				117430		37	America/Punta_Arenas	2024-01-01
+3868626	Valparaíso	Valparaiso		-33.03932	-71.62725	P	PPLA	CL		01				282448		41	America/Santiago	2024-01-01
+3117735	Madrid	Madrid		40.4165	-3.70256	P	PPLC	ES		29				3255944		665	Europe/Madrid	2024-01-01
+9999991	Santiago	Santiago		19.4517	-70.69703	P	PPLA	DO		25				1200000		175	America/Santo_Domingo	2024-01-01

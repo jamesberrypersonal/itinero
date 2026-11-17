@@ -14,6 +14,25 @@ the planner's itinerary. The planner is the first system that needs that compone
 
 ### Phase 1 — Build
 
+#### Milestone Planner-1.4 — The trip held online
+
+- `packages/trip-time/rules/2026f.json` is built with the build script from IANA's own release
+  2026f, and gives every zone the same offset as the file it replaces, which Milestone Planner-1.1
+  read from the files macOS ships.
+- `planner/trip-host` is in the Worker of the online side, as its specification gives it. Each trip
+  is a Durable Object of its own, Cloudflare's object with storage of its own that handles one
+  request at a time. It holds the trip's calendar, pages, grants of access and bookings in its own
+  SQLite database. `access/membership` hands it each traveller who joins, leaves or is made an
+  admin.
+- Its test suite proves each requirement of `planner/trip-host` by the verification it carries,
+  inside Wrangler, with the tests of its cost on Node.js. A request takes at most 3 milliseconds on
+  a trip of 500 pages and 300 bookings, within the trip host's budget of 10. A day of ten devices,
+  each holding the trip open while a change is made each minute, reads about 2 million rows, within
+  the free plan's 5 million.
+- The suite proves the checks of the planner's own requirements that need only the online side:
+  `PLN-F6`, `PLN-F10`, `PLN-F13`, `PLN-F14` and `PLN-F16`. It proves `BKG-F1`, and every check of
+  `BKG-F5` except that a removed booking is gone from every traveller's bookings page.
+
 #### Milestone Planner-1.3 — Pages
 
 - `planner/pages` is built as `@itinero/pages`, in `packages/pages/`, as its specification gives
@@ -37,9 +56,9 @@ the planner's itinerary. The planner is the first system that needs that compone
   specification gives it, in TypeScript with no runtime dependencies (ADR-0007, trip-time is
   written in TypeScript).
 - Its rules file, `rules/2026f.json`, holds release 2026f of the IANA time zone database, read from
-  the TZif files macOS ships for that release (ADR-0008, trip-time carries its own copy of the
-  time-zone rules). The build script, `npm run build-rules`, makes the rules file from an unpacked
-  IANA release with that release's own zic.
+  the TZif files, the compiled rules, macOS ships for that release (ADR-0008, trip-time carries its
+  own copy of the time-zone rules). The build script, `npm run build-rules`, makes the rules file
+  from an unpacked IANA release with that release's own zic, its compiler of the rules.
 - Its test suite proves each requirement of `shared/trip-time` by the verification it carries,
   except the checks of `SHR:TRIP-TIME-NFR1` that need a phone.
 
@@ -47,17 +66,20 @@ the planner's itinerary. The planner is the first system that needs that compone
 
 #### Milestone Planner-0.3 — The home page, and the trip held online
 
-- A trip opens on a home page for each traveller, with their own dates, their bookings and the
-  country the phone is in (ADR-0014, a trip opens on a home page for each traveller).
-- A trip's calendar holds stretches and unbooked firm items, and is seen only by the travellers an
-  admin chooses. Bookings have a page of their own (ADR-0013, a trip's bookings have a page of their
-  own, and its calendar is seen only by the travellers an admin chooses).
+- A trip opens on a home page for each traveller, with their own dates, the part of the trip they
+  come for, their bookings and the country the phone is in (ADR-0014, a trip opens on a home page
+  for each traveller).
+- A trip's calendar holds pencilled stretches, each a place and rough dates, and firm items fixed to
+  a date that are not bookings. It is seen only by the travellers an admin chooses. Bookings have a
+  page of their own (ADR-0013, a trip's bookings have a page of their own, and its calendar is seen
+  only by the travellers an admin chooses).
 - The planner system's requirements promise a trip's dates, each traveller's dates within them, and
   the home page.
 - `planner/trip-host` holds the copy of each trip online, in a Cloudflare Durable Object of its own
   (ADR-0015, Itinero's online side runs on Cloudflare's free plan). It applies every change once
   `access/permissions` allows it, one at a time, and tells each open device of each change.
-- A traveller's save of a page another traveller changed meanwhile is refused, with both texts kept.
+- A traveller's save of a page that another traveller changed since the first began editing it is
+  refused, and the traveller is shown both texts.
 - `planner/trip-host` holds a trip's bookings beside its calendar and pages, and gives each device
   only the bookings its traveller may see (ADR-0016, a trip's bookings are entered by hand, as one
   of four kinds, and kept with the trip online).
@@ -69,8 +91,9 @@ the planner's itinerary. The planner is the first system that needs that compone
   graveyard. Only an admin, a traveller who may manage the trip, reads or restores a page there
   (ADR-0011, a trip's pages form a tree).
 - A deleted page is restored only to its old place. The graveyard lists only the highest deleted
-  page of each branch. A page deleted with it returns with it, and one deleted earlier is listed
-  once it is restored (ADR-0021, a deleted page is restored only to its old place).
+  page of each branch. A page deleted along with the page above it returns when that page does. A
+  page deleted earlier than the page above it is listed again once that page is restored (ADR-0021,
+  a deleted page is restored only to its old place).
 - The planner system's requirements promise the tree, the links between pages, a page for each
   chosen country, and links from the calendar to pages.
 - Each pencilled stretch and each firm item on a trip's calendar, which `planner/itinerary` holds,
@@ -96,26 +119,11 @@ the planner's itinerary. The planner is the first system that needs that compone
 - A trip's calendar holds pencilled stretches, each a place and rough dates, and firm items fixed to
   a date (ADR-0010, a trip's calendar is pencilled in).
 - The planner system has its requirements: a trip pencilled in on a calendar, the country of each
-  day, firm items and firm travel in local time, changes shared between travellers, and pages.
+  day, firm items, among them travel, in local time, changes shared between travellers, and pages.
 - `planner/itinerary` has its requirements and its specification. Each change to a trip is applied
   by one function, the same on a phone and on the copy held online.
 
 ## Pending
 
-### Phase 1 — Build
-
-#### Milestone Planner-1.4 — The trip held online
-
-**Waits on:** Milestone Access-1.3, Milestone Bookings-1.5, Milestone Web-0.2
-
-- Rebuild `packages/trip-time/rules/2026f.json` with the build script, from IANA's own release,
-  and confirm the test suite still passes. Milestone Planner-1.1 moved this here, since the release
-  could not be downloaded when it was built.
-- Build `planner/trip-host` in the Worker of the online side, in `services/online/`, with a Durable
-  Object for each trip, as its specification gives it.
-- Prove each requirement of `planner/trip-host` by the verification it carries.
-- Prove the planner system's own requirements that need only the online side, such as changes
-  shared between travellers. Those that need a phone wait for the web app.
-- Prove the bookings system's requirements that need only the online side, by the verification
-  each carries: `BKG-F1`, and `BKG-F5` but for its check that a removed booking is gone from every
-  traveller's bookings page. Milestone Web-1.4 proves the rest of the bookings system.
+Nothing is pending. The checks of the planner's requirements that need a phone or the screens
+wait in the web app's roadmap.

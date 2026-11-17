@@ -1,0 +1,4 @@
+CL.12	Santiago Metropolitan	Santiago Metropolitan	3873544
+CL.12x	Magallanes	Magallanes	1
+CL.01	Valparaíso	Valparaiso	3868621
+ES.29	Madrid	Madrid	3117732

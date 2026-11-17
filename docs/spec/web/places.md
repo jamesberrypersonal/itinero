@@ -19,7 +19,7 @@ Three things act on it:
 - **`web/screens`** asks for an airport by its code, and for the towns matching what a traveller
   types (§3.3).
 - **`web/trip-store`**, the component that keeps each trip's copy, gives the trips whose countries
-  the places component fetches.
+  the places component fetches. The trip store passes itself to `startPlaces` (§3.3).
 - **A maintainer** runs the build when GeoNames or OurAirports publish newer data (§4.5).
 
 Deliberately absent:
@@ -42,8 +42,9 @@ None of its own. `web/screens` shows the places it gives, the countries it holds
 
 ### 3.2 Application interface
 
-The places component serves its files as static files of the web app, beside the files of each
-version, from Itinero's own address:
+The places component serves its files as static files of the web app, from Itinero's own address.
+They sit beside the files of each version of the web app, the files one build makes, and are not
+among them:
 
 | Path | Holds |
 |---|---|
@@ -51,14 +52,13 @@ version, from Itinero's own address:
 | `/places/airports.json` | Every airport (§5.1) |
 | `/places/{country}.json` | The towns of one country, named by its ISO 3166-1 alpha-2 code, such as `/places/CL.json` (§5.1) |
 
-The service worker of `web/shell` sends these requests to the network untouched, because they are
-not among a version's files.
+`web/shell`'s service worker, the script that answers the web app's requests for a version's files
+with no connection, sends these requests to the network untouched, because they are not among a
+version's files.
 
 ### 3.3 Programming interface
 
 ```ts
-import type { Result } from "@itinero/trip-time";
-
 type Place = {
   kind: "airport" | "town";
   name: string;            // such as "Puerto Natales", or "Arturo Merino Benítez International Airport"
@@ -69,12 +69,29 @@ type Place = {
   zone: string;            // a time zone, such as "America/Punta_Arenas"
 };
 
-function startPlaces(): void;
+type TripSource = {        // what the places component reads of web/trip-store (spec/web/trip-store.md §3.3)
+  trips(): Promise<readonly { id: string }[]>;
+  trip(id: string): Promise<CopyCountries | undefined>;
+  onTrips(listener: (trips: readonly { id: string }[]) => void): () => void;
+  isOnline(): boolean;
+  onOnline(listener: (online: boolean) => void): () => void;
+};
+type CopyCountries = {     // what it reads of a trip's copy
+  pages: { pages: readonly { country?: string }[] };
+  calendar?: { stretches: readonly { place: { country: string } }[] };
+};
+type PlacesResult<T> = { ok: true; value: T }
+                     | { ok: false; refusal: { code: "offline" | "unknown-country"; message: string } };
+
+function startPlaces(trips: TripSource): void;
 function airport(code: string): Promise<Place | undefined>;
 function towns(words: string, limit?: number): Promise<readonly Place[]>;   // limit: 10 if absent
 function held(): Promise<readonly string[]>;                                 // countries held
-function fetchCountry(country: string): Promise<Result<true>>;
+function fetchCountry(country: string): Promise<PlacesResult<true>>;
 ```
+
+`web/trip-store` passes itself as `trips`, since it has every function `TripSource` names. The
+places component imports nothing of the trip store, so its tests give it a stand-in.
 
 `fetchCountry` refuses with `offline` where the device has no connection, and with
 `unknown-country` for a code `/places/index.json` does not list.
@@ -83,7 +100,11 @@ function fetchCountry(country: string): Promise<Result<true>>;
 
 The places component stores its files in Cache Storage, in a cache named `itinero-places`, which
 `spec/web/shell.md` §3.4 describes. No version of the web app deletes it, and signing out leaves it,
-since it holds nothing of any traveller.
+since it holds nothing of any traveller. Each file is stored with the version of the list it came
+from in a header, so that the component compares versions without reading the file. The component
+opens the cache as its module loads. WebKit, the engine of Safari, empties a cache that a page first
+opens after it has loaded, once the page's last window closes. Milestone Web-1.2's browser tests
+found this.
 
 At build time, it reads two public datasets:
 
@@ -100,23 +121,26 @@ At build time, it reads two public datasets:
 
 ### 4.1 Which countries a device holds
 
-*Porcelain:* `startPlaces()` runs once the trip store has opened, and whenever it tells its
+*Porcelain:* the trip store calls `startPlaces` once it has opened. From then on, the places
+component works out what the device needs at once, and again whenever the trip store tells its
 listeners that the trips or the connection have changed (`WEB:PLACES-F2`). While the device is
 online, it works out the countries the device needs:
 
 - the `country` of every page made for a country, in each trip's copy
 - the country of every stretch, in each trip's copy that holds the calendar
-- every country a traveller fetched by choosing it, which the component records in its cache
+- every country a traveller fetched by choosing it, which the component records in its cache, as
+  `/places/chosen.json`
 
-It then fetches, one at a time, `/places/index.json`, the airports where they are not held, and each
-country needed whose file is not held or is of an older version. A country no trip needs any longer
-is kept, since a traveller may return to it. A fetch that fails is tried again the next time the
-trips or the connection change.
+It then fetches, one at a time, `/places/index.json`, then the airports, and each country needed,
+where the file is not held, or is held from an older version of the list than the index names. A
+country no trip needs any longer is kept, since a traveller may return to it. A fetch that fails is
+tried again the next time the trips or the connection change. Only one round of fetching runs at a
+time. A change while one runs starts another once it ends.
 
 ### 4.2 airport
 
-*Porcelain:* `airport(code)` reads the airports into memory, once, and gives the airport whose code
-equals `code` with its letters made capitals, or `undefined` (`WEB:PLACES-F1`).
+*Porcelain:* `airport(code)` reads the airports into memory, once. It makes the letters of `code`
+capitals, and gives the airport with that code, or `undefined` (`WEB:PLACES-F1`).
 
 ### 4.3 towns
 
@@ -127,7 +151,8 @@ Matching compares folded text. A text is folded by decomposing it into Unicode's
 every combining mark, and making it lower case, so `Valparaíso` folds to `valparaiso`. A town matches
 where every word of the folded `words` begins some word of the folded name, in any order. Matches
 come first where the name begins with the first word, then by population, largest first, then by
-name, so `Santiago` gives Chile's capital before smaller towns of that name.
+name, so `Santiago` gives Chile's capital before smaller towns of that name. A word is a run of
+letters and digits.
 
 Each folded name is made once, when its country is read, so each letter typed is one pass over the
 towns held (`WEB:PLACES-NFR1`).
@@ -140,18 +165,22 @@ with `offline` and fetches nothing.
 
 ### 4.5 The build
 
-*Plumbing:* `npm run build-places` in `apps/web/` reads the files a maintainer has downloaded from
-GeoNames and OurAirports, and writes the files of §5.1 into `apps/web/places/`, which is committed
-and copied into each build of the web app. The build:
+*Plumbing:* `npm run build-places -- <date>` in `apps/web/` reads the files a maintainer has
+downloaded from GeoNames and OurAirports into `apps/web/places-data/<date>/`, which git ignores. It
+writes the files of §5.1 into `apps/web/places/`, which is committed. Each build of the web app
+copies them beside its own files, not among them. The opening comment of
+`apps/web/scripts/build-places.ts` gives the address of each file to download. The build:
 
 1. reads every town of `cities1000.txt`, with its name, population, country, region and time zone,
    and its region's name from `admin1CodesASCII.txt`
 2. writes each country's towns, ordered by population, largest first
-3. reads every airport of `airports.csv` with an IATA code, whose type is not `closed`
+3. reads every airport of `airports.csv` with an IATA code, whose type is not `closed`. Of two
+   airports given one code, it keeps the one whose `scheduled_service` is `yes`, then the one whose
+   `type` names the larger airport
 4. gives each airport the time zone of the nearest town of `cities1000.txt` in the same country,
    measured along the earth's surface, and leaves out an airport whose country has no town
-5. writes `index.json`, whose version is the date the GeoNames files were downloaded, such as
-   `2026-11-14`
+5. writes `index.json`, whose version is the date given, the day the GeoNames files were
+   downloaded, such as `2026-11-14`
 
 The same downloaded files always give the same bytes, since every list is sorted and every number
 written the same way.
@@ -162,11 +191,13 @@ The places component's tests run in the suite of `apps/web/`, which `spec/web/sh
 describes.
 
 - **Unit tests** cover folding, matching and ordering, with the towns of Chile and the United
-  States, and `airport` for a sample of codes, with no network.
-- **Build tests** run the build on a small sample of each dataset, and confirm its output, and that
-  a second run gives the same bytes.
-- **Fetch tests** give a stand-in trip store trips visiting Chile, then Argentina, and confirm each
-  country's file is fetched once, and not again until the version changes.
+  States the build wrote, and `airport` for a sample of codes, with no network.
+- **Build tests** run the build on a small sample of each dataset, in `apps/web/test/fixtures/`,
+  and confirm its output, and that a second run gives the same bytes.
+- **Fetch tests**, among the browser tests in three engines, give the places component a stand-in
+  for the trip store. Its trips visit Chile, then Argentina. The tests confirm each country's file
+  is fetched once, and not again until the list's version changes. They then take the device
+  offline, reopen Itinero, and find the places of `WEB:PLACES-F1`.
 - **Size tests** fail where the airports exceed 200 kilobytes, or any country 600 kilobytes,
   compressed with gzip (`WEB:PLACES-NFR2`).
 - **Timing tests** type `Springfield` against the towns of the United States, and fail where an
@@ -183,13 +214,14 @@ a list, and each place names its zone by its place in the list.
 ```json
 {
   "country": "CL",
-  "towns": [["Santiago", "Santiago Metropolitan", 0], ["Puerto Natales", "Magallanes", 1]],
+  "towns": [["Santiago", "Santiago Metropolitan", 0, 4837295], ["Puerto Natales", "Magallanes", 1, 18505]],
   "version": "2026-11-14",
   "zones": ["America/Santiago", "America/Punta_Arenas"]
 }
 ```
 
-A town is its name, its region's name, and its zone. The airports file holds, for each airport, its
+A town is its name, its region's name, its zone, and its population. The population orders the
+towns of two countries against each other (§4.3). The airports file holds, for each airport, its
 code, its name, its town, its country and its zone, ordered by code:
 
 ```json
@@ -206,13 +238,16 @@ code, its name, its town, its country and its zone, ordered by code:
 |---|---|---|
 | The places component | `apps/web/src/places/` | Whoever keeps the web app's roadmap |
 | The built files | `apps/web/places/`, built by `npm run build-places` | Whoever keeps the web app's roadmap |
+| The build | `apps/web/scripts/build-places.ts`, and `apps/web/scripts/places/` | Whoever keeps the web app's roadmap |
+| The downloaded files | `apps/web/places-data/<date>/`, never committed | Whoever keeps the web app's roadmap |
 | A device's places | Cache Storage, `itinero-places` | The device's browser |
 
 ## 6. Quality attributes
 
 - **Offline** (`WEB:PLACES-F1`). Every place is found from files already on the device.
-- **Small** (`WEB:PLACES-NFR2`, `WEB-NFR2`). A device fetches only the countries its trips visit,
-  after sign-in, never in the app's first download. A zone is named once in each file.
+- **Small** (`WEB:PLACES-NFR2`, `WEB-NFR2`). A device fetches only the countries its trips visit and
+  those its traveller chooses, after sign-in, never in the app's first download. A zone is named
+  once in each file.
 - **Private** (`WEB:PLACES-NR3`). Nothing a traveller types leaves the device. The files a device
   fetches show the countries of its trips, which the online side holds already.
 - **Quick** (`WEB:PLACES-NFR1`). Names are folded once, when a country is read.

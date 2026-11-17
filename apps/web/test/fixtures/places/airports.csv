@@ -1,0 +1,8 @@
+"id","ident","type","name","latitude_deg","longitude_deg","elevation_ft","continent","iso_country","iso_region","municipality","scheduled_service","icao_code","iata_code","gps_code","local_code","home_link","wikipedia_link","keywords"
+1,"SCEL","large_airport","Comodoro Arturo Merino Benítez International Airport",-33.393,-70.785,1555,"SA","CL","CL-RM","Santiago","yes","SCEL","SCL",,,,,
+2,"SCCI","medium_airport","President Carlos Ibáñez International Airport",-53.0026,-70.8546,139,"SA","CL","CL-MA","Punta Arenas","yes","SCCI","PUQ",,,,,
+3,"LEMD","large_airport","Adolfo Suárez Madrid–Barajas Airport",40.4719,-3.5626,1998,"EU","ES","ES-M","Madrid","yes","LEMD","MAD",,,,,"Barajas, ""Madrid"" airport"
+4,"XSCL","heliport","A heliport given Santiago's code",-33.4,-70.6,0,"SA","CL","CL-RM","Santiago","no",,"SCL",,,,,
+5,"OLD1","closed","A closed airfield",-33.5,-70.7,0,"SA","CL","CL-RM","Santiago","no",,"OLD",,,,,
+6,"NOIA","small_airport","An airfield with no IATA code",-33.5,-70.7,0,"SA","CL","CL-RM","Santiago","no",,,,,,,
+7,"PERU","large_airport","Jorge Chávez International Airport",-12.02,-77.11,113,"SA","PE","PE-CAL","Lima","yes","SPJC","LIM",,,,,

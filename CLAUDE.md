@@ -18,7 +18,13 @@ rules, and `tools/doc-scaffold` starts new documents as skeletons that pass it.
   `packages/permissions/` (`@itinero/permissions`) uses pages, and decides what each traveller may
   see and change. `package.json` at the root declares the npm workspace.
 - `services/online/` (`@itinero/online`) is the Worker of the online side, on Cloudflare, with its
-  D1 database. It holds `access/accounts` and `access/membership`.
+  D1 database. It holds `access/accounts` and `access/membership`, and `planner/trip-host`: a
+  Durable Object for each trip, `TripHost`, whose logic is in `src/trip-core.ts`.
+- `apps/web/` (`@itinero/web`) is the web app, built with Preact and Vite, and served by the Worker
+  as its static files. It holds `web/shell`, `web/places`, `web/trip-store` and `web/screens`.
+  `npm run build-borders` builds the map of country borders into
+  `apps/web/src/screens/borders.json`. Its places, every country's towns and every airport, are built into
+  `apps/web/places/` by `npm run build-places -- <date>`.
 - `tools/doc-check/` and `tools/doc-scaffold/` are Rust packages, run through `just`.
 - `tools/hooks/pre-commit` is an optional hook that runs the checker before each commit.
 
@@ -36,6 +42,7 @@ just test-pages                 # the test suite of @itinero/pages
 just test-bookings              # the test suite of @itinero/bookings
 just test-permissions           # the test suite of @itinero/permissions
 just test-online                # the test suite of the online side, in Wrangler
+just test-web                   # the web app's unit tests, then its browser tests in three engines
 npm test                        # the test suites of every package in the npm workspace
 just install-hook               # install the pre-commit hook
 just new-component <system> <slug> <PREFIX> "<description>"   # start a component's documents and rows
@@ -79,9 +86,23 @@ The online side, in `services/online/`, is a Cloudflare Worker. It keeps the fir
 but Wrangler bundles it, and `npm test` runs `tsc`, then Vitest with Cloudflare's integration,
 which runs each test file in the Workers runtime with a local D1 database of its own. The suite
 replaces Google with a stand-in that signs ID tokens with a key of its own, and Resend with one
-that keeps each email sent. The SQL migrations in
+that keeps each email sent. After Vitest, `node --test` runs the trip host's cost tests in
+`test/node/` on Node's SQLite, since the Workers runtime keeps its clock still while code runs. The
+SQL migrations in
 `services/online/migrations/` make its D1 tables. Its secrets are set with Wrangler, never in the
 repository.
+
+The web app, in `apps/web/`, keeps the second constraint too, but Vite bundles it, so its screens
+are `.tsx`. `npm test` runs `tsc` twice, once for the page and once for the service worker, then
+Node's test runner over `test/unit/`, then Playwright over `test/browser/`, in Chromium, WebKit and
+Firefox. Install the engines once with `npx playwright install chromium webkit firefox`. The browser
+tests build three versions into `apps/web/test-results/`, and serve them from a stand-in for the
+Worker. The trip store's and the screens' browser tests start the Worker itself in Wrangler, with
+sessions seeded into a local D1 database, or travellers signed in through stand-ins for Google and
+Resend that the Worker reaches through variables unset in every deploy. The trip store's unit tests
+run the trip host's logic on Node's SQLite. `npm run build` in `apps/web/` writes the version the Worker serves, into `apps/web/dist/`.
+The Worker's own module, `services/online/src/index.ts`, exports only its handlers: the Workers
+runtime reads any other named export as an entrypoint, and refuses to start.
 
 `@itinero/trip-time` never uses `Date`, Intl, Temporal, network calls or Node modules in `src/`,
 and `test/source.test.ts` fails if it does. Its rules file is rebuilt from an IANA release with
@@ -198,7 +219,7 @@ request.
 
 ## Continuous integration
 
-`.github/workflows/check-docs.yml` runs on every push and pull request. It runs `just test-docs`,
-then `just check-docs --summary "$GITHUB_STEP_SUMMARY"`. A pull request with findings fails its
-check. `.github/workflows/test-packages.yml` runs `npm ci` and `npm test` with Node.js 24, on every
-push and pull request.
+`.github/workflows/check-docs.yml` runs on each pull request and each push to `main` (ADR-0023). It
+runs `just test-docs`, then `just check-docs --summary "$GITHUB_STEP_SUMMARY"`. A pull request with
+findings fails its check. `.github/workflows/test-packages.yml` runs `npm ci`, installs Playwright's
+three engines, and runs `npm test` with Node.js 24, on the same events.

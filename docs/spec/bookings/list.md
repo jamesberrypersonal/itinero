@@ -285,8 +285,8 @@ a check that needs a booking of some kind is in the test file of the kind it use
   call, any Node module, any function whose result depends on the device's language, such as
   `localeCompare`, or any package but `@itinero/trip-time` (§4, §6).
 
-The workflow `.github/workflows/test-packages.yml` runs the suite on every push and pull request,
-with every other package of the npm workspace.
+The workflow `.github/workflows/test-packages.yml` runs the suite on each pull request and each
+push to `main`, with every other package of the npm workspace (ADR-0023).
 
 ## 5. Resources
 
