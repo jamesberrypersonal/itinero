@@ -385,7 +385,7 @@ release's data and its code, `tzdata<release>.tar.gz` and `tzcode<release>.tar.g
 The suite runs with `npm test` in `packages/trip-time/`, using Node's built-in test runner, after
 TypeScript checks the package's types. A just recipe, `just test-trip-time`, runs it from anywhere
 in the repository. The workflow `.github/workflows/test-packages.yml` runs `npm test` for every
-package of the npm workspace, on every push and pull request.
+package of the npm workspace, on each pull request and each push to `main` (ADR-0023).
 
 - **Unit tests** cover each refusal of §3.3, each row of every table in §4, and every check in the
   verification of each requirement trip-time claims.

@@ -300,8 +300,8 @@ recipe, `just test-itinerary`, runs it from anywhere in the repository.
 - **Source tests** confirm that no module of the package uses `Date`, Intl, Temporal, any network
   call, any Node module, or any package but `@itinero/trip-time` (§4, §6).
 
-The workflow `.github/workflows/test-packages.yml` runs the suite on every push and pull request,
-with every other package of the npm workspace.
+The workflow `.github/workflows/test-packages.yml` runs the suite on each pull request and each
+push to `main`, with every other package of the npm workspace (ADR-0023).
 
 ### 4.9 A trip's dates and each traveller's
 

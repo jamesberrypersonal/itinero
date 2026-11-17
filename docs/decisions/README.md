@@ -47,6 +47,7 @@ keeps:
 | [0020](0020-a-milestone-names-what-it-waits-on.md) | A milestone names the milestones of other systems it waits on | workspace | Accepted |
 | [0021](0021-a-deleted-page-is-restored-only-to-its-old-place.md) | A deleted page is restored only to its old place | planner | Accepted |
 | [0022](0022-each-tree-index-defines-its-shared-words.md) | Each tree's index defines the words its documents share | workspace | Accepted |
+| [0023](0023-continuous-integration-runs-on-each-pull-request-and-each-push-to-main.md) | Continuous integration runs on each pull request and each push to main | workspace | Accepted |
 
 ## By subject
 
@@ -60,6 +61,7 @@ keeps:
 | [0009](0009-a-finished-item-leaves-the-list-when-finished.md) | A finished item leaves the live list in the commit that finishes it | Accepted |
 | [0020](0020-a-milestone-names-what-it-waits-on.md) | A milestone names the milestones of other systems it waits on | Accepted |
 | [0022](0022-each-tree-index-defines-its-shared-words.md) | Each tree's index defines the words its documents share | Accepted |
+| [0023](0023-continuous-integration-runs-on-each-pull-request-and-each-push-to-main.md) | Continuous integration runs on each pull request and each push to main | Accepted |
 
 ### planner
 

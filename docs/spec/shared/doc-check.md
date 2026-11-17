@@ -17,7 +17,7 @@ the vault.
 Three things act on it:
 
 - an author, through `just check-docs`, from any directory in the repository
-- the continuous integration workflow, on every push and pull request
+- the continuous integration workflow, on each pull request and each push to `main`
 - a pre-commit hook, which a guide says how to install
 
 Deliberately absent:
@@ -89,7 +89,8 @@ doc-check drives three systems outside itself.
 - **GitHub Actions**, the continuous integration platform. A workflow is a file under
   `.github/workflows/` that lists jobs and their steps. A job summary is Markdown that a step appends to the file named by the environment variable `GITHUB_STEP_SUMMARY`. GitHub shows the summary on the pull request's run. A step that exits non-zero fails its job. A failed job fails the pull request's check.
 
-The workflow `.github/workflows/check-docs.yml` runs on every push and every pull request. It
+The workflow `.github/workflows/check-docs.yml` runs on each pull request and each push to `main`
+(ADR-0023). It
 installs just and the pinned Rust toolchain. It runs the test suite (§4.7) with `just test-docs`,
 which also runs doc-scaffold's, so no rule lands without its cases. It then runs:
 

@@ -219,7 +219,7 @@ request.
 
 ## Continuous integration
 
-`.github/workflows/check-docs.yml` runs on every push and pull request. It runs `just test-docs`,
-then `just check-docs --summary "$GITHUB_STEP_SUMMARY"`. A pull request with findings fails its
-check. `.github/workflows/test-packages.yml` runs `npm ci`, installs Playwright's three engines,
-and runs `npm test` with Node.js 24, on every push and pull request.
+`.github/workflows/check-docs.yml` runs on each pull request and each push to `main` (ADR-0023). It
+runs `just test-docs`, then `just check-docs --summary "$GITHUB_STEP_SUMMARY"`. A pull request with
+findings fails its check. `.github/workflows/test-packages.yml` runs `npm ci`, installs Playwright's
+three engines, and runs `npm test` with Node.js 24, on the same events.

@@ -345,8 +345,8 @@ repository.
   call, any Node module, any function whose result depends on the device's language, such as
   `toLocaleLowerCase`, or anything but types from another package (§4, §6).
 
-The workflow `.github/workflows/test-packages.yml` runs the suite on every push and pull request,
-with every other package of the npm workspace.
+The workflow `.github/workflows/test-packages.yml` runs the suite on each pull request and each
+push to `main`, with every other package of the npm workspace (ADR-0023).
 
 ## 5. Resources
 
