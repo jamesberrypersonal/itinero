@@ -3,7 +3,7 @@
 What needs active work, and what waits on a decision. `documentation-system.md` gives the list's
 rules. When an item is done, it leaves this list for `CHANGELOG.md` in the commit that finishes it.
 
-*Next free:* TODO-18
+*Next free:* TODO-19
 
 ## Tags
 
@@ -167,5 +167,23 @@ lock, and deleted when its traveller signs out).
 *Proposal:* Consider listing the devices a traveller is signed in on, and letting them sign out
 any or all of them, so that each deletes its copy the next time it connects. Decide it in a
 decision record scoped `access/accounts` and `web`.
+
+*Releases:* Nothing is planned for it yet.
+
+### TODO-18 — Publish a privacy policy
+
+*Tags:* web, access/accounts
+*Written:* 2026-11-17
+*Started:* 2026-11-17
+
+*Problem:* Google lets only test users sign in to Itinero until it is published, and publishing it
+needs a homepage and a privacy policy at Itinero's own domain.
+
+*Reason:* No requirement covers a privacy policy, because the online side was first deployed with
+two test accounts only, in Milestone Access-1.4.
+
+*Proposal:* Serve a privacy policy at `https://useitinero.ca/privacy`, as a static page of the web
+app that needs no sign-in, saying what Itinero holds, where, and for how long. Give its address and
+the homepage to Google, and publish the app.
 
 *Releases:* Nothing is planned for it yet.
