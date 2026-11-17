@@ -9,7 +9,7 @@
     "typecheck": "tsc --project .",
     "test": "tsc --project . && vitest run",
     "dev": "wrangler dev",
-    "deploy": "wrangler d1 migrations apply DB --remote && wrangler deploy"
+    "deploy": "npm run build --workspace @itinero/web && wrangler d1 migrations apply DB --remote && wrangler deploy"
   },
   "devDependencies": {
     "@cloudflare/vitest-plugin": "1.4.11",

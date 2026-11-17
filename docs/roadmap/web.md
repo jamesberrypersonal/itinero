@@ -12,6 +12,23 @@ theirs, in Milestone Planner-0.2 and Milestone Access-0.1.
 
 ## Completed
 
+### Phase 1 — Build
+
+#### Milestone Web-1.1 — The shell
+
+- `@itinero/web` is started, in `apps/web/`, with Preact and Vite, and is served by the Worker of
+  the online side as its static files. Every path under `/api/` goes to the Worker, and every other
+  path to the web app.
+- `web/shell` is built in it, as its specification gives it, with a service worker written by hand,
+  the web app's manifest and icons, and the two copies of the time-zone rules on a device.
+- Its test suite proves each requirement of `web/shell` by the verification it carries, in
+  Chromium, WebKit and Firefox, against a stand-in for the online side. It leaves the checks that
+  need a phone, or the trip store and the screens, to later milestones.
+- `SHR:TRIP-TIME-NFR1` holds with no connection in the same three engines, with the rules the shell
+  keeps. The check on a phone is left to Milestone Web-1.5.
+- The Worker's own module exports only its handlers, since the Workers runtime reads each named
+  export as an entrypoint. Wrangler could not start the Worker before.
+
 ### Phase 0 — Design
 
 #### Milestone Web-0.2 — A trial on a real phone
@@ -58,19 +75,6 @@ theirs, in Milestone Planner-0.2 and Milestone Access-0.1.
 
 ### Phase 1 — Build
 
-#### Milestone Web-1.1 — The shell
-
-**Waits on:** Milestone Planner-1.1, Milestone Access-1.1
-
-- Start `@itinero/web`, in `apps/web/`, with Preact and Vite, served by the Worker of the online
-  side.
-- Build `web/shell` in it, as its specification gives it: launching with no connection, adding it
-  to a phone's home screen, and keeping the time-zone rules up to date.
-- Prove each requirement of `web/shell` by the verification it carries.
-- Prove `SHR:TRIP-TIME-NFR1` on a phone, by the checks of its verification that need one.
-  Milestone Planner-1.1 proved the rest of `shared/trip-time`, and moved these checks here, since
-  they need the shell.
-
 #### Milestone Web-1.2 — Places
 
 - Write the build that makes the lists of airports and towns, and build `web/places`, as its
@@ -100,6 +104,11 @@ theirs, in Milestone Planner-0.2 and Milestone Access-0.1.
 - Build the first screens of `web/screens`, as its specification gives them: signing in and
   choosing the name other travellers see, accepting an invitation, the list of trips and a new trip,
   the home page, the bookings, the pages of research with their search, and the settings.
+- Prove the checks of `WEB:SHELL-F5` that need a trip's copy and the screens: that every trip the
+  device holds still opens while a new version is required, that no screen offers to change one,
+  and that the new version brings every trip up to date. Milestone Web-1.1 proved the rest of
+  `WEB:SHELL-F5`, and moved these checks here, since they need the trip store and the screens. Its
+  browser test of `WEB:SHELL-F1` opens each new screen with no connection.
 - Prove the requirements of `web/screens` those screens meet, by the verification each carries:
   `WEB:SCREENS-F1`, `WEB:SCREENS-F2`, `WEB:SCREENS-F4`, `WEB:SCREENS-F5`, and `WEB:SCREENS-F7` to
   `WEB:SCREENS-F10`.
@@ -119,3 +128,10 @@ theirs, in Milestone Planner-0.2 and Milestone Access-0.1.
   `web/screens`, by the verification each carries.
 - Prove the web app's own requirements on a phone and on a computer. Prove there too the
   requirements of the planner, access and bookings systems that only a phone can prove.
+- Prove the checks of `web/shell` that need a phone: adding Itinero to the home screen of an
+  Android phone and of an iPhone, and the browser keeping Itinero's storage, for `WEB:SHELL-F3`,
+  and opening Itinero ten times within 300 milliseconds on a phone at least four years old, for
+  `WEB:SHELL-NFR1`. Milestone Web-1.1 proved the rest of `web/shell` in three browser engines, and
+  moved these checks here, since they need a phone.
+- Prove `SHR:TRIP-TIME-NFR1` on a phone, by the checks of its verification. Milestone Web-1.1
+  proved it with no connection in three browser engines, and moved the check on a phone here.

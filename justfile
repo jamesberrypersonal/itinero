@@ -32,6 +32,10 @@ test-permissions:
 test-online:
     @npm test --workspace @itinero/online
 
+# Run the test suite of @itinero/web: unit tests, then browser tests in three engines (docs/spec/web/shell.md §4.5).
+test-web:
+    @npm test --workspace @itinero/web
+
 # Write the skeleton documents and index rows for a new component.
 new-component *args:
     @cargo run --release --quiet --package doc-scaffold -- component "$@"

@@ -81,6 +81,7 @@ type ShellState = {
 };
 
 function start(): Promise<ShellState>;                        // before any screen shows a time
+function current(): ShellState | undefined;                   // the state, once start has resolved
 function onChange(listener: (state: ShellState) => void): () => void;
 function online(): void;                                      // web/trip-store calls it on connecting
 
@@ -114,11 +115,16 @@ detail.
 
 - **Install.** The service worker fetches `/version.json`, then every file it lists, into a cache
   named `itinero-<version>`. The install fails, and is tried again on the next launch, if any file
-  fails.
+  fails, or if `/version.json` names a version other than the service worker's own, as when a
+  deploy lands during the install.
 - **Wait.** A new service worker, once installed, waits while any window uses the old one. It
   calls `skipWaiting`, which ends the wait and lets it take over open windows, only when a window
   asks it to (§4.7). Otherwise it takes over once no window uses the old one.
-- **Activate.** Once it takes over, it deletes every cache named `itinero-` but its own.
+- **Activate.** Once it takes over, it deletes every other version's cache, and keeps
+  `itinero-rules` (§4.4) and the cache of `web/places`. It then takes control of any window it does
+  not yet control, with `clients.claim`. The window that installed the first version opened before
+  any service worker did, and without this it would use none, so the next version would take over at
+  once rather than wait for it to close.
 - **Fetch.** It answers a request for a page with the cached `index.html`, and a request for any
   other file its version lists from the cache. Every other request, including every request to the
   online side and for `/time-zone-rules.json`, goes to the network untouched.
@@ -130,14 +136,16 @@ never share a name for different contents, and a version is always used whole.
 
 *Porcelain:* `start()` runs as the page opens, before any screen shows a time (`WEB:SHELL-F4`). It:
 
-1. registers `/sw.js`, if no service worker is registered
+1. registers `/sw.js`, without waiting for it. Where a service worker is registered already,
+   registering it again has the browser check for a new version
 2. loads the rules into trip-time, as §4.4 gives
 3. asks `navigator.storage.persist()`, once per device, and does not wait for the answer
    (`WEB:SHELL-F3`)
 4. gives the `ShellState`
 
-`offlineReady` is true once the service worker holding this version is active. `updateWaiting` is
-true while a newer service worker waits. `onChange` tells its listener each time any field of the
+`offlineReady` is true once the service worker holding this version is active, which the shell
+learns by asking the active service worker its version in a message. `updateWaiting` is true while a
+newer service worker waits. `onChange` tells its listener each time any field of the
 `ShellState` changes.
 
 ### 4.3 Adding Itinero to a home screen
@@ -163,11 +171,14 @@ with Safari 27.2.
 - **the version's own**, built into the version's files by the build (§4.6)
 - **the newest fetched**, in a cache named `itinero-rules`, which no version deletes
 
-At `start`, it loads the newer of the two with trip-time's `loadRules`. One file is newer than
+At `start`, it loads the newer of the two with trip-time's `loadRules`. The newest fetched is
+stored with its release in a header, so that the shell chooses between the two without reading
+either file. One file is newer than
 another where its `version` compares later as text, since IANA releases sort so. A file that
 trip-time refuses with `bad-rules` is deleted, and the version's own is loaded.
 
-`online()` fetches `/time-zone-rules.json` with no caching by the browser. Where the file fetched
+`online()` fetches `/time-zone-rules.json` with no caching by the browser, each time it is called,
+and asks the browser to check for a new version (§4.7). Where the file fetched
 is newer than the one loaded, the shell stores it in `itinero-rules`, loads it, and tells its
 listeners, so that `web/screens` redraws every time. `web/trip-store` calls `online()` each time
 the device connects, and the shell calls it after `start` where the device is online.
@@ -177,13 +188,23 @@ the device connects, and the shell calls it after `start` where the device is on
 The suite runs with `npm test` in `apps/web/`, and the recipe `just test-web` runs it from anywhere
 in the repository. It covers all three of the web app's components.
 
-- **Unit tests**, with Node's built-in test runner, cover choosing the newer rules file and
-  `suggestInstall`.
+- **Unit tests**, with Node's built-in test runner, cover choosing the newer rules file,
+  `suggestInstall`, and the build of §4.6: the files a version lists, its name, `/sw.js`, and both
+  copies of the rules.
 - **Browser tests**, with Playwright in Chromium, WebKit and Firefox, open Itinero, go offline,
   reopen it, and open every screen (`WEB:SHELL-F1`). They publish a second version and confirm it
-  takes over only once every window closes (`WEB:SHELL-F2`). They publish a third whose online side
-  refuses the second, and confirm the notice, and that `applyUpdate` starts it in every window
-  (`WEB:SHELL-F5`).
+  takes over only once every window closes (`WEB:SHELL-F2`). They publish newer rules, and confirm
+  they are loaded and kept (`WEB:SHELL-F4`). They publish a third version whose online side refuses
+  the first, and confirm the notice, and that `applyUpdate` starts it in every window
+  (`WEB:SHELL-F5`). With no connection, they confirm that trip-time writes, orders and measures
+  times with the rules the shell kept (`SHR:TRIP-TIME-NFR1`).
+
+The browser tests build each version they publish once, before they run, with a hook through which
+they reach the shell and trip-time, and play the part of `web/trip-store` until it is built. Each
+test file serves the versions from a stand-in for the online side, which serves them as the
+Worker's Wrangler configuration does, and refuses an older `Itinero-Api` as the Worker does. Going
+offline makes the stand-in unreachable as well as taking the browser offline, since a browser's own
+checks for a new service worker ignore Playwright's offline setting in some engines.
 - **Timing tests** measure the time from opening to `start` resolving, and fail above 300
   milliseconds on the machine running them. The check on a phone of `WEB:SHELL-NFR1` is made by
   hand before each release.
@@ -196,7 +217,10 @@ The build:
 1. bundles the web app's TypeScript, Preact and every package it imports
 2. copies the newest rules file of `@itinero/trip-time` into the version's files, and, apart from
    them, to `/time-zone-rules.json`
-3. writes `version.json`, naming the version by the hash of the version's files, and listing them
+3. writes `version.json`, naming the version by the hash of the version's files, and listing them,
+   with `index.html` listed as `/`
+4. writes the version into `index.html`, and writes `/sw.js` from `src/shell/sw.ts`, with its
+   types stripped and the version written into it
 
 `/time-zone-rules.json` is not one of the version's files, so newer rules change no version's name.
 A maintainer publishes newer rules without a new version with `npm run build-rules` in `apps/web/`.
@@ -205,8 +229,8 @@ deploy then serves it beside the version already served (`WEB:SHELL-F4`).
 
 The online side's Wrangler configuration serves `apps/web/dist/` as the Worker's static files. It
 passes every path under `/api/` to the Worker, and answers any other path it does not hold with
-`index.html`. Deploying the online side deploys the web app
-with it (ADR-0018).
+`index.html`. Deploying the online side builds the web app and deploys it with the Worker
+(ADR-0018).
 
 ### 4.7 A version the online side no longer answers
 
@@ -240,7 +264,9 @@ only once they choose to update.
 | The web app's package | `apps/web/`, as `@itinero/web` | Whoever keeps the web app's roadmap |
 | The shell | `apps/web/src/shell/` | Whoever keeps the web app's roadmap |
 | The service worker | `apps/web/src/shell/sw.ts`, built to `/sw.js` | Whoever keeps the web app's roadmap |
-| The manifest and icons | `apps/web/public/` | Whoever keeps the web app's roadmap |
+| The shell's notices | `apps/web/src/shell/notices.tsx` | Whoever keeps the web app's roadmap |
+| The manifest and icons | `apps/web/public/`, the icons drawn by `apps/web/scripts/icons.ts` | Whoever keeps the web app's roadmap |
+| The build of §4.6 | `apps/web/plugins/shell-plugin.ts`, a Vite plugin | Whoever keeps the web app's roadmap |
 | The built version | `apps/web/dist/`, never committed | Whoever keeps the web app's roadmap |
 | A version's cache on a device | Cache Storage, `itinero-<version>` | The device's browser |
 | The newest rules on a device | Cache Storage, `itinero-rules` | The device's browser |
@@ -259,8 +285,8 @@ shows: `@itinero/trip-time`, `@itinero/itinerary`, `@itinero/pages`, `@itinero/p
   anything is read or written for it, and says so.
 - **Small** (`WEB-NFR2`). Preact, and Vite leaving out code nothing uses, keep the version's files
   small. The rules file and the map of country borders are the largest of them.
-- **Quick to start** (`WEB:SHELL-NFR1`). `start` reads two cached files and loads one, and waits for
-  nothing on the network.
+- **Quick to start** (`WEB:SHELL-NFR1`). `start` reads one cached rules file, the newer, and loads
+  it, and waits for nothing on the network.
 
 ## 7. Requirements this satisfies
 

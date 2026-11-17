@@ -25,7 +25,7 @@ system, component or concern is added here before any document names it.
 | [permissions](spec/access/permissions.md) | access | ACC:PERMISSIONS | `@itinero/permissions` | | What each traveller may see and change of a trip's pages, calendar and bookings |
 | [places](spec/web/places.md) | web | WEB:PLACES | | | The places a device knows the time zone of: every airport, and the towns of each country its trips visit |
 | [screens](spec/web/screens.md) | web | WEB:SCREENS | | | What travellers see and use: the home page, the calendar, the bookings page, the pages of research and the trip's members |
-| [shell](spec/web/shell.md) | web | WEB:SHELL | | | The installable app itself: launching with no connection, adding it to a phone's home screen, and keeping the time-zone rules up to date |
+| [shell](spec/web/shell.md) | web | WEB:SHELL | `@itinero/web` | | The installable app itself: launching with no connection, adding it to a phone's home screen, and keeping the time-zone rules up to date |
 | [trip-store](spec/web/trip-store.md) | web | WEB:STORE | | | Each trip's copy on a device: catching it up, telling it of changes as they happen, sending changes, and deleting it on sign-out |
 | [list](spec/bookings/list.md) | bookings | BKG:LIST | `@itinero/bookings` | | A trip's bookings: adding, changing and removing each one, the travellers it names, and the order they happen in |
 | [doc-check](spec/shared/doc-check.md) | shared | SHR:DOC-CHECK | | | The checker that holds every document in this vault to the documentation system |

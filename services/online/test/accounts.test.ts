@@ -5,7 +5,8 @@ import { createScheduledController, env } from "cloudflare:test";
 import { describe, expect, test } from "vitest";
 import { account, makeNonce, NONCE_LIFE, SESSION_LIFE, whoSent } from "../src/accounts.ts";
 import { digest } from "../src/bytes.ts";
-import worker, { answer } from "../src/index.ts";
+import worker from "../src/index.ts";
+import { answer } from "../src/answer.ts";
 import { google, idToken, keyFetches, stranger, type Person } from "./google.ts";
 import { api, expectRefused, json, nonce, rows, sessionSet, signIn } from "./helpers.ts";
 
