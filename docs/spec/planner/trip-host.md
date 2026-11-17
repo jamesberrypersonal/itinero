@@ -29,8 +29,8 @@ Deliberately absent:
 
 - deciding what a traveller may do, which `access/permissions` does when the trip host asks
 - the rules of the calendar and the pages, which `planner/itinerary` and `planner/pages` hold
-- the rules of a booking, which `bookings/list`, the component that holds a trip's bookings, holds
-  with the components of each kind of booking
+- the rules of a booking, which `bookings/list`, the component that checks and orders a trip's
+  bookings, holds with the components of each kind of booking
 - accepting a change made with no connection, or merging changes made while apart (ADR-0004, a trip
   is read-only offline)
 - merging two travellers' edits to one page, which is future work
@@ -78,7 +78,7 @@ agreed would come to see a moved page.
 | Refusal code | Status | When |
 |---|---|---|
 | `not-a-member` | 404 | A request about a trip the account is not on, whether or not the trip exists, or from a member the trip's grants do not hold |
-| `creator-only` | 403 | A `rename` or a `trip-dates` change by a traveller who is not the trip's creator |
+| `creator-only` | 403 | A calendar change that renames the trip or sets its dates, `rename` or `trip-dates`, by a traveller who is not the trip's creator |
 | `own-dates-only` | 403 | A `traveller-dates` change for another traveller, by a traveller who is not an admin |
 | `membership-only` | 403 | An `add` or a `remove` grant sent by a device. Only `access/membership` sends them |
 | `unknown-traveller` | 409 | A booking naming a traveller who is not on the trip. `details.traveller` names them |
@@ -114,10 +114,11 @@ class TripHost {
 }
 ```
 
-`access/membership` tells a listener of each change it makes, which it is given with its
-`onChange`. The Worker gives that listener. It passes each `add` and `remove` to the trip's
-`grant`, the only way either reaches a trip's grants. It passes each `admin` change, which names a
-member made an admin, to the trip's `touch`. `Sync` is the body of §4.4.
+The Worker hands `access/membership` a listener, through `access/membership`'s `onChange`.
+`access/membership` tells the listener of each change it makes to a trip's members. The listener
+passes each `add` and `remove` to the trip's `grant`, the only way either reaches a trip's grants.
+It passes each `admin` change, which names a member made an admin, to the trip's `touch`. `Sync` is
+the body of §4.4.
 
 ### 3.4 Systems this drives
 
@@ -136,12 +137,14 @@ Behaviour crossing every operation:
 
 - **Every request names its member.** The Worker passes each request to the trip's Durable Object
   only with the member `access/membership` gives for the account. An account not on the trip is
-  refused with `not-a-member`, before the Durable Object is reached. The Durable Object refuses in
-  the same way a member its grants do not hold, such as one whose removal stopped part way
+  refused with `not-a-member`, before the Durable Object is reached. The Durable Object refuses, in
+  the same way, a member whom its grants do not hold, such as one whose removal stopped part way
   (`spec/access/membership.md` §4.5).
-- **Every change and every read is asked of `access/permissions` first**, with the trip's grants,
-  pages and member, by its `authorise` (ACC-NFR1). A refusal is returned unchanged, and nothing is
-  read or written.
+- **Every change and every read is checked first.** The trip host asks `access/permissions`'
+  `authorise`, with the trip's grants, pages and member (ACC-NFR1), apart from the checks §4.3
+  names that it makes itself: who may set the trip's name and each traveller's dates, and the grant
+  changes only `access/membership` sends. A refusal is returned unchanged, and nothing is read or
+  written.
 - **One request at a time.** A Durable Object handles one request at a time. Each change is
   checked, applied and stored in one transaction of its database, so no change sees another half
   done.
@@ -154,7 +157,7 @@ Behaviour crossing every operation:
 
 | Table | Holds |
 |---|---|
-| `trip` | One row: the trip, in the itinerary's text form, its `changed`, and the trip's `sequence` |
+| `trip` | One row: the trip, with its calendar, in the itinerary's text form, its `changed`, and the trip's `sequence` |
 | `pages` | One row for each page: its `changed`, its text and title, each other field of the page in a column of its own, and `seenBy` for a page a `bury` named (§4.6) |
 | `grants` | One row: the trip's grants, in the permissions' text form |
 | `bookings` | One row for each booking, keyed by its identifier, in the bookings' text form, with its `changed` and the travellers it names, so that a catch-up works out which bookings a traveller may see without reading every booking's text |
@@ -169,14 +172,14 @@ function it calls reads the text of any other page. It writes a page's text form
 device, from the same row.
 
 The trip host's logic is written over a small interface to a SQLite database, which runs each
-statement and each transaction. The Durable Object gives it its own database, and the cost tests of
-§4.7 give it Node's, so the same code is timed there.
+statement and each transaction. The Durable Object gives the logic its own database. The cost tests
+of §4.7 give it Node's, so that they time the code the Durable Object runs.
 
 The itinerary and the bookings need the world's time-zone rules, which `shared/trip-time` loads
 from a rules file. The Worker carries the rules file as one of its files. The Durable Object loads
 it the first time a change to the calendar or to a booking needs it, and not as it starts, so
-that catching a device up never waits on it. Its result is the one that stands when a device holds
-other rules (`PLN:ITINERARY-F6`).
+that catching a device up never waits on it. A change checked against these rules stands, whatever
+rules a device holds (`PLN:ITINERARY-F6`).
 
 ### 4.2 Creating a trip
 
@@ -211,7 +214,8 @@ one's name and dates, from its `summary`.
    needs edit access to the calendar. For `pages`, the change is asked of `authorise` as a
    `change-page`. For `grants`, an `add` or a `remove` is refused with `membership-only`, and any
    other change is asked as a `grant`. For `bookings`, the trip host reads the booking held with the
-   change's identifier, and takes the bookings' `touches`. It asks `authorise` for a
+   change's identifier, and takes the bookings' `touches`, which gives `before` and `after`: the
+   travellers the booking names before the change and after it. It asks `authorise` for a
    `change-booking` naming `before`, where `before` names anyone, and for one naming `after`, where
    `after` names anyone. Each traveller of `after` must be held in the grants, or named in `before`,
    or the change is refused with `unknown-traveller` (`PLN:HOST-F9`). A booking therefore keeps a
@@ -225,8 +229,9 @@ one's name and dates, from its `summary`.
 
 Where every check passes, the trip host raises the `sequence`, and stores each record the change
 wrote: the trip, the one page `apply` wrote, the grants, or the one booking `apply` gave. A removed
-booking's row is deleted. It does both in one transaction. It
-then tells every open socket of the new sequence (§4.5), and gives `{ "sequence": ... }`.
+booking's row is deleted. It raises the sequence and stores or deletes the records in one
+transaction. It then tells every open socket of the new sequence (§4.5), and gives
+`{ "sequence": ... }`.
 
 `grant`, from `access/membership`, applies an `add` or a `remove` in the same way, with no check of
 who sent it (`PLN:HOST-F7`). After a `remove`, the trip host closes every socket of that traveller,
@@ -236,7 +241,7 @@ with the close code 4403.
 stopped part way by sending the same change again:
 
 - an `add` for a traveller the grants already hold sets their access to the trip and to the
-  calendar to those given, and keeps their exceptions
+  calendar to those given, and keeps their exceptions, the levels set for single pages
 - a `remove` for a traveller the grants do not hold succeeds, and changes nothing
 
 A `remove` also applies to the calendar a `traveller-dates` change with no `dates` for the
@@ -246,8 +251,8 @@ traveller, in the same transaction, so that their own dates leave with them
 `touch`, from `access/membership`, raises the `sequence`, tells every open socket of it, and writes
 nothing else (`PLN:HOST-F6`). `access/membership` calls it when a member is made an admin, which
 changes no record the trip host holds. Each open device then catches up. The new admin's device is
-given everything an admin may see. Every other device, whose catch-up fetches the trip's members
-again, marks them an admin.
+given everything an admin may see. Every other device's catch-up also asks `access/membership` for
+the trip's members (`spec/web/trip-store.md` §4.2), and so marks the new admin as one.
 
 ### 4.4 Catching a device up
 
@@ -259,7 +264,7 @@ again, marks them an admin.
 | `trip` | The trip's name, its dates and the traveller's own dates, which every traveller may see |
 | `you` | Whether the traveller is an admin and the creator, and the traveller's own grant |
 | `grants` | The trip's grants, in the permissions' text form, where the traveller is an admin. Absent for any other traveller |
-| `calendar` | The stretches and firm items, where the traveller's level for the calendar is view or edit, and the trip changed after `since`, or `holdsCalendar` is false. `null` where their level is none, and absent where nothing changed |
+| `calendar` | The trip in the itinerary's text form, with its stretches and firm items, where the traveller's level for the calendar is view or edit, and the `trip` row's `changed` is after `since`, or `holdsCalendar` is false. `holdsCalendar` says whether the device holds the calendar already. `null` where their level is none, and absent where nothing changed |
 | `pages` | For each page of `seen`, from `access/permissions`, its identifier and its `changed`. A page whose `changed` is after `since` also holds its text form |
 | `graveyard` | For each page the pages' `graveyard` lists whose `seenBy` holds the traveller, or for every one to an admin: its identifier, its title, and the number of pages that went with it |
 | `bookings` | For each booking whose `bookingLevel` for the traveller is view or edit, its identifier and its `changed`. A booking whose `changed` is after `since` also holds its text form |
@@ -310,10 +315,10 @@ A restored page therefore always returns to its old place, and to the access of 
 
 *Plumbing:* each traveller is shown in the graveyard the deleted pages they could see when each was
 deleted (`ACC-F10`). The trip host records who could see each page as it applies a `bury`. Before
-the change is made, it asks `access/permissions`'s `pageLevel` of each traveller the grants hold,
-as a traveller who is not an admin. An admin is shown every page whatever `seenBy` holds.
-It then stores, in the buried page's `seenBy`, the accounts whose level was view or edit. A
-`restore` clears `seenBy`.
+the change is made, it asks `access/permissions`'s `pageLevel` for each traveller the grants hold,
+counting none of them as an admin. It then stores, in the buried page's `seenBy`, the accounts whose
+level was view or edit. A `restore` clears `seenBy`. An admin is shown every page in the
+graveyard, whatever `seenBy` holds.
 
 A page deleted only because a page above it was deleted holds no `seenBy`, because the pages'
 `graveyard` does not list it. A page deleted earlier than a page above it keeps its own `seenBy`.
@@ -336,15 +341,17 @@ runs it from anywhere in the repository.
   may not see (`PLN:HOST-NFR1`).
 - **Cost tests** count the requests, the rows read and written, and the storage of the day of
   `PLN:HOST-NFR2`, and confirm they are within the free plan's limits. They run thirty minutes of
-  the day and count four hours' worth. They also measure the processor time of each kind of request
-  on a trip of 500 pages and 300 bookings, the first after the Durable Object wakes included, and
-  fail where one takes over 10 milliseconds. Loading the rules file is not counted, since it happens
-  once each time the Durable Object wakes, for a change that needs it. The cost tests run the trip
-  host's logic on Node.js, with Node's SQLite, with `node --test` after the rest of the suite. The
-  Workers runtime keeps its clock still while code runs, so no test inside it can time code. That is the trip host's own
-  budget, well inside the free plan's limit: on the free plan, Milestone Web-0.2's trial ran a
-  Durable Object request of 374 milliseconds of processor time, and loaded the rules file in 6 to
-  23. A Worker on the free plan is held to 10 milliseconds, and a Durable Object is not.
+  the day, and multiply each count by eight for its four hours. They also measure the processor time
+  of each kind of request on a trip of 500 pages and 300 bookings, the first after the Durable
+  Object wakes included, and fail where one takes over 10 milliseconds. That is the trip host's own
+  budget. The free plan holds a Worker to 10 milliseconds of processor time, and a Durable Object
+  to none: Milestone Web-0.2's trial ran a Durable Object request of 374 milliseconds on the free
+  plan, and loaded the rules file in 6 to 23 milliseconds. The budget keeps every request far
+  inside what the free plan allows.
+  Loading the rules file is not counted, since it happens once each time the Durable Object wakes,
+  for a change that needs it. The cost tests run the trip host's logic on Node.js, with Node's
+  SQLite, with `node --test` after the rest of the suite. The Workers runtime keeps its clock still
+  while code runs, so no test inside it can time code.
 
 ## 5. Resources
 

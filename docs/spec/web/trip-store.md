@@ -67,7 +67,7 @@ type Copy = {
   you: { admin: boolean; creator: boolean; grant: Grant };
   calendar?: Trip;                                        // absent: not granted
   pages: Pages; graveyard: readonly { id: string; title: string;
-                                       went: number }[];   // went: the pages deleted with it
+                                       went: number }[];   // went: how many pages went with it
   bookings: readonly Booking[]; members: readonly Member[];
   grants?: Grants;                                        // an admin's copy alone: everyone's access
   invitations?: readonly Invitation[];                    // an admin's copy alone: those still open
@@ -99,6 +99,11 @@ function makeAdmin(id: string, account: string): Promise<Result<true>>;
 function remove(id: string, account: string): Promise<Result<true>>;
 function buried(id: string, page: string): Promise<Result<Page>>;
 ```
+
+`open` opens the device's database as the web app starts, and gives the account signed in on the
+device, or none (§4.5). `agreed` is the number of travellers the traveller agreed would come to see
+a moved page, as `planner/trip-host` takes it. `token` is the one the invitation's email carries in
+its link. A page's or a booking's `changed` is the trip's sequence at its last change.
 
 `change` is in the text form of its target's package, as `planner/trip-host` takes it. `onSignedOut`
 tells its listener once this window or another has signed out, or the session has ended, so that
@@ -146,11 +151,12 @@ Behaviour crossing every operation:
   every request it needs has answered, so a copy is brought up to date whole or not at all
   (`WEB:STORE-F2`).
 - **A version too old stops everything but reading.** Every request carries, in the header
-  `Itinero-Api`, the shell's `API`: the number of the form of request this version sends
-  (`spec/web/shell.md` §4.7). Any request refused with `update-first` writes nothing. The trip store
-  then calls the shell's `updateFirst`, which has the shell fetch the new version (`WEB:SHELL-F5`).
-  It then sends no request until the window reloads, and refuses with `update-first` every `send`,
-  and every function from `create` to `buried`. Every copy stays as it is, and is still read.
+  `Itinero-Api`, the shell's `API`. It numbers the form of the requests and records this version of
+  the web app sends and reads (`spec/web/shell.md` §4.7). Any request refused with `update-first`
+  writes nothing. The trip store then calls the shell's `updateFirst`, which has the shell fetch the
+  new version (`WEB:SHELL-F5`). It then sends no request until the window reloads, and refuses with
+  `update-first` every `send`, and every function from `create` to `buried`. Every copy stays as it
+  is, and is still read.
 - **A session that has ended deletes everything.** Any request refused with `no-session` signs the
   device out, as §4.5 gives, before anything else is done (`WEB:STORE-F5`).
 
@@ -177,21 +183,24 @@ caught up from the start the next time the device is online.
 - when it opens and the device is online
 - each time the browser fires its `online` event, and each time a window of Itinero comes to the
   front
-- every 60 seconds while the device is offline, which it learns by trying
+- every 60 seconds while the device is offline, since the trip store learns the device is online
+  again only by a request answered
 
 It first asks `GET /api/trips`. It deletes each trip it holds that the answer does not list, and
 adds each that it lists and the device does not hold. It then catches each trip up in turn, and
-tells `web/shell` the device is online. A device signed out tells `web/shell` the same, so that it
-takes newer time-zone rules too. Only one catch-up of every trip runs at a time, and only one of
-each trip.
+tells `web/shell` the device is online. Where no traveller is signed in, the trip store catches
+nothing up, and still tells `web/shell` the device is online, so that the shell takes newer
+time-zone rules. Only one catch-up of every trip runs at a time, and a trip is never caught up by
+two at once.
 
 To catch one trip up, the trip store:
 
-1. sends `POST /api/trips/{trip}/sync`, with `since` set to the trip's `sequence`, or absent for a
-   trip not yet held, and `holdsCalendar` set to whether it holds the calendar
+1. sends `POST /api/trips/{trip}/sync`, with `since` set to the trip's `sequence`, and
+   `holdsCalendar` set to whether it holds the calendar. `since` is absent for a trip not yet held,
+   or one with a record a package refused to read (§4.1)
 2. sends `POST /api/trips/{trip}/pages` for every page the answer lists without its text that the
    device does not hold, and `POST /api/trips/{trip}/bookings` for every such booking, in groups of
-   100. A trip whose record a package refused to read is caught up from the start
+   100
 3. sends `GET /api/trips/{trip}/members`, which gives an admin the open invitations too
 4. in one transaction, writes the trip's record, with the grants and the invitations where the
    answers hold them, writes every page and booking it was given, deletes every page and booking
@@ -299,7 +308,8 @@ nothing. Otherwise each sends one request, and returns a refusal unchanged.
 | `buried` | `GET /api/trips/{trip}/buried/{page}` | Reads the page with the pages' `pageFromText`, and gives it |
 
 Each function returns only once its catch-up is written, so the copy holds what the request did.
-`buried` stores nothing, so a page in the graveyard is never on the device (`PLN-F13`).
+`buried` stores nothing, so the text of a page in the graveyard is never on the device. The copy
+holds only the graveyard's titles (`PLN-F13`).
 
 An admin's copy holds the trip's `grants` and its open `invitations`, which each catch-up replaces
 whole. A copy whose traveller is no longer an admin is given neither, and the catch-up deletes
