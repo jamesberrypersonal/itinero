@@ -61,13 +61,13 @@ may show.
 
 | Request | Body | Gives |
 |---|---|---|
-| `POST /api/trips` | `{ "name": ..., "first": ..., "last": ..., "countries": [ ... ] }` | `{ "trip": ... }`, the new trip's identifier (§4.2) |
-| `GET /api/trips` | None | Each trip the account is on, with its name and dates (§4.2) |
+| `POST /api/trips` | `{ "name": ..., "first": ..., "last": ..., "countries": [ ... ] }` | `{ "trip": ... }`, the new trip's identifier, with status 201 (§4.2) |
+| `GET /api/trips` | None | `{ "trips": [ { "trip": ..., "name": ..., "dates": { "first": ..., "last": ... } } ] }`: each trip the account is on (§4.2) |
 | `POST /api/trips/{trip}/changes` | `{ "target": "calendar" \| "pages" \| "grants" \| "bookings", "change": ..., "agreed": ... }` | `{ "sequence": ... }` (§4.3) |
 | `POST /api/trips/{trip}/sync` | `{ "since": ..., "holdsCalendar": ... }` | What the device may hold that changed since (§4.4) |
-| `POST /api/trips/{trip}/pages` | `{ "pages": [ ... ] }` | The pages named that the traveller may see (§4.4) |
-| `POST /api/trips/{trip}/bookings` | `{ "bookings": [ ... ] }` | The bookings named that the traveller may see (§4.4) |
-| `GET /api/trips/{trip}/buried/{page}` | None | A page in the graveyard, to an admin (§4.6) |
+| `POST /api/trips/{trip}/pages` | `{ "pages": [ ... ] }` | `{ "pages": [ ... ] }`: the text form of each page named that the traveller may see (§4.4) |
+| `POST /api/trips/{trip}/bookings` | `{ "bookings": [ ... ] }` | `{ "bookings": [ ... ] }`: the text form of each booking named that the traveller may see (§4.4) |
+| `GET /api/trips/{trip}/buried/{page}` | None | `{ "page": ... }`: a page in the graveyard, in its text form, to an admin (§4.6) |
 | `GET /api/trips/{trip}/live` | None | A WebSocket that is told of each change (§4.5) |
 
 A `change` is written in the text form of its package: the itinerary's for `calendar`, the pages'
@@ -157,7 +157,7 @@ Behaviour crossing every operation:
 | `trip` | One row: the trip, in the itinerary's text form, its `changed`, and the trip's `sequence` |
 | `pages` | One row for each page: its `changed`, its text and title, each other field of the page in a column of its own, and `seenBy` for a page a `bury` named (§4.6) |
 | `grants` | One row: the trip's grants, in the permissions' text form |
-| `bookings` | One row for each booking, keyed by its identifier, in the bookings' text form, with its `changed` |
+| `bookings` | One row for each booking, keyed by its identifier, in the bookings' text form, with its `changed` and the travellers it names, so that a catch-up works out which bookings a traveller may see without reading every booking's text |
 | `creator` | One row: the creator's account |
 
 The trip host reads a page's text only where it gives or writes that text: for a page a request
@@ -167,6 +167,10 @@ order and `buried` alone. The trip host therefore builds the pages it gives `@it
 `@itinero/permissions` from the columns, with the text of only the pages it gives or writes. No
 function it calls reads the text of any other page. It writes a page's text form, for a
 device, from the same row.
+
+The trip host's logic is written over a small interface to a SQLite database, which runs each
+statement and each transaction. The Durable Object gives it its own database, and the cost tests of
+§4.7 give it Node's, so the same code is timed there.
 
 The itinerary and the bookings need the world's time-zone rules, which `shared/trip-time` loads
 from a rules file. The Worker carries the rules file as one of its files. The Durable Object loads
@@ -182,7 +186,8 @@ other rules (`PLN:ITINERARY-F6`).
 1. makes the trip with the itinerary's `newTrip`, and sets its dates with a `trip-dates` change,
    returning any refusal unchanged
 2. makes its pages with the pages' `newPages`, with a page for each country, titled with the name
-   the itinerary's `countries()` gives it
+   the itinerary's `countries()` gives it, and identified as `country-` and the country's code in
+   lower case, such as `country-cl`
 3. makes its grants with `newGrants`, and adds the creator with edit access to the trip and to the
    calendar
 4. stores all three, with a `sequence` of 1
@@ -276,7 +281,9 @@ other, without saying why. `bookings(who, ids)` does the same for each booking n
 `bookingLevel` for the traveller is view or edit.
 
 `you` holds only the traveller's own grant, and `grants` is given to an admin alone. A traveller
-who is not an admin therefore never learns another's access (`PLN:HOST-NFR1`). An admin is given
+who is not an admin therefore never learns another's access (`PLN:HOST-NFR1`). The grant in `you`
+holds only the exceptions for pages the traveller may see, since an exception for any other names a
+page hidden from them. An admin is given
 every grant on each catch-up, whatever `since` holds, because an admin sets each traveller's access
 and must see it first.
 
@@ -327,10 +334,14 @@ runs it from anywhere in the repository.
 - **Leak tests** catch up, as a traveller hidden from part of a trip, from every sequence the trip
   has held, and confirm nothing given names a page, a stretch, a grant or a booking that traveller
   may not see (`PLN:HOST-NFR1`).
-- **Cost tests** count the requests, the rows read and the storage of the day of `PLN:HOST-NFR2`,
-  and confirm they are within the free plan's limits. They also measure the processor time of each
-  kind of request on a trip of 500 pages and 300 bookings, the first after the Durable Object
-  wakes included, and fail where one takes over 10 milliseconds. That is the trip host's own
+- **Cost tests** count the requests, the rows read and written, and the storage of the day of
+  `PLN:HOST-NFR2`, and confirm they are within the free plan's limits. They run thirty minutes of
+  the day and count four hours' worth. They also measure the processor time of each kind of request
+  on a trip of 500 pages and 300 bookings, the first after the Durable Object wakes included, and
+  fail where one takes over 10 milliseconds. Loading the rules file is not counted, since it happens
+  once each time the Durable Object wakes, for a change that needs it. The cost tests run the trip
+  host's logic on Node.js, with Node's SQLite, with `node --test` after the rest of the suite. The
+  Workers runtime keeps its clock still while code runs, so no test inside it can time code. That is the trip host's own
   budget, well inside the free plan's limit: on the free plan, Milestone Web-0.2's trial ran a
   Durable Object request of 374 milliseconds of processor time, and loaded the rules file in 6 to
   23. A Worker on the free plan is held to 10 milliseconds, and a Durable Object is not.
@@ -341,6 +352,8 @@ runs it from anywhere in the repository.
 |---|---|---|
 | The Worker of the online side | `services/online/` | Whoever keeps the planner's roadmap |
 | The Durable Object class | `TripHost`, in `services/online/src/trip-host.ts`, bound to the Worker as `TRIPS` | Whoever keeps the planner's roadmap |
+| The trip host's logic | `services/online/src/trip-core.ts` | Whoever keeps the planner's roadmap |
+| The requests of §3.2 | `services/online/src/trip-routes.ts` | Whoever keeps the planner's roadmap |
 | Each trip's database | The SQLite database of the trip's Durable Object, with the tables of §4.1 | Whoever keeps the planner's roadmap |
 | The time-zone rules file | One of the Worker's files, from `shared/trip-time` | Whoever keeps the planner's roadmap |
 | The Wrangler configuration | `services/online/wrangler.toml` | Whoever keeps the planner's roadmap |

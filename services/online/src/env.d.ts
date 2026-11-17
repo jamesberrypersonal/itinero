@@ -13,5 +13,7 @@ declare namespace Cloudflare {
     RESEND_API_KEY: string;
     /** The address invitations are sent from, at Itinero's own domain. */
     INVITATIONS_FROM: string;
+    /** The Durable Objects that each hold one trip (docs/spec/planner/trip-host.md §5). */
+    TRIPS: DurableObjectNamespace<import("./trip-host.ts").TripHost>;
   }
 }

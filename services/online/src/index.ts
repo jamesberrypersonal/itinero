@@ -6,6 +6,9 @@ import { forgetExpired } from "./accounts.ts";
 import { answer } from "./answer.ts";
 import { closeExpired } from "./membership.ts";
 
+/** The Durable Object that holds each trip (docs/spec/planner/trip-host.md §5). */
+export { TripHost } from "./trip-host.ts";
+
 export default {
   fetch: (request, _env, _ctx) => answer(request),
   scheduled: async (controller, _env, _ctx) => {

@@ -14,6 +14,20 @@ the planner's itinerary. The planner is the first system that needs that compone
 
 ### Phase 1 — Build
 
+#### Milestone Planner-1.4 — The trip held online
+
+- `packages/trip-time/rules/2026f.json` is built with the build script from IANA's own release
+  2026f, and gives every zone the same offset as before.
+- `planner/trip-host` is in the Worker of the online side, with a Durable Object for each trip,
+  holding its calendar, pages, grants and bookings in its own SQLite database, as its specification
+  gives it. `access/membership` hands it each traveller who joins, leaves or is made an admin.
+- Its test suite proves each requirement of `planner/trip-host` by the verification it carries,
+  inside Wrangler, with its cost tests on Node.js. A request takes at most 3 milliseconds on a trip
+  of 500 pages and 300 bookings, and a day of ten devices reads about 2 million rows.
+- The suite proves the checks of the planner's own requirements that need only the online side:
+  `PLN-F6`, `PLN-F10`, `PLN-F13`, `PLN-F14` and `PLN-F16`. It proves `BKG-F1`, and `BKG-F5` but
+  for its check that a removed booking is gone from every traveller's bookings page.
+
 #### Milestone Planner-1.3 — Pages
 
 - `planner/pages` is built as `@itinero/pages`, in `packages/pages/`, as its specification gives
@@ -101,21 +115,3 @@ the planner's itinerary. The planner is the first system that needs that compone
   by one function, the same on a phone and on the copy held online.
 
 ## Pending
-
-### Phase 1 — Build
-
-#### Milestone Planner-1.4 — The trip held online
-
-**Waits on:** Milestone Access-1.3, Milestone Bookings-1.5, Milestone Web-0.2
-
-- Rebuild `packages/trip-time/rules/2026f.json` with the build script, from IANA's own release,
-  and confirm the test suite still passes. Milestone Planner-1.1 moved this here, since the release
-  could not be downloaded when it was built.
-- Build `planner/trip-host` in the Worker of the online side, in `services/online/`, with a Durable
-  Object for each trip, as its specification gives it.
-- Prove each requirement of `planner/trip-host` by the verification it carries.
-- Prove the planner system's own requirements that need only the online side, such as changes
-  shared between travellers. Those that need a phone wait for the web app.
-- Prove the bookings system's requirements that need only the online side, by the verification
-  each carries: `BKG-F1`, and `BKG-F5` but for its check that a removed booking is gone from every
-  traveller's bookings page. Milestone Web-1.4 proves the rest of the bookings system.

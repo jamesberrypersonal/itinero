@@ -6,6 +6,7 @@
 import { authenticate, makeNonce, setName, signIn, signOut } from "./accounts.ts";
 import { body, refused, type Refusal } from "./result.ts";
 import { membershipRoutes } from "./membership-routes.ts";
+import { connectMembership, tripRoutes } from "./trip-routes.ts";
 import type { Route } from "./route.ts";
 import { clearSession, sessionOf, setSession } from "./session.ts";
 
@@ -63,7 +64,10 @@ function refusal(code: string, message: string): Refusal {
   return { code, message };
 }
 
-const routes: Route[] = [...accountRoutes, ...membershipRoutes];
+const routes: Route[] = [...accountRoutes, ...tripRoutes, ...membershipRoutes];
+
+// access/membership hands each change of a trip's members to the trip host.
+connectMembership();
 
 /** Whether a request carries a version of the web app the online side answers (§4.7). */
 function versionAnswered(request: Request): boolean {

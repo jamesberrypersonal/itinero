@@ -32,5 +32,15 @@ database_name = "itinero"
 database_id = "00000000-0000-0000-0000-000000000000"
 migrations_dir = "migrations"
 
+# Each trip, in a Durable Object of its own with its own SQLite database
+# (docs/spec/planner/trip-host.md §3.4, §5).
+[[durable_objects.bindings]]
+name = "TRIPS"
+class_name = "TripHost"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["TripHost"]
+
 # NONCE_KEY and RESEND_API_KEY are secrets, set with `wrangler secret put`, never in the repository.
 # For `wrangler dev`, put it in .dev.vars, which git ignores.

@@ -6,20 +6,27 @@
   "license": "SEE LICENSE IN ../../LICENSE",
   "type": "module",
   "scripts": {
-    "typecheck": "tsc --project .",
-    "test": "tsc --project . && vitest run",
+    "typecheck": "tsc --project . && tsc --project tsconfig.node.json",
+    "test": "tsc --project . && tsc --project tsconfig.node.json && vitest run && node --test \"test/node/**/*.test.ts\"",
     "dev": "wrangler dev",
     "deploy": "npm run build --workspace @itinero/web && wrangler d1 migrations apply DB --remote && wrangler deploy"
   },
   "devDependencies": {
     "@cloudflare/vitest-plugin": "1.4.11",
     "@cloudflare/workers-types": "5.20261031.1",
-    "@itinero/permissions": "0.1.0",
     "typescript": "7.0.2",
     "vitest": "4.1.12",
-    "wrangler": "4.156.0"
+    "wrangler": "4.156.0",
+    "@types/node": "24.19.2"
   },
   "engines": {
     "node": ">=24"
+  },
+  "dependencies": {
+    "@itinero/bookings": "0.1.0",
+    "@itinero/itinerary": "0.1.0",
+    "@itinero/pages": "0.1.0",
+    "@itinero/permissions": "0.1.0",
+    "@itinero/trip-time": "0.1.0"
   }
 }

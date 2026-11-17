@@ -21,7 +21,7 @@ theirs, in Milestone Planner-0.2 and Milestone Access-0.1.
   Its files, built from the data of 2026-11-16, are in `apps/web/places/`, and each build of the web
   app serves them beside its version.
 - `web/places` is built in `@itinero/web`, as its specification gives it. Each town in its files
-  carries its population, so that the towns of two countries are ordered against each other.
+  carries its population.
 - Its test suite proves each requirement of `web/places` by the verification it carries, the fetch
   tests in Chromium, WebKit and Firefox against a stand-in trip store, except the check of
   `WEB:PLACES-NFR1` on a phone.
@@ -38,8 +38,7 @@ theirs, in Milestone Planner-0.2 and Milestone Access-0.1.
   need a phone, or the trip store and the screens, to later milestones.
 - `SHR:TRIP-TIME-NFR1` holds with no connection in the same three engines, with the rules the shell
   keeps. The check on a phone is left to Milestone Web-1.5.
-- The Worker's own module exports only its handlers, since the Workers runtime reads each named
-  export as an entrypoint. Wrangler could not start the Worker before.
+- The Worker's own module exports only its handlers and its Durable Object.
 
 ### Phase 0 — Design
 
