@@ -9,7 +9,7 @@ export type Email = { to: string; subject: string; text: string };
 /** Sends an email as plain text. Gives true once Resend has accepted it, and false where it refused. */
 export async function send(email: Email): Promise<boolean> {
   try {
-    const response = await fetch(RESEND_EMAILS, {
+    const response = await fetch(env.RESEND_URL ?? RESEND_EMAILS, {
       method: "POST",
       headers: { Authorization: `Bearer ${env.RESEND_API_KEY}`, "Content-Type": "application/json" },
       body: JSON.stringify({ from: env.INVITATIONS_FROM, to: [email.to], subject: email.subject, text: email.text }),

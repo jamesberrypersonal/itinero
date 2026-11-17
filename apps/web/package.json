@@ -13,7 +13,8 @@
     "test": "tsc --project . && tsc --project tsconfig.sw.json && node --test \"test/unit/**/*.test.ts\" && playwright test",
     "test:unit": "node --test \"test/unit/**/*.test.ts\"",
     "test:browser": "playwright test",
-    "build-places": "node scripts/build-places.ts"
+    "build-places": "node scripts/build-places.ts",
+    "build-borders": "node scripts/build-borders.ts"
   },
   "dependencies": {
     "@itinero/bookings": "0.1.0",
@@ -21,6 +22,8 @@
     "@itinero/pages": "0.1.0",
     "@itinero/permissions": "0.1.0",
     "@itinero/trip-time": "0.1.0",
+    "micromark": "4.0.3",
+    "micromark-extension-gfm": "3.0.0",
     "preact": "11.2.0"
   },
   "devDependencies": {

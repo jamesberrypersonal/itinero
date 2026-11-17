@@ -252,6 +252,9 @@ against an email stand-in that keeps each message sent, and a listener stand-in 
 `planner/trip-host`. It also checks each refusal of §3.2. It runs
 with the accounts component's suite, with `npm test` in `services/online/`, inside Wrangler.
 
+`RESEND_URL`, a variable of the Worker unset in every deploy, points it at a stand-in for Resend
+that keeps each email, for the web app's browser tests (`spec/web/screens.md` §4.9).
+
 ## 5. Resources
 
 The membership component stores two kinds of record, each a table of the online side's D1

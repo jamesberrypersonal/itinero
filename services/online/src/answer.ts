@@ -3,6 +3,7 @@
 // The Worker's own module, index.ts, exports nothing else, since the Workers runtime reads each of
 // its named exports as an entrypoint.
 
+import { env } from "cloudflare:workers";
 import { authenticate, makeNonce, setName, signIn, signOut } from "./accounts.ts";
 import { body, refused, type Refusal } from "./result.ts";
 import { membershipRoutes } from "./membership-routes.ts";
@@ -18,7 +19,9 @@ const accountRoutes: Route[] = [
     method: "POST",
     path: /^\/api\/auth\/nonce$/,
     signedIn: false,
-    answer: async () => Response.json({ nonce: await makeNonce() }),
+    // The nonce comes with Itinero's client identifier at Google, which the sign-in screen draws
+    // Google's button with, so the Worker's variable is its one source (§3.2).
+    answer: async () => Response.json({ nonce: await makeNonce(), google: env.GOOGLE_CLIENT_ID }),
   },
   {
     method: "POST",
@@ -74,7 +77,9 @@ function versionAnswered(request: Request): boolean {
   // A browser lets no page add a header to the request that opens a WebSocket.
   if (request.headers.get("Upgrade")?.toLowerCase() === "websocket") return true;
   const api = request.headers.get("Itinero-Api");
-  return api !== null && /^[0-9]{1,9}$/.test(api) && Number(api) >= OLDEST_API;
+  // A test of the web app's update raises the oldest it answers, as a deploy would (env.d.ts).
+  const oldest = env.OLDEST_API ? Number(env.OLDEST_API) : OLDEST_API;
+  return api !== null && /^[0-9]{1,9}$/.test(api) && Number(api) >= oldest;
 }
 
 export async function answer(request: Request): Promise<Response> {

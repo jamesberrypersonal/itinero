@@ -49,7 +49,7 @@ Every response that refuses gives a status of 400, 401 or 426, and a JSON body
 
 | Request | Body | Gives |
 |---|---|---|
-| `POST /api/auth/nonce` | None | `{ "nonce": ... }`: a single-use value for the next sign-in (§4.1) |
+| `POST /api/auth/nonce` | None | `{ "nonce": ..., "google": ... }`: a single-use value for the next sign-in (§4.1), and Itinero's client identifier at Google, which the sign-in screen draws Google's button with |
 | `POST /api/auth/sign-in` | `{ "provider": "google", "idToken": ..., "nonce": ... }` | `{ "account": ..., "email": ..., "name": ..., "named": ... }`, and sets the session (§4.2) |
 | `PUT /api/auth/name` | `{ "name": ... }` | `{ "name": ... }`, and sets the account's name (§4.5) |
 | `POST /api/auth/sign-out` | None | Nothing, and ends the session sent with it (§4.4) |
@@ -232,7 +232,11 @@ of the Worker, which Cloudflare runs once a day, deletes every session past its 
 nonce past its 10 minutes.
 
 Itinero's client identifier at Google is set as a variable of the Worker, named `GOOGLE_CLIENT_ID`,
-in its Wrangler configuration. `NONCE_KEY` is 32 random bytes, set as a secret of the Worker with
+in its Wrangler configuration. Three more variables are unset in every deploy, and set only by the
+web app's browser tests, which run the Worker on the developer's machine over plain HTTP:
+`GOOGLE_KEYS_URL` points the Worker at a stand-in for Google's key set, `SESSION_COOKIE_INSECURE`
+set to `yes` leaves `Secure` off the session cookie, which WebKit keeps over HTTPS alone, and
+`OLDEST_API` raises the oldest number answered, as a deploy would. `NONCE_KEY` is 32 random bytes, set as a secret of the Worker with
 Wrangler, and never in the repository. Changing it refuses every nonce not yet used, which costs a
 traveller signing in at that moment one more try. `OLDEST_API` is a constant of the Worker's code,
 so that it changes only with a deploy.

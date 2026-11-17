@@ -88,7 +88,12 @@ function online(): void;                                      // web/trip-store 
 const API: number;                                            // sent with every request (§4.7)
 function updateFirst(): void;                                 // web/trip-store calls it when refused
 function applyUpdate(): void;                                 // web/screens calls it from the notice
+function zoneNames(): Promise<readonly string[]>;             // every zone the rules loaded name
 ```
+
+`zoneNames` gives every zone and alias of the rules loaded, in byte order, for a traveller choosing
+a time's zone by hand (`spec/web/screens.md` §4.5). It reads the rules file again, once, the first
+time it is asked.
 
 ### 3.4 Systems this drives
 

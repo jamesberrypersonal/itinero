@@ -29,6 +29,18 @@ export function ReadyOffline({ state }: { state: ShellState }) {
   );
 }
 
+/** The version running, the time-zone rules loaded, and whether Itinero is ready offline. */
+export function About({ state }: { state: ShellState }) {
+  return (
+    <footer class="about" data-shell="about">
+      <ReadyOffline state={state} />
+      <span>
+        Version <span data-shell="version">{state.version}</span> · time zones <span data-shell="rules-version">{state.rulesVersion}</span>
+      </span>
+    </footer>
+  );
+}
+
 /** Shown on an iPhone or an iPad not opened from the home screen (`WEB:SHELL-F3`, §4.3). */
 export function InstallSuggestion({ state }: { state: ShellState }) {
   if (!state.suggestInstall) return null;

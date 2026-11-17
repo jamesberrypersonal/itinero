@@ -14,6 +14,7 @@ export default defineConfig({
   reporter: process.env["CI"] ? [["list"], ["github"]] : "list",
   timeout: 60_000,
   expect: { timeout: 15_000 },
+  use: { actionTimeout: 15_000 },
   projects: [
     { name: "chromium", use: { ...devices["Desktop Chrome"] } },
     { name: "webkit", use: { ...devices["Desktop Safari"] } },

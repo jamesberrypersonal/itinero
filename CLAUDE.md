@@ -21,8 +21,9 @@ rules, and `tools/doc-scaffold` starts new documents as skeletons that pass it.
   D1 database. It holds `access/accounts` and `access/membership`, and `planner/trip-host`: a
   Durable Object for each trip, `TripHost`, whose logic is in `src/trip-core.ts`.
 - `apps/web/` (`@itinero/web`) is the web app, built with Preact and Vite, and served by the Worker
-  as its static files. It holds `web/shell`, `web/places` and `web/trip-store`, and will hold
-  `web/screens`. Its places, every country's towns and every airport, are built into
+  as its static files. It holds `web/shell`, `web/places`, `web/trip-store` and `web/screens`.
+  `npm run build-borders` builds the map of country borders into
+  `apps/web/src/screens/borders.json`. Its places, every country's towns and every airport, are built into
   `apps/web/places/` by `npm run build-places -- <date>`.
 - `tools/doc-check/` and `tools/doc-scaffold/` are Rust packages, run through `just`.
 - `tools/hooks/pre-commit` is an optional hook that runs the checker before each commit.
@@ -96,8 +97,10 @@ are `.tsx`. `npm test` runs `tsc` twice, once for the page and once for the serv
 Node's test runner over `test/unit/`, then Playwright over `test/browser/`, in Chromium, WebKit and
 Firefox. Install the engines once with `npx playwright install chromium webkit firefox`. The browser
 tests build three versions into `apps/web/test-results/`, and serve them from a stand-in for the
-Worker. The trip store's browser tests start the Worker itself in Wrangler, with sessions seeded
-into a local D1 database, and its unit tests run the trip host's logic on Node's SQLite. `npm run build` in `apps/web/` writes the version the Worker serves, into `apps/web/dist/`.
+Worker. The trip store's and the screens' browser tests start the Worker itself in Wrangler, with
+sessions seeded into a local D1 database, or travellers signed in through stand-ins for Google and
+Resend that the Worker reaches through variables unset in every deploy. The trip store's unit tests
+run the trip host's logic on Node's SQLite. `npm run build` in `apps/web/` writes the version the Worker serves, into `apps/web/dist/`.
 The Worker's own module, `services/online/src/index.ts`, exports only its handlers: the Workers
 runtime reads any other named export as an entrypoint, and refuses to start.
 

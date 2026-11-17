@@ -43,6 +43,7 @@ export const {
   onSignedOut,
   signedIn,
   signOut,
+  catchUpAll,
   create,
   accept,
   invite,

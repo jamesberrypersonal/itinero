@@ -14,6 +14,28 @@ theirs, in Milestone Planner-0.2 and Milestone Access-0.1.
 
 ### Phase 1 — Build
 
+#### Milestone Web-1.4 — The screens a traveller reads a trip on
+
+- The first screens of `web/screens` are built, as its specification gives them: signing in and
+  choosing a name, accepting an invitation, the list of trips and a new trip, a trip's home page,
+  its bookings with a form for each kind, its pages with their search and graveyard, its members,
+  and the settings. A trip's bar runs along the foot of a phone and down the side of a computer.
+- The map of country borders, `npm run build-borders`, is built from Natural Earth's countries at
+  1:50 million, and is 416 kilobytes as sent. The home page finds the phone's country in it, on the
+  phone.
+- `POST /api/auth/nonce` gives Itinero's client identifier at Google with the nonce, for the sign-in
+  screen to draw Google's button with.
+- Its test suite proves `WEB:SCREENS-F1`, `WEB:SCREENS-F2`, `WEB:SCREENS-F4`, `WEB:SCREENS-F5`,
+  `WEB:SCREENS-F7`, `WEB:SCREENS-F10`, and `WEB:SCREENS-F8` and `WEB:SCREENS-F9` but for the checks
+  left to Milestone Web-1.5, by the verification each carries, in Chromium, WebKit and Firefox,
+  against the online side in Wrangler with stand-ins for Google and Resend.
+- The suite proves the checks of `WEB:SHELL-F5` that need a trip's copy and the screens, against a
+  version deployed whose online side refuses the one running.
+- The suite proves `BKG-F2`, `BKG-F3`, `BKG-F4` and `BKG-F6`, and the check of `BKG-F5` that a removed
+  booking is gone from every traveller's bookings page. `BKG-NFR1`, `BKG:LIST-NFR2` and
+  `WEB:SCREENS-NFR1` hold in each engine on this machine, and their checks on a phone are left to
+  Milestone Web-1.5.
+
 #### Milestone Web-1.3 — A trip's copy on a device
 
 - `web/trip-store` is built in `@itinero/web`, as its specification gives it, with each trip's copy
@@ -99,29 +121,6 @@ theirs, in Milestone Planner-0.2 and Milestone Access-0.1.
 
 ### Phase 1 — Build
 
-#### Milestone Web-1.4 — The screens a traveller reads a trip on
-
-**Waits on:** Milestone Bookings-1.5
-
-- Build the first screens of `web/screens`, as its specification gives them: signing in and
-  choosing the name other travellers see, accepting an invitation, the list of trips and a new trip,
-  the home page, the bookings, the pages of research with their search, and the settings.
-- Prove the checks of `WEB:SHELL-F5` that need a trip's copy and the screens: that every trip the
-  device holds still opens while a new version is required, that no screen offers to change one,
-  and that the new version brings every trip up to date. Milestone Web-1.1 proved the rest of
-  `WEB:SHELL-F5`, and moved these checks here, since they need the trip store and the screens. Its
-  browser test of `WEB:SHELL-F1` opens each new screen with no connection.
-- Prove the requirements of `web/screens` those screens meet, by the verification each carries:
-  `WEB:SCREENS-F1`, `WEB:SCREENS-F2`, `WEB:SCREENS-F4`, `WEB:SCREENS-F5`, and `WEB:SCREENS-F7` to
-  `WEB:SCREENS-F10`.
-- Prove `BKG:LIST-NFR2` on a phone at least four years old, by the checks of its verification.
-  Milestone Bookings-1.5 proved the rest of `bookings/list`, and moved these checks here, since they
-  need a phone.
-- Prove the bookings system's requirements that need the bookings page or a phone, by the
-  verification each carries: `BKG-F2`, `BKG-F3`, `BKG-F4`, `BKG-F6` and `BKG-NFR1`, and the check
-  of `BKG-F5` that a removed booking is gone from every traveller's bookings page. Milestone
-  Planner-1.4 proves the rest of the bookings system.
-
 #### Milestone Web-1.5 — The calendar, and the screens an admin manages a trip on
 
 **Waits on:** Milestone Access-1.4
@@ -140,6 +139,15 @@ theirs, in Milestone Planner-0.2 and Milestone Access-0.1.
 - Prove `WEB:PLACES-NFR1` on a phone at least four years old, by the check of its verification.
   Milestone Web-1.2 proved the rest of `web/places`, and moved this check here, since it needs a
   phone.
+- Build moving a page by dragging it in the tree, with the question of `ACC-F9` where the move lets
+  more travellers see it, as `spec/web/screens.md` §4.6 gives, for `WEB:SCREENS-F6`.
+- Prove the check of `WEB:SCREENS-F8` that removing a traveller asks first, and the checks of
+  `WEB:SCREENS-F1` on the calendar and the screens an admin manages a trip on. Milestone Web-1.4
+  proved the rest of both, and moved these checks here, since they need these screens.
+- Prove `WEB:SCREENS-F9` with Google's own button, signing in on a phone and on a computer, and
+  `BKG:LIST-NFR2`, `BKG-NFR1` and `WEB:SCREENS-NFR1` on a phone at least four years old. Milestone
+  Web-1.4 proved the rest of them, and moved these checks here, since they need a phone and
+  Itinero registered with Google.
 - Prove `WEB:STORE-NFR1` on a phone at least four years old, and `PLN:ITINERARY-NFR1`,
   `PLN:PAGES-NFR1` and `ACC:PERMISSIONS-NFR1` on a phone with no connection, by the checks of their
   verifications that need one. Milestone Web-1.3 proved the rest of them, and moved these checks

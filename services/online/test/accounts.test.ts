@@ -300,3 +300,11 @@ describe("The refusals of §3.2", () => {
     expect((await answer(socket)).status).toBe(200);
   });
 });
+
+describe("§3.2 — a nonce comes with Itinero's client identifier at Google", () => {
+  test("the sign-in screen draws Google's button from the Worker's own variable", async () => {
+    const answer = await json<{ nonce: string; google: string }>(await api("/api/auth/nonce", { method: "POST" }));
+    expect(answer.google).toBe("itinero-test.apps.googleusercontent.com");
+    expect(answer.nonce).toBeTypeOf("string");
+  });
+});

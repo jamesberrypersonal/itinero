@@ -111,8 +111,9 @@ Behaviour crossing every screen:
 
 *Invoked from:* opening Itinero with no account, a trip's menu, and `/settings`.
 
-The sign-in screen loads Google Identity Services, and draws its button, which opens Google's
-sign-in in a second window and gives the ID token back to the screen. It does so from an iPhone's
+The sign-in screen loads Google Identity Services, and draws its button with the client identifier
+`POST /api/auth/nonce` gives with the nonce. The button opens Google's sign-in in a second window
+and gives the ID token back to the screen. It does so from an iPhone's
 home screen as well as in Safari, as Milestone Web-0.2's trial showed. On a computer, where the
 screen is wider than 720 pixels and the device has no touch screen, it says that the trips it opens
 stay on the computer until the traveller signs out (`WEB:SCREENS-F9`). A sign-in asks
@@ -122,7 +123,8 @@ stay on the computer until the traveller signs out (`WEB:SCREENS-F9`). A sign-in
 as an invitation, or the list of trips.
 
 `/name` asks for the name other travellers will see, filled with the `name` the sign-in gave, and
-sends it with `PUT /api/auth/name`. A `bad-name` refusal shows its message beside the box. Once the
+sends it with `PUT /api/auth/name`. Until it is saved, the name the sign-in gave is kept in
+`localStorage` as `itinero-name-owed`, which signing out deletes. A `bad-name` refusal shows its message beside the box. Once the
 name is set, the screen the traveller came for opens, so an invitation is accepted only after its
 new member has chosen their name (`WEB:SCREENS-F10`, `ACC-F13`). `/name` offers no way to any other
 screen until the name is saved. A traveller who closes Itinero there keeps `named` false, and is
@@ -171,6 +173,11 @@ naming the travellers whose dates would fall outside shows each of them (`PLN-F1
 A position in no country, such as at sea, shows no country. A country the trip has no page for, or
 a page hidden from the traveller, shows the country's name without a link.
 
+The sign-in screen, the list of trips and the settings each end with a line holding the shell's
+notice that Itinero is ready offline, its version and the release of its time-zone rules. The
+sign-in screen and the list of trips show the shell's notice for an iPhone, so that a traveller
+adds Itinero to the home screen before signing in.
+
 ### 4.4 The calendar
 
 *Invoked from:* the calendar in a trip's bar, shown only where the copy holds a calendar.
@@ -209,7 +216,8 @@ first booking of `notOver`. Each booking shows its `label`, its times, and its t
 A booking's own screen shows every detail. A flight shows each leg with `legDurations`, and each
 connection with `connections`, and a journey its `journeyDuration` (`BKG:FLIGHT-F3`). Its
 reference is a button that copies it with the browser's `navigator.clipboard`. Its link opens in a
-new tab, and its page opens as §4.6 gives (`WEB:SCREENS-F4`).
+new tab, and its page opens as §4.6 gives (`WEB:SCREENS-F4`). A page the traveller may not see, or
+one in the graveyard, is shown as Not available, without its title (`ACC-F8`).
 
 Adding a booking asks first for its kind, then shows that kind's form (`BKG-F1`). The travellers it
 names start as the traveller adding it alone, chosen from the copy's members. A time asks for its
@@ -304,13 +312,17 @@ of any trip.
 The screens' tests run in the suite of `apps/web/`, which `spec/web/shell.md` §4.5 describes.
 
 - **Unit tests** cover the home page's day, the calendar's order of firm items and bookings, the
-  default style, and finding a country, at positions inside, outside and on the border of each of a
-  sample of countries.
+  default style, writing dates, finding a country, at positions inside, outside and near the border
+  of each of a sample of countries, and the map's size.
 - **Browser tests**, with Playwright, run every verification of `requirements/web/screens.md` that
   needs no real phone, at 360 pixels wide and at 1280, and watch every request for a position or a
-  country (`WEB-F6`).
-- **Safety tests** open pages whose text holds HTML of every kind, and confirm none is drawn as
-  HTML (`WEB:SCREENS-NR4`).
+  country (`WEB-F6`). They run against the online side in Wrangler, with stand-ins for Google's
+  key set and for Resend, so a test signs travellers in with ID tokens of its own and accepts
+  invitations from the emails the stand-in keeps. Google's own button cannot be drawn in a test, so
+  a test gives the sign-in screen the token as the button would. The tests set the device's clock,
+  its position and its connection, and deploy a version whose online side refuses the one running.
+- **Safety tests** draw pages whose text holds HTML of every kind, and links to `javascript:` and
+  `data:` addresses, and confirm none is drawn as HTML or kept as a link (`WEB:SCREENS-NR4`).
 - **Timing tests** draw the home page of a trip of 500 pages and 300 bookings, and fail above 500
   milliseconds on the machine running them. The check on a phone of `WEB:SCREENS-NFR1` is made by
   hand before each release.
@@ -331,7 +343,10 @@ domain. A build script, `npm run build-borders` in `apps/web/`, reads its shapef
   holds it
 
 A position is in a country where it is inside an odd number of the country's rings, counted by
-casting a ray east from it. The file is one of the version's files, which the service worker holds
+casting a ray east from it. Where two countries hold it, the one with the smaller bounding box is
+the one, since an enclave, such as Vatican City inside Italy, is drawn inside the country around it.
+The map draws each coast coarsely, and puts the centre of a coastal city such as Lisbon at sea. A
+position in no country, but within about 10 kilometres of one, is therefore in the nearest. The file is one of the version's files, which the service worker holds
 before Itinero says it is ready offline. The country is therefore found with no connection from the
 first launch. The screens read the file into memory only once the traveller first asks for their
 country (`WEB:SCREENS-NFR2`).
@@ -347,6 +362,7 @@ the country that holds it.
 | The map of country borders | `apps/web/src/screens/borders.json`, built by `npm run build-borders` | Whoever keeps the web app's roadmap |
 | The traveller's style | `localStorage`, `itinero-style` | The device's browser |
 | Finding the country on opening | `localStorage`, `itinero-find-country` | The device's browser |
+| A name not yet chosen | `localStorage`, `itinero-name-owed`, deleted once the name is chosen or on signing out | The device's browser |
 
 The screens' runtime dependencies are Preact, micromark and its extension for GitHub's Markdown,
 and the packages of the trip's parts, which `spec/web/shell.md` §5 lists.

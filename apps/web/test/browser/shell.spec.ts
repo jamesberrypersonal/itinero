@@ -29,7 +29,7 @@ test.afterEach(async () => {
   await online.close();
 });
 
-/** Every screen's address the web app has. Until web/screens, each opens the one screen there is. */
+/** Every screen's address the web app has. Signed out, as these tests are, each opens the sign-in screen. */
 const SCREENS = ["/", "/sign-in", "/trips/t-1", "/trips/t-1/bookings", "/trips/t-1/pages/p-1", "/settings", "/invitations/i-1"];
 
 test.describe("WEB:SHELL-F1 — once opened with a connection, Itinero opens with none", () => {
@@ -42,7 +42,7 @@ test.describe("WEB:SHELL-F1 — once opened with a connection, Itinero opens wit
     expect(await running(page)).toBe(versionOf("one"));
     for (const screen of SCREENS) {
       await page.goto(new URL(screen, online.url).href);
-      await expect(page.locator('[data-screen="start"]')).toBeVisible();
+      await expect(page.locator('[data-screen="sign-in"]')).toBeVisible();
       expect(await running(page)).toBe(versionOf("one"));
     }
   });
@@ -52,7 +52,7 @@ test.describe("WEB:SHELL-F1 — once opened with a connection, Itinero opens wit
     await setOnline(context, online, false);
     await closeAll(context);
     const page = await open(context, online.url, "/trips/t-1/members");
-    await expect(page.locator('[data-screen="start"]')).toBeVisible();
+    await expect(page.locator('[data-screen="sign-in"]')).toBeVisible();
   });
 });
 
@@ -103,9 +103,11 @@ test.describe("WEB:SHELL-F2 — a new version takes over only when no window of 
     await untilUpdateWaiting(page);
     const files = await page.evaluate(async () =>
       Promise.all(
-        [...document.querySelectorAll<HTMLScriptElement | HTMLLinkElement>("script[src], link[rel=stylesheet]")].map(
-          async (element) => (await fetch("src" in element ? element.src : element.href)).status,
-        ),
+        [...document.querySelectorAll<HTMLScriptElement | HTMLLinkElement>("script[src], link[rel=stylesheet]")]
+          .map((element) => ("src" in element ? element.src : element.href))
+          // Itinero's own files: the sign-in screen also loads Google's script, from Google.
+          .filter((address) => new URL(address).origin === location.origin)
+          .map(async (address) => (await fetch(address)).status),
       ),
     );
     expect(files.every((status) => status === 200)).toBe(true);

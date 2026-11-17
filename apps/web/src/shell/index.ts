@@ -165,6 +165,26 @@ async function fetchNewestRules(): Promise<void> {
   }
 }
 
+let names: Promise<readonly string[]> | undefined;
+
+/**
+ * Every zone and alias the rules loaded name, in byte order, for a traveller choosing a time's zone
+ * by hand (spec/web/screens.md §4.5). It reads the rules file again, once, when first asked.
+ */
+export function zoneNames(): Promise<readonly string[]> {
+  names ??= (async () => {
+    const cache = await rulesCache()?.catch(() => undefined);
+    const kept = await cache?.match(RULES_PATH);
+    const file = kept && kept.headers.get(RULES_RELEASE) === rulesVersion() ? await kept.text() : await (await fetch(builtRules.url)).text();
+    const parsed = JSON.parse(file) as { zones: Record<string, unknown>; aliases: Record<string, unknown> };
+    return [...Object.keys(parsed.zones), ...Object.keys(parsed.aliases)].sort();
+  })().catch(() => {
+    names = undefined;
+    return [];
+  });
+  return names;
+}
+
 // --- Keeping what Itinero stores (§4.2) ---
 
 function askToPersist(): void {

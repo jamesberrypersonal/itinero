@@ -1,6 +1,7 @@
 // Opens Itinero: the shell starts first, before any screen shows a time (docs/spec/web/shell.md
 // §4.2), then the app draws.
 
+import * as bookings from "@itinero/bookings";
 import * as itinerary from "@itinero/itinerary";
 import * as pages from "@itinero/pages";
 import * as permissions from "@itinero/permissions";
@@ -8,7 +9,9 @@ import * as tripTime from "@itinero/trip-time";
 import { render } from "preact";
 import * as places from "./places/index.ts";
 import * as store from "./store/index.ts";
-import { App } from "./app.tsx";
+import { complete } from "./screens/account.tsx";
+import { App } from "./screens/app.tsx";
+import "./screens/screens.css";
 import * as shell from "./shell/index.ts";
 import "./styles.css";
 
@@ -22,7 +25,9 @@ if (__ITINERO_TEST__) {
     itineroTripTime: tripTime,
     itineroPlaces: places,
     itineroStore: store,
-    itineroPackages: { itinerary, pages, permissions },
+    itineroPackages: { itinerary, pages, permissions, bookings },
+    // Google's button cannot be drawn in a test: the tests sign in with ID tokens of their own.
+    itineroAuth: { complete },
   });
 }
 
@@ -32,9 +37,12 @@ shell.start().then(
   (state) => {
     // The timing tests read this mark: the time from opening to the shell being ready (§4.5).
     performance.mark("itinero-shell-ready");
-    render(<App initial={state} />, root);
+    void state;
     // The trip store opens once the rules are loaded, and the places follow the trips it holds.
-    void store.open().then(() => places.startPlaces(store));
+    void store.open().then((opened) => {
+      render(<App initialAccount={opened.account} />, root);
+      places.startPlaces(store);
+    });
   },
   (error: unknown) => {
     console.error(error);
