@@ -206,6 +206,25 @@ describe("WEB:STORE-F2 — each time the device connects, every trip is brought 
   });
 });
 
+describe("catching up while a catch-up runs", () => {
+  test("a call while one runs waits for a catch-up that asks after it", async () => {
+    const ana = await window(phone("ana"), "ana");
+    const trip = ok(await ana.create("Patagonia", DEC, ["CL"])).trip;
+    // The running catch-up has asked for the trip, and waits on the trip's members, when the change
+    // below is made and the second call comes.
+    online.holdNext = /\/members$/;
+    const running = ana.catchUpAll();
+    await until(() => online.holdNext === undefined, "the running catch-up waits on the members");
+    const me = { traveller: "ana", admin: true, creator: true };
+    ok(online.trips.get(trip)!.core.change(me, "pages", pageChange({ op: "rename", id: CHILE, title: "Chile, renamed meanwhile" })));
+    const after = ana.catchUpAll();
+    online.release();
+    await running;
+    await after;
+    assert.ok((await ana.trip(trip))!.pages.pages.some((p) => p.title === "Chile, renamed meanwhile"));
+  });
+});
+
 describe("WEB:STORE-F3 — while a trip is open and the device online, each change is taken within seconds", () => {
   test("the trip open on two devices", async () => {
     const ana = await window(phone("ana"), "ana");

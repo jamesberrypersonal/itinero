@@ -27,3 +27,17 @@ jobs:
 
       - name: Test every package
         run: npm test
+
+      # The trace and screenshot of each browser test that failed, to open with
+      # `npx playwright show-trace`.
+      - name: Keep the failed browser tests' traces
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: playwright-traces
+          path: |
+            apps/web/test-results/
+            !apps/web/test-results/versions/
+            !apps/web/test-results/wrangler-*/
+          retention-days: 14
+          if-no-files-found: ignore

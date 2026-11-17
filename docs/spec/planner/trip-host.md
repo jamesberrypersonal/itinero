@@ -347,11 +347,13 @@ runs it from anywhere in the repository.
   budget. The free plan holds a Worker to 10 milliseconds of processor time, and a Durable Object
   to none: Milestone Web-0.2's trial ran a Durable Object request of 374 milliseconds on the free
   plan, and loaded the rules file in 6 to 23 milliseconds. The budget keeps every request far
-  inside what the free plan allows.
-  Loading the rules file is not counted, since it happens once each time the Durable Object wakes,
-  for a change that needs it. The cost tests run the trip host's logic on Node.js, with Node's
-  SQLite, with `node --test` after the rest of the suite. The Workers runtime keeps its clock still
-  while code runs, so no test inside it can time code.
+  inside what the free plan allows. Loading the rules file is not counted, since it happens once
+  each time the Durable Object wakes, for a change that needs it. The cost tests run the trip host's
+  logic on Node.js, with Node's SQLite, with `node --test` after the rest of the suite. The Workers
+  runtime keeps its clock still while code runs, so no test inside it can time code. Continuous
+  integration runs on shared machines several times slower than a developer's or Cloudflare's, so
+  there the cost tests report each time and do not fail on it. The budget is held on a developer's
+  machine.
 
 ## 5. Resources
 

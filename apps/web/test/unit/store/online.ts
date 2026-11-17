@@ -77,6 +77,13 @@ export class Online {
   oldestApi = 1;
   /** Fails the next request whose `METHOD /path` matches, as a lost connection would. */
   failNext: RegExp | undefined;
+  /** Holds the next request whose `METHOD /path` matches until `release` is called, as a slow connection would. */
+  holdNext: RegExp | undefined;
+  private released: (() => void) | undefined;
+  /** Lets a held request be answered. */
+  release(): void {
+    this.released?.();
+  }
   private count = 0;
 
   /** A device signed in as an account, which the stand-in makes if it does not hold it. */
@@ -97,6 +104,10 @@ export class Online {
         if (online.failNext?.test(said)) {
           online.failNext = undefined;
           throw new TypeError("Failed to fetch");
+        }
+        if (online.holdNext?.test(said)) {
+          online.holdNext = undefined;
+          await new Promise<void>((resolve) => (online.released = resolve));
         }
         const headers = new Headers(init?.headers);
         const body = typeof init?.body === "string" ? (JSON.parse(init.body) as Record<string, unknown>) : {};

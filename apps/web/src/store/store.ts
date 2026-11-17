@@ -81,6 +81,8 @@ export function createStore(deps: StoreDeps) {
   const sockets = new Map<string, { socket?: WebSocket | undefined; delay: number; timer?: ReturnType<typeof setTimeout> | undefined }>();
   const catching = new Map<string, Promise<void>>();
   let catchingAll: Promise<void> | undefined;
+  /** The catch-up that answers every call made while another runs: it starts once that one ends. */
+  let nextAll: Promise<void> | undefined;
 
   const channel = new deps.BroadcastChannel(CHANNEL);
   channel.onmessage = (event: MessageEvent) => {
@@ -224,12 +226,25 @@ export function createStore(deps: StoreDeps) {
 
   // --- Catching up (§4.2) ---
 
-  /** Catches every trip up. One runs at a time, and a call while one runs waits for it. */
+  /**
+   * Catches every trip up. One runs at a time. A call while one runs is answered by the next, which
+   * starts once that one ends, since the one running may have asked the online side before the
+   * change the caller waits for. Every call made meanwhile shares the next.
+   */
   function catchUpAll(): Promise<void> {
-    catchingAll ??= runCatchUpAll().finally(() => {
-      catchingAll = undefined;
-    });
-    return catchingAll;
+    if (!catchingAll) {
+      catchingAll = runCatchUpAll().finally(() => {
+        catchingAll = undefined;
+      });
+      return catchingAll;
+    }
+    nextAll ??= catchingAll
+      .catch(() => undefined)
+      .then(() => {
+        nextAll = undefined;
+        return catchUpAll();
+      });
+    return nextAll;
   }
 
   async function runCatchUpAll(): Promise<void> {
