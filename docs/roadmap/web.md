@@ -129,6 +129,8 @@ theirs, in Milestone Planner-0.2 and Milestone Access-0.1.
 
 #### Milestone Web-1.5 — The calendar, and the screens an admin manages a trip on
 
+**Waits on:** Milestone Access-1.4
+
 - Build the rest of `web/screens`: the calendar, the members and their access, inviting a traveller,
   and the graveyard of deleted pages. An admin is a traveller who may manage the trip.
 - Prove `WEB:SCREENS-F3` and `WEB:SCREENS-F6`, and the non-functional requirements of
