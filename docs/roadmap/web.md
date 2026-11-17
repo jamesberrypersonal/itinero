@@ -14,6 +14,19 @@ theirs, in Milestone Planner-0.2 and Milestone Access-0.1.
 
 ### Phase 1 — Build
 
+#### Milestone Web-1.3 — A trip's copy on a device
+
+- `web/trip-store` is built in `@itinero/web`, as its specification gives it, with each trip's copy
+  in IndexedDB, a live socket for each trip a window shows, and a BroadcastChannel between windows.
+  It starts `web/places` once it opens.
+- Its test suite proves each requirement of `web/trip-store` by the verification it carries: on
+  Node.js against a stand-in running the trip host's own logic, and in Chromium, WebKit and Firefox
+  against the online side in Wrangler. A trip of 500 pages and 300 bookings is read in under 10
+  milliseconds. The check of `WEB:STORE-NFR1` on a phone is left to Milestone Web-1.5.
+- `PLN:ITINERARY-NFR1`, `PLN:PAGES-NFR1` and `ACC:PERMISSIONS-NFR1` hold on a copy read with no
+  connection, in the same three engines, on devices set to two languages and two time zones, with
+  the same results as on Node.js. The checks on a phone are left to Milestone Web-1.5.
+
 #### Milestone Web-1.2 — Places
 
 - The build of the places, `npm run build-places`, makes every country's towns from GeoNames and
@@ -86,23 +99,6 @@ theirs, in Milestone Planner-0.2 and Milestone Access-0.1.
 
 ### Phase 1 — Build
 
-#### Milestone Web-1.3 — A trip's copy on a device
-
-**Waits on:** Milestone Planner-1.4, Milestone Access-1.3
-
-- Build `web/trip-store`, as its specification gives it, and start `web/places` from it, as
-  `spec/web/places.md` §3.3 gives.
-- Prove each requirement of `web/trip-store` by the verification it carries.
-- Prove `PLN:ITINERARY-NFR1` on a phone with no connection, by the checks of its verification that
-  need one. Milestone Planner-1.2 proved the rest of `planner/itinerary`, and moved these checks
-  here, since they need a trip's copy on the device.
-- Prove `PLN:PAGES-NFR1` on a phone with no connection, by the checks of its verification that
-  need one. Milestone Planner-1.3 proved the rest of `planner/pages`, and moved these checks here,
-  for the same reason.
-- Prove `ACC:PERMISSIONS-NFR1` on a phone with no connection and in a browser, by the checks of its
-  verification that need them. Milestone Access-1.2 proved the rest of `access/permissions`, and
-  moved these checks here, for the same reason.
-
 #### Milestone Web-1.4 — The screens a traveller reads a trip on
 
 **Waits on:** Milestone Bookings-1.5
@@ -144,5 +140,9 @@ theirs, in Milestone Planner-0.2 and Milestone Access-0.1.
 - Prove `WEB:PLACES-NFR1` on a phone at least four years old, by the check of its verification.
   Milestone Web-1.2 proved the rest of `web/places`, and moved this check here, since it needs a
   phone.
+- Prove `WEB:STORE-NFR1` on a phone at least four years old, and `PLN:ITINERARY-NFR1`,
+  `PLN:PAGES-NFR1` and `ACC:PERMISSIONS-NFR1` on a phone with no connection, by the checks of their
+  verifications that need one. Milestone Web-1.3 proved the rest of them, and moved these checks
+  here, since they need a phone.
 - Prove `SHR:TRIP-TIME-NFR1` on a phone, by the checks of its verification. Milestone Web-1.1
   proved it with no connection in three browser engines, and moved the check on a phone here.
