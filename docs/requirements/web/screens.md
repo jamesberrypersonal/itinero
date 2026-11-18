@@ -199,7 +199,7 @@ their name in their settings while online. Every screen names each traveller by 
 ### WEB:SCREENS-NFR1 — The home page is drawn quickly from the device's copy
 
 Given a trip's copy holding 500 pages and 300 bookings, the screens draw its home page within 500
-milliseconds, on a phone at least four years old. ^web-screens-nfr1
+milliseconds, on a phone. ^web-screens-nfr1
 
 - **Verification:** on such a phone, with no connection,
     - open the trip ten times, and confirm the home page is drawn within 500 milliseconds of its

@@ -150,21 +150,20 @@ Each part of a system is named by its address, the system and the part's own nam
 
 - Prove the web app's own requirements on a phone and on a computer. Prove there too the
   requirements of the planner, access and bookings systems that only a phone can prove.
-- Prove the checks of `web/shell` that need a phone: adding Itinero to the home screen of an Android
-  phone and of an iPhone, and the browser keeping Itinero's storage, for `WEB:SHELL-F3`, and opening
-  Itinero ten times, each within 300 milliseconds, on a phone at least four years old, for
-  `WEB:SHELL-NFR1`. Milestone Web-1.1 proved the rest of `web/shell` in three browser engines, and
-  moved these checks here, since they need a phone.
-- Prove `WEB:PLACES-NFR1` on a phone at least four years old, by the check of its verification.
-  Milestone Web-1.2 proved the rest of `web/places`, and moved this check here, since it needs a
+- Prove the checks of `web/shell` that need a phone: adding Itinero to the home screen of an
+  iPhone, and the browser keeping Itinero's storage, for `WEB:SHELL-F3`, and opening Itinero ten
+  times, each within 300 milliseconds, on a phone, for `WEB:SHELL-NFR1`. Milestone Web-1.1 proved
+  the rest of `web/shell` in three browser engines, and moved these checks here, since they need a
   phone.
+- Prove `WEB:PLACES-NFR1` on a phone, by the check of its verification. Milestone Web-1.2 proved
+  the rest of `web/places`, and moved this check here, since it needs a phone.
 - Prove `WEB:SCREENS-F9` with Google's own button, signing in on a phone and on a computer, and
-  `BKG:LIST-NFR2`, `BKG-NFR1` and `WEB:SCREENS-NFR1` on a phone at least four years old. Milestone
-  Web-1.4 proved the rest of them, and moved these checks here, since they need a phone and
-  Itinero's client identifier from Google.
-- Prove `WEB:STORE-NFR1` on a phone at least four years old, and `PLN:ITINERARY-NFR1`,
-  `PLN:PAGES-NFR1` and `ACC:PERMISSIONS-NFR1` on a phone with no connection, by the checks of their
-  verifications that need a phone. Milestone Web-1.3 proved the rest of them, and moved these checks
-  here, since they need a phone.
+  `BKG:LIST-NFR2`, `BKG-NFR1` and `WEB:SCREENS-NFR1` on a phone. Milestone Web-1.4 proved the rest
+  of them, and moved these checks here, since they need a phone and Itinero's client identifier
+  from Google.
+- Prove `WEB:STORE-NFR1` on a phone, and `PLN:ITINERARY-NFR1`, `PLN:PAGES-NFR1` and
+  `ACC:PERMISSIONS-NFR1` on a phone with no connection, by the checks of their verifications that
+  need a phone. Milestone Web-1.3 proved the rest of them, and moved these checks here, since they
+  need a phone.
 - Prove `SHR:TRIP-TIME-NFR1` on a phone, by the checks of its verification. Milestone Web-1.1
   proved it with no connection in three browser engines, and moved the check on a phone here.
