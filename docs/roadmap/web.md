@@ -30,6 +30,13 @@ Each part of a system is named by its address, the system and the part's own nam
   and the checks of `WEB:SCREENS-F1` on the calendar and the screens an admin manages a trip on, in
   Chromium, WebKit and Firefox, against the online side in Wrangler. Its unit tests prove the
   calendar's order of firm items and bookings, and `WEB:SCREENS-NFR2`.
+- The same suite proves `ACC-F4` to `ACC-F8`, `ACC-F10`, `PLN-F2`, `PLN-F3`, `PLN-F4`, `PLN-F7`,
+  `PLN-F8`, `PLN-F9`, `PLN-F11`, `PLN-F15` and `WEB-F7` through the screens, by the verification
+  each carries, and `WEB-F6` but for its check on a phone in Chile. A link, a stretch or a firm
+  item naming a page in the graveyard says the page is deleted, and travel on the calendar shows
+  when it arrives.
+- `npm run fill-trip` makes a trip of 500 pages and 300 bookings on a running online side, for the
+  timing checks made by hand on a phone.
 
 #### Milestone Web-1.4 — The screens a traveller reads a trip on
 

@@ -5,7 +5,7 @@
 import type { ComponentChildren } from "preact";
 import { useEffect, useMemo, useRef, useState } from "preact/hooks";
 import { extent as bookingExtent, label as bookingLabel } from "@itinero/bookings";
-import { changeToText, countries, travelDuration, type Change, type FirmItem, type Stretch, type Way, type When } from "@itinero/itinerary";
+import { changeToText, countries, travelDuration, type Change, type FirmItem, type Place, type Stretch, type Way, type When } from "@itinero/itinerary";
 import { forPhone, state } from "@itinero/pages";
 import { format, formatDuration, type TextStyle, type TripTime } from "@itinero/trip-time";
 import * as store from "../store/index.ts";
@@ -42,6 +42,14 @@ function mayEdit(copy: Copy, account: string): boolean {
 function PageLink({ copy, page, children }: { copy: Copy; page: string | undefined; children: ComponentChildren }) {
   if (page === undefined) return <span class="cal-name">{children}</span>;
   const seen = forPhone(copy.pages).pages.some((p) => p.id === page);
+  if (copy.graveyard.some((entry) => entry.id === page)) {
+    // A page in the graveyard the traveller could see (PLN-F11).
+    return (
+      <span class="cal-name">
+        {children} <span class="unavailable" data-graveyard={page}>Page deleted</span>
+      </span>
+    );
+  }
   if (!seen || state(copy.pages, page) !== "tree") {
     return (
       <span class="cal-name">
@@ -56,6 +64,7 @@ function PageLink({ copy, page, children }: { copy: Copy; page: string | undefin
   );
 }
 
+const placeName = (place: Place) => place.name ?? COUNTRY_NAMES.get(place.country) ?? place.country;
 const placeWords = (stretch: Stretch) => stretch.place.name ?? COUNTRY_NAMES.get(stretch.place.country) ?? stretch.place.country;
 const whenWords = (when: When, style: TextStyle) => (when.kind === "day" ? "All day" : format(when, style));
 
@@ -241,7 +250,8 @@ function FixedCard({ copy, fixed, style, edit, onFirm }: { copy: Copy; fixed: Fi
       </PageLink>
       <span class="fixed-when">
         {whenWords(item.when, style)}
-        {item.travel ? ` · ${COUNTRY_NAMES.get(item.travel.from.country) ?? ""}${item.travel.from.name ? ` (${item.travel.from.name})` : ""} to ${item.travel.to.name ?? COUNTRY_NAMES.get(item.travel.to.country) ?? ""}` : ""}
+        {item.travel ? ` · ${placeName(item.travel.from)} to ${placeName(item.travel.to)}` : ""}
+        {item.travel?.arrive ? ` · arrives ${item.travel.arrive.kind === "day" ? dateWords(item.travel.arrive.date, style) : format(item.travel.arrive, style)}` : ""}
         {took ? ` · ${formatDuration(took)}` : ""}
       </span>
       {edit ? (

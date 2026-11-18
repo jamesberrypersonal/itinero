@@ -203,6 +203,7 @@ function Drawn({ copy, text }: { copy: Copy; text: string }) {
   const host = useRef<HTMLDivElement>(null);
   const html = useMemo(() => toHtml(text), [text]);
   const inTree = useMemo(() => new Set(forPhone(copy.pages).pages.map((p) => p.id)), [copy]);
+  const deleted = useMemo(() => new Set(copy.graveyard.map((entry) => entry.id)), [copy]);
   useLayoutEffect(() => {
     for (const link of Array.from(host.current?.querySelectorAll("a") ?? [])) {
       const href = link.getAttribute("href") ?? "";
@@ -212,10 +213,16 @@ function Drawn({ copy, text }: { copy: Copy; text: string }) {
           link.setAttribute("href", pagePath(copy, target));
           link.dataset["page"] = target;
         } else {
-          // A page the traveller may not see, or in the graveyard: no title, no address (ACC-F8).
+          // A page in the graveyard the traveller could see is shown as deleted (PLN-F9). Any other
+          // is shown as not available, with no title and no address (ACC-F8).
           const unavailable = document.createElement("span");
           unavailable.className = "unavailable";
-          unavailable.textContent = "Page not available";
+          if (deleted.has(target)) {
+            unavailable.textContent = "Page deleted";
+            unavailable.dataset["graveyard"] = target;
+          } else {
+            unavailable.textContent = "Page not available";
+          }
           link.replaceWith(unavailable);
         }
       } else if (href === "" || href.startsWith("#")) {
@@ -226,7 +233,7 @@ function Drawn({ copy, text }: { copy: Copy; text: string }) {
         link.referrerPolicy = "no-referrer";
       }
     }
-  }, [html, inTree]);
+  }, [html, inTree, deleted]);
   return (
     <div
       class="prose"

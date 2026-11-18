@@ -85,7 +85,7 @@ async function clock(page: Page, when: string): Promise<void> {
 const PUNTA_ARENAS = "America/Punta_Arenas";
 const SANTIAGO = "America/Santiago";
 
-test("WEB:SCREENS-F2 — the home page shows the traveller's day, their bookings for today and next, and the page for their country", async ({ browser }) => {
+test("WEB:SCREENS-F2, WEB-F6 — the home page shows the traveller's day, their bookings for today and next, and the page for their country", async ({ browser }) => {
   const ana = await traveller(browser, "Ana", "computer");
   const sam = await traveller(browser, "Sam", "phone", { geolocation: { latitude: -33.45, longitude: -70.66 }, permissions: ["geolocation"] });
   const trip = await createTrip(ana.page, "Patagonia", "2026-12-01", "2026-12-20", ["CL", "AR"]);

@@ -14,7 +14,8 @@
     "test:unit": "node --test \"test/unit/**/*.test.ts\"",
     "test:browser": "playwright test",
     "build-places": "node scripts/build-places.ts",
-    "build-borders": "node scripts/build-borders.ts"
+    "build-borders": "node scripts/build-borders.ts",
+    "fill-trip": "node scripts/fill-trip.ts"
   },
   "dependencies": {
     "@itinero/bookings": "0.1.0",
