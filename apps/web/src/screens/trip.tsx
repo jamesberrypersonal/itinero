@@ -45,6 +45,7 @@ function OfflineLine({ copy }: { copy: Copy }) {
 
 const BAR = [
   { rest: "", label: "Home", icon: "M4 11l8-7 8 7v9h-5v-6h-6v6H4z" },
+  { rest: "/calendar", label: "Calendar", icon: "M4 6h16v14H4zM4 10h16M8 3v5M16 3v5M8 14h2M14 14h2M8 17h2" },
   { rest: "/bookings", label: "Bookings", icon: "M4 7h16v12H4zM8 4v6M16 4v6M4 11h16" },
   { rest: "/pages", label: "Pages", icon: "M6 3h9l4 4v14H6zM15 3v4h4M9 12h7M9 16h7" },
   { rest: "/members", label: "Members", icon: "M9 11a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7zM3 20c.8-3.5 3-5.5 6-5.5s5.2 2 6 5.5M16 4.5a3.2 3.2 0 0 1 0 6.3M17.5 14.6c1.8.7 3 2.4 3.5 5.4" },
@@ -78,7 +79,7 @@ export function TripFrame({ id, children }: { id: string; children: (copy: Copy)
     <div class="trip">
       <nav class="trip-bar" aria-label={copy.name}>
         <p class="trip-bar-name">{copy.name}</p>
-        {BAR.map((item) => {
+        {BAR.filter((item) => item.rest !== "/calendar" || copy.calendar).map((item) => {
           const href = tripPath(id, item.rest);
           const current = item.rest === "" ? here === href : here.startsWith(href);
           return (

@@ -79,14 +79,27 @@ function ZoneList() {
   );
 }
 
-export function TimeField({ label, value, onChange, name }: { label: string; value: TimeDraft; onChange: (next: TimeDraft) => void; name: string }) {
+export function TimeField({
+  label,
+  value,
+  onChange,
+  name,
+  kinds,
+}: {
+  label: string;
+  value: TimeDraft;
+  onChange: (next: TimeDraft) => void;
+  name: string;
+  /** The precisions offered, where not every one is: a firm item's time always holds a time. */
+  kinds?: readonly TripTime["kind"][];
+}) {
   const set = (patch: Partial<TimeDraft>) => onChange({ ...value, ...patch });
   return (
     <fieldset class="time-field" data-time={name}>
       <legend class="field-label">{label}</legend>
       <ZoneList />
       <select aria-label={`${label}: precision`} name={`${name}-kind`} value={value.kind} onChange={(e) => set({ kind: e.currentTarget.value as TripTime["kind"] })}>
-        {KINDS.map((k) => (
+        {KINDS.filter((k) => !kinds || kinds.includes(k.kind)).map((k) => (
           <option key={k.kind} value={k.kind}>
             {k.words}
           </option>

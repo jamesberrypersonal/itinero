@@ -7,7 +7,8 @@ import * as store from "../store/index.ts";
 import { ChooseName, Invitation, SignIn } from "./account.tsx";
 import { forgetNameOwed, nameOwed } from "./auth.ts";
 import { BookingForm, Bookings, BookingView } from "./bookings.tsx";
-import { Members } from "./members.tsx";
+import { Calendar } from "./calendar.tsx";
+import { Member, Members } from "./members.tsx";
 import { Graveyard, PageEditor, PageTree, PageView, Search } from "./pages.tsx";
 import { go, match, useLocation } from "./router.tsx";
 import { Settings } from "./settings.tsx";
@@ -89,9 +90,11 @@ function route(path: string, _search: URLSearchParams, account: string | undefin
     return (
       <TripFrame id={id}>
         {(copy) => {
+          if (screen === "calendar" && copy.calendar) return <Calendar copy={copy} account={account} />;
+          // A traveller with no calendar in their copy: its address opens the home page (§4.4).
           if (!screen || screen === "calendar") return <Home copy={copy} account={account} />;
           if (screen === "settings") return <Settings account={account} back={{ href: `/trips/${encodeURIComponent(id)}`, label: copy.name }} />;
-          if (screen === "members") return <Members copy={copy} account={account} />;
+          if (screen === "members") return item ? <Member copy={copy} account={account} id={item} /> : <Members copy={copy} account={account} />;
           if (screen === "search") return <Search copy={copy} />;
           if (screen === "graveyard") return <Graveyard copy={copy} />;
           if (screen === "pages") {

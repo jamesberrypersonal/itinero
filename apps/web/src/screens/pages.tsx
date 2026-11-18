@@ -2,9 +2,9 @@
 // graveyard (docs/spec/web/screens.md §4.6, WEB:SCREENS-F5, WEB:SCREENS-F8).
 
 import { useLayoutEffect, useMemo, useRef, useState } from "preact/hooks";
-import { authorise, type Who } from "@itinero/permissions";
-import { beneath, changeToText, forPhone, linkTarget, search, tree, type Branch, type Page } from "@itinero/pages";
+import { beneath, changeToText, forPhone, linkTarget, search, tree, type Branch, type Page, type Where } from "@itinero/pages";
 import * as store from "../store/index.ts";
+import { allows } from "./access.ts";
 import type { Copy } from "../store/index.ts";
 import { toHtml } from "./markdown.ts";
 import { go, Link } from "./router.tsx";
@@ -15,23 +15,26 @@ import { TripMenu } from "./trip.tsx";
 const tripPath = (id: string, rest = "") => `/trips/${encodeURIComponent(id)}${rest}`;
 const pagePath = (copy: Copy, page: string, rest = "") => tripPath(copy.id, `/pages/${encodeURIComponent(page)}${rest}`);
 
-const whoOf = (copy: Copy, account: string): Who => ({ traveller: account, admin: copy.you.admin });
-
-/**
- * Whether the copy lets the traveller make a change: an admin's copy holds every grant, and any
- * other holds the traveller's own, which is all `authorise` reads of them.
- */
+/** Whether the copy lets the traveller make a change to the pages. */
 function allowed(copy: Copy, account: string, change: Parameters<typeof changeToText>[0]): boolean {
-  const grants = copy.grants ?? { format: 1 as const, trip: copy.id, revision: 0, grants: [copy.you.grant] };
-  return authorise(grants, whoOf(copy, account), copy.pages, { kind: "change-page", change }).ok;
+  return allows(copy, account, { kind: "change-page", change });
 }
 
-function Branches({ copy, branches, open, toggle }: { copy: Copy; branches: readonly Branch[]; open: Set<string>; toggle: (id: string) => void }) {
+/** Dragging a page in the tree: the page held, and the page it would go beneath ("" for the top). */
+type Drag = {
+  /** Whether the traveller may move this page. */
+  may: (id: string) => boolean;
+  held: string | undefined;
+  over: string | undefined;
+  pointer: (event: PointerEvent, id: string, phase: "down" | "move" | "up" | "cancel") => void;
+};
+
+function Branches({ copy, branches, open, toggle, drag }: { copy: Copy; branches: readonly Branch[]; open: Set<string>; toggle: (id: string) => void; drag: Drag }) {
   return (
     <ul class="tree" role="group">
       {branches.map(({ page, under }) => (
         <li key={page.id} role="treeitem" aria-expanded={under.length ? open.has(page.id) : undefined}>
-          <div class="tree-row">
+          <div class={`tree-row${drag.over === page.id ? " drop-target" : ""}${drag.held === page.id ? " dragging" : ""}`} data-drop={page.id}>
             {under.length ? (
               <button type="button" class="fold" aria-label={open.has(page.id) ? `Fold ${page.title}` : `Open ${page.title}`} onClick={() => toggle(page.id)}>
                 <svg aria-hidden="true" viewBox="0 0 10 10" width="10" height="10" class={open.has(page.id) ? "folded-open" : ""}>
@@ -44,12 +47,45 @@ function Branches({ copy, branches, open, toggle }: { copy: Copy; branches: read
             <Link href={pagePath(copy, page.id)} class="tree-title">
               {page.title}
             </Link>
+            {drag.may(page.id) ? (
+              <span
+                class="drag-handle"
+                role="button"
+                aria-label={`Drag ${page.title} to move it`}
+                data-action="move-page"
+                data-page={page.id}
+                onPointerDown={(e) => drag.pointer(e, page.id, "down")}
+                onPointerMove={(e) => drag.pointer(e, page.id, "move")}
+                onPointerUp={(e) => drag.pointer(e, page.id, "up")}
+                onPointerCancel={(e) => drag.pointer(e, page.id, "cancel")}
+              >
+                <svg aria-hidden="true" viewBox="0 0 16 16" width="16" height="16">
+                  <path d="M3 5h10M3 8h10M3 11h10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
+                </svg>
+              </span>
+            ) : null}
           </div>
-          {under.length && open.has(page.id) ? <Branches copy={copy} branches={under} open={open} toggle={toggle} /> : null}
+          {under.length && open.has(page.id) ? <Branches copy={copy} branches={under} open={open} toggle={toggle} drag={drag} /> : null}
         </li>
       ))}
     </ul>
   );
+}
+
+/** Where a page dropped beneath another goes: after the last page already beneath it. */
+function dropAt(branches: readonly Branch[], parent: string, moving: string): Where {
+  const under = parent === "" ? branches : findBranch(branches, parent)?.under ?? [];
+  const last = under.filter((b) => b.page.id !== moving).at(-1);
+  return { ...(parent ? { parent } : {}), ...(last ? { after: last.page.id } : {}) };
+}
+
+function findBranch(branches: readonly Branch[], id: string): Branch | undefined {
+  for (const branch of branches) {
+    if (branch.page.id === id) return branch;
+    const found = findBranch(branch.under, id);
+    if (found) return found;
+  }
+  return undefined;
 }
 
 /** The tree of pages, each branch folded or open, with search and the graveyard. */
@@ -63,6 +99,53 @@ export function PageTree({ copy, account }: { copy: Copy; account: string }) {
     else next.add(id);
     setOpen(next);
   };
+  const [held, setHeld] = useState<string>();
+  const [over, setOver] = useState<string>();
+  const [agreeing, setAgreeing] = useState<{ id: string; to: Where; count: number; message: string }>();
+  const [error, setError] = useState<string>();
+
+  /**
+   * Sends a move with no `agreed`. Where the copy held online says the move lets more travellers see
+   * the page, the screen asks first, and sends it again with that number (§4.6, ACC-F9).
+   */
+  const move = async (id: string, to: Where, agreed?: number) => {
+    const result = await store.send(copy.id, "pages", changeToText({ op: "move", id, to }), agreed);
+    if (result.ok) {
+      setError(undefined);
+      if (to.parent) setOpen(new Set([...open, to.parent]));
+      return;
+    }
+    if (result.refusal.code === "agree-first") {
+      return setAgreeing({ id, to, count: Number(result.refusal.details?.["count"] ?? 0), message: result.refusal.message });
+    }
+    setError(result.refusal.message);
+  };
+
+  const drag: Drag = {
+    may: (id) => canChange && allowed(copy, account, { op: "move", id, to: {} }),
+    held,
+    over,
+    pointer(event, id, phase) {
+      if (phase === "down") {
+        event.preventDefault();
+        (event.currentTarget as HTMLElement).setPointerCapture(event.pointerId);
+        setHeld(id);
+        return;
+      }
+      if (held !== id) return;
+      const target = document.elementFromPoint(event.clientX, event.clientY)?.closest<HTMLElement>("[data-drop]")?.dataset["drop"];
+      if (phase === "move") {
+        if (target !== over) setOver(target);
+        return;
+      }
+      setHeld(undefined);
+      setOver(undefined);
+      if (phase === "cancel" || target === undefined || target === id) return;
+      const moving = copy.pages.pages.find((p) => p.id === id);
+      if ((moving?.parent ?? "") === target) return;
+      void move(id, dropAt(branches, target, id));
+    },
+  };
   return (
     <main class="screen" data-screen="pages">
       <Title action={<TripMenu id={copy.id} />}>Pages</Title>
@@ -75,7 +158,12 @@ export function PageTree({ copy, account }: { copy: Copy; account: string }) {
       </Link>
       {branches.length ? (
         <div class="group tree-group" aria-label="Pages" role="tree">
-          <Branches copy={copy} branches={branches} open={open} toggle={toggle} />
+          <Branches copy={copy} branches={branches} open={open} toggle={toggle} drag={drag} />
+          {held ? (
+            <div class={`tree-row tree-top${over === "" ? " drop-target" : ""}`} data-drop="">
+              To the top of the tree
+            </div>
+          ) : null}
         </div>
       ) : (
         <Empty>No pages yet.</Empty>
@@ -85,12 +173,26 @@ export function PageTree({ copy, account }: { copy: Copy; account: string }) {
           New page
         </Button>
       ) : null}
+      <Refused message={error} />
       {copy.graveyard.length ? (
         <Group>
           <Row href={tripPath(copy.id, "/graveyard")} detail={String(copy.graveyard.length)}>
             Deleted pages
           </Row>
         </Group>
+      ) : null}
+      {agreeing ? (
+        <Confirm
+          title={agreeing.count === 1 ? "1 more traveller will see this page" : `${agreeing.count} more travellers will see this page`}
+          message={agreeing.message.replace(/ Confirm, and move it again\.$/, " Move it anyway?")}
+          confirm="Move"
+          onCancel={() => setAgreeing(undefined)}
+          onConfirm={() => {
+            const { id, to, count } = agreeing;
+            setAgreeing(undefined);
+            void move(id, to, count);
+          }}
+        />
       ) : null}
     </main>
   );

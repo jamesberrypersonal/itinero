@@ -21,10 +21,10 @@ import {
   type StayBooking,
   type Way,
 } from "@itinero/bookings";
-import { authorise } from "@itinero/permissions";
 import { format, formatDuration, type TripTime } from "@itinero/trip-time";
 import * as places from "../places/index.ts";
 import * as store from "../store/index.ts";
+import { allows } from "./access.ts";
 import type { Copy } from "../store/index.ts";
 import { utcNow } from "./day.ts";
 import { go } from "./router.tsx";
@@ -39,8 +39,7 @@ const bookingPath = (copy: Copy, id: string, rest = "") => tripPath(copy.id, `/b
 
 /** Whether the copy lets the traveller change a booking naming these travellers. */
 function mayChange(copy: Copy, account: string, travellers: readonly string[]): boolean {
-  const grants = copy.grants ?? { format: 1 as const, trip: copy.id, revision: 0, grants: [copy.you.grant] };
-  return authorise(grants, { traveller: account, admin: copy.you.admin }, copy.pages, { kind: "change-booking", travellers }).ok;
+  return allows(copy, account, { kind: "change-booking", travellers });
 }
 
 /** The bookings page: every booking under the date it starts, opening at the first not yet over (BKG-F3). */

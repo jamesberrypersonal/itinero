@@ -205,14 +205,14 @@ phone (`WEB:SCREENS-F3`). Each day shows:
 
 A stretch or a firm item that names a page links to it, and the link shows not available where the
 pages' `state` is not `tree`, being in the graveyard or absent, or the page is hidden (`PLN-F11`). A
-traveller with edit access to the calendar drags a stretch's ends to resize it, or taps it to change
-its place or dates, and adds a stretch or a firm item from a day (`PLN-F1`, `PLN-F3`, `PLN-F4`). A
-firm item of travel asks how it goes, and for each end its place and its time, with the zone filled
-in as §4.5 gives. The calendar shows its duration, the itinerary's `travelDuration`, as trip-time's
-`formatDuration` writes it. A firm item's form sends a `change-firm` with the revision it was opened
-from. A `stale` refusal shows the item as it now stands, from `details.item`, beside the traveller's
-own, to start again from (`PLN:ITINERARY-F11`). A traveller with no calendar in their copy has no
-calendar in their bar, and its address opens the home page.
+traveller with edit access to the calendar drags a stretch's ends to resize it, or taps its pencil
+to change its place or dates, and adds a stretch or a firm item from a day (`PLN-F1`, `PLN-F3`,
+`PLN-F4`). A firm item of travel asks how it goes, and for each end its place and its time, with the
+zone filled in as §4.5 gives. The calendar shows its duration, the itinerary's `travelDuration`, as
+trip-time's `formatDuration` writes it. A firm item's form sends a `change-firm` with the revision it
+was opened from. A `stale` refusal shows the item as it now stands, from `details.item`, beside the
+traveller's own, to start again from (`PLN:ITINERARY-F11`). A traveller with no calendar in their
+copy has no calendar in their bar, and its address opens the home page.
 
 ### 4.5 The bookings
 
