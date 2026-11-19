@@ -3,7 +3,7 @@
 What needs active work, and what waits on a decision. `documentation-system.md` gives the list's
 rules. When an item is done, it leaves this list for `CHANGELOG.md` in the commit that finishes it.
 
-*Next free:* TODO-20
+*Next free:* TODO-37
 
 ## Tags
 
@@ -32,6 +32,7 @@ rules. When an item is done, it leaves this list for `CHANGELOG.md` in the commi
 | web/shell | The installable app itself: launching with no connection, adding it to a phone's home screen, and keeping the time-zone rules up to date |
 | web/trip-store | Each trip's copy on a device: catching it up, telling it of changes as they happen, sending changes, and deleting it on sign-out |
 | docs | The documentation system, and the tools authors use with it |
+| ci | The workflows that test each pull request and each push to `main` |
 
 ## Items
 
@@ -167,5 +168,298 @@ lock, and deleted when its traveller signs out).
 *Proposal:* Consider listing the devices a traveller is signed in on, and letting them sign out
 any or all of them, so that each deletes its copy the next time it connects. Decide it in a
 decision record scoped `access/accounts` and `web`.
+
+*Releases:* Nothing is planned for it yet.
+
+### TODO-20 — Limit the invitation emails one account can send
+
+*Tags:* access/membership
+*Written:* 2026-11-19
+
+*Problem:* Any Google account can sign in, create a trip, and make Itinero send as many invitation
+emails as it likes, to any address, from `invitations@useitinero.ca`, carrying its own name and
+trip name as free text, which can hold a link.
+
+*Reason:* Signing in is open to every Google account (`ACC:ACCOUNTS-F1`), any traveller can create
+a trip and be its admin, and the online side counts nothing before it sends an invitation. A
+security audit on 2026-11-19 found no limit in the source. Whether Cloudflare or Resend limits it
+is not known.
+
+*Proposal:* Check Cloudflare for a rate-limiting rule on the trip and invitation routes, and
+Resend's sending limits. Then cap the invitations an account sends in a day, and to one address,
+refusing the rest. Decide also whether open sign-up is what production wants.
+
+*Releases:* Nothing is planned for it yet.
+
+### TODO-21 — Decide whether a page shows images from other sites
+
+*Tags:* planner/pages, web/screens
+*Written:* 2026-11-19
+
+*Problem:* An image written in a page's Markdown, such as `![x](https://example.com/p.png)`, loads
+from that site as soon as another traveller opens the page, so whoever wrote it learns each
+reader's IP address, browser and the time they read it.
+
+*Reason:* The screens leave micromark's settings as they are (`WEB:SCREENS-NR4`), and those keep
+images. The screens give every link to another site no referrer, but they do nothing with images,
+and the web app sets no Content-Security-Policy. The pages component holds no images of its own
+(`PLN:PAGES-NR4`), but that does not say whether one from another site may be shown.
+
+*Proposal:* Decide whether a page may show an image from another site. If not, turn off
+micromark's image syntax, or allow images only from Itinero's own address, and test that a page
+with an image loads nothing from another site.
+
+*Releases:* Nothing is planned for it yet.
+
+### TODO-22 — Send the headers that keep the web app safe in a browser
+
+*Tags:* web/shell
+*Written:* 2026-11-19
+
+*Problem:* The web app is served with no Content-Security-Policy, no `frame-ancestors`, no
+`Referrer-Policy` and no `Strict-Transport-Security`.
+
+*Reason:* The Worker serves the web app as static files, and nothing yet adds headers to them. The
+session cookie's `SameSite=Lax` and micromark's settings stop the attacks these headers guard
+against today, so they were not needed to ship.
+
+*Proposal:* Add the headers to every response, with a policy that allows scripts, styles and
+images only from Itinero's own address, allows no framing, and sends no referrer. Test that every
+screen still works under the policy.
+
+*Releases:* Nothing is planned for it yet.
+
+### TODO-23 — Refuse, in a deploy, the settings only the tests use
+
+*Tags:* access/accounts, web/shell
+*Written:* 2026-11-19
+
+*Problem:* Nothing stops a deploy from carrying a setting only the tests should use: with
+`GOOGLE_KEYS_URL` set, anyone could sign in as anyone, and a build made with `ITINERO_TEST` set
+gives every page the test hooks. The Worker may also answer at a `workers.dev` address, a second
+origin beside `useitinero.ca`.
+
+*Reason:* The tests point the Worker at stand-ins through variables that every deploy leaves unset,
+and the deploy builds the web app from whatever the shell holds. Settings made in Cloudflare's
+dashboard are not in the repository.
+
+*Proposal:* Check Cloudflare's dashboard that none of the test variables is set. Make the Worker
+ignore them unless it runs on this machine, make the deploy script refuse to run with
+`ITINERO_TEST` set, and set `workers_dev` and `preview_urls` to false in `wrangler.toml`.
+
+*Releases:* Nothing is planned for it yet.
+
+### TODO-24 — Check the origin of a trip's live socket
+
+*Tags:* planner/trip-host
+*Written:* 2026-11-19
+
+*Problem:* The live socket for a trip is opened without checking which site asked for it, so only
+the cookie's `SameSite=Lax` stops another site from opening one with a traveller's session.
+
+*Reason:* A browser cannot add the `Itinero-Api` header to a WebSocket, so the socket is let
+through without it. It carries only the trip's sequence number, so another site could learn no
+more than when the trip changes.
+
+*Proposal:* Refuse a socket whose `Origin` is not the Worker's own address.
+
+*Releases:* Nothing is planned for it yet.
+
+### TODO-25 — Stop a sign-in from fetching Google's keys again for every unknown key
+
+*Tags:* access/accounts
+*Written:* 2026-11-19
+
+*Problem:* A sign-in whose token names a key Google does not hold makes the Worker fetch Google's
+key set again, so anyone can make it fetch once for each request they send.
+
+*Reason:* The Worker fetches the key set afresh whenever a token names a key the cached set lacks,
+so that it learns a key Google has just added.
+
+*Proposal:* Fetch afresh at most once a minute, and refuse a token naming an unknown key until
+then.
+
+*Releases:* Nothing is planned for it yet.
+
+### TODO-26 — Ask a traveller before accepting an invitation
+
+*Tags:* access/membership, web/screens
+*Written:* 2026-11-19
+
+*Problem:* Opening an invitation's link while signed in accepts it at once, so a link planted
+elsewhere can put a traveller on a trip they never chose to join.
+
+*Reason:* The invitation screen accepts as soon as it opens, which saves a step. Only the invited
+address can accept, which limits the harm.
+
+*Proposal:* Show the trip and who invited the traveller, with a button to accept.
+
+*Releases:* Nothing is planned for it yet.
+
+### TODO-27 — Add a member only from the acceptance that closed the invitation
+
+*Tags:* access/membership
+*Written:* 2026-11-19
+
+*Problem:* Two acceptances of one invitation sent at once both write the member, so the second can
+put back on the trip a traveller an admin removed between the two.
+
+*Reason:* The acceptance adds the member wherever the invitation is accepted by that account, not
+only where the request itself closed the invitation. The window is short, and the invitee cannot
+widen it.
+
+*Proposal:* Add the member only where this request's own close changed the invitation, and
+otherwise give back the grant it added.
+
+*Releases:* Nothing is planned for it yet.
+
+### TODO-28 — Withdraw the open invitations of an admin who is removed
+
+*Tags:* access/membership
+*Written:* 2026-11-19
+
+*Problem:* An admin removed from a trip leaves their open invitations behind, so someone they
+invited, such as the admin at another address, can still join for up to 14 days.
+
+*Reason:* Removing a member does not look at the invitations they sent, though each invitation
+records who sent it.
+
+*Proposal:* Decide whether removing an admin withdraws the invitations they sent. If it does,
+withdraw them in the same batch as the removal.
+
+*Releases:* Nothing is planned for it yet.
+
+### TODO-29 — Take away a removed member's admin role first
+
+*Tags:* access/membership
+*Written:* 2026-11-19
+
+*Problem:* Where a removal stops after the trip's grants change, the member's row still says they
+are an admin, so they can still invite, make admins and remove members until the removal is done
+again.
+
+*Reason:* A removal changes the trip's grants first and its members last (`ACC:MEMBERSHIP-F4`), so
+that a removal that stops part way leaves a traveller with less access, never more. The admin
+role, kept with the members, is cleared only in the last step.
+
+*Proposal:* Clear the admin role before the trip's grants change, in a step of its own.
+
+*Releases:* Nothing is planned for it yet.
+
+### TODO-30 — Check a traveller's email address afresh before they accept an invitation
+
+*Tags:* access/accounts, access/membership
+*Written:* 2026-11-19
+
+*Problem:* An account keeps the email address it last signed in with for as long as its session
+lasts, so an account whose address has since passed to someone else can still accept an
+invitation sent to it.
+
+*Reason:* The account's address is updated only when its traveller signs in, and a session lasts
+until it goes 180 days unused. Addresses are also compared after lowering their case only.
+
+*Proposal:* Decide whether accepting an invitation needs a fresh sign-in with Google, and whether
+addresses are compared in a normalised form.
+
+*Releases:* Nothing is planned for it yet.
+
+### TODO-31 — Refuse a hidden page or booking as if it did not exist
+
+*Tags:* access/permissions, planner/trip-host, access/membership
+*Written:* 2026-11-19
+
+*Problem:* A traveller can tell whether a page or booking they may not see exists, from which
+refusal a change naming it gets. An admin can likewise tell whether a member's account holds an
+email address they guess, from the refusal of an invitation to it.
+
+*Reason:* Each refusal names its own cause, which helps a traveller fix a change. Only identifiers
+are given away, never a title or text, and some identifiers, such as a country's page, can be
+guessed.
+
+*Proposal:* Decide whether a page or booking the traveller may not see is refused as unknown, and
+whether inviting a member's address is refused as an invitation is.
+
+*Releases:* Nothing is planned for it yet.
+
+### TODO-32 — Check access for a booking with no travellers
+
+*Tags:* planner/trip-host
+*Written:* 2026-11-19
+
+*Problem:* A booking change whose new list of travellers is empty is not checked against the
+traveller's access, and is refused only because the bookings component refuses a booking with no
+travellers.
+
+*Reason:* The trip host checks the access of each traveller a booking names, and an empty list names
+none.
+
+*Proposal:* Refuse an empty list of travellers in the trip host, before any access is checked.
+
+*Releases:* Nothing is planned for it yet.
+
+### TODO-33 — Give the workflows only the access they need
+
+*Tags:* ci
+*Written:* 2026-11-19
+
+*Problem:* The workflows run with the repository's default token access, keep the token on disk
+while they install and test, and name their actions by major version, which their owners can move.
+
+*Reason:* The workflows were written to test, and neither publishes nor deploys, so their access was
+left at the defaults.
+
+*Proposal:* Set `permissions: contents: read`, check out with `persist-credentials: false`, and pin
+every action to a commit, which Dependabot keeps up to date.
+
+*Releases:* Nothing is planned for it yet.
+
+### TODO-34 — Check the files the build scripts read before building from them
+
+*Tags:* shared/trip-time, web/places, web/screens
+*Written:* 2026-11-19
+
+*Problem:* The time-zone rules, the places and the country borders are built from files a maintainer
+downloads by hand, and nothing checks that each file is the one its publisher made.
+
+*Reason:* The built files are committed, so a change to them is read in a pull request. But the
+time-zone build compiles and runs IANA's own program, on the maintainer's computer.
+
+*Proposal:* Check IANA's signature on each release before building from it, and record each other
+file's SHA-256 digest in the script that reads it.
+
+*Releases:* Nothing is planned for it yet.
+
+### TODO-35 — Find what a trip's changes can cost the trip host
+
+*Tags:* planner/trip-host
+*Written:* 2026-11-19
+
+*Problem:* No one has checked how much work one traveller's changes can push onto a trip's Durable
+Object, and so onto every other traveller on the trip.
+
+*Reason:* A trip limits the size of each page and booking, but not how many there are, nor the size
+of a request. Every change of the calendar, the grants or the bookings reads the whole tree of
+pages. The security audit on 2026-11-19 left this unchecked.
+
+*Proposal:* Review the trip host's changes and catch-ups for cost, for text that is stored but later
+fails to read, and for requests larger than any change needs. Then add the limits the review finds
+are needed.
+
+*Releases:* Nothing is planned for it yet.
+
+### TODO-36 — Find what signing in and creating trips can cost the online side
+
+*Tags:* access/accounts, planner/trip-host
+*Written:* 2026-11-19
+
+*Problem:* No one has checked what one account, or no account, can make the online side do through
+signing in, creating trips and listing them.
+
+*Reason:* Nonces are free to make, a trip creates a Durable Object, an account may create any number
+of trips, and listing an account's trips asks each trip's Durable Object in turn. The security audit
+on 2026-11-19 left this unchecked.
+
+*Proposal:* Review these routes for cost, and decide on limits such as trips per account, with
+Cloudflare's rate limiting where the Worker cannot count.
 
 *Releases:* Nothing is planned for it yet.
