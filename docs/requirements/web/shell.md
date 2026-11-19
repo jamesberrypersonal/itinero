@@ -41,8 +41,9 @@ opens the next time. A version is used whole, never mixed with another's files. 
 > **What does this buy?** A traveller is never interrupted mid-task by an update, and a version half
 > downloaded never breaks the app.
 
-> **Does a new version ever take over an open window?** Only when the traveller asks it to, once
-> the online side no longer accepts the version they have (`WEB:SHELL-F5`).
+> **Does a new version ever take over an open window?** Only when the traveller asks it to, from the
+> notice that says it is waiting (`WEB:SHELL-F6`), or from the one that says the online side no
+> longer accepts the version they have (`WEB:SHELL-F5`).
 
 ### WEB:SHELL-F3 — Itinero can be added to a phone's home screen, and asks the browser to keep what it stores
 
@@ -103,6 +104,31 @@ they start it. ^web-shell-f5
 
 > **Why not update without asking?** Starting a new version reloads every window, and would lose a
 > page the traveller is in the middle of writing (`WEB:SHELL-F2`).
+
+### WEB:SHELL-F6 — A new version waiting says so, and starts when the traveller asks
+
+While a new version of Itinero waits for every window of Itinero on the device to close
+(`WEB:SHELL-F2`), every screen says so, in a quiet notice that never takes the focus from what the
+traveller is doing. It says the new version opens once every window of Itinero is closed, and
+offers to start it now, as the notice of `WEB:SHELL-F5` does, without closing Itinero. Starting it
+reloads every window of Itinero, which the notice says first. The traveller can put the notice away
+until the window next reloads. Where the online side no longer accepts the version running, only the
+notice of `WEB:SHELL-F5` shows. ^web-shell-f6
+
+- **Verification:** with Itinero open in two windows on a device, typing in an editor in the first,
+    - publish a new version, and confirm both windows show the notice, with the editor still focused
+      and its text kept
+    - start the new version from the notice, and confirm both windows run it, and show no notice
+    - publish another, put the notice away, and confirm it stays away until the window reloads
+    - publish a version whose online side no longer accepts the one running, and confirm only the
+      notice of `WEB:SHELL-F5` shows
+
+> **What does this buy?** A traveller who keeps Itinero open for days learns that a new version is
+> waiting, and starts it in one step, at a moment they choose.
+
+> **Why not start it when the traveller reloads?** A reload does not close the window, so the old
+> version keeps it (`WEB:SHELL-F2`). Without the notice, a traveller who reloads, or signs out and in
+> again, sees no change and cannot tell why.
 
 ---
 

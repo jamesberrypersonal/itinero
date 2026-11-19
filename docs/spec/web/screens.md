@@ -100,6 +100,9 @@ Behaviour crossing every screen:
   control that changes a trip is left out, as offline, except the editor a traveller already has
   open, which keeps its text until the traveller updates. Updating reloads every window, which the
   bar says (`WEB:SHELL-F5`).
+- **A version waiting.** While `web/shell`'s `updateWaiting` is true and `updateRequired` is false,
+  every screen shows the shell's quiet notice of a new version waiting at its top, above the
+  offline bar. It leaves every control as it is (`WEB:SHELL-F6`, `spec/web/shell.md` §4.8).
 - **What to offer.** A control that changes something is shown only where `access/permissions`'
   `authorise` allows it. It is asked of the copy's grants, its pages and `you`, the traveller's own
   roles and grant (`spec/web/trip-store.md` §3.3). Where the copy held online still refuses a
@@ -414,6 +417,7 @@ and the packages of the trip's parts, which `spec/web/shell.md` §5 lists.
 | [WEB:SCREENS-F10](../../requirements/web/screens.md#^web-screens-f10) | `/name` at the first sign-in, before an invitation is accepted (§4.1, §4.7), and changing the name in the settings (§4.8). |
 | [ACC-F13](../../requirements/access/access.md#^acc-f13) | Asking for a name at the first sign-in, and changing it later (§4.1, §4.8). |
 | [WEB:SHELL-F5](../../requirements/web/shell.md#^web-shell-f5) | The bar and its button, and no control that changes a trip while a new version is required (§4). |
+| [WEB:SHELL-F6](../../requirements/web/shell.md#^web-shell-f6) | The notice of a new version waiting, on every screen (§4). |
 | [WEB:SCREENS-NFR1](../../requirements/web/screens.md#^web-screens-nfr1) | Drawing what is on screen first (§6), and the timing tests of §4.9. |
 | [WEB:SCREENS-NFR2](../../requirements/web/screens.md#^web-screens-nfr2) | The map's rounded coordinates (§5.1). |
 | [WEB-F1](../../requirements/web/web.md#^web-f1) | Every screen at a phone's width and a computer's (§3.1). Adding Itinero to a home screen is `web/shell`. |

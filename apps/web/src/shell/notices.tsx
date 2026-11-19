@@ -1,6 +1,6 @@
-// The three things the shell shows of its own, which web/screens places (docs/spec/web/shell.md
-// §3.1): that Itinero is ready offline, how to add it to an iPhone's home screen, and that a new
-// version is required.
+// The four things the shell shows of its own, which web/screens places (docs/spec/web/shell.md
+// §3.1): that Itinero is ready offline, how to add it to an iPhone's home screen, that a new version
+// is waiting, and that a new version is required.
 
 import { useEffect, useState } from "preact/hooks";
 import { applyUpdate, current, onChange, type ShellState } from "./index.ts";
@@ -74,6 +74,32 @@ export function UpdateRequired({ state }: { state: ShellState }) {
       ) : (
         <p class="shell-update-fetching">Fetching the new version…</p>
       )}
+    </div>
+  );
+}
+
+/**
+ * Shown while a new version waits for every window to close, and none is required (`WEB:SHELL-F6`,
+ * §4.8). It is a status, not an alert, so it never takes the focus from a traveller typing, and Later
+ * puts it away until the window reloads.
+ */
+export function UpdateWaiting({ state }: { state: ShellState }) {
+  const [later, setLater] = useState(false);
+  if (!state.updateWaiting || state.updateRequired || later) return null;
+  return (
+    <div class="shell-waiting" role="status" data-shell="update-waiting">
+      <p>
+        <strong>A new version of Itinero is ready.</strong> It opens once every window of Itinero is closed. Updating
+        now reloads every window, so copy any text you are writing somewhere safe first.
+      </p>
+      <div class="shell-actions">
+        <button type="button" class="shell-button shell-button-quiet" onClick={() => setLater(true)}>
+          Later
+        </button>
+        <button type="button" class="shell-button" onClick={applyUpdate}>
+          Update now
+        </button>
+      </div>
     </div>
   );
 }

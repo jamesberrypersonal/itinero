@@ -4,6 +4,16 @@ What has been done, newest first. The live work list, `TODO.md`, numbers each pi
 owed, such as TODO-9. An entry that finishes one of those items names it, so a reader can find what
 became of its number. `documentation-system.md` sets the rules.
 
+## 2026-11-19 — TODO-19, a new version waiting says so
+
+*By:* James Berry, with Claude
+
+While a new version of Itinero waits for every window to close, every screen shows a quiet notice
+that says so (`WEB:SHELL-F6`). It says the new version opens once every window of Itinero is
+closed, and offers Update now, which reloads every window into it, and Later, which puts the notice
+away until the window reloads. It never takes the focus, and gives way to the notice of a version
+too old.
+
 ## 2026-11-17 — TODO-18, a privacy policy is published
 
 *By:* James Berry, with Claude

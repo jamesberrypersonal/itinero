@@ -39,12 +39,14 @@ web app carries itself (ADR-0008, trip-time carries its own copy of the time-zon
 
 ### 3.1 User interface
 
-The shell shows three things of its own, which `web/screens` places:
+The shell shows four things of its own, which `web/screens` places:
 
 - **a notice that Itinero is ready offline**, once the service worker holds every file of the
   version
 - **a notice on an iPhone that Itinero is not on the home screen**, saying to tap Share, then Add
   to Home Screen, so that its trips stay when the phone goes unused for some days (§4.3)
+- **a notice that a new version is waiting**, while one waits for every window to close and none
+  is required, with a button that starts it, and one that puts the notice away (§4.8)
 - **a notice that a new version is required**, once the online side refuses the version running,
   with a button that starts the new version (§4.7)
 
@@ -126,7 +128,7 @@ detail.
   deploy lands during the install.
 - **Wait.** A new service worker, once installed, waits while any window uses the old one. It
   calls `skipWaiting`, which ends the wait and lets it take over open windows, only when a window
-  asks it to (§4.7). Otherwise it takes over once no window uses the old one.
+  asks it to (§4.7, §4.8). Otherwise it takes over once no window uses the old one.
 - **Activate.** Once it takes over, it deletes every other version's cache, and keeps
   `itinero-rules` (§4.4) and the cache of `web/places`, the web app's list of places and their
   time zones. It then takes control of any window it does
@@ -207,7 +209,10 @@ in the repository. It covers all four of the web app's components.
   takes over only once every window closes (`WEB:SHELL-F2`). They publish newer rules, and confirm
   they are loaded and kept (`WEB:SHELL-F4`). They publish a third version whose online side refuses
   the first, and confirm the notice, and that `applyUpdate` starts it in every window
-  (`WEB:SHELL-F5`). With no connection, they confirm that trip-time writes, orders and measures
+  (`WEB:SHELL-F5`). They publish a second version with two windows open, and confirm the notice of
+  §4.8 shows in both without taking the focus, that Update now starts it in both, that Later puts
+  it away until the window reloads, and that it gives way to the notice of §4.7
+  (`WEB:SHELL-F6`). With no connection, they confirm that trip-time writes, orders and measures
   times with the rules the shell kept (`SHR:TRIP-TIME-NFR1`).
 - **Timing tests** measure the time from opening to `start` resolving, and fail above 300
   milliseconds on the machine running them. The check on a phone of `WEB:SHELL-NFR1` is made by
@@ -272,6 +277,26 @@ control has changed, so every window then runs the new version. `applyUpdate()` 
 `updateWaiting` is false. The shell never calls it itself, so a traveller's unsaved text is lost
 only once they choose to update.
 
+### 4.8 A new version waiting
+
+*Porcelain:* while `updateWaiting` is true and `updateRequired` is false, `web/screens` shows the
+shell's `UpdateWaiting` notice at the top of every screen (`WEB:SHELL-F6`). It says a new version is
+ready, that it opens once every window of Itinero is closed, and that updating now reloads every
+window, so the traveller should copy any text they are writing somewhere safe first. Its buttons are
+Update now, which calls `applyUpdate` (§4.7), and Later.
+
+The notice is quiet, where the notice of §4.7 is urgent. It has the role `status`, not `alert`, so
+it takes no focus and a screen reader reads it only once the reader is idle. It takes the colours of
+a card rather than of a warning, and scrolls away with the screen rather than staying at the top.
+
+Later puts the notice away in that window until the window reloads. It is held in the notice's own
+state, not stored, so a window reloaded, or opened afresh, shows the notice again while the version
+still waits. Each window learns of the waiting version for itself, from its own registration's
+`updatefound` event, which the browser fires in each, so every open window shows the notice.
+
+While `updateRequired` is true, the notice of §4.7 shows in its place, and offers the same
+`applyUpdate`.
+
 ## 5. Resources
 
 | Resource | Path | Owned by |
@@ -295,7 +320,7 @@ shows: `@itinero/trip-time`, `@itinero/itinerary`, `@itinero/pages`, `@itinero/p
 
 - **Offline** (`WEB:SHELL-F1`). Every file a version needs is cached before it is reported ready.
 - **One version at a time** (`WEB:SHELL-F2`). Files are named by their contents, and a new service
-  worker takes over an open window only when the traveller asks, from the notice of §4.7.
+  worker takes over an open window only when the traveller asks, from the notice of §4.7 or §4.8.
 - **Never out of step with the online side** (`WEB:SHELL-F5`). A version too old is refused before
   anything is read or written for it, and says so.
 - **Small** (`WEB-NFR2`). Preact, and Vite leaving out code nothing uses, keep the version's files
@@ -313,6 +338,7 @@ shows: `@itinero/trip-time`, `@itinero/itinerary`, `@itinero/pages`, `@itinero/p
 | [WEB:SHELL-F3](../../requirements/web/shell.md#^web-shell-f3) | The manifest and `suggestInstall`, in §4.3, and `persist`, in §4.2. |
 | [WEB:SHELL-F4](../../requirements/web/shell.md#^web-shell-f4) | The two rules files, and `online`, in §4.4. |
 | [WEB:SHELL-F5](../../requirements/web/shell.md#^web-shell-f5) | `API`, `updateFirst` and `applyUpdate`, in §4.7. The refusal is `access/accounts`, and the notice is `web/screens`. |
+| [WEB:SHELL-F6](../../requirements/web/shell.md#^web-shell-f6) | `updateWaiting`, `applyUpdate` and the notice, in §4.8. Placing the notice on every screen is `web/screens`. |
 | [WEB:SHELL-NFR1](../../requirements/web/shell.md#^web-shell-nfr1) | `start`, which waits on nothing on the network (§4.2, §6). |
 | [WEB-F1](../../requirements/web/web.md#^web-f1) | The manifest, and the notice for an iPhone (§4.3). Every screen fitting a phone is `web/screens`. |
 | [WEB-F3](../../requirements/web/web.md#^web-f3) | Asking the browser to keep what Itinero stores, and saying how to add Itinero to an iPhone's home screen (§4.2, §4.3). Holding each trip is `web/trip-store`. |

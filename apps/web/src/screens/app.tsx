@@ -1,8 +1,8 @@
-// The screens' root: each address's screen (docs/spec/web/screens.md §3.1), the bar of a version
-// too old, and the guards of signing in and choosing a name (§4.1).
+// The screens' root: each address's screen (docs/spec/web/screens.md §3.1), the bars of a version
+// waiting and a version too old, and the guards of signing in and choosing a name (§4.1).
 
 import { useEffect, useState } from "preact/hooks";
-import { UpdateRequired } from "../shell/notices.tsx";
+import { UpdateRequired, UpdateWaiting } from "../shell/notices.tsx";
 import * as store from "../store/index.ts";
 import { ChooseName, Invitation, SignIn } from "./account.tsx";
 import { forgetNameOwed, nameOwed } from "./auth.ts";
@@ -65,6 +65,7 @@ export function App({ initialAccount }: { initialAccount: string | undefined }) 
   return (
     <div class="app">
       <UpdateRequired state={shell} />
+      <UpdateWaiting state={shell} />
       {screen}
     </div>
   );
