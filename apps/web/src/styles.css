@@ -196,6 +196,35 @@ a,
   opacity: 0.8;
 }
 
+/* A new version is waiting: a quiet bar at the top of the screen, which scrolls away with it. */
+.shell-waiting {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1rem;
+  padding: calc(env(safe-area-inset-top, 0px) + 0.75rem) var(--gutter) 0.75rem;
+  background: var(--surface);
+  color: var(--text-secondary);
+  font-size: 0.9375rem;
+  box-shadow: 0 0.5px 0 var(--separator);
+}
+
+.shell-waiting p {
+  flex: 1 1 18rem;
+  margin: 0;
+}
+
+.shell-waiting strong {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.shell-actions {
+  display: flex;
+  flex: none;
+  gap: 0.5rem;
+}
+
 .shell-button {
   flex: none;
   min-height: 44px; /* a finger's width */
@@ -223,9 +252,22 @@ a,
   outline-offset: 2px;
 }
 
+/* Later: the same shape, without the fill, so Update now stays the one choice that stands out. */
+.shell-button-quiet {
+  background: transparent;
+  color: var(--accent);
+}
+
+.shell-button-quiet:active {
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+}
+
 @media (hover: hover) and (pointer: fine) {
   .shell-button:hover {
     background: var(--accent-pressed);
+  }
+  .shell-button-quiet:hover {
+    background: color-mix(in srgb, var(--accent) 8%, transparent);
   }
 }
 
@@ -244,5 +286,11 @@ a,
   }
   .shell-update {
     box-shadow: 0 1px 0 var(--warning-text);
+  }
+  .shell-waiting {
+    box-shadow: 0 1px 0 var(--text);
+  }
+  .shell-button-quiet {
+    box-shadow: inset 0 0 0 1px var(--accent);
   }
 }

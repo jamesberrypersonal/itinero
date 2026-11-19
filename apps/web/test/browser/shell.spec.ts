@@ -304,3 +304,74 @@ test.describe("WEB:SHELL-F5 — a version too old for the online side says so, a
     expect((await shellState(page)).updateWaiting).toBe(false);
   });
 });
+
+test.describe("WEB:SHELL-F6 — a new version waiting says so, and starts when the traveller asks", () => {
+  test("every open window says so without taking the focus, and Update now starts it in every window", async ({
+    context,
+  }) => {
+    const first = await openReady(context, online.url);
+    const second = await open(context, online.url);
+
+    // A traveller is writing. The editor stands in for web/screens' page editor.
+    await first.evaluate(() => {
+      const editor = document.createElement("textarea");
+      editor.id = "editor";
+      document.querySelector("main")!.append(editor);
+      Object.assign(window, { notReloaded: true });
+    });
+    await first.locator("#editor").fill("Half a page about Torres del Paine");
+
+    online.publish(versionDir("two"));
+    await untilUpdateWaiting(first);
+    for (const page of [first, second]) {
+      const notice = page.locator('[data-shell="update-waiting"]');
+      await expect(notice).toBeVisible();
+      await expect(notice).toHaveAttribute("role", "status");
+      await expect(notice).toContainText("once every window of Itinero is closed");
+      await expect(notice).toContainText("reloads every window");
+    }
+    await expect(first.locator("#editor")).toBeFocused();
+    await expect(first.locator("#editor")).toHaveValue("Half a page about Torres del Paine");
+    expect(await first.evaluate(() => "notReloaded" in window)).toBe(true);
+    expect(await running(first)).toBe(versionOf("one"));
+
+    await Promise.all([
+      first.waitForEvent("load"),
+      second.waitForEvent("load"),
+      first.locator('[data-shell="update-waiting"]').getByRole("button", { name: "Update now" }).click(),
+    ]);
+    for (const page of [first, second]) {
+      await expect(page.locator('[data-shell="version"]')).toHaveText(versionOf("two"));
+      await expect(page.locator('[data-shell="update-waiting"]')).toHaveCount(0);
+    }
+  });
+
+  test("Later puts the notice away until the window reloads", async ({ context }) => {
+    const page = await openReady(context, online.url);
+    online.publish(versionDir("two"));
+    await untilUpdateWaiting(page);
+    const notice = page.locator('[data-shell="update-waiting"]');
+    await notice.getByRole("button", { name: "Later" }).click();
+    await expect(notice).toHaveCount(0);
+
+    // Moving between screens keeps it away; reloading the window brings it back.
+    await page.evaluate(() => {
+      history.pushState(null, "", "/settings");
+      dispatchEvent(new PopStateEvent("popstate"));
+    });
+    await expect(notice).toHaveCount(0);
+    await page.reload();
+    expect(await running(page)).toBe(versionOf("one"));
+    await untilUpdateWaiting(page);
+    await expect(notice).toBeVisible();
+  });
+
+  test("a version too old shows only its own notice", async ({ context }) => {
+    const page = await openReady(context, online.url);
+    online.publish(versionDir("three"), 2);
+    expect(await reachOnline(page)).toBe(426);
+    await untilUpdateWaiting(page);
+    await expect(page.locator('[data-shell="update-required"]')).toBeVisible();
+    await expect(page.locator('[data-shell="update-waiting"]')).toHaveCount(0);
+  });
+});
