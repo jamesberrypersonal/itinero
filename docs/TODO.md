@@ -3,7 +3,7 @@
 What needs active work, and what waits on a decision. `documentation-system.md` gives the list's
 rules. When an item is done, it leaves this list for `CHANGELOG.md` in the commit that finishes it.
 
-*Next free:* TODO-19
+*Next free:* TODO-20
 
 ## Tags
 
@@ -167,5 +167,22 @@ lock, and deleted when its traveller signs out).
 *Proposal:* Consider listing the devices a traveller is signed in on, and letting them sign out
 any or all of them, so that each deletes its copy the next time it connects. Decide it in a
 decision record scoped `access/accounts` and `web`.
+
+*Releases:* Nothing is planned for it yet.
+
+### TODO-19 — Tell a traveller when a new version of Itinero is waiting
+
+*Tags:* web/shell
+*Written:* 2026-11-18
+
+*Problem:* A traveller who keeps Itinero open does not know a new version is waiting, so they go
+on using the old one and miss what the new one adds, even after reloading or signing out.
+
+*Reason:* A new version takes over only once every window of Itinero on the device is closed
+(`WEB:SHELL-F2`), and the shell shows a notice only when the online side refuses the version
+running (`WEB:SHELL-F5`).
+
+*Proposal:* Show a quiet notice when a new version is waiting, which says to close every window of
+Itinero, or offers to update now, as `WEB:SHELL-F5` does. Add it to the shell's requirements.
 
 *Releases:* Nothing is planned for it yet.
