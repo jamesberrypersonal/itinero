@@ -85,7 +85,7 @@ async function clock(page: Page, when: string): Promise<void> {
 const PUNTA_ARENAS = "America/Punta_Arenas";
 const SANTIAGO = "America/Santiago";
 
-test("WEB:SCREENS-F2 — the home page shows the traveller's day, their bookings for today and next, and the page for their country", async ({ browser }) => {
+test("WEB:SCREENS-F2, WEB-F6 — the home page shows the traveller's day, their bookings for today and next, and the page for their country", async ({ browser }) => {
   const ana = await traveller(browser, "Ana", "computer");
   const sam = await traveller(browser, "Sam", "phone", { geolocation: { latitude: -33.45, longitude: -70.66 }, permissions: ["geolocation"] });
   const trip = await createTrip(ana.page, "Patagonia", "2026-12-01", "2026-12-20", ["CL", "AR"]);
@@ -379,9 +379,223 @@ test("BKG-F5 — a removed booking is gone from every traveller's bookings page"
   for (const t of [ana, sam]) await t.context.close();
 });
 
+/** Drags an element's centre onto another's, with the pointer, in steps, as a finger or a mouse would. */
+async function drag(page: Page, from: ReturnType<Page["locator"]>, to: ReturnType<Page["locator"]>): Promise<void> {
+  await from.scrollIntoViewIfNeeded();
+  const start = (await from.boundingBox())!;
+  await page.mouse.move(start.x + start.width / 2, start.y + start.height / 2);
+  await page.mouse.down();
+  const b = (await to.boundingBox())!;
+  await page.mouse.move(b.x + b.width / 2, b.y + b.height / 2, { steps: 12 });
+  await page.mouse.up();
+}
+
+type TripWindow = { itineroStore: { trip(id: string): Promise<{ calendar?: { stretches: { id: string; first: string; last: string }[] }; pages: { pages: { id: string; parent?: string }[] } }> } };
+const held = (page: Page, trip: string) => page.evaluate(async (id) => (await (window as unknown as TripWindow).itineroStore.trip(id))!, trip);
+
+test("WEB:SCREENS-F3 — the calendar shows each day's countries, stretches pencilled, and firm items and bookings apart, only to a traveller granted it", async ({ browser }) => {
+  const ana = await traveller(browser, "Ana", "computer");
+  const sam = await traveller(browser, "Sam", "phone");
+  const kim = await traveller(browser, "Kim", "phone");
+  const trip = await createTrip(ana.page, "Patagonia", "2026-12-01", "2026-12-20", ["CL"]);
+  await join(ana, sam, trip, "edit", "view");
+  await join(ana, kim, trip, "edit", "none");
+
+  // Ana pencils Chile from 1 to 10 December, from the calendar.
+  await screen(ana.page, `/trips/${trip}/calendar`, "calendar");
+  await ana.page.locator('[data-date="2026-12-01"] [data-action="add-to-day"]').click();
+  await ana.page.locator('[data-action="add-stretch"]').click();
+  const stretchForm = ana.page.locator('[data-form="stretch"]');
+  await stretchForm.locator('select[name="country"]').selectOption("CL");
+  await stretchForm.locator('input[name="last"]').fill("2026-12-10");
+  await stretchForm.locator('[data-action="save-stretch"]').click();
+  await expect(ana.page.locator('[data-date="2026-12-10"] .stretch')).toHaveCount(1);
+  await expect(ana.page.locator('[data-date="2026-12-11"] .stretch')).toHaveCount(0);
+
+  await send(ana.page, trip, "pages", pageChange({ op: "add", id: "santiago", title: "Santiago", at: { parent: "country-cl" } }));
+  await send(ana.page, trip, "calendar", calendarChange({ op: "pencil", stretch: { id: "santiago", place: { country: "CL", name: "Santiago" }, first: "2026-12-01", last: "2026-12-03", page: "santiago" } }));
+  await send(ana.page, trip, "bookings", bookingChange({ op: "add", booking: booking({ id: "flight", travellers: [ana.account, sam.account], kind: "flight", seats: [], legs: [{ flight: "LA 98", from: { code: "SCL" }, to: { code: "PUQ" }, leaves: exact(SANTIAGO, "2026-12-05", "07:05"), arrives: exact(PUNTA_ARENAS, "2026-12-05", "10:30") }] }) }));
+
+  // Ana adds a firm item on 4 December: a train, with its two ends and its duration.
+  await ana.page.locator('[data-date="2026-12-04"] [data-action="add-to-day"]').click();
+  await ana.page.locator('[data-action="add-firm"]').click();
+  const firmForm = ana.page.locator('[data-form="firm"]');
+  await firmForm.locator('input[name="title"]').fill("Train to Valparaíso");
+  await firmForm.locator('input[name="when-time"]').fill("09:00");
+  await firmForm.locator('input[name="when-zone"]').fill(SANTIAGO);
+  await firmForm.locator('input[name="travel"]').check();
+  await firmForm.locator('select[name="from-country"]').selectOption("CL");
+  await firmForm.locator('input[name="from"]').fill("Santiago");
+  await firmForm.locator('select[name="to-country"]').selectOption("CL");
+  await firmForm.locator('input[name="to"]').fill("Valparaíso");
+  await firmForm.locator('input[name="has-arrival"]').check();
+  await firmForm.locator('input[name="arrive-date"]').fill("2026-12-04");
+  await firmForm.locator('input[name="arrive-time"]').fill("10:45");
+  await firmForm.locator('input[name="arrive-zone"]').fill(SANTIAGO);
+  await firmForm.locator('[data-action="save-firm"]').click();
+  await expect(ana.page.locator('[data-date="2026-12-04"] .fixed')).toContainText("Train to Valparaíso");
+  await expect(ana.page.locator('[data-date="2026-12-04"] .fixed')).toContainText("1 h 45 min");
+  await noSidewaysScroll(ana.page);
+
+  // Ana drags Chile's last day from 10 to 12 December (PLN-F1).
+  const chile = (await held(ana.page, trip)).calendar!.stretches.find((s) => s.id !== "santiago")!;
+  await drag(ana.page, ana.page.locator(`[data-date="2026-12-10"] [data-stretch="${chile.id}"] [data-end="last"]`), ana.page.locator('[data-date="2026-12-12"]'));
+  await expect(ana.page.locator(`[data-date="2026-12-12"] [data-stretch="${chile.id}"]`)).toBeVisible();
+  expect((await held(ana.page, trip)).calendar!.stretches.find((s) => s.id === chile.id)).toMatchObject({ first: "2026-12-01", last: "2026-12-12" });
+
+  // A firm item saved from an older revision shows the item as it now stands (PLN:ITINERARY-F11).
+  await ana.page.locator('[data-date="2026-12-04"] [data-action="edit-firm"]').click();
+  const firmId = (await ana.page.locator("[data-firm]").first().getAttribute("data-firm"))!;
+  await send(ana.page, trip, "calendar", calendarChange({ op: "change-firm", base: 1, item: { id: firmId, revision: 1, title: "Train to Viña", when: exact(SANTIAGO, "2026-12-04", "09:00") } as never }));
+  await ana.page.locator('[data-form="firm"] input[name="title"]').fill("Early train to Valparaíso");
+  await ana.page.locator('[data-action="save-firm"]').click();
+  await expect(ana.page.locator('[data-form="firm"] [data-theirs]')).toContainText("Train to Viña");
+  await ana.page.keyboard.press("Escape");
+  await expect(ana.page.locator('[data-form="firm"]')).toHaveCount(0);
+
+  // Sam, granted the calendar, sees 2 December's country and both stretches pencilled, and 5
+  // December's flight standing apart.
+  await catchUp(sam.page);
+  await screen(sam.page, `/trips/${trip}/calendar`, "calendar");
+  await expect(sam.page.locator('[data-date="2026-12-02"] .cal-countries')).toHaveText("Chile");
+  await noSidewaysScroll(sam.page);
+  const stretches = sam.page.locator('[data-date="2026-12-02"] .stretch');
+  await expect(stretches).toHaveCount(2);
+  for (const band of await stretches.all()) expect(await band.evaluate((el) => getComputedStyle(el).borderTopStyle)).toBe("dashed");
+  const flight = sam.page.locator('[data-date="2026-12-05"] [data-booking="flight"]');
+  await expect(flight).toContainText("LA 98");
+  expect(await flight.evaluate((el) => getComputedStyle(el).borderTopStyle)).toBe("none");
+  expect(await flight.evaluate((el) => el.closest(".stretch"))).toBeNull();
+  await expect(sam.page.locator('[data-action="add-to-day"], [data-action="edit-stretch"], [data-action="resize-stretch"]')).toHaveCount(0);
+
+  // Tapping Santiago's stretch opens the page Santiago.
+  await sam.page.locator('[data-date="2026-12-02"] [data-stretch="santiago"] a').click();
+  await expect(sam.page.locator('[data-screen="page"] .title')).toHaveText("Santiago");
+
+  // Kim, with no access to the calendar, is shown no calendar, and no way to open it.
+  await catchUp(kim.page);
+  await screen(kim.page, `/trips/${trip}`, "home");
+  await expect(kim.page.locator(".trip-bar")).not.toContainText("Calendar");
+  await kim.page.goto(at(`/trips/${trip}/calendar`));
+  await expect(kim.page.locator('[data-screen="home"]')).toBeVisible();
+  await expect(kim.page.locator('[data-screen="calendar"]')).toHaveCount(0);
+  await expect(kim.page.getByText("Calendar")).toHaveCount(0);
+  for (const t of [ana, sam, kim]) await t.context.close();
+});
+
+test("WEB:SCREENS-F6, WEB:SCREENS-F8, ACC-F9 — an admin manages the members and their access, every traveller sees who is on the trip, a move asks first, and removing a traveller asks first", async ({ browser }) => {
+  const ana = await traveller(browser, "Ana", "computer");
+  const sam = await traveller(browser, "Sam", "phone");
+  const kim = await traveller(browser, "Kim", "phone");
+  const trip = await createTrip(ana.page, "Patagonia", "2026-12-01", "2026-12-20", ["CL"]);
+  await join(ana, sam, trip);
+  await join(ana, kim, trip);
+  await send(ana.page, trip, "pages", pageChange({ op: "add", id: "santiago", title: "Santiago", at: { parent: "country-cl" } }));
+  await send(ana.page, trip, "pages", pageChange({ op: "add", id: "hidden", title: "Surprise", at: {} }));
+  await send(ana.page, trip, "pages", pageChange({ op: "add", id: "notes", title: "Notes", at: { parent: "hidden" } }));
+
+  // A traveller who is not an admin sees every member, with the admin marked, and no way to change anyone's access.
+  await catchUp(sam.page);
+  await screen(sam.page, `/trips/${trip}/members`, "members");
+  for (const t of [ana, sam, kim]) await expect(sam.page.locator(`[data-member="${t.account}"]`)).toBeVisible();
+  await expect(sam.page.locator(".row", { has: sam.page.locator(`[data-member="${ana.account}"]`) })).toContainText("Creator");
+  await expect(sam.page.locator('[data-screen="members"] a.row-link, [data-screen="members"] [data-action]:not([data-action="trip-menu"]), [data-form="invite"]')).toHaveCount(0);
+  await sam.page.goto(at(`/trips/${trip}/members/${kim.account}`));
+  await expect(sam.page.locator('[data-screen="member"] .title')).toHaveText("Member not available");
+
+  // The admin invites an address with view access and no calendar, and the invitation is listed.
+  await screen(ana.page, `/trips/${trip}/members`, "members");
+  const form = ana.page.locator('[data-form="invite"]');
+  await form.locator('input[name="email"]').fill("lee@example.com");
+  await form.locator('[data-choice="invite-trip"] [data-value="view"]').click();
+  await form.locator('[data-choice="invite-calendar"] [data-value="none"]').click();
+  await form.locator('[data-action="invite"]').click();
+  const invitation = ana.page.locator('[data-invitation="lee@example.com"]');
+  await expect(invitation).toContainText("Can view");
+  await expect(invitation).toContainText("calendar: no access");
+  await invitation.locator('[data-action="withdraw-invitation"]').click();
+  await expect(ana.page.getByRole("alertdialog")).toContainText("lee@example.com");
+  await ana.page.locator('[data-dialog="confirm"]').click();
+  await expect(invitation).toHaveCount(0);
+
+  // The admin gives Sam no access to the page Santiago, and it is accepted.
+  await ana.page.locator(`a:has([data-member="${sam.account}"])`).click();
+  await expect(ana.page.locator('[data-screen="member"] .title')).toHaveText("Sam");
+  await noSidewaysScroll(ana.page);
+  await ana.page.locator('select[name="page-santiago"]').selectOption("none");
+  await expect(ana.page.locator('select[name="page-santiago"]')).toHaveValue("none");
+  await expect(ana.page.locator('[data-screen="member"] .refused')).toHaveCount(0);
+  await catchUp(sam.page);
+  await screen(sam.page, `/trips/${trip}/pages/santiago`, "page");
+  await expect(sam.page.locator(".title")).toHaveText("Page not available");
+
+  // A page beneath one hidden from Sam cannot be opened to him first: the screen names the page above.
+  await ana.page.locator('select[name="page-hidden"]').selectOption("none");
+  await expect(ana.page.locator('select[name="page-hidden"]')).toHaveValue("none");
+  await ana.page.locator('select[name="page-notes"]').selectOption("view");
+  await expect(ana.page.locator('[data-screen="member"] .refused')).toContainText('Give them access to "Surprise" first');
+
+  // Kim moves Notes, which Sam cannot see, under Chile, which he can: the screen says one more
+  // traveller will see it, and asks first.
+  await catchUp(kim.page);
+  await screen(kim.page, `/trips/${trip}/pages`, "pages");
+  await kim.page.getByRole("button", { name: "Open Surprise" }).click();
+  await drag(kim.page, kim.page.locator('[data-action="move-page"][data-page="notes"]'), kim.page.locator('.tree-row[data-drop="country-cl"]'));
+  await expect(kim.page.getByRole("alertdialog")).toContainText("1 more traveller will see this page");
+  await kim.page.locator('[data-dialog="cancel"]').click();
+  expect((await held(kim.page, trip)).pages.pages.find((p) => p.id === "notes")!.parent).toBe("hidden");
+  await drag(kim.page, kim.page.locator('[data-action="move-page"][data-page="notes"]'), kim.page.locator('.tree-row[data-drop="country-cl"]'));
+  await kim.page.locator('[data-dialog="confirm"]').click();
+  await expect.poll(async () => (await held(kim.page, trip)).pages.pages.find((p) => p.id === "notes")!.parent).toBe("country-cl");
+
+  // A move that lets no one more see a page is made at once.
+  await drag(kim.page, kim.page.locator('[data-action="move-page"][data-page="notes"]'), kim.page.locator('.tree-row[data-drop="hidden"]'));
+  await expect.poll(async () => (await held(kim.page, trip)).pages.pages.find((p) => p.id === "notes")!.parent).toBe("hidden");
+  await expect(kim.page.getByRole("alertdialog")).toHaveCount(0);
+
+  // The admin makes Sam an admin, and Sam then sees each member's access.
+  await ana.page.locator('[data-action="make-admin"]').click();
+  await expect(ana.page.locator('[data-action="make-admin"]')).toHaveCount(0);
+  await expect(ana.page.locator('[data-screen="member"] .lead')).toContainText("Admin");
+  await catchUp(sam.page);
+  await screen(sam.page, `/trips/${trip}/members`, "members");
+  await expect(sam.page.locator(`a:has([data-member="${kim.account}"])`)).toBeVisible();
+
+  // Removing a traveller asks first; declining keeps them, and confirming removes them.
+  await screen(ana.page, `/trips/${trip}/members/${kim.account}`, "member");
+  await ana.page.locator('[data-action="remove-member"]').click();
+  await expect(ana.page.getByRole("alertdialog")).toContainText("Kim will be removed from the trip");
+  await expect(ana.page.locator('[data-dialog="cancel"]')).toBeFocused();
+  await ana.page.locator('[data-dialog="cancel"]').click();
+  await screen(ana.page, `/trips/${trip}/members`, "members");
+  await expect(ana.page.locator(`[data-member="${kim.account}"]`)).toBeVisible();
+  await screen(ana.page, `/trips/${trip}/members/${kim.account}`, "member");
+  await ana.page.locator('[data-action="remove-member"]').click();
+  await ana.page.locator('[data-dialog="confirm"]').click();
+  await expect(ana.page.locator('[data-screen="members"]')).toBeVisible();
+  await expect(ana.page.locator(`[data-member="${kim.account}"]`)).toHaveCount(0);
+  for (const t of [ana, sam, kim]) await t.context.close();
+});
+
+test("PLN-F13 — an admin reads a deleted page online, and restores it", async ({ browser }) => {
+  const ana = await traveller(browser, "Ana", "computer");
+  const trip = await createTrip(ana.page, "Patagonia", "2026-12-01", "2026-12-20", ["CL"]);
+  await send(ana.page, trip, "pages", pageChange({ op: "add", id: "santiago", title: "Santiago", text: "Cerro San Cristóbal at sunset.", at: { parent: "country-cl" } }));
+  await send(ana.page, trip, "pages", pageChange({ op: "bury", id: "santiago" }));
+  await screen(ana.page, `/trips/${trip}/graveyard`, "graveyard");
+  await ana.page.getByRole("button", { name: /Santiago/ }).click();
+  await expect(ana.page.locator('[data-buried="santiago"]')).toContainText("Cerro San Cristóbal at sunset.");
+  await ana.page.locator('[data-buried="santiago"]').getByRole("button", { name: "Restore" }).click();
+  await expect(ana.page.locator('[data-screen="page"] .title')).toHaveText("Santiago");
+  await screen(ana.page, `/trips/${trip}/graveyard`, "graveyard");
+  await expect(ana.page.getByText("No deleted pages.")).toBeVisible();
+  await ana.context.close();
+});
+
 /** Every screen of a trip, by its address and the name it draws. */
-const TRIP_SCREENS = (trip: string): [string, string][] => [
+const TRIP_SCREENS = (trip: string, account: string): [string, string][] => [
   [`/trips/${trip}`, "home"],
+  [`/trips/${trip}/calendar`, "calendar"],
   [`/trips/${trip}/bookings`, "bookings"],
   [`/trips/${trip}/bookings/tour`, "booking"],
   [`/trips/${trip}/pages`, "pages"],
@@ -389,6 +603,7 @@ const TRIP_SCREENS = (trip: string): [string, string][] => [
   [`/trips/${trip}/search`, "search"],
   [`/trips/${trip}/graveyard`, "graveyard"],
   [`/trips/${trip}/members`, "members"],
+  [`/trips/${trip}/members/${account}`, "member"],
 ];
 
 test("WEB:SCREENS-F1, WEB:SHELL-F1 — every screen fits a phone, and offline each says so and offers no change", async ({ browser }) => {
@@ -396,7 +611,8 @@ test("WEB:SCREENS-F1, WEB:SHELL-F1 — every screen fits a phone, and offline ea
   const trip = await createTrip(ana.page, "Patagonia with a long name that has to wrap on a phone", "2026-12-01", "2026-12-20", ["CL"]);
   await send(ana.page, trip, "bookings", bookingChange({ op: "add", booking: booking({ id: "tour", travellers: [ana.account], details: { reference: "AVERYLONGREFERENCE1234567890" }, kind: "activity", sort: "tour", title: "Torres del Paine full day, with lunch, and a boat across Lago Grey", starts: exact(PUNTA_ARENAS, "2026-12-09", "07:30") }) }));
   await send(ana.page, trip, "pages", pageChange({ op: "write", id: "country-cl", base: 1, text: "| A very wide table | with | many | columns | to | scroll | across |\n|---|---|---|---|---|---|---|\n| 1 | 2 | 3 | 4 | 5 | 6 | 7 |\n\nhttps://example.com/a/very/long/address/that/goes/on/and/on/and/on" }));
-  const all = [...TRIP_SCREENS(trip), ["/", "trips"], ["/trips/new", "new-trip"], ["/settings", "settings"], [`/trips/${trip}/bookings/new`, "booking-kind"], [`/trips/${trip}/pages/country-cl/edit`, "page-editor"]] as [string, string][];
+  await send(ana.page, trip, "calendar", calendarChange({ op: "pencil", stretch: { id: "chile", place: { country: "CL", name: "A place with a very long name indeed, to wrap" }, first: "2026-12-01", last: "2026-12-10" } }));
+  const all = [...TRIP_SCREENS(trip, ana.account), ["/", "trips"], ["/trips/new", "new-trip"], ["/settings", "settings"], [`/trips/${trip}/bookings/new`, "booking-kind"], [`/trips/${trip}/pages/country-cl/edit`, "page-editor"]] as [string, string][];
   for (const [path, name] of all) {
     await screen(ana.page, path, name);
     await noSidewaysScroll(ana.page);
@@ -407,7 +623,7 @@ test("WEB:SCREENS-F1, WEB:SHELL-F1 — every screen fits a phone, and offline ea
   await ana.context.setOffline(true);
   await ana.page.close();
   const page = await ana.context.newPage();
-  for (const [path, name] of TRIP_SCREENS(trip)) {
+  for (const [path, name] of TRIP_SCREENS(trip, ana.account)) {
     await screen(page, path, name);
     await expect(page.locator("[data-offline]")).toContainText(/Offline · brought up to date today at \d\d:\d\d/);
     await expect(page.locator('[data-action]:not([data-action="trip-menu"]):not([data-action="find-country"]):not([data-action="copy-reference"])')).toHaveCount(0);
@@ -431,7 +647,7 @@ test("WEB:SHELL-F5 — while a new version is required, every trip opens, no scr
   await catchUp(ana.page);
   await expect(ana.page.locator('[data-shell="update-required"]')).toBeVisible();
   for (const id of [trip, other]) {
-    for (const [path, name] of TRIP_SCREENS(id).filter(([, n]) => n !== "booking")) {
+    for (const [path, name] of TRIP_SCREENS(id, ana.account).filter(([, n]) => n !== "booking")) {
       await ana.page.evaluate((path) => {
         history.pushState(null, "", path);
         dispatchEvent(new PopStateEvent("popstate"));

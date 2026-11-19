@@ -1,7 +1,7 @@
 // The places' limits (docs/spec/web/places.md §4.6): every file within its size, compressed with
 // gzip as it is sent (WEB:PLACES-NFR2), and each answer of typing Springfield, against the towns of
 // the United States, within 50 milliseconds on the machine running the tests (WEB:PLACES-NFR1). The
-// check on a phone at least four years old is made by hand before each release.
+// check on a phone is made by hand before each release.
 
 import assert from "node:assert/strict";
 import { readdirSync, readFileSync } from "node:fs";

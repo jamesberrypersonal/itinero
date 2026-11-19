@@ -162,7 +162,7 @@ loaded. It needs no connection, and never reads the device's time zone or clock.
 The bookings list orders 1,000 bookings, and finds those not yet over, within 50 milliseconds on a
 phone. ^bkg-list-nfr2
 
-- **Verification:** on a phone at least four years old,
+- **Verification:** on a phone,
     - order 1,000 bookings of every kind, and confirm it takes under 50 milliseconds
     - find the bookings not yet over among them, and confirm it takes under 50 milliseconds
 

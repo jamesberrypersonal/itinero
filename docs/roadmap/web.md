@@ -16,6 +16,28 @@ Each part of a system is named by its address, the system and the part's own nam
 
 ### Phase 1 — Build
 
+#### Milestone Web-1.5 — The calendar, and the screens an admin manages a trip on
+
+- The rest of `web/screens` is built, as its specification gives it: the calendar, one day to a row
+  on a phone and one week to a row on a computer, with each stretch drawn pencilled and resized by
+  dragging its ends, and stretches and firm items, travel among them, added from a day. An admin's
+  members screen lists the open invitations, invites an address and withdraws an invitation, and
+  opens each member, to set their access to the trip, the calendar and each branch of pages, make
+  them an admin, or remove them. A page is moved by dragging it in the tree.
+- A traveller who is not an admin is offered each change their own grant allows, on every screen.
+- Its test suite proves `WEB:SCREENS-F3`, `WEB:SCREENS-F6`, `ACC-F9` and `PLN-F13` by the
+  verification each carries, the check of `WEB:SCREENS-F8` that removing a traveller asks first,
+  and the checks of `WEB:SCREENS-F1` on the calendar and the screens an admin manages a trip on, in
+  Chromium, WebKit and Firefox, against the online side in Wrangler. Its unit tests prove the
+  calendar's order of firm items and bookings, and `WEB:SCREENS-NFR2`.
+- The same suite proves `ACC-F4` to `ACC-F8`, `ACC-F10`, `PLN-F2`, `PLN-F3`, `PLN-F4`, `PLN-F7`,
+  `PLN-F8`, `PLN-F9`, `PLN-F11`, `PLN-F15` and `WEB-F7` through the screens, by the verification
+  each carries, and `WEB-F6` but for its check on a phone in Chile. A link, a stretch or a firm
+  item naming a page in the graveyard says the page is deleted, and travel on the calendar shows
+  when it arrives.
+- `npm run fill-trip` makes a trip of 500 pages and 300 bookings on a running online side, for the
+  timing checks made by hand on a phone.
+
 #### Milestone Web-1.4 — The screens a traveller reads a trip on
 
 - The first screens of `web/screens` are built, as its specification gives them: signing in and
@@ -133,33 +155,22 @@ Each part of a system is named by its address, the system and the part's own nam
 
 **Waits on:** Milestone Access-1.4
 
-- Build the rest of `web/screens`: the calendar, an admin's management of the members and their
-  access, inviting a traveller, and reading and restoring a deleted page. An admin is a traveller
-  who may manage the trip.
-- Prove `WEB:SCREENS-F3` and `WEB:SCREENS-F6`, and the non-functional requirements of
-  `web/screens`, by the verification each carries.
 - Prove the web app's own requirements on a phone and on a computer. Prove there too the
   requirements of the planner, access and bookings systems that only a phone can prove.
-- Prove the checks of `web/shell` that need a phone: adding Itinero to the home screen of an Android
-  phone and of an iPhone, and the browser keeping Itinero's storage, for `WEB:SHELL-F3`, and opening
-  Itinero ten times, each within 300 milliseconds, on a phone at least four years old, for
-  `WEB:SHELL-NFR1`. Milestone Web-1.1 proved the rest of `web/shell` in three browser engines, and
-  moved these checks here, since they need a phone.
-- Prove `WEB:PLACES-NFR1` on a phone at least four years old, by the check of its verification.
-  Milestone Web-1.2 proved the rest of `web/places`, and moved this check here, since it needs a
+- Prove the checks of `web/shell` that need a phone: adding Itinero to the home screen of an
+  iPhone, and the browser keeping Itinero's storage, for `WEB:SHELL-F3`, and opening Itinero ten
+  times, each within 300 milliseconds, on a phone, for `WEB:SHELL-NFR1`. Milestone Web-1.1 proved
+  the rest of `web/shell` in three browser engines, and moved these checks here, since they need a
   phone.
-- Build moving a page by dragging it in the tree, asking first where the move lets more travellers
-  see the page, as `spec/web/screens.md` §4.6 gives, for `WEB:SCREENS-F6` and `ACC-F9`.
-- Prove the check of `WEB:SCREENS-F8` that removing a traveller asks first, and the checks of
-  `WEB:SCREENS-F1` on the calendar and the screens an admin manages a trip on. Milestone Web-1.4
-  proved the rest of both, and moved these checks here, since they need these screens.
+- Prove `WEB:PLACES-NFR1` on a phone, by the check of its verification. Milestone Web-1.2 proved
+  the rest of `web/places`, and moved this check here, since it needs a phone.
 - Prove `WEB:SCREENS-F9` with Google's own button, signing in on a phone and on a computer, and
-  `BKG:LIST-NFR2`, `BKG-NFR1` and `WEB:SCREENS-NFR1` on a phone at least four years old. Milestone
-  Web-1.4 proved the rest of them, and moved these checks here, since they need a phone and
-  Itinero's client identifier from Google.
-- Prove `WEB:STORE-NFR1` on a phone at least four years old, and `PLN:ITINERARY-NFR1`,
-  `PLN:PAGES-NFR1` and `ACC:PERMISSIONS-NFR1` on a phone with no connection, by the checks of their
-  verifications that need a phone. Milestone Web-1.3 proved the rest of them, and moved these checks
-  here, since they need a phone.
+  `BKG:LIST-NFR2`, `BKG-NFR1` and `WEB:SCREENS-NFR1` on a phone. Milestone Web-1.4 proved the rest
+  of them, and moved these checks here, since they need a phone and Itinero's client identifier
+  from Google.
+- Prove `WEB:STORE-NFR1` on a phone, and `PLN:ITINERARY-NFR1`, `PLN:PAGES-NFR1` and
+  `ACC:PERMISSIONS-NFR1` on a phone with no connection, by the checks of their verifications that
+  need a phone. Milestone Web-1.3 proved the rest of them, and moved these checks here, since they
+  need a phone.
 - Prove `SHR:TRIP-TIME-NFR1` on a phone, by the checks of its verification. Milestone Web-1.1
   proved it with no connection in three browser engines, and moved the check on a phone here.

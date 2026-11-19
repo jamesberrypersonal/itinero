@@ -52,10 +52,10 @@ shell says how to add it, and why. On every device, it asks the browser to keep 
 rather than clear it when space runs short. ^web-shell-f3
 
 - **Verification:**
-    - on an Android phone in Chrome, add Itinero to the home screen, and confirm it shows Itinero's
-      name and icon, and opens without the address bar
     - on an iPhone in Safari, confirm the shell says how to add Itinero, and why
-    - add it on the iPhone, open it from the home screen, and confirm the shell no longer says so
+    - add it to the iPhone's home screen, and confirm it shows Itinero's name and icon
+    - open it from the home screen, and confirm it opens without the address bar, and the shell no
+      longer says how to add it
     - in each browser of `WEB-NFR3`, confirm the browser reports Itinero's storage as kept
 
 > **What does this buy?** A trip's copy lasts however long the phone goes unopened (`WEB-F3`).
@@ -111,7 +111,7 @@ they start it. ^web-shell-f5
 ### WEB:SHELL-NFR1 — The shell's own work adds little to opening Itinero
 
 With every file already on the device, the shell has Itinero ready to show its first screen within
-300 milliseconds of opening, on a phone at least four years old. ^web-shell-nfr1
+300 milliseconds of opening, on a phone. ^web-shell-nfr1
 
 - **Verification:** on such a phone, with no connection,
     - open Itinero from the home screen ten times, and confirm the shell is ready within 300

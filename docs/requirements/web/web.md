@@ -31,9 +31,9 @@ On a phone, a traveller can add Itinero to the home screen, from where it opens 
 the browser's address bar. ^web-f1
 
 - **Verification:** on a running system,
-    - open Itinero on an iPhone in Safari, on an Android phone in Chrome, and on a computer, and
-      confirm each signs in and opens a trip
-    - on each phone, add Itinero to the home screen, open it from there, and confirm it opens
+    - open Itinero on an iPhone in Safari and on a computer, and confirm each signs in and opens a
+      trip
+    - on the iPhone, add Itinero to the home screen, open it from there, and confirm it opens
       without the address bar
     - on a phone held upright, open the home page, the calendar, the bookings page and a page of
       research, and confirm none needs scrolling sideways
@@ -202,8 +202,7 @@ choose the zone by hand. ^web-f9
 A trip holding 500 pages and 300 bookings opens on its home page within two seconds of tapping
 Itinero on a phone with no connection. ^web-nfr1
 
-- **Verification:** on a phone at least four years old, with no connection, and a trip holding
-  500 pages and 300 bookings,
+- **Verification:** on a phone, with no connection, and a trip holding 500 pages and 300 bookings,
     - open Itinero from the home screen, and confirm the trip's home page shows within two seconds
 
 > **What does this buy?** A traveller opens their trip at a desk or a gate, with people waiting
@@ -223,8 +222,8 @@ most 3 megabytes before any trip, compressed as it is sent. ^web-nfr2
 
 ### WEB-NFR3 — The web app works in the browsers travellers' devices have
 
-Every requirement of this document holds in the two newest versions of Safari on iPhone, Chrome on
-Android, and Chrome, Safari, Firefox and Edge on a computer. ^web-nfr3
+Every requirement of this document holds in the two newest versions of Safari on iPhone, and of
+Chrome, Safari, Firefox and Edge on a computer. ^web-nfr3
 
 - **Verification:**
     - run every verification of this document in each of those browsers, and confirm each passes

@@ -203,16 +203,17 @@ phone (`WEB:SCREENS-F3`). Each day shows:
   together by trip-time's `sort` on the firm item's `when` and the booking's `starts`. A booking
   shows on every date from its extent's `first` to its `last` (`PLN-F5`)
 
-A stretch or a firm item that names a page links to it, and the link shows not available where the
-pages' `state` is not `tree`, being in the graveyard or absent, or the page is hidden (`PLN-F11`). A
-traveller with edit access to the calendar drags a stretch's ends to resize it, or taps it to change
-its place or dates, and adds a stretch or a firm item from a day (`PLN-F1`, `PLN-F3`, `PLN-F4`). A
-firm item of travel asks how it goes, and for each end its place and its time, with the zone filled
-in as §4.5 gives. The calendar shows its duration, the itinerary's `travelDuration`, as trip-time's
-`formatDuration` writes it. A firm item's form sends a `change-firm` with the revision it was opened
-from. A `stale` refusal shows the item as it now stands, from `details.item`, beside the traveller's
-own, to start again from (`PLN:ITINERARY-F11`). A traveller with no calendar in their copy has no
-calendar in their bar, and its address opens the home page.
+A stretch or a firm item that names a page links to it. The link shows the page deleted where the
+copy's `graveyard` lists it, and not available where the page is otherwise not in the copy's tree,
+being hidden, absent, or deleted beneath another page (`PLN-F11`, `ACC-F8`). A
+traveller with edit access to the calendar drags a stretch's ends to resize it, or taps its pencil
+to change its place or dates, and adds a stretch or a firm item from a day (`PLN-F1`, `PLN-F3`,
+`PLN-F4`). A firm item of travel asks how it goes, and for each end its place and its time, with the
+zone filled in as §4.5 gives. The calendar shows when it leaves and arrives, and its duration, the
+itinerary's `travelDuration`, as trip-time's `formatDuration` writes it. A firm item's form sends a `change-firm` with the revision it
+was opened from. A `stale` refusal shows the item as it now stands, from `details.item`, beside the
+traveller's own, to start again from (`PLN:ITINERARY-F11`). A traveller with no calendar in their
+copy has no calendar in their bar, and its address opens the home page.
 
 ### 4.5 The bookings
 
@@ -261,9 +262,9 @@ settings for both as they are.
 
 micromark gives the page as HTML, and the screens then go through its links. Where the pages'
 `linkTarget` reads a page's identifier from a link's destination, the link is to a page of the
-trip. It opens that page where the page
-is in the copy's tree, and otherwise shows Page not available, without a title (`PLN-F9`,
-`ACC-F8`). Every other link opens in a new tab, with no referrer.
+trip. It opens that page where the page is in the copy's tree. It shows Page deleted where the
+copy's `graveyard` lists the page, which the traveller could see as it was deleted, and otherwise
+Page not available, without a title (`PLN-F9`, `ACC-F8`). Every other link opens in a new tab, with no referrer.
 
 A page is edited as its Markdown text, in a plain text box, with the formatted page beside it on a
 computer and a tab to switch on a phone. Saving sends a `write` with the revision the editor was
@@ -329,13 +330,15 @@ The screens' tests run in the suite of `apps/web/`, which `spec/web/shell.md` §
   default style, writing dates, finding a country, at positions inside, outside and near the border
   of each of a sample of countries, and the map's size.
 - **Browser tests**, with Playwright, run every verification of `requirements/web/screens.md` that
-  needs no real phone, at 360 pixels wide and at 1280, and watch every request for a position or a
-  country (`WEB-F6`). They run against the online side in Wrangler, with stand-ins for Google's
-  key set and for Resend, so a test signs travellers in with ID tokens of its own and accepts
-  invitations from the emails the stand-in keeps. Google's own button cannot be drawn in a test, so
-  a test gives the sign-in screen the token as the button would. The tests set the device's clock,
-  its position and its connection. They also deploy a new version whose online side refuses the
-version the device is running.
+  needs no real phone, at 360 pixels wide and at 1280. They also run those of the planner's, the
+  access system's and the web app's own requirements that the screens show and that need neither a
+  real phone nor Google itself. They watch every request for a position or a country (`WEB-F6`).
+  They run against the online side in Wrangler, with stand-ins for Google's key set and for Resend,
+  so a test signs travellers in with ID tokens of its own and accepts invitations from the emails
+  the stand-in keeps. Google's own button cannot be drawn in a test, so a test gives the sign-in
+  screen the token as the button would. The tests set the device's clock, its position and its
+  connection. They also deploy a new version whose online side refuses the version the device is
+  running.
 - **Safety tests** draw pages whose text holds HTML of every kind, and links to `javascript:` and
   `data:` addresses, and confirm none is drawn as HTML or kept as a link (`WEB:SCREENS-NR4`).
 - **Timing tests** draw the home page of a trip of 500 pages and 300 bookings, and fail above 500

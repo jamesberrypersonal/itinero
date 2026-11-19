@@ -4,6 +4,17 @@ What has been done, newest first. The live work list, `TODO.md`, numbers each pi
 owed, such as TODO-9. An entry that finishes one of those items names it, so a reader can find what
 became of its number. `documentation-system.md` sets the rules.
 
+## 2026-11-17 — TODO-18, a privacy policy is published
+
+*By:* James Berry, with Claude
+*Commits:* 8869b0c
+
+Itinero serves a privacy policy at `https://useitinero.ca/privacy`, a static page of the web app
+that needs no sign-in. It says what Itinero holds, where it is held, who sees it and how long it is
+kept, and gives `privacy@useitinero.ca` as its contact, which Cloudflare forwards. With it and the
+homepage, Itinero is published at Google, so any Google account can sign in, not only its test
+users.
+
 ## 2026-11-16 — TODO-17, trip-time reads back a stored window in any order
 
 *By:* James Berry, with Claude

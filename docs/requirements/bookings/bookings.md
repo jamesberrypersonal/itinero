@@ -166,8 +166,7 @@ bookings page, and each booking with all its details, read with no connection. ^
 The bookings page of a trip holding 300 bookings the traveller may see opens within one second, on
 a phone with no connection. ^bkg-nfr1
 
-- **Verification:** on a phone at least four years old, with no connection, and a trip holding 300
-  bookings of every kind,
+- **Verification:** on a phone, with no connection, and a trip holding 300 bookings of every kind,
     - open the bookings page, and confirm it shows its bookings within one second
 
 > **What does this buy?** A long trip with a group holds hundreds of bookings, and a traveller

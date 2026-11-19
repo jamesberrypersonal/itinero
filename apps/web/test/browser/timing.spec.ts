@@ -1,7 +1,6 @@
 // WEB:SHELL-NFR1 on the machine running the tests (docs/spec/web/shell.md §4.5): with every file
 // already on the device and no connection, the shell is ready within 300 milliseconds of opening,
-// each of ten times. The check on a phone at least four years old is made by hand before each
-// release.
+// each of ten times. The check on a phone is made by hand before each release.
 
 import { expect, test } from "@playwright/test";
 import { closeAll, setOnline, open, openReady } from "./helpers.ts";

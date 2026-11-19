@@ -147,7 +147,7 @@ accepted. ^web-store-f7
 ### WEB:STORE-NFR1 — A large trip is read from the device quickly
 
 The trip store gives a trip holding 500 pages and 300 bookings from the device's storage within one
-second, on a phone at least four years old. ^web-store-nfr1
+second, on a phone. ^web-store-nfr1
 
 - **Verification:** on such a phone, with no connection,
     - open the trip ten times, and confirm it is given within one second each time
