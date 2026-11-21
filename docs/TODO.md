@@ -3,7 +3,7 @@
 What needs active work, and what waits on a decision. `documentation-system.md` gives the list's
 rules. When an item is done, it leaves this list for `CHANGELOG.md` in the commit that finishes it.
 
-*Next free:* TODO-39
+*Next free:* TODO-41
 
 ## Tags
 
@@ -496,5 +496,40 @@ and each page, though an admin sees and changes the whole trip whatever is set.
 seemed to do nothing.
 
 *Proposal:* Show an admin's access as edit throughout, with nothing to change, and say why.
+
+*Releases:* Nothing is planned for it yet.
+
+### TODO-39 — Start a trip's checklists from templates
+
+*Tags:* planner, planner/pages
+*Written:* 2026-11-21
+
+*Problem:* A traveller who keeps the same checklist for every trip, such as checking a passport's
+validity and making copies of documents before leaving, writes it out again for each new trip.
+
+*Reason:* A page can hold a checklist, but every page belongs to one trip, so nothing outlives a
+trip to start the next one's from (`PLN-NR4`).
+
+*Proposal:* Decide whether a template is a page that belongs to no trip, and whether each traveller
+ticks their own copy of a checklist or the trip shares one. Then add the requirements to the
+planner.
+
+*Releases:* Nothing is planned for it yet.
+
+### TODO-40 — Print a sheet of a trip's details for when a phone is lost
+
+*Tags:* web/screens, bookings, planner
+*Written:* 2026-11-21
+
+*Problem:* A traveller whose phone is lost, stolen or flat has no copy of their trip's dates,
+stays, flight numbers and booking references, or of the numbers to call for help.
+
+*Reason:* Reading a trip with no connection covers a phone that is offline, not one that is gone,
+and nothing in the web app is laid out for paper. Each detail sits on its own screen: the calendar,
+the bookings page or a page of research.
+
+*Proposal:* Decide what the sheet holds for each traveller, from what that traveller may see,
+including whether it takes the trip's country pages whole. Then add the requirements to the web
+app's screens.
 
 *Releases:* Nothing is planned for it yet.
