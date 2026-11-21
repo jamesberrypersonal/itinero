@@ -363,6 +363,35 @@ describe("WEB:STORE-F5 — signing out deletes every trip first, and a session t
   });
 });
 
+describe("the trip last opened, which Itinero opens with (spec §4.5)", () => {
+  test("given while the device holds it, and forgotten on removal and on signing out", async () => {
+    const samPhone = phone("sam");
+    const ana = await window(phone("ana"), "ana");
+    const sam = await window(samPhone, "sam");
+    const trip = await patagonia(ana, sam);
+    const lisbon = ok(await ana.create("Lisbon", { first: "2027-03-01", last: "2027-03-05" }, ["PT"])).trip;
+    const invitation = ok(await ana.invite(lisbon, "sam@example.com", "edit", "view"));
+    ok(await sam.accept(invitation.id, online.tokenOf(lisbon, invitation.id)));
+    assert.deepEqual(await sam.open(), { account: "sam" }, "no trip opened yet");
+
+    await sam.opened(trip);
+    await sam.opened(lisbon);
+    offline(samPhone);
+    assert.deepEqual(await (await window(samPhone)).open(), { account: "sam", last: lisbon }, "the later one, offline, in a new window");
+
+    await connect(samPhone);
+    ok(await ana.remove(lisbon, "sam"));
+    await sam.catchUpAll();
+    assert.deepEqual(await sam.open(), { account: "sam" }, "a trip no longer held is not given");
+
+    await sam.opened(trip);
+    await sam.signOut();
+    assert.deepEqual((await everything(samPhone.idb))["account"], [{ key: "me", signOutOwed: false }]);
+    await sam.opened(trip);
+    assert.deepEqual((await everything(samPhone.idb))["account"], [{ key: "me", signOutOwed: false }], "nothing is recorded signed out");
+  });
+});
+
 describe("WEB:STORE-F6 — every window on a device shares one copy, and each is told when it changes", () => {
   test("two windows of Itinero open on one computer", async () => {
     const anaPhone = phone("ana");

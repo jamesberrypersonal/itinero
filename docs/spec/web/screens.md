@@ -49,7 +49,7 @@ Each screen has an address in the web app, so a traveller can return to it, and 
 | Address | Screen |
 |---|---|
 | `/sign-in` | Signing in with Google (§4.1) |
-| `/` | The list of trips, and a new trip (§4.2) |
+| `/` | The list of trips, and a new trip. Opening Itinero there opens the trip last opened (§4.2) |
 | `/trips/{trip}` | The trip's home page (§4.3) |
 | `/trips/{trip}/calendar` | The calendar, for a traveller granted it (§4.4) |
 | `/trips/{trip}/bookings` and `/trips/{trip}/bookings/{booking}` | The bookings page, and one booking (§4.5) |
@@ -147,6 +147,12 @@ screen.
 ### 4.2 The list of trips
 
 *Invoked from:* `/`, and from signing in.
+
+Itinero opened at `/`, as the home screen's icon opens it, opens the home page of the trip the trip
+store's `open` gives as `last` in its place, replacing the address in the browser's history, and
+draws no list first. With no `last`, the list shows. Every screen of a trip calls the trip store's
+`opened` once it holds the trip's copy. The list's links within Itinero, such as All trips in a
+trip's menu, still open the list (`WEB-NFR1`).
 
 The list shows each trip of the trip store's `trips`, with its name and dates, newest first. While
 `web/shell`'s `suggestInstall` is true, it shows the notice that says how to add Itinero to the home
@@ -427,7 +433,7 @@ and the packages of the trip's parts, which `spec/web/shell.md` §5 lists.
 | [WEB-F6](../../requirements/web/web.md#^web-f6) | Finding the country on the phone, and never storing or sending it (§4.3, §5.1). |
 | [WEB-F7](../../requirements/web/web.md#^web-f7) | The style of §4.8. |
 | [WEB-F9](../../requirements/web/web.md#^web-f9) | Filling each zone in from `web/places`, and letting the traveller choose another (§4.5). |
-| [WEB-NFR1](../../requirements/web/web.md#^web-nfr1) | Drawing the home page within 500 milliseconds (§6). Opening and reading the copy are `web/shell` and `web/trip-store`. |
+| [WEB-NFR1](../../requirements/web/web.md#^web-nfr1) | Opening at the trip last opened (§4.2), and drawing the home page within 500 milliseconds (§6). Opening and reading the copy are `web/shell` and `web/trip-store`. |
 | [WEB-NFR2](../../requirements/web/web.md#^web-nfr2) | The map of §5.1, at most 500 kilobytes. The rest of the download is `web/shell`. |
 | [WEB-NFR3](../../requirements/web/web.md#^web-nfr3) | The browser tests of §4.9, in the three engines `spec/web/shell.md` §4.5 names. |
 | [PLN-F1](../../requirements/planner/planner.md#^pln-f1) | Stretches shown pencilled, and moved and resized (§4.4). |

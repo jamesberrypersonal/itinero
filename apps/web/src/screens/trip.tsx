@@ -64,6 +64,11 @@ export function TripFrame({ id, children }: { id: string; children: (copy: Copy)
       }),
     [id],
   );
+  const held = copy !== undefined && copy !== null;
+  // The trip opened is the one Itinero opens with next time (§4.2).
+  useEffect(() => {
+    if (held) void store.opened(id);
+  }, [id, held]);
   if (copy === undefined) return <main class="screen" aria-busy="true" />;
   if (copy === null) {
     return (

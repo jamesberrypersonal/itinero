@@ -612,7 +612,12 @@ test("WEB:SCREENS-F1, WEB:SHELL-F1 — every screen fits a phone, and offline ea
   await send(ana.page, trip, "bookings", bookingChange({ op: "add", booking: booking({ id: "tour", travellers: [ana.account], details: { reference: "AVERYLONGREFERENCE1234567890" }, kind: "activity", sort: "tour", title: "Torres del Paine full day, with lunch, and a boat across Lago Grey", starts: exact(PUNTA_ARENAS, "2026-12-09", "07:30") }) }));
   await send(ana.page, trip, "pages", pageChange({ op: "write", id: "country-cl", base: 1, text: "| A very wide table | with | many | columns | to | scroll | across |\n|---|---|---|---|---|---|---|\n| 1 | 2 | 3 | 4 | 5 | 6 | 7 |\n\nhttps://example.com/a/very/long/address/that/goes/on/and/on/and/on" }));
   await send(ana.page, trip, "calendar", calendarChange({ op: "pencil", stretch: { id: "chile", place: { country: "CL", name: "A place with a very long name indeed, to wrap" }, first: "2026-12-01", last: "2026-12-10" } }));
-  const all = [...TRIP_SCREENS(trip, ana.account), ["/", "trips"], ["/trips/new", "new-trip"], ["/settings", "settings"], [`/trips/${trip}/bookings/new`, "booking-kind"], [`/trips/${trip}/pages/country-cl/edit`, "page-editor"]] as [string, string][];
+  // Opened at `/`, Itinero opens the trip last opened, so the list of trips is reached by its link.
+  await screen(ana.page, "/trips/new", "new-trip");
+  await ana.page.locator('a[href="/"]').first().click();
+  await expect(ana.page.locator('[data-screen="trips"]')).toBeVisible();
+  await noSidewaysScroll(ana.page);
+  const all = [...TRIP_SCREENS(trip, ana.account), ["/trips/new", "new-trip"], ["/settings", "settings"], [`/trips/${trip}/bookings/new`, "booking-kind"], [`/trips/${trip}/pages/country-cl/edit`, "page-editor"]] as [string, string][];
   for (const [path, name] of all) {
     await screen(ana.page, path, name);
     await noSidewaysScroll(ana.page);
@@ -630,6 +635,32 @@ test("WEB:SCREENS-F1, WEB:SHELL-F1 — every screen fits a phone, and offline ea
     await expect(page.locator('button[type="submit"]:enabled')).toHaveCount(0);
     await expect(page.getByText("Change dates")).toHaveCount(0);
   }
+  await ana.context.close();
+});
+
+test("WEB-NFR1 — Itinero opens at the trip last opened, also with no connection, and its link opens the list of trips", async ({ browser }) => {
+  const ana = await traveller(browser, "Ana", "phone");
+  const patagonia = await createTrip(ana.page, "Patagonia", "2026-12-01", "2026-12-20", ["CL"]);
+  const lisbon = await createTrip(ana.page, "Lisbon", "2027-03-01", "2027-03-05", ["PT"]);
+  await screen(ana.page, "/", "trips");
+  await screen(ana.page, `/trips/${patagonia}`, "home");
+  await screen(ana.page, `/trips/${lisbon}/bookings`, "bookings");
+  await ana.page.waitForFunction(
+    async (trip) => (await (window as unknown as { itineroStore: { open(): Promise<{ last?: string }> } }).itineroStore.open()).last === trip,
+    lisbon,
+  );
+
+  await ana.context.setOffline(true);
+  await ana.page.close();
+  const page = await ana.context.newPage();
+  await screen(page, "/", "home");
+  expect(new URL(page.url()).pathname).toBe(`/trips/${lisbon}`);
+  await expect(page.locator("h1")).toContainText("Lisbon");
+  expect(await page.evaluate(() => performance.getEntriesByName("itinero-home-drawn").length)).toBe(1);
+
+  await page.locator('[data-action="trip-menu"]').click();
+  await page.getByRole("menuitem", { name: "All trips" }).click();
+  await expect(page.locator('[data-screen="trips"]')).toBeVisible();
   await ana.context.close();
 });
 

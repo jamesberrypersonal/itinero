@@ -67,4 +67,5 @@ export type TripRecord = {
 };
 
 export type TextRecord = { trip: string; id: string; text: string; changed: number };
-export type AccountRecord = { key: "me"; account?: string; signOutOwed: boolean };
+/** `last`: the trip this account last opened on the device (§4.5). */
+export type AccountRecord = { key: "me"; account?: string; signOutOwed: boolean; last?: string };

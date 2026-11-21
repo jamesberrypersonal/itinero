@@ -76,7 +76,8 @@ type Copy = {
 type Summary = { id: string; name: string; dates: Dates; caughtUp: number };
 type Target = "calendar" | "pages" | "grants" | "bookings";
 
-function open(): Promise<{ account?: string }>;   // undefined: signed out
+function open(): Promise<{ account?: string; last?: string }>;   // undefined: signed out
+function opened(id: string): Promise<void>;
 function trips(): Promise<readonly Summary[]>;
 function trip(id: string): Promise<Copy | undefined>;
 function watch(id: string, listener: (copy: Copy | undefined) => void): () => void;
@@ -101,7 +102,8 @@ function buried(id: string, page: string): Promise<Result<Page>>;
 ```
 
 `open` opens the device's database as the web app starts, and gives the account signed in on the
-device, or none (§4.5). `agreed` is the number of travellers the traveller agreed would come to see
+device, or none, and the trip that account last opened on the device, while the device holds it.
+`opened` records that trip (§4.5). `agreed` is the number of travellers the traveller agreed would come to see
 a moved page, as `planner/trip-host` takes it. `token` is the one the invitation's email carries in
 its link. A page's or a booking's `changed` is the trip's sequence at its last change.
 
@@ -167,7 +169,7 @@ stores:
 
 | Object store | Key | Holds |
 |---|---|---|
-| `account` | `"me"` | The account signed in, and `signOutOwed` where the session is still to be ended (§4.5) |
+| `account` | `"me"` | The account signed in, the trip it last opened as `last`, and `signOutOwed` where the session is still to be ended (§4.5) |
 | `trips` | The trip's identifier | The trip's name, its dates, the traveller's own, `you`, the calendar in the itinerary's text form or `null`, the graveyard's titles, the members, `sequence` and `caughtUp`. For an admin, also the trip's grants in the permissions' text form, and the open invitations |
 | `pages` | The trip's identifier and the page's | The page in the pages' text form, and its `changed` |
 | `bookings` | The trip's identifier and the booking's | The booking in the bookings' text form, and its `changed` |
@@ -240,6 +242,11 @@ event, until a request is next answered.
 
 *Porcelain:* `signedIn(account)` records the account once `access/accounts` has signed the traveller
 in, and catches every trip up.
+
+`opened(id)` records `id` as `last` in the `account` record, where an account is signed in and no
+sign-out is owed. `open` gives `last` only while the `trips` object store holds that trip, so a trip
+deleted since, such as by the traveller's removal, is not given. Signing in again, signing out and a
+session ended each write the `account` record afresh, without `last`.
 
 `signOut()` (`WEB:STORE-F5`):
 
@@ -356,7 +363,7 @@ and seats. It is protected by the device's own lock, and deleted on sign-out (AD
 | [WEB-F3](../../requirements/web/web.md#^web-f3) | A copy that stays until sign-out (§4.5). Keeping the browser from clearing it is `web/shell`. |
 | [WEB-F4](../../requirements/web/web.md#^web-f4) | Catching up on connecting, and the socket of an open trip (§4.2, §4.3). |
 | [WEB-F5](../../requirements/web/web.md#^web-f5) | Deleting every trip on sign-out and when a session has ended (§4.5). The notice on a computer is `web/screens`. |
-| [WEB-NFR1](../../requirements/web/web.md#^web-nfr1) | Reading a large trip within one second (§6). Showing it is `web/screens`. |
+| [WEB-NFR1](../../requirements/web/web.md#^web-nfr1) | Reading a large trip within one second (§6), and giving the trip last opened (§4.5). Showing it is `web/screens`. |
 | [BKG-F6](../../requirements/bookings/bookings.md#^bkg-f6) | Keeping every booking the traveller may see, whole, on the device (§4.1, §4.2). |
 | [PLN-F6](../../requirements/planner/planner.md#^pln-f6) | Taking each change while a trip is open (§4.3). Showing it is `web/screens`. |
 | [PLN:ITINERARY-NFR1](../../requirements/planner/itinerary.md#^pln-itinerary-nfr1) | Keeping a trip's calendar on the phone (§4.1). |
