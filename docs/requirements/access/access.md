@@ -57,8 +57,10 @@ and which of them are admins. ^acc-f2
 - **Verification:** on a running system,
     - create a trip, and confirm its creator is its admin
     - as the creator, make a second traveller an admin, and confirm the second can edit every page
-    - as the second admin, try to remove the creator, and to take away their admin role, and confirm
-      each is refused, with the reason
+    - as the second admin, confirm no screen offers to remove the creator, or to take away their
+      admin role
+    - as the second admin, ask the online side to remove the creator, and to take away their admin
+      role, and confirm each is refused, with the reason
     - as a traveller who is not an admin, confirm they see every traveller on the trip, with the two
       admins marked
 
@@ -229,7 +231,8 @@ connects. ^acc-f11
     - with the phone offline, remove the traveller, and confirm they can no longer open the trip on
       a computer
     - connect the phone, and confirm the trip is no longer on it
-    - try to remove the creator, and confirm it is refused, with the reason
+    - confirm no screen offers to remove the creator, then ask the online side to remove them, and
+      confirm it is refused, with the reason
 
 > **What does this buy?** An admin takes back a trip from someone who should no longer have it,
 > such as a companion who dropped out.

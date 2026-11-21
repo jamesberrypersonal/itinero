@@ -201,8 +201,7 @@ describes.
 - **Size tests** fail where the airports exceed 200 kilobytes, or any country 600 kilobytes,
   compressed with gzip (`WEB:PLACES-NFR2`).
 - **Timing tests** type `Springfield` against the towns of the United States, and fail where an
-  answer takes over 50 milliseconds on the machine running them. The check on a phone of
-  `WEB:PLACES-NFR1` is made by hand before each release.
+  answer takes over 50 milliseconds on the machine running them (`WEB:PLACES-NFR1`).
 
 ## 5. Resources
 

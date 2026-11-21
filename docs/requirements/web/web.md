@@ -68,15 +68,16 @@ is offline, and when that was. While offline, the web app shows no way to change
 
 A trip's copy stays on a device for as long as its traveller is signed in there, however long the
 device goes without opening the trip or connecting. On a phone, this holds once Itinero is added to
-the home screen, and the web app tells a traveller on a phone how to add it until they have. ^web-f3
+the home screen, and the web app tells a traveller on a phone how to add it until they have. On a
+computer, the browser may still clear a copy left long unopened, until TODO-37 is done. ^web-f3
 
 - **Verification:** on the trip of `WEB-F2`,
-    - on an iPhone with Itinero added to the home screen, leave the app unopened and the phone
-      offline for 14 days, then open it, and confirm the trip opens
+    - in the trip store's test suite, confirm a trip's copy is deleted only when its traveller signs
+      out, their session ends, or they are removed from the trip
+    - on an iPhone with Itinero added to the home screen, confirm the browser reports Itinero's
+      storage as kept
     - on an iPhone using Itinero in Safari alone, confirm the web app says how to add it to the home
       screen, and why
-    - on a computer, leave Itinero unopened for 14 days, then open it with no connection, and
-      confirm the trip opens
 
 > **What does this buy?** A traveller on a long trek, or a long stretch with no signal, keeps their
 > trip however long they are offline (ADR-0017, a trip's copy on a device is protected by the
@@ -125,8 +126,8 @@ phone's location, or the country worked out from it. A traveller who does not le
 location sees no country, and the rest of the home page as usual. ^web-f6
 
 - **Verification:** on the trip of `WEB-F2`, which holds a page made for Chile,
-    - with the phone offline in Chile, open the home page, and confirm it links to the page for
-      Chile
+    - with the phone offline, and its location set to Santiago in a browser test, open the home
+      page, and confirm it links to the page for Chile
     - with the phone online, watch every request it sends while the home page is open, and confirm
       none holds the location or the country
     - refuse the location, and confirm the home page shows the traveller's day and bookings, and no
@@ -193,6 +194,10 @@ choose the zone by hand. ^web-f9
 > on every phone. Each trip needs only a few countries, and every airport is held, since a flight
 > often leaves from outside them.
 
+> **Can a traveller enter a place with no connection today?** No, until TODO-4 is done. No screen
+> offers a change with no connection (`WEB-F2`), so a place is entered only online, and the checks
+> above wait until a trip can be changed offline.
+
 ---
 
 ## Non-functional requirements
@@ -226,7 +231,8 @@ Every requirement of this document holds in the two newest versions of Safari on
 Chrome, Safari, Firefox and Edge on a computer. ^web-nfr3
 
 - **Verification:**
-    - run every verification of this document in each of those browsers, and confirm each passes
+    - run every verification of this document in each of those browsers, in the version the
+      device making the check has, and confirm each passes
 
 > **What does this buy?** A companion joins a trip on whatever phone or computer they already have.
 

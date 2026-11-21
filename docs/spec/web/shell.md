@@ -111,7 +111,8 @@ The shell drives four parts of the browser:
   added to the home screen.
 - **The Storage API's `navigator.storage.persist()`** asks the browser to keep a site's stored data
   rather than clear it when space runs short. Safari on an iPhone clears a site's stored data after
-  some days unused, unless the site was opened from the home screen.
+  some days unused, unless the site was opened from the home screen. On a computer, Chrome and
+  Safari decide for themselves, and answered no for Itinero in Milestone Web-1.5's checks.
 
 The MDN Web Docs on service workers, Cache Storage, web app manifests and the Storage API give the
 detail.

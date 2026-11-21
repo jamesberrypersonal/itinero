@@ -57,7 +57,9 @@ rather than clear it when space runs short. ^web-shell-f3
     - add it to the iPhone's home screen, and confirm it shows Itinero's name and icon
     - open it from the home screen, and confirm it opens without the address bar, and the shell no
       longer says how to add it
-    - in each browser of `WEB-NFR3`, confirm the browser reports Itinero's storage as kept
+    - on the iPhone, confirm the browser reports Itinero's storage as kept
+    - in each browser of `WEB-NFR3` on a computer, confirm Itinero asks the browser to keep its
+      storage
 
 > **What does this buy?** A trip's copy lasts however long the phone goes unopened (`WEB-F3`).
 

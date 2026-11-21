@@ -37,6 +37,19 @@ Each part of a system is named by its address, the system and the part's own nam
   when it arrives.
 - `npm run fill-trip` makes a trip of 500 pages and 300 bookings on a running online side, for the
   timing checks made by hand on a phone.
+- From 2026-11-18 to 2026-11-21, checks made by hand on an iPhone and on a computer, against the
+  deploy at useitinero.ca, proved `WEB-F1` to `WEB-F5`, `WEB-NFR1`, `WEB-NFR3`, `WEB:SHELL-F3`,
+  `WEB:SHELL-NFR1`, `WEB:STORE-NFR1`, `WEB:SCREENS-F9` and `WEB:SCREENS-NFR1`, by the verification
+  each carries. Everything the web app downloads before a trip is fetched is 974.5 kilobytes as sent
+  (`WEB-NFR2`).
+- The same checks proved `ACC-F1`, `ACC-F2`, `ACC-F11` to `ACC-F13`, `ACC-NFR1`, `BKG-NFR1` and
+  `PLN-F12` on the iPhone and the computer, and `PLN:ITINERARY-NFR1`, `PLN:PAGES-NFR1`,
+  `ACC:PERMISSIONS-NFR1` and `SHR:TRIP-TIME-NFR1` on the iPhone with no connection. They proved the
+  checks of `ACC-F3` that an invitation with view access gives view access, and that a withdrawn
+  invitation cannot be accepted, and the check of `WEB-F8` on a device opened for the first time.
+- The online side's suite proves the check of `ACC-F3` that an invitation expires after 14 days.
+  The suites' runs on the computer prove `BKG:LIST-NFR2` and `WEB:PLACES-NFR1`, and the browser
+  test that places the phone in Chile proves `WEB-F6`.
 
 #### Milestone Web-1.4 — The screens a traveller reads a trip on
 
@@ -155,22 +168,7 @@ Each part of a system is named by its address, the system and the part's own nam
 
 **Waits on:** Milestone Access-1.4
 
-- Prove the web app's own requirements on a phone and on a computer. Prove there too the
-  requirements of the planner, access and bookings systems that only a phone can prove.
-- Prove the checks of `web/shell` that need a phone: adding Itinero to the home screen of an
-  iPhone, and the browser keeping Itinero's storage, for `WEB:SHELL-F3`, and opening Itinero ten
-  times, each within 300 milliseconds, on a phone, for `WEB:SHELL-NFR1`. Milestone Web-1.1 proved
-  the rest of `web/shell` in three browser engines, and moved these checks here, since they need a
-  phone.
-- Prove `WEB:PLACES-NFR1` on a phone, by the check of its verification. Milestone Web-1.2 proved
-  the rest of `web/places`, and moved this check here, since it needs a phone.
-- Prove `WEB:SCREENS-F9` with Google's own button, signing in on a phone and on a computer, and
-  `BKG:LIST-NFR2`, `BKG-NFR1` and `WEB:SCREENS-NFR1` on a phone. Milestone Web-1.4 proved the rest
-  of them, and moved these checks here, since they need a phone and Itinero's client identifier
-  from Google.
-- Prove `WEB:STORE-NFR1` on a phone, and `PLN:ITINERARY-NFR1`, `PLN:PAGES-NFR1` and
-  `ACC:PERMISSIONS-NFR1` on a phone with no connection, by the checks of their verifications that
-  need a phone. Milestone Web-1.3 proved the rest of them, and moved these checks here, since they
-  need a phone.
-- Prove `SHR:TRIP-TIME-NFR1` on a phone, by the checks of its verification. Milestone Web-1.1
-  proved it with no connection in three browser engines, and moved the check on a phone here.
+- Prove the check of `ACC-F3` that an invitation opened by an account holding another address
+  cannot be accepted, and says which address it was sent to, on the iPhone.
+- Prove the checks of `WEB-F8` and `SHR:TRIP-TIME-NFR1` that a device takes newer time-zone rules,
+  online and then offline, with the deploy that carries the next IANA release.
