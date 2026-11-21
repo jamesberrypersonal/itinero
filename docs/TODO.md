@@ -3,7 +3,7 @@
 What needs active work, and what waits on a decision. `documentation-system.md` gives the list's
 rules. When an item is done, it leaves this list for `CHANGELOG.md` in the commit that finishes it.
 
-*Next free:* TODO-37
+*Next free:* TODO-39
 
 ## Tags
 
@@ -461,5 +461,40 @@ on 2026-11-19 left this unchecked.
 
 *Proposal:* Review these routes for cost, and decide on limits such as trips per account, with
 Cloudflare's rate limiting where the Worker cannot count.
+
+*Releases:* Nothing is planned for it yet.
+
+### TODO-37 — Keep a trip's copy on a computer however long it goes unopened
+
+*Tags:* web/shell, web/trip-store
+*Written:* 2026-11-21
+
+*Problem:* On a computer, the browser may clear a trip's copy left long unopened, so `WEB-F3` holds
+only on a phone.
+
+*Reason:* Itinero asks every browser to keep what it stores (`WEB:SHELL-F3`). In Milestone
+Web-1.5's checks, on 2026-11-21, the iPhone kept it, but Chrome and Safari on a computer answered
+no. Each decides for itself, by how much a site is used, or whether it is installed. Safari can also
+clear a site's storage after some days of use in which the site is not opened.
+
+*Proposal:* Find what makes Chrome, Safari, Firefox and Edge on a computer keep Itinero's storage,
+such as installing it, and decide whether the web app suggests it on a computer as it does on an
+iPhone. If nothing will, say on a computer that a trip's copy may be cleared.
+
+*Releases:* Nothing is planned for it yet.
+
+### TODO-38 — Offer no access to change for an admin
+
+*Tags:* web/screens
+*Written:* 2026-11-21
+
+*Problem:* An admin's member screen offers to change the admin's access to the trip, the calendar
+and each page, though an admin sees and changes the whole trip whatever is set.
+
+*Reason:* The member screen shows every member's grant in the same way (`spec/web/screens.md`
+§4.7). In Milestone Web-1.5's checks, on 2026-11-21, changing the creator's access to the trip
+seemed to do nothing.
+
+*Proposal:* Show an admin's access as edit throughout, with nothing to change, and say why.
 
 *Releases:* Nothing is planned for it yet.

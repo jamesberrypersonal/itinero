@@ -63,7 +63,7 @@ Itinero publishes a newer list. Online, a traveller can also fetch the towns of 
 The places component gives the matching towns within 50 milliseconds of each letter typed, on a
 phone holding the towns of the United States. ^web-places-nfr1
 
-- **Verification:** on such a phone, holding the towns of the United States,
+- **Verification:** on the computer running the test suite, holding the towns of the United States,
     - type `Springfield` one letter at a time, and confirm each answer is given within 50
       milliseconds
 

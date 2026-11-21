@@ -279,8 +279,7 @@ a check that needs a booking of some kind is in the test file of the kind it use
   environment variable set to `Europe/London` and one with it set to `Asia/Tokyo`, and confirm
   every result is the same (`BKG:LIST-NFR1`).
 - **Speed tests** order 1,000 bookings of every kind, and find those not yet over, and fail where
-  either takes over 50 milliseconds in Node.js on the machine running them. They run on a phone of
-  `BKG:LIST-NFR2` before each release (`BKG:LIST-NFR2`).
+  either takes over 50 milliseconds in Node.js on the machine running them (`BKG:LIST-NFR2`).
 - **Source tests** confirm that no module of the package uses `Date`, Intl, Temporal, any network
   call, any Node module, any function whose result depends on the device's language, such as
   `localeCompare`, or any package but `@itinero/trip-time` (§4, §6).
