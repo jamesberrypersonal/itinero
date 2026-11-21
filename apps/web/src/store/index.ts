@@ -33,6 +33,7 @@ setInterval(() => {
 
 export const {
   open,
+  opened,
   trips,
   trip,
   watch,

@@ -40,6 +40,11 @@ shell.start().then(
     void state;
     // The trip store opens once the rules are loaded, and the places follow the trips it holds.
     void store.open().then((opened) => {
+      // Opened at the list of trips, Itinero opens the trip last opened instead
+      // (docs/spec/web/screens.md §4.2).
+      if (opened.last !== undefined && location.pathname === "/" && location.search === "" && location.hash === "") {
+        history.replaceState(null, "", `/trips/${encodeURIComponent(opened.last)}`);
+      }
       render(<App initialAccount={opened.account} />, root);
       places.startPlaces(store);
     });

@@ -15,6 +15,7 @@ import {
   deleteTrip,
   heldIds,
   openDatabase,
+  holds,
   readAccount,
   readTrip,
   writeAccount,
@@ -466,7 +467,7 @@ export function createStore(deps: StoreDeps) {
 
   // --- Signing in and out (§4.5) ---
 
-  async function open(): Promise<{ account?: string }> {
+  async function open(): Promise<{ account?: string; last?: string }> {
     const base = await database();
     const record = await readAccount(base);
     if (record?.signOutOwed || !record?.account) {
@@ -474,7 +475,17 @@ export function createStore(deps: StoreDeps) {
       return {};
     }
     if (online) void catchUpAll();
+    // The trip last opened is given only while the device still holds it (§4.5).
+    if (record.last !== undefined && (await holds(base, record.last))) return { account: record.account, last: record.last };
     return { account: record.account };
+  }
+
+  /** Records the trip a traveller has opened, for `open` to give the next time Itinero opens (§4.5). */
+  async function opened(id: string): Promise<void> {
+    const base = await database();
+    const record = await readAccount(base);
+    if (!record?.account || record.signOutOwed || record.last === id) return;
+    await writeAccount(base, { ...record, last: id });
   }
 
   async function signedIn(account: string): Promise<void> {
@@ -537,6 +548,7 @@ export function createStore(deps: StoreDeps) {
 
   return {
     open,
+    opened,
     trips,
     trip,
     watch,

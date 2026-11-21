@@ -82,6 +82,11 @@ export async function writeAccount(db: IDBDatabase, record: AccountRecord): Prom
   await committed(transaction);
 }
 
+/** Whether the device holds a trip. */
+export async function holds(db: IDBDatabase, id: string): Promise<boolean> {
+  return (await done(db.transaction("trips", "readonly").objectStore("trips").getKey(id))) !== undefined;
+}
+
 export async function allTrips(db: IDBDatabase): Promise<TripRecord[]> {
   return done(db.transaction("trips", "readonly").objectStore("trips").getAll() as IDBRequest<TripRecord[]>);
 }
