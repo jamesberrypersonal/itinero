@@ -52,13 +52,28 @@ import {
   touches,
   type Booking,
 } from "@itinero/bookings";
+import {
+  apply as applyToChecklist,
+  changeFromText as checklistChangeFromText,
+  checklistFromText,
+  checklistToText,
+  copyChecklist,
+  newChecklist,
+  ordered,
+  type Checklist,
+} from "@itinero/checklists";
 
 export type Refusal = { code: string; message: string; details?: Record<string, string> };
 export type Result<T> = { ok: true; value: T } | { ok: false; refusal: Refusal };
 
 /** A member of the trip, as the Worker gives it from access/membership (§3.3). */
 export type Member = Who & { creator: boolean };
-export type Target = "calendar" | "pages" | "grants" | "bookings";
+export type Target = "calendar" | "pages" | "grants" | "bookings" | "checklists";
+/** How a new checklist starts: empty with a title, or copied from a checklist's text form (§4.8). */
+export type Start = { title: string } | { from: string };
+
+/** A traveller holds at most this many checklists on one trip (PLN:HOST-F10). */
+export const MAX_CHECKLISTS = 50;
 
 /** What a catch-up gives a device (§4.4). */
 export type Sync = {
@@ -70,6 +85,7 @@ export type Sync = {
   pages: { id: string; changed: number; text?: string }[];
   graveyard: { id: string; title: string; went: number }[];
   bookings: { id: string; changed: number; text?: string }[];
+  checklists: { id: string; changed: number; text?: string }[];
 };
 
 /** A value SQLite stores. */
@@ -96,7 +112,13 @@ const SCHEMA = [
   `CREATE TABLE IF NOT EXISTS bookings (id TEXT PRIMARY KEY, text TEXT NOT NULL,
      travellers TEXT NOT NULL, changed INTEGER NOT NULL)`,
   `CREATE TABLE IF NOT EXISTS creator (one INTEGER PRIMARY KEY CHECK (one = 1), account TEXT NOT NULL)`,
+  // §4.8 Each traveller's checklists, keyed by their owner, so a catch-up reads only its traveller's.
+  `CREATE TABLE IF NOT EXISTS checklists (owner TEXT NOT NULL, id TEXT NOT NULL, ord TEXT NOT NULL,
+     text TEXT NOT NULL, changed INTEGER NOT NULL, PRIMARY KEY (owner, id))`,
 ];
+
+const unknownChecklist = (): Refused =>
+  new Refused({ code: "unknown-checklist", message: "You hold no such checklist on this trip." });
 
 const accept = <T>(value: T): Result<T> => ({ ok: true, value });
 
@@ -291,6 +313,8 @@ export class TripCore {
           return this.changeGrants(who, grants, text);
         case "bookings":
           return this.changeBookings(who, grants, text);
+        case "checklists":
+          return this.changeChecklists(who, text);
         default:
           throw new Refused({ code: "malformed", message: `${String(target)} is not a part of a trip.` });
       }
@@ -395,6 +419,74 @@ export class TripCore {
     return { sequence };
   }
 
+  // --- §4.8 Checklists ---
+  // The trip host checks every request about a checklist itself, without access/permissions: the
+  // only check is whose it is, so an admin's access stops short of another traveller's.
+
+  /** The traveller's own checklist, or a refusal the same whether another traveller holds the identifier or nobody does. */
+  private ownChecklist(who: Member, id: string): Checklist {
+    const row = this.sql.exec("SELECT text FROM checklists WHERE owner = ?1 AND id = ?2", who.traveller, id)[0];
+    if (!row) throw unknownChecklist();
+    return must(checklistFromText(String(row["text"])));
+  }
+
+  private writeChecklist(checklist: Checklist, changed: number): void {
+    this.sql.exec(
+      `INSERT INTO checklists (owner, id, ord, text, changed) VALUES (?1, ?2, ?3, ?4, ?5)
+       ON CONFLICT (owner, id) DO UPDATE SET ord = excluded.ord, text = excluded.text, changed = excluded.changed`,
+      checklist.owner,
+      checklist.id,
+      checklist.order,
+      checklistToText(checklist),
+      changed,
+    );
+  }
+
+  private changeChecklists(who: Member, text: string): { sequence: number } {
+    const change = must(checklistChangeFromText(text));
+    const changed = must(applyToChecklist(this.ownChecklist(who, change.checklist), change));
+    const sequence = this.next();
+    this.writeChecklist(changed, sequence);
+    return { sequence };
+  }
+
+  /** Starts a checklist of the traveller's own on the trip, empty or copied, after every other of theirs. */
+  addChecklist(who: Member, id: string, start: Start): Result<{ sequence: number }> {
+    return this.run(() => {
+      this.trip = this.readTrip().id;
+      this.holds(this.readGrants(), who);
+      let from: Checklist | undefined;
+      if ("from" in start) {
+        from = must(checklistFromText(start.from));
+        if (from.owner !== who.traveller) throw new Refused({ code: "not-yours", message: "The checklist copied belongs to another traveller." });
+      }
+      const list = this.sql.exec('SELECT id, ord AS "order" FROM checklists WHERE owner = ?1', who.traveller).map((row) => ({
+        id: String(row["id"]),
+        order: String(row["order"]),
+      }));
+      if (list.length >= MAX_CHECKLISTS) {
+        throw new Refused({ code: "checklists-full", message: `You already hold ${MAX_CHECKLISTS} checklists on this trip. Delete one first.` });
+      }
+      if (list.some((c) => c.id === id)) throw new Refused({ code: "duplicate-checklist", message: "You already hold a checklist of that identifier on this trip." });
+      const made = must(from ? copyChecklist(from, id, list, this.trip) : newChecklist(id, who.traveller, (start as { title: string }).title, list, this.trip));
+      const sequence = this.next();
+      this.writeChecklist(made, sequence);
+      return { sequence };
+    });
+  }
+
+  /** Deletes a checklist of the traveller's own, for good. */
+  deleteChecklist(who: Member, id: string): Result<{ sequence: number }> {
+    return this.run(() => {
+      this.trip = this.readTrip().id;
+      this.holds(this.readGrants(), who);
+      this.ownChecklist(who, id);
+      const sequence = this.next();
+      this.sql.exec("DELETE FROM checklists WHERE owner = ?1 AND id = ?2", who.traveller, id);
+      return { sequence };
+    });
+  }
+
   /**
    * An `add` or a `remove` from access/membership, applied with no check of who sent it, and safe to
    * repeat (§4.3). Gives the new sequence, and the traveller removed, whose sockets the caller closes.
@@ -470,6 +562,7 @@ export class TripCore {
           .filter(({ page }) => who.admin || this.seenBy(rows.get(page.id)).includes(who.traveller))
           .map(({ page, went }) => ({ id: page.id, title: page.title, went })),
         bookings: [],
+        checklists: [],
       };
       if (trip.dates) body.trip.dates = trip.dates;
       const mine = travellerDates(trip, who.traveller);
@@ -487,6 +580,16 @@ export class TripCore {
         const entry: { id: string; changed: number; text?: string } = { id: String(row["id"]), changed: Number(row["changed"]) };
         if (row["text"] !== null) entry.text = String(row["text"]);
         body.bookings.push(entry);
+      }
+
+      // The traveller's own checklists alone, whoever they are, an admin included (§4.8).
+      const checklists = this.sql.exec(
+        'SELECT id, ord AS "order", changed, CASE WHEN changed > ?2 THEN text ELSE NULL END AS text FROM checklists WHERE owner = ?1',
+        who.traveller,
+        after,
+      ).map((row) => ({ id: String(row["id"]), order: String(row["order"]), changed: Number(row["changed"]), text: row["text"] }));
+      for (const row of ordered(checklists)) {
+        body.checklists.push(row.text === null ? { id: row.id, changed: row.changed } : { id: row.id, changed: row.changed, text: String(row.text) });
       }
       return body;
     });

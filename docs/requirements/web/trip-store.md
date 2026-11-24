@@ -3,15 +3,18 @@
 What the component `web/trip-store` promises to `web/screens`, the component that shows a trip, and
 through it to travellers. The trip store keeps each trip's copy on a device: it brings the copy up
 to date, is told of each change while a trip is open, sends each change a traveller makes, and
-deletes every copy when its traveller signs out. It also carries every other request a traveller
-makes about a trip, such as creating one or inviting a traveller. The component registry,
+deletes every copy when its traveller signs out. It keeps a copy of the traveller's library of
+checklist templates in the same way. It also carries every other request a traveller makes about a
+trip, such as creating one or inviting a traveller. The component registry,
 `components.md`, gives it the prefix `WEB:STORE`.
 
 A trip's copy holds what its traveller may see of the trip: its name and dates, their own dates,
 their pages, the titles of the deleted pages they could see, the calendar where an admin has
-granted it, their bookings, and the trip's members. An admin's copy also holds every traveller's
+granted it, their bookings, their own checklists on the trip, and the trip's members. An admin's copy also holds every traveller's
 access, and the invitations not yet accepted. `planner/trip-host`, the component that holds
-each trip online, gives the copy, and decides what it may hold. A device is a phone or a computer a
+each trip online, gives the copy, and decides what it may hold. A traveller's library holds their
+templates, each a checklist kept outside any trip, and `planner/library`, the component that holds
+each library online, gives its copy. A device is a phone or a computer a
 traveller signs in on.
 
 ---
@@ -85,14 +88,14 @@ copy before the trip store says so. ^web-store-f4
 
 ### WEB:STORE-F5 — Signing out deletes every trip from the device first, and a session that has ended does the same
 
-When a traveller signs out, the trip store deletes every trip it holds before it ends the session,
-whether or not the device is online. Where the device is offline, it ends the session the next time
-it connects. When a request is refused because the device's session has ended, the trip store
-deletes every trip it holds. ^web-store-f5
+When a traveller signs out, the trip store deletes every trip it holds, and the library, before it
+ends the session, whether or not the device is online. Where the device is offline, it ends the
+session the next time it connects. When a request is refused because the device's session has
+ended, the trip store deletes every trip it holds, and the library. ^web-store-f5
 
 - **Verification:**
-    - sign out online, and confirm nothing of any trip is left in the browser's storage for
-      Itinero's site, and the session is ended
+    - sign out online, and confirm nothing of any trip or of the library is left in the browser's
+      storage for Itinero's site, and the session is ended
     - sign out offline, confirm nothing is left, then connect, and confirm the session is ended
     - end the device's session online, from the accounts component, connect, and confirm every trip
       is deleted
@@ -139,6 +142,47 @@ accepted. ^web-store-f7
 
 > **Why does only an admin's copy hold other travellers' access?** An admin sets each traveller's
 > access, and has to see it first. No other traveller learns it (`PLN:HOST-NFR1`).
+
+### WEB:STORE-F8 — A device holds a copy of its traveller's library, brought up to date with their trips
+
+The trip store holds a copy of its traveller's library, and gives it with no connection, as it
+stood when last brought up to date. It brings the library up to date each time it brings the trips
+up to date, whole or not at all. It drops each template the traveller deleted on another
+device. ^web-store-f8
+
+- **Verification:** with a traveller signed in on two devices, and a library holding Before leaving
+  and Packing,
+    - take the second device offline, and confirm it gives both templates
+    - on the first, rename Packing and delete Before leaving, then connect the second, and confirm
+      it holds Packing under its new name, and no Before leaving
+    - cut the connection halfway through bringing the library up to date, and confirm the copy is as
+      it was before
+
+> **What does this buy?** A traveller reads their library on a phone with no connection, and it is
+> the same on each of their devices (`PLN-F17`, `PLN:LIBRARY-F4`).
+
+### WEB:STORE-F9 — The trip store carries each request about a checklist or a template, and the copy shows what each did
+
+The trip store carries each request a traveller makes about their checklists and templates:
+starting a checklist on a trip, empty or from a template, saving a checklist as a template, and
+adding, changing and deleting either. It sends each only while the device is online, and returns a
+refusal unchanged. It reports a request answered only once the device's copy holds what the request
+did. ^web-store-f9
+
+- **Verification:** with a traveller signed in on a device, a template Before leaving, and a trip,
+    - start a checklist on the trip from Before leaving, and confirm the trip's copy holds it, with
+      no item ticked, as soon as it is reported
+    - tick an item of it, and confirm the copy holds the tick
+    - save the checklist as a template, and confirm the library's copy holds it
+    - delete the checklist and the new template, and confirm neither copy holds them
+    - with the device offline, make each request, and confirm each is refused as offline, and
+      nothing is sent
+
+> **What does this buy?** A traveller sees at once what they did to their checklists, on the device
+> they did it on (`PLN-F17`, `PLN-F18`).
+
+> **Can a traveller tick an item with no connection?** No. A tick is a change, and the trip store
+> sends a change only while the device is online (`WEB:STORE-NR1`).
 
 ---
 

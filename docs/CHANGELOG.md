@@ -4,6 +4,19 @@ What has been done, newest first. The live work list, `TODO.md`, numbers each pi
 owed, such as TODO-9. An entry that finishes one of those items names it, so a reader can find what
 became of its number. `documentation-system.md` sets the rules.
 
+## 2026-11-23 — TODO-39, a trip's checklists start from templates
+
+*By:* James Berry, with Claude
+
+A traveller keeps checklist templates of their own, in a library outside any trip, and starts a
+trip's checklists from them (ADR-0024, a traveller's checklists are their own). A checklist on a
+trip is its traveller's alone, which no other traveller sees, an admin included, and its items are
+ticked by that traveller. A copy stands apart from its template, a delete is for good, and a
+traveller who leaves a trip finds their checklists there if they rejoin. The design is written in
+the requirements and specifications of two new components, `planner/checklists` and
+`planner/library`, and of `planner/trip-host`, `access`, `web/trip-store` and `web/screens`.
+Building it is Milestone Planner-2.2 and Milestone Web-1.6.
+
 ## 2026-11-19 — TODO-19, a new version waiting says so
 
 *By:* James Berry, with Claude

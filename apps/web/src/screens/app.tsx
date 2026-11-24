@@ -8,6 +8,7 @@ import { ChooseName, Invitation, SignIn } from "./account.tsx";
 import { forgetNameOwed, nameOwed } from "./auth.ts";
 import { BookingForm, Bookings, BookingView } from "./bookings.tsx";
 import { Calendar } from "./calendar.tsx";
+import { ChecklistScreen, Checklists, Library, TemplateScreen } from "./checklists.tsx";
 import { Member, Members } from "./members.tsx";
 import { Graveyard, PageEditor, PageTree, PageView, Search } from "./pages.tsx";
 import { go, match, useLocation } from "./router.tsx";
@@ -80,6 +81,9 @@ function route(path: string, _search: URLSearchParams, account: string | undefin
   if (path === "/" || path === "") return <Trips />;
   if (path === "/trips/new") return <NewTrip />;
   if (path === "/settings") return <Settings account={account} back={{ href: "/", label: "Trips" }} />;
+  if (path === "/library") return <Library />;
+  const template = match("/library/:template", path);
+  if (template) return <TemplateScreen id={template["template"]!} />;
 
   const trip = match("/trips/:trip", path) ?? match("/trips/:trip/:screen", path) ?? match("/trips/:trip/:screen/:item", path) ?? match("/trips/:trip/:screen/:item/:action", path);
   if (trip) {
@@ -97,6 +101,7 @@ function route(path: string, _search: URLSearchParams, account: string | undefin
           if (screen === "settings") return <Settings account={account} back={{ href: `/trips/${encodeURIComponent(id)}`, label: copy.name }} />;
           if (screen === "members") return item ? <Member copy={copy} account={account} id={item} /> : <Members copy={copy} account={account} />;
           if (screen === "search") return <Search copy={copy} />;
+          if (screen === "checklists") return item ? <ChecklistScreen copy={copy} id={item} /> : <Checklists copy={copy} />;
           if (screen === "graveyard") return <Graveyard copy={copy} />;
           if (screen === "pages") {
             if (!item) return <PageTree copy={copy} account={account} />;

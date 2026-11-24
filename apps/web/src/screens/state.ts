@@ -4,7 +4,7 @@ import { useEffect, useState } from "preact/hooks";
 import type { TextStyle } from "@itinero/trip-time";
 import { current, onChange, type ShellState } from "../shell/index.ts";
 import * as store from "../store/index.ts";
-import type { Copy, Summary } from "../store/index.ts";
+import type { Copy, Library, Summary } from "../store/index.ts";
 import { onStyle, style } from "./style.ts";
 
 export function useShellState(): ShellState {
@@ -65,4 +65,14 @@ export function useNow(): Date {
     return () => clearInterval(timer);
   }, []);
   return now;
+}
+
+/** The traveller's library, as the trip store gives it and each time it changes. Undefined: still reading. */
+export function useLibrary(): Library | undefined {
+  const [library, setLibrary] = useState<Library | undefined>(undefined);
+  useEffect(() => {
+    void store.library().then(setLibrary);
+    return store.onLibrary(setLibrary);
+  }, []);
+  return library;
 }

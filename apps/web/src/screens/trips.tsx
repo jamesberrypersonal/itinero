@@ -45,6 +45,9 @@ export function Trips() {
           New trip
         </Button>
       ) : null}
+      <Group>
+        <Row href="/library">Your templates</Row>
+      </Group>
       <About state={shell} />
     </main>
   );

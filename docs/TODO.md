@@ -20,7 +20,9 @@ rules. When an item is done, it leaves this list for `CHANGELOG.md` in the commi
 | bookings/list | A trip's bookings: adding, changing and removing each one, the travellers it names, and the order they happen in |
 | bookings/stay | One or more nights' stay, such as a hotel or a flat, from check-in to check-out |
 | planner | The trip planner |
+| planner/checklists | Each traveller's checklists on a trip, which only they see and tick, and their own templates, kept outside any trip, to start each from |
 | planner/itinerary | The itinerary: a trip's pencilled stretches and firm items |
+| planner/library | Each traveller's library of checklist templates, kept online outside any trip |
 | planner/pages | The pages of a trip |
 | planner/trip-host | The copy of each trip held online, in a Durable Object of its own, which applies every change and keeps each traveller's devices up to date |
 | shared/doc-check | The documentation checker |
@@ -28,7 +30,7 @@ rules. When an item is done, it leaves this list for `CHANGELOG.md` in the commi
 | shared/trip-time | Local dates and times, and time zones |
 | web | The web app, on a computer and on a phone |
 | web/places | The places a device knows the time zone of: every airport, and the towns of each country its trips visit |
-| web/screens | What travellers see and use: the home page, the calendar, the bookings page, the pages of research and the trip's members |
+| web/screens | What travellers see and use: the home page, the calendar, the bookings page, the pages of research, their checklists and templates, and the trip's members |
 | web/shell | The installable app itself: launching with no connection, adding it to a phone's home screen, and keeping the time-zone rules up to date |
 | web/trip-store | Each trip's copy on a device: catching it up, telling it of changes as they happen, sending changes, and deleting it on sign-out |
 | docs | The documentation system, and the tools authors use with it |
@@ -496,23 +498,6 @@ and each page, though an admin sees and changes the whole trip whatever is set.
 seemed to do nothing.
 
 *Proposal:* Show an admin's access as edit throughout, with nothing to change, and say why.
-
-*Releases:* Nothing is planned for it yet.
-
-### TODO-39 — Start a trip's checklists from templates
-
-*Tags:* planner, planner/pages
-*Written:* 2026-11-21
-
-*Problem:* A traveller who keeps the same checklist for every trip, such as checking a passport's
-validity and making copies of documents before leaving, writes it out again for each new trip.
-
-*Reason:* A page can hold a checklist, but every page belongs to one trip, so nothing outlives a
-trip to start the next one's from (`PLN-NR4`).
-
-*Proposal:* Decide whether a template is a page that belongs to no trip, and whether each traveller
-ticks their own copy of a checklist or the trip shares one. Then add the requirements to the
-planner.
 
 *Releases:* Nothing is planned for it yet.
 

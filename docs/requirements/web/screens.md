@@ -2,7 +2,8 @@
 
 What the component `web/screens` promises to travellers. The screens are everything a traveller sees
 and uses in Itinero: signing in, the list of trips, a trip's home page, its calendar, its bookings,
-its pages of research, and, for an admin, its members and their access. The component registry,
+its pages of research, the traveller's own checklists and templates, and, for an admin, its members
+and their access. The component registry,
 `components.md`, gives it the prefix `WEB:SCREENS`.
 
 What a traveller can do with a trip is promised by the planner, the bookings system and the access
@@ -148,20 +149,22 @@ device's, and stays after signing out. ^web-screens-f7
 > **What does this buy?** A traveller reads every time in the form they read most easily
 > (`WEB-F7`, `SHR:TRIP-TIME-F8`).
 
-### WEB:SCREENS-F8 — Deleting a page, removing a booking and removing a traveller each ask first
+### WEB:SCREENS-F8 — Deleting a page, a checklist or a template, removing a booking and removing a traveller each ask first
 
-Before deleting a page, removing a booking or removing a traveller from the trip, the screens ask
-the traveller to confirm, saying what will go. Deleting a page says how many pages beneath it go
+Before deleting a page, a checklist or a template, removing a booking or removing a traveller from
+the trip, the screens ask the traveller to confirm, saying what will go. Deleting a page says how many pages beneath it go
 with it. ^web-screens-f8
 
 - **Verification:**
     - delete a page with three pages beneath it, and confirm the screen says four pages will go, and
       asks first
     - decline, and confirm nothing is deleted
-    - remove a booking, and remove a traveller, and confirm each asks first
+    - remove a booking, remove a traveller, delete a checklist and delete a template, and confirm
+      each asks first
 
 > **What does this buy?** A slip of the finger never removes something a traveller then has to
-> enter again, or an admin has to restore (`PLN-F8`, `BKG-NR5`).
+> enter again, or an admin has to restore (`PLN-F8`, `BKG-NR5`). A deleted checklist or template
+> cannot be restored at all (`PLN-F17`, `PLN-F18`).
 
 ### WEB:SCREENS-F9 — A traveller signs in with Google, and signs out, and a computer says its trips stay until they do
 
@@ -191,6 +194,66 @@ their name in their settings while online. Every screen names each traveller by 
 
 > **What does this buy?** A new member is known by the name they chose from their first moment on
 > the trip (`ACC-F13`).
+
+### WEB:SCREENS-F11 — A trip's checklists have a screen of their own, where the traveller starts, ticks and arranges theirs
+
+A trip's checklists have a screen of their own, apart from the pages, which every screen of the trip
+links to. It lists the traveller's own checklists on the trip, in their order, each with how many of
+its items are ticked. A traveller starts a checklist there, empty or from one of their templates,
+and saves one as a template. In a checklist, they tick and untick items, and add, change, reorder
+and remove them. A ticked item keeps its place, marked as done. ^web-screens-f11
+
+- **Verification:** on a trip, as a traveller whose library holds Before leaving, with four items,
+    - open the checklists from the trip's bar, start a checklist from Before leaving, and confirm it
+      is listed with 0 of 4 ticked
+    - tick the second item, and confirm it stays second, marked as done, and the list says 1 of 4
+    - add an item, move it to the top, and rewrite it, and confirm each is shown at once
+    - save the checklist as a template, and confirm the library lists it
+    - with the device offline, confirm the checklists are shown, and no control ticks or changes
+      them
+
+> **What does this buy?** A traveller works through their own lists for a trip in one place, apart
+> from the research the travellers share (`PLN-F18`, ADR-0024, a traveller's checklists are their
+> own).
+
+> **Why does a ticked item keep its place?** The traveller gave the order. An item that moved as it
+> was ticked would put another under their finger.
+
+### WEB:SCREENS-F12 — A traveller keeps their templates on a screen of their own, reached from any trip
+
+A traveller's library has a screen of its own, which every screen's menu links to, whichever trip
+is open, and which the checklists of a trip link to. It lists the traveller's templates, in their
+order, each with how many items it holds. A traveller adds, renames, arranges and deletes templates
+there, and adds, changes, reorders and removes each template's items. ^web-screens-f12
+
+- **Verification:** as a traveller with a library holding Before leaving,
+    - open the library from the menu of a trip, and from the list of trips, and confirm each lists
+      Before leaving with its number of items
+    - add the template Packing, give it three items, and move it to the top, and confirm the library
+      lists Packing first, with 3 items
+    - confirm a template offers no way to tick an item
+    - with the device offline, confirm the library is shown, and no control changes it
+
+> **What does this buy?** A traveller keeps the lists they use for every trip in one place, outside
+> any trip (`PLN-F17`).
+
+### WEB:SCREENS-F13 — Until their trip starts, the home page lists the traveller's checklists not yet done
+
+Before the first of the traveller's own dates, the home page lists each of their checklists on the
+trip with an item not yet ticked, in their order, each with how many of its items are ticked, and
+each opening that checklist. From their first date on, the home page lists no checklist. ^web-screens-f13
+
+- **Verification:** on a trip with a traveller whose own dates are 6 to 13 December, with the
+  checklists Before leaving, 2 of 5 ticked, and Packing, 4 of 4 ticked,
+    - on 3 December, confirm the home page lists Before leaving, 2 of 5, and not Packing
+    - tap Before leaving, and confirm it opens
+    - on 6 December, confirm the home page lists no checklist
+
+> **What does this buy?** In the days before leaving, a traveller sees what is left to do as soon as
+> they open the trip (`PLN-F18`).
+
+> **Why not once the trip has started?** On the road the home page is about the day: its bookings
+> and the country. A checklist is still a tap away in the trip's bar.
 
 ---
 
