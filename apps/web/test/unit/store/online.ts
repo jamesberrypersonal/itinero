@@ -3,14 +3,17 @@
 // SQLite, so a catch-up holds what the real one does. Membership, invitations and sessions are
 // kept in memory, as access/membership and access/accounts answer them. Each device has its own
 // fetch, WebSocket and session, and a test can take a device offline, fail one request, end a
-// session or refuse an older version.
+// session or refuse an older version. Each traveller's library is kept in memory, as
+// planner/library answers it, with @itinero/checklists making and changing each template.
 
 import { DatabaseSync } from "node:sqlite";
+import { apply, changeFromText, checklistFromText, checklistToText, copyChecklist, newChecklist, ordered } from "@itinero/checklists";
 import { TripCore, type Row, type Sql } from "../../../../../services/online/src/trip-core.ts";
 
 type MemberRow = { account: string; admin: boolean; creator: boolean; joined: string; removed?: string };
 type Open = { id: string; email: string; trip: "view" | "edit"; calendar: "none" | "view" | "edit"; expires: string; token: string };
 type Hosted = { core: TripCore; members: Map<string, MemberRow>; invitations: Map<string, Open> };
+type Shelf = { sequence: number; templates: Map<string, { text: string; order: string; changed: number }> };
 
 function sqlOf(db: DatabaseSync): Sql {
   return {
@@ -72,6 +75,8 @@ export class Online {
   readonly sessions = new Map<string, string>();
   readonly names = new Map<string, string>();
   readonly sockets = new Set<StandInSocket>();
+  /** Each account's library, as planner/library holds it. */
+  readonly libraries = new Map<string, Shelf>();
   /** Every request answered or failed, as `METHOD /path`. */
   readonly requests: string[] = [];
   oldestApi = 1;
@@ -186,6 +191,8 @@ export class Online {
       return refusal(404, "bad-invitation", "This invitation cannot be accepted.");
     }
 
+    if (path.startsWith("/api/library/")) return this.library(method, path, account, body);
+
     const match = /^\/api\/trips\/([^/]+)\/(.+)$/.exec(path);
     if (!match) return refusal(404, "not-found", "The online side answers no such request.");
     const trip = decodeURIComponent(match[1]!);
@@ -196,11 +203,24 @@ export class Online {
     const who = { traveller: account, admin: row.admin, creator: row.creator };
     const reply = <T>(result: { ok: true; value: T } | { ok: false; refusal: { code: string } }, wrap: (value: T) => unknown = (v) => v) => {
       if (!result.ok) {
-        const status = ["no-view", "no-edit", "admin-only", "creator-only"].includes(result.refusal.code) ? 403 : result.refusal.code === "malformed" ? 400 : 409;
+        const code = result.refusal.code;
+        const status = ["no-view", "no-edit", "admin-only", "creator-only", "not-yours"].includes(code) ? 403 : code === "malformed" ? 400 : code === "unknown-checklist" ? 404 : 409;
         return Response.json(result.refusal, { status });
       }
       return Response.json(wrap(result.value));
     };
+    if (rest === "checklists" && method === "POST") {
+      const start = body["title"] !== undefined ? { title: String(body["title"]) } : { from: String(body["from"]) };
+      const result = hosted.core.addChecklist(who, String(body["id"]), start);
+      if (result.ok) this.tell(trip, result.value.sequence);
+      return result.ok ? Response.json(result.value, { status: 201 }) : reply(result);
+    }
+    const checklist = /^checklists\/(.+)$/.exec(rest);
+    if (checklist && method === "DELETE") {
+      const result = hosted.core.deleteChecklist(who, decodeURIComponent(checklist[1]!));
+      if (result.ok) this.tell(trip, result.value.sequence);
+      return reply(result);
+    }
 
     if (rest === "sync") return reply(hosted.core.sync(who, body["since"] as number | undefined, body["holdsCalendar"] === true));
     if (rest === "pages") return reply(hosted.core.pages(who, body["pages"] as string[]), (pages) => ({ pages }));
@@ -256,6 +276,62 @@ export class Online {
       return new Response(null, { status: 204 });
     }
     return refusal(404, "not-found", "The online side answers no such request.");
+  }
+
+  /** The requests of planner/library (spec/planner/library.md §3.2), on the account's own library alone. */
+  private library(method: string, path: string, account: string, body: Record<string, unknown>): Response {
+    const shelf = this.libraries.get(account) ?? { sequence: 0, templates: new Map() };
+    const refused = (status: number, refusal: { code: string; message: string }) => Response.json(refusal, { status });
+    const unknown = () => refused(404, { code: "unknown-template", message: "Your library holds no such template." });
+    const written = () => {
+      this.libraries.set(account, shelf);
+      return Response.json({ sequence: shelf.sequence });
+    };
+    const list = () => [...shelf.templates.entries()].map(([id, t]) => ({ id, order: t.order }));
+    if (path === "/api/library/sync" && method === "POST") {
+      const since = typeof body["since"] === "number" ? body["since"] : 0;
+      const templates = ordered([...shelf.templates.entries()].map(([id, t]) => ({ id, ...t }))).map((t) =>
+        t.changed > since ? { id: t.id, changed: t.changed, template: t.text } : { id: t.id, changed: t.changed },
+      );
+      return Response.json({ sequence: shelf.sequence, templates });
+    }
+    if (path === "/api/library/templates" && method === "POST") {
+      const id = String(body["id"]);
+      if (shelf.templates.has(id)) return refused(409, { code: "duplicate-template", message: "Your library already holds a template of that identifier." });
+      let made;
+      if (body["from"] !== undefined) {
+        const from = checklistFromText(String(body["from"]));
+        if (!from.ok) return refused(400, from.refusal);
+        if (from.value.owner !== account) return refused(403, { code: "not-yours", message: "The checklist copied belongs to another traveller." });
+        made = copyChecklist(from.value, id, list());
+      } else {
+        made = newChecklist(id, account, String(body["title"]), list());
+      }
+      if (!made.ok) return refused(409, made.refusal);
+      shelf.sequence++;
+      shelf.templates.set(id, { text: checklistToText(made.value), order: made.value.order, changed: shelf.sequence });
+      this.libraries.set(account, shelf);
+      return Response.json({ sequence: shelf.sequence }, { status: 201 });
+    }
+    if (path === "/api/library/changes" && method === "POST") {
+      const change = changeFromText(String(body["change"]));
+      if (!change.ok) return refused(400, change.refusal);
+      const held = shelf.templates.get(change.value.checklist);
+      if (!held) return unknown();
+      const changed = apply((checklistFromText(held.text) as { ok: true; value: never }).value, change.value);
+      if (!changed.ok) return refused(409, changed.refusal);
+      shelf.sequence++;
+      shelf.templates.set(changed.value.id, { text: checklistToText(changed.value), order: changed.value.order, changed: shelf.sequence });
+      return written();
+    }
+    const removed = /^\/api\/library\/templates\/(.+)$/.exec(path);
+    if (removed && method === "DELETE") {
+      const id = decodeURIComponent(removed[1]!);
+      if (!shelf.templates.delete(id)) return unknown();
+      shelf.sequence++;
+      return written();
+    }
+    return refused(404, { code: "not-found", message: "The online side answers no such request." });
   }
 
   /** The open invitation's token, as its email would give it. */

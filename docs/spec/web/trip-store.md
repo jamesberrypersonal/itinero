@@ -333,9 +333,10 @@ The trip store's tests run in the suite of `apps/web/`, which `spec/web/shell.md
   to English and London time and one to Turkish and Tokyo time. They make the checks of
   `PLN:ITINERARY-NFR1`, `PLN:PAGES-NFR1` and `ACC:PERMISSIONS-NFR1` on the copy, and confirm both
   devices and Node.js give the same results.
-- **Checklist tests**, with the same stand-in, which runs the library's logic beside the trip
-  host's, cover each function of §4.9, the catch-up of the library in §4.2, and the upgrade from
-  version 1 of §4.1 (`WEB:STORE-F8`, `WEB:STORE-F9`). Cut tests fail the stand-in during the
+- **Checklist tests**, with the same stand-in, cover each function of §4.9, the catch-up of the
+  library in §4.2, and the upgrade from version 1 of §4.1 (`WEB:STORE-F8`, `WEB:STORE-F9`). The
+  stand-in keeps each traveller's library in memory, with `@itinero/checklists` making and changing
+  each template, as `planner/library` answers its requests. Cut tests fail the stand-in during the
   library's catch-up, and confirm the library's copy is unchanged.
 - **Timing tests** read a trip of 500 pages and 300 bookings ten times, and fail where a read takes
   over one second on the machine running them. The check on a phone of `WEB:STORE-NFR1` is made by

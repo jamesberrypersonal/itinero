@@ -302,7 +302,8 @@ describe("WEB:STORE-F4 — a change is sent only while the device is online, and
 /** Every record held in a device's database, store by store. */
 async function everything(idb: IDBFactory): Promise<Record<string, unknown[]>> {
   const db = await new Promise<IDBDatabase>((resolve, reject) => {
-    const request = idb.open("itinero", 1);
+    // At whatever version the trip store made it.
+    const request = idb.open("itinero");
     request.onsuccess = () => resolve(request.result);
     request.onerror = () => reject(request.error);
   });
@@ -327,7 +328,9 @@ describe("WEB:STORE-F5 — signing out deletes every trip first, and a session t
     assert.deepEqual(await everything(samPhone.idb), {
       account: [{ key: "me", signOutOwed: false }],
       bookings: [],
+      checklists: [],
       pages: [],
+      templates: [],
       trips: [],
     });
     assert.equal(online.sessions.has(samPhone.device.session), false, "the session is ended");
@@ -341,7 +344,7 @@ describe("WEB:STORE-F5 — signing out deletes every trip first, and a session t
     offline(samPhone);
     await sam.signOut();
     const held = await everything(samPhone.idb);
-    assert.deepEqual(held, { account: [{ key: "me", signOutOwed: true }], bookings: [], pages: [], trips: [] });
+    assert.deepEqual(held, { account: [{ key: "me", signOutOwed: true }], bookings: [], checklists: [], pages: [], templates: [], trips: [] });
     assert.ok(online.sessions.has(samPhone.device.session), "the session is still open online");
     assert.deepEqual(await sam.open(), {}, "the sign-in screen shows");
 
