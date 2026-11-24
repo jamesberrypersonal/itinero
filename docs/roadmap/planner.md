@@ -27,6 +27,12 @@ the planner's itinerary. The planner is the first system that needs that compone
   `0003_library.sql`.
 - Its test suite proves each requirement of `planner/library` by the verification it carries,
   inside Wrangler, with ten travellers' day of `PLN:LIBRARY-NFR2` within the free plan.
+- `planner/trip-host` holds each traveller's checklists on a trip, in a table of each trip's
+  Durable Object, and gives each traveller only their own, an admin included. A removed
+  traveller's checklists are kept, and given back if they rejoin.
+- The online side's suite proves `PLN:HOST-F10`, and the checks of `PLN:HOST-NFR1` and `ACC-F14`
+  that need only the online side. A day of ten devices still reads about 2 million rows, within the
+  free plan's 5 million.
 
 #### Milestone Planner-2.1 — The design of checklists
 
@@ -158,12 +164,5 @@ the planner's itinerary. The planner is the first system that needs that compone
 
 ## Pending
 
-The checks of the planner's requirements that need a phone or the screens wait in the web app's
-roadmap.
-
-### Phase 2 — Checklists
-
-#### Milestone Planner-2.2 — Checklists built
-
-- Add checklists to `planner/trip-host`, as its specification gives them, and prove `PLN:HOST-F10`
-  and the checks of `PLN:HOST-NFR1` and `ACC-F14` that need only the online side.
+Nothing is pending. The checks of the planner's requirements that need a phone or the screens
+wait in the web app's roadmap.

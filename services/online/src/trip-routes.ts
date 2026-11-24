@@ -10,13 +10,13 @@ import type { Member, Result, Target } from "./trip-core.ts";
 import { ACCOUNT_HEADER } from "./trip-host.ts";
 
 const SEGMENT = "([^/]+)";
-const TARGETS: readonly Target[] = ["calendar", "pages", "grants", "bookings"];
+const TARGETS: readonly Target[] = ["calendar", "pages", "grants", "bookings", "checklists"];
 /** A refusal for missing access is 403, and any other from a package 409 (§3.2). */
-const ACCESS = new Set(["no-view", "no-edit", "admin-only", "creator-only", "own-dates-only", "membership-only"]);
+const ACCESS = new Set(["no-view", "no-edit", "admin-only", "creator-only", "own-dates-only", "membership-only", "not-yours"]);
 
 function status(code: string): number {
   if (code === "malformed") return 400;
-  if (code === "not-a-member") return 404;
+  if (code === "not-a-member" || code === "unknown-checklist") return 404;
   return ACCESS.has(code) ? 403 : 409;
 }
 
@@ -98,7 +98,7 @@ export const tripRoutes: Route[] = [
       if (!read.ok) return malformed(read.refusal.message, by!);
       const { target, change, agreed } = read.value;
       if (!TARGETS.includes(target as Target) || typeof change !== "string") {
-        return malformed("A change needs its target, one of calendar, pages, grants and bookings, and the change as text.", by!);
+        return malformed("A change needs its target, one of calendar, pages, grants, bookings and checklists, and the change as text.", by!);
       }
       if (agreed !== undefined && (typeof agreed !== "number" || !Number.isInteger(agreed) || agreed < 0)) {
         return malformed("The number of travellers agreed is a whole number.", by!);
@@ -145,6 +145,35 @@ export const tripRoutes: Route[] = [
       const read = await body(request);
       if (!read.ok || !isList(read.value.bookings)) return malformed("Name the bookings wanted as a list of identifiers.", by!);
       return reply(await host(on.trip).bookings(on.who, read.value.bookings), by!, (bookings) => ({ bookings }));
+    },
+  },
+  {
+    method: "POST",
+    path: new RegExp(`^/api/trips/${SEGMENT}/checklists$`),
+    signedIn: true,
+    answer: async (request, match, by) => {
+      const on = await onTrip(match, by!);
+      if (on instanceof Response) return on;
+      const read = await body(request);
+      if (!read.ok) return malformed(read.refusal.message, by!);
+      const { id, title, from } = read.value;
+      const keys = Object.keys(read.value);
+      const one = (title === undefined) !== (from === undefined);
+      if (typeof id !== "string" || !one || keys.some((k) => !["id", "title", "from"].includes(k)) || (title !== undefined && typeof title !== "string") || (from !== undefined && typeof from !== "string")) {
+        return malformed("A new checklist needs its identifier, and either a title or a checklist to copy, as text.", by!);
+      }
+      const start = title !== undefined ? { title: title as string } : { from: from as string };
+      return reply(await host(on.trip).addChecklist(on.who, id, start), by!, (value) => value, 201);
+    },
+  },
+  {
+    method: "DELETE",
+    path: new RegExp(`^/api/trips/${SEGMENT}/checklists/${SEGMENT}$`),
+    signedIn: true,
+    answer: async (_, match, by) => {
+      const on = await onTrip(match, by!);
+      if (on instanceof Response) return on;
+      return reply(await host(on.trip).deleteChecklist(on.who, decodeURIComponent(match[2]!)), by!, (value) => value);
     },
   },
   {
