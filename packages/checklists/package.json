@@ -1,0 +1,26 @@
+{
+  "name": "@itinero/checklists",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Each traveller's checklists, on a trip or kept as templates, their items, ticks and order (docs/spec/planner/checklists.md)",
+  "license": "SEE LICENSE IN ../../LICENSE",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "files": [
+    "src"
+  ],
+  "scripts": {
+    "typecheck": "tsc --project .",
+    "test": "tsc --project . && node --test \"test/**/*.test.ts\""
+  },
+  "devDependencies": {
+    "@itinero/trip-time": "0.1.0",
+    "@types/node": "24.19.2",
+    "typescript": "7.0.2"
+  },
+  "engines": {
+    "node": ">=24"
+  }
+}

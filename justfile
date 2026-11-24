@@ -20,6 +20,10 @@ test-itinerary:
 test-pages:
     @npm test --workspace @itinero/pages
 
+# Run the test suite of @itinero/checklists (docs/spec/planner/checklists.md §4.7).
+test-checklists:
+    @npm test --workspace @itinero/checklists
+
 # Run the test suite of @itinero/bookings, with its four kinds (docs/spec/bookings/list.md §4.6).
 test-bookings:
     @npm test --workspace @itinero/bookings

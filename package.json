@@ -7,6 +7,7 @@
     "packages/trip-time",
     "packages/itinerary",
     "packages/pages",
+    "packages/checklists",
     "packages/bookings",
     "packages/permissions",
     "apps/web",

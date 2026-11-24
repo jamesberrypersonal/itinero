@@ -15,6 +15,14 @@ the planner's itinerary. The planner is the first system that needs that compone
 
 ### Phase 2 — Checklists
 
+#### Milestone Planner-2.2 — Checklists built
+
+- `planner/checklists` is built as `@itinero/checklists`, in `packages/checklists/`, as its
+  specification gives it. It imports only types from `@itinero/trip-time`, and has no runtime
+  dependency.
+- Its test suite proves each requirement of `planner/checklists` by the verification it carries,
+  except the checks of `PLN:CHECKLISTS-NFR1` that need a phone.
+
 #### Milestone Planner-2.1 — The design of checklists
 
 - A traveller's checklists are their own, and start from templates kept outside any trip. Only that
@@ -152,9 +160,6 @@ roadmap.
 
 #### Milestone Planner-2.2 — Checklists built
 
-- Build `planner/checklists` as `@itinero/checklists`, in `packages/checklists/`, as its
-  specification gives it, with its test suite proving each requirement it claims, except the checks
-  of `PLN:CHECKLISTS-NFR1` that need a phone.
 - Build `planner/library` in the Worker of the online side, with the migration that makes its two
   tables, and prove each requirement it claims in the online side's suite.
 - Add checklists to `planner/trip-host`, as its specification gives them, and prove `PLN:HOST-F10`

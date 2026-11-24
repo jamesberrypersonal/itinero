@@ -15,6 +15,8 @@ rules, and `tools/doc-scaffold` starts new documents as skeletons that pass it.
   `packages/itinerary/` (`@itinero/itinerary`), which uses it, `packages/pages/`
   (`@itinero/pages`), which imports only its types, and `packages/bookings/`
   (`@itinero/bookings`), which uses trip-time, and holds the bookings list and each kind of booking.
+  `packages/checklists/` (`@itinero/checklists`) imports only trip-time's types, and holds each
+  traveller's checklists and templates.
   `packages/permissions/` (`@itinero/permissions`) uses pages, and decides what each traveller may
   see and change. `package.json` at the root declares the npm workspace.
 - `services/online/` (`@itinero/online`) is the Worker of the online side, on Cloudflare, with its
@@ -39,6 +41,7 @@ just test-docs                  # the whole test suites of doc-check and doc-sca
 just test-trip-time             # the test suite of @itinero/trip-time
 just test-itinerary             # the test suite of @itinero/itinerary
 just test-pages                 # the test suite of @itinero/pages
+just test-checklists            # the test suite of @itinero/checklists
 just test-bookings              # the test suite of @itinero/bookings
 just test-permissions           # the test suite of @itinero/permissions
 just test-online                # the test suite of the online side, in Wrangler

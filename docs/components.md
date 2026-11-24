@@ -31,7 +31,7 @@ their prefixes open with `SHR`. Each kind of booking is a component of the syste
 
 | Component | System | Prefix | Packages | Outside the vault | Is |
 |---|---|---|---|---|---|
-| [checklists](spec/planner/checklists.md) | planner | PLN:CHECKLISTS | | | Each traveller's checklists on a trip, which only they see and tick, and their own templates, kept outside any trip, to start each from |
+| [checklists](spec/planner/checklists.md) | planner | PLN:CHECKLISTS | `@itinero/checklists` | | Each traveller's checklists on a trip, which only they see and tick, and their own templates, kept outside any trip, to start each from |
 | [itinerary](spec/planner/itinerary.md) | planner | PLN:ITINERARY | `@itinero/itinerary` | | How a trip's pencilled stretches and firm items are stored and changed |
 | [library](spec/planner/library.md) | planner | PLN:LIBRARY | | | Each traveller's library of checklist templates, kept online outside any trip, in a table of the online side's D1 database |
 | [pages](spec/planner/pages.md) | planner | PLN:PAGES | `@itinero/pages` | | The pages of a trip, where travellers write up their research by hand |
