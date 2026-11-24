@@ -5,7 +5,7 @@
 import { DurableObject } from "cloudflare:workers";
 import { loadRules, rulesVersion } from "@itinero/trip-time";
 import type { GrantChange } from "@itinero/permissions";
-import { TripCore, type Member, type Result, type Sql, type SqlValue, type Sync, type Target } from "./trip-core.ts";
+import { TripCore, type Member, type Result, type Sql, type SqlValue, type Start, type Sync, type Target } from "./trip-core.ts";
 
 /** The header the Worker names the account of a live socket in (§4.5). */
 export const ACCOUNT_HEADER = "Itinero-Account";
@@ -44,6 +44,20 @@ export class TripHost extends DurableObject<Cloudflare.Env> {
   async change(who: Member, target: Target, change: string, agreed?: number): Promise<Result<{ sequence: number }>> {
     if (target === "calendar" || target === "bookings") await ensureRules();
     const result = this.core.change(who, target, change, agreed);
+    if (result.ok) this.tell(result.value.sequence);
+    return result;
+  }
+
+  /** Starts a checklist of the traveller's own on the trip (§4.8). */
+  addChecklist(who: Member, id: string, start: Start): Result<{ sequence: number }> {
+    const result = this.core.addChecklist(who, id, start);
+    if (result.ok) this.tell(result.value.sequence);
+    return result;
+  }
+
+  /** Deletes a checklist of the traveller's own, for good (§4.8). */
+  deleteChecklist(who: Member, id: string): Result<{ sequence: number }> {
+    const result = this.core.deleteChecklist(who, id);
     if (result.ok) this.tell(result.value.sequence);
     return result;
   }

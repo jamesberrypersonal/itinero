@@ -205,5 +205,6 @@ same results on every device. ^acc-permissions-nfr1
 | **ACC:PERMISSIONS-NR3** | Know who is making a request | `access/accounts` signs each traveller in. The caller passes the traveller on |
 | **ACC:PERMISSIONS-NR4** | Store a trip's grants | `planner/trip-host` stores them with the trip |
 | **ACC:PERMISSIONS-NR5** | Set access to one stretch or one firm item of the calendar | The calendar is granted whole (`ACC-NR5`) |
+| **ACC:PERMISSIONS-NR6** | Decide who may see or change a checklist or a template | Each is its traveller's alone, and no grant reaches it. `planner/trip-host` and `planner/library` give each only to its owner (ADR-0024, a traveller's checklists are their own) |
 
 ^acc-permissions-nr

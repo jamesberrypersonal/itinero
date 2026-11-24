@@ -16,6 +16,20 @@ Each part of a system is named by its address, the system and the part's own nam
 
 ### Phase 1 — Build
 
+#### Milestone Web-1.6 — Checklists
+
+- `web/trip-store` keeps each traveller's library and their checklists on each trip, as its
+  specification gives them. The device's database is at version 2, with two more object stores,
+  and a device holding version 1 catches every trip up from the start once upgraded.
+- Its unit tests prove `WEB:STORE-F8` and `WEB:STORE-F9`, and that signing out deletes the library
+  too, against the stand-in for the online side.
+- `web/screens` shows a trip's checklists and the traveller's library in screens of their own, as
+  its specification gives them. The trip's bar has a sixth entry, Checklists, and the home page
+  lists the checklists not yet done until the traveller's first date.
+- Its browser tests prove `WEB:SCREENS-F11`, `WEB:SCREENS-F12` and `WEB:SCREENS-F13`, the
+  checklists and templates of `WEB:SCREENS-F8`, and the checks of `PLN-F17` and `PLN-F18` that
+  need the screens, in all three engines.
+
 #### Milestone Web-1.5 — The calendar, and the screens an admin manages a trip on
 
 - The rest of `web/screens` is built, as its specification gives it: the calendar, one day to a row
@@ -164,9 +178,12 @@ Each part of a system is named by its address, the system and the part's own nam
 
 ### Phase 1 — Build
 
-#### Milestone Web-1.5 — The calendar, and the screens an admin manages a trip on
+#### Milestone Web-1.7 — Checks waiting on the iPhone and the next IANA release
 
 **Waits on:** Milestone Access-1.4
+
+The two items below were Milestone Web-1.5's. They moved here when Milestone Web-1.6 started, since
+each waits on something outside the web app.
 
 - Prove the check of `ACC-F3` that an invitation opened by an account holding another address
   cannot be accepted, and says which address it was sent to, on the iPhone.

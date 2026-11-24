@@ -8,20 +8,23 @@ import { bookingFromText, type Booking } from "@itinero/bookings";
 import { tripFromText, type Dates } from "@itinero/itinerary";
 import { pageFromText, type Page } from "@itinero/pages";
 import { grantsFromText, type Level, type TripLevel } from "@itinero/permissions";
+import { checklistFromText, checklistToText, ordered, type Checklist } from "@itinero/checklists";
 import {
   allTrips,
   committed,
   deleteDatabase,
+  done,
   deleteTrip,
   heldIds,
   openDatabase,
   holds,
   readAccount,
+  readLibrary,
   readTrip,
   writeAccount,
   type Held,
 } from "./db.ts";
-import type { Copy, Invitation, Member, Result, Summary, Target, TextRecord, TripRecord } from "./types.ts";
+import type { AccountRecord, Copy, Invitation, Library, Member, Result, Start, Summary, Target, TemplateRecord, TextRecord, TripRecord } from "./types.ts";
 
 export type StoreDeps = {
   indexedDB: IDBFactory;
@@ -51,7 +54,11 @@ type SyncBody = {
   pages: { id: string; changed: number; text?: string }[];
   graveyard: Copy["graveyard"];
   bookings: { id: string; changed: number; text?: string }[];
+  checklists: { id: string; changed: number; text?: string }[];
 };
+
+/** The answer to a catch-up of the library (spec/planner/library.md §4.4). */
+type LibraryBody = { sequence: number; templates: { id: string; changed: number; template?: string }[] };
 
 const CHANNEL = "itinero";
 /** Pages and bookings are fetched in groups of this many (§4.2). */
@@ -67,6 +74,7 @@ const updateFirst = <T>(): Result<T> => ({
   refusal: { code: "update-first", message: "This version of Itinero is too old. Update it, and try again." },
 });
 const NO_DATES: Dates = { first: "", last: "" };
+const EMPTY_LIBRARY: Library = { templates: [], sequence: 0, caughtUp: 0 };
 
 export function createStore(deps: StoreDeps) {
   let db: Promise<IDBDatabase> | undefined;
@@ -78,6 +86,8 @@ export function createStore(deps: StoreDeps) {
   const tripListeners = new Set<(trips: readonly Summary[]) => void>();
   const onlineListeners = new Set<(online: boolean) => void>();
   const signedOutListeners = new Set<() => void>();
+  const libraryListeners = new Set<(library: Library) => void>();
+  let catchingLibrary: Promise<void> = Promise.resolve();
   const watchers = new Map<string, Set<(copy: Copy | undefined) => void>>();
   const sockets = new Map<string, { socket?: WebSocket | undefined; delay: number; timer?: ReturnType<typeof setTimeout> | undefined }>();
   const catching = new Map<string, Promise<void>>();
@@ -87,9 +97,10 @@ export function createStore(deps: StoreDeps) {
 
   const channel = new deps.BroadcastChannel(CHANNEL);
   channel.onmessage = (event: MessageEvent) => {
-    const data = event.data as { trip?: string; signedOut?: boolean };
+    const data = event.data as { trip?: string; signedOut?: boolean; library?: number };
     if (data.signedOut) void afterSignOut(false);
     else if (typeof data.trip === "string") void changed(data.trip, false);
+    else if (typeof data.library === "number") void libraryChanged(false);
   };
 
   function database(): Promise<IDBDatabase> {
@@ -159,6 +170,7 @@ export function createStore(deps: StoreDeps) {
       .filter((p): p is Page => p !== undefined)
       .sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
     const bookings = held.bookings.map((r) => read(bookingFromText(r.text))).filter((b): b is Booking => b !== undefined);
+    const checklists = ordered(held.checklists.map((r) => read(checklistFromText(r.text))).filter((c): c is Checklist => c !== undefined));
     const copy: Copy = {
       id: record.id,
       name: record.name,
@@ -169,6 +181,7 @@ export function createStore(deps: StoreDeps) {
       graveyard: record.graveyard,
       bookings,
       members: record.members,
+      checklists,
       sequence: record.sequence,
       caughtUp: record.caughtUp,
     };
@@ -265,6 +278,10 @@ export function createStore(deps: StoreDeps) {
     const answer = await call("GET", "/api/trips");
     if (answer.kind !== "answered") return;
     const listed = (answer.body as { trips: { trip: string }[] }).trips.map((t) => t.trip);
+    const started = db;
+    await catchUpLibrary();
+    // A sign-out meanwhile deleted the database this catch-up started on: nothing more is written.
+    if (db !== started) return;
     for (const held of await allTrips(base)) {
       if (!listed.includes(held.id)) {
         await deleteTrip(base, held.id);
@@ -319,7 +336,8 @@ export function createStore(deps: StoreDeps) {
     const members = membersAnswer.body as { members: Member[]; invitations?: Invitation[] };
 
     // 4. One transaction.
-    const transaction = base.transaction(["trips", "pages", "bookings"], "readwrite");
+    const heldChecklists = await heldIds(base, "checklists", id);
+    const transaction = base.transaction(["trips", "pages", "bookings", "checklists"], "readwrite");
     const dates = sync.trip.dates ?? NO_DATES;
     const record: TripRecord = {
       id,
@@ -338,6 +356,7 @@ export function createStore(deps: StoreDeps) {
     transaction.objectStore("trips").put(record);
     writeTexts(transaction.objectStore("pages"), id, sync.pages, pageTexts, heldPages);
     writeTexts(transaction.objectStore("bookings"), id, sync.bookings, bookingTexts, heldBookings);
+    writeTexts(transaction.objectStore("checklists"), id, sync.checklists ?? [], new Map(), heldChecklists);
     await committed(transaction);
     await changed(id, true);
   }
@@ -371,6 +390,73 @@ export function createStore(deps: StoreDeps) {
       if (text !== undefined) store.put({ trip, id: entry.id, text, changed: entry.changed } satisfies TextRecord);
     }
     for (const id of held) if (!keep.has(id)) store.delete([trip, id]);
+  }
+
+  // --- The library (§4.1, §4.2) ---
+
+  async function library(): Promise<Library> {
+    const { templates, account } = await readLibrary(await database());
+    let unreadable = false;
+    const read = templates.map((r) => {
+      const result = checklistFromText(r.text);
+      if (!result.ok) unreadable = true;
+      return result.ok ? result.value : undefined;
+    });
+    if (unreadable) void markLibraryFromStart();
+    return {
+      templates: ordered(read.filter((t): t is Checklist => t !== undefined)),
+      sequence: account?.library?.sequence ?? 0,
+      caughtUp: account?.library?.caughtUp ?? 0,
+    };
+  }
+
+  /** A template a package refused to read: the library's next catch-up starts from the beginning. */
+  async function markLibraryFromStart(): Promise<void> {
+    const base = await database();
+    const record = await readAccount(base);
+    if (record?.library) await writeAccount(base, { ...record, library: { ...record.library, fromStart: true } });
+  }
+
+  /** Tells this window's listeners of the library, and, where this window wrote, every other window (§4.6). */
+  async function libraryChanged(here: boolean): Promise<void> {
+    const current = await library();
+    for (const listener of libraryListeners) listener(current);
+    if (here) channel.postMessage({ library: current.sequence });
+  }
+
+  /** Catches the library up, one catch-up of it at a time. */
+  function catchUpLibrary(): Promise<void> {
+    catchingLibrary = catchingLibrary.then(runCatchUpLibrary).catch(() => undefined);
+    return catchingLibrary;
+  }
+
+  async function runCatchUpLibrary(): Promise<void> {
+    if (blocked) return;
+    const base = await database();
+    const account = await readAccount(base);
+    if (!account?.account) return;
+    const held = account.library;
+    const since = held && !held.fromStart ? held.sequence : undefined;
+    const answer = await call("POST", "/api/library/sync", since === undefined ? {} : { since });
+    if (answer.kind !== "answered") return;
+    const body = answer.body as LibraryBody;
+    const transaction = base.transaction(["templates", "account"], "readwrite");
+    const templates = transaction.objectStore("templates");
+    const listed = new Set(body.templates.map((t) => t.id));
+    const keys = (await done(templates.getAllKeys())) as string[];
+    for (const id of keys) if (!listed.has(id)) templates.delete(id);
+    for (const t of body.templates) if (t.template !== undefined) templates.put({ id: t.id, text: t.template, changed: t.changed } satisfies TemplateRecord);
+    const accounts = transaction.objectStore("account");
+    const current = (await done(accounts.get("me"))) as AccountRecord | undefined;
+    // A sign-out meanwhile leaves the library as it is.
+    if (current?.account !== account.account) {
+      transaction.abort();
+      await committed(transaction).catch(() => undefined);
+      return;
+    }
+    accounts.put({ ...current, library: { sequence: body.sequence, caughtUp: deps.now() } } satisfies AccountRecord);
+    await committed(transaction);
+    await libraryChanged(true);
   }
 
   // --- The open trip (§4.3) ---
@@ -513,6 +599,7 @@ export function createStore(deps: StoreDeps) {
     }
     for (const listeners of watchers.values()) for (const listener of listeners) listener(undefined);
     for (const listener of tripListeners) listener([]);
+    for (const listener of libraryListeners) listener(EMPTY_LIBRARY);
     for (const listener of signedOutListeners) listener();
   }
 
@@ -545,6 +632,9 @@ export function createStore(deps: StoreDeps) {
   }
 
   const trip_ = (id: string) => `/api/trips/${encodeURIComponent(id)}`;
+
+  /** The body that starts a checklist or a template (§4.9). */
+  const startBody = (id: string, start: Start) => ("title" in start ? { id, title: start.title } : { id, from: checklistToText(start.from) });
 
   return {
     open,
@@ -603,6 +693,43 @@ export function createStore(deps: StoreDeps) {
         await catchUp(id);
         return true as const;
       }),
+
+    // §4.9 Checklists and the library.
+    library,
+    onLibrary(listener: (library: Library) => void): () => void {
+      libraryListeners.add(listener);
+      return () => libraryListeners.delete(listener);
+    },
+    addChecklist: (id: string, start: Start) => {
+      const checklist = crypto.randomUUID();
+      return request("POST", `${trip_(id)}/checklists`, startBody(checklist, start), async () => {
+        await catchUp(id);
+        return { checklist };
+      });
+    },
+    deleteChecklist: (id: string, checklist: string) =>
+      request("DELETE", `${trip_(id)}/checklists/${encodeURIComponent(checklist)}`, undefined, async () => {
+        await catchUp(id);
+        return true as const;
+      }),
+    addTemplate: (start: Start) => {
+      const template = crypto.randomUUID();
+      return request("POST", "/api/library/templates", startBody(template, start), async () => {
+        await catchUpLibrary();
+        return { template };
+      });
+    },
+    changeTemplate: (change: string) =>
+      request("POST", "/api/library/changes", { change }, async () => {
+        await catchUpLibrary();
+        return true as const;
+      }),
+    deleteTemplate: (template: string) =>
+      request("DELETE", `/api/library/templates/${encodeURIComponent(template)}`, undefined, async () => {
+        await catchUpLibrary();
+        return true as const;
+      }),
+
     buried: async (id: string, page: string): Promise<Result<Page>> => {
       const got = await request("GET", `${trip_(id)}/buried/${encodeURIComponent(page)}`, undefined, async (body) => (body as { page: string }).page);
       if (!got.ok) return got;

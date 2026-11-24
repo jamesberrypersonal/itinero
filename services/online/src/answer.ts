@@ -6,6 +6,7 @@
 import { env } from "cloudflare:workers";
 import { authenticate, makeNonce, setName, signIn, signOut } from "./accounts.ts";
 import { body, refused, type Refusal } from "./result.ts";
+import { libraryRoutes } from "./library-routes.ts";
 import { membershipRoutes } from "./membership-routes.ts";
 import { connectMembership, tripRoutes } from "./trip-routes.ts";
 import type { Route } from "./route.ts";
@@ -67,7 +68,7 @@ function refusal(code: string, message: string): Refusal {
   return { code, message };
 }
 
-const routes: Route[] = [...accountRoutes, ...tripRoutes, ...membershipRoutes];
+const routes: Route[] = [...accountRoutes, ...tripRoutes, ...membershipRoutes, ...libraryRoutes];
 
 // access/membership hands each change of a trip's members to the trip host.
 connectMembership();

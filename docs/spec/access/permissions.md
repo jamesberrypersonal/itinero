@@ -31,6 +31,8 @@ Deliberately absent:
 - who is making a request, which `access/accounts` establishes
 - storing the grants, or sending them between devices
 - access to one stretch or one firm item of the calendar, which is granted whole
+- a traveller's checklists and templates, which no grant reaches. `planner/trip-host` and
+  `planner/library` give each only to its owner (ADR-0024, a traveller's checklists are their own)
 
 Access passes down a trip's tree of pages, from the trip as its root (ADR-0012, access to a page
 passes down to the pages beneath it). The calendar is granted apart from the pages, and is hidden
@@ -140,8 +142,9 @@ functions of `@itinero/pages`, which `spec/planner/pages.md` specifies.
 
 Behaviour crossing every operation:
 
-- **An admin has edit for everything.** Every level function gives `edit` for a `Who` whose
-  `admin` is true, and `authorise` allows every request of an admin.
+- **An admin has edit for everything the grants cover.** Every level function gives `edit` for a
+  `Who` whose `admin` is true, and `authorise` allows every request of an admin. A checklist is not
+  among them, since no `Request` names one (§2).
 - **Levels are ordered** none, then view, then edit. A request needing view is allowed at view or
   edit.
 - **The tree is the pages' own.** The permissions component reads a page's parent from the page's

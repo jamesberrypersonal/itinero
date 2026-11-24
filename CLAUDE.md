@@ -15,11 +15,14 @@ rules, and `tools/doc-scaffold` starts new documents as skeletons that pass it.
   `packages/itinerary/` (`@itinero/itinerary`), which uses it, `packages/pages/`
   (`@itinero/pages`), which imports only its types, and `packages/bookings/`
   (`@itinero/bookings`), which uses trip-time, and holds the bookings list and each kind of booking.
+  `packages/checklists/` (`@itinero/checklists`) imports only trip-time's types, and holds each
+  traveller's checklists and templates.
   `packages/permissions/` (`@itinero/permissions`) uses pages, and decides what each traveller may
   see and change. `package.json` at the root declares the npm workspace.
 - `services/online/` (`@itinero/online`) is the Worker of the online side, on Cloudflare, with its
-  D1 database. It holds `access/accounts` and `access/membership`, and `planner/trip-host`: a
-  Durable Object for each trip, `TripHost`, whose logic is in `src/trip-core.ts`.
+  D1 database. It holds `access/accounts`, `access/membership`, `planner/library`, whose logic is
+  in `src/library.ts`, and `planner/trip-host`: a Durable Object for each trip, `TripHost`, whose
+  logic is in `src/trip-core.ts`.
 - `apps/web/` (`@itinero/web`) is the web app, built with Preact and Vite, and served by the Worker
   as its static files. It holds `web/shell`, `web/places`, `web/trip-store` and `web/screens`.
   `npm run build-borders` builds the map of country borders into
@@ -39,6 +42,7 @@ just test-docs                  # the whole test suites of doc-check and doc-sca
 just test-trip-time             # the test suite of @itinero/trip-time
 just test-itinerary             # the test suite of @itinero/itinerary
 just test-pages                 # the test suite of @itinero/pages
+just test-checklists            # the test suite of @itinero/checklists
 just test-bookings              # the test suite of @itinero/bookings
 just test-permissions           # the test suite of @itinero/permissions
 just test-online                # the test suite of the online side, in Wrangler

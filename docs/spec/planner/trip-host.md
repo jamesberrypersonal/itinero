@@ -11,8 +11,8 @@ tells each open device when a trip changes.
 
 ## 2. Scope
 
-The trip host covers a trip's calendar, pages, grants of access and bookings as stored online, the
-changes to them, catching a device up, telling open devices of changes, and reading and restoring pages in the
+The trip host covers a trip's calendar, pages, grants of access, bookings and each traveller's
+checklists as stored online, the changes to them, catching a device up, telling open devices of changes, and reading and restoring pages in the
 graveyard.
 
 Three things act on it:
@@ -31,6 +31,9 @@ Deliberately absent:
 - the rules of the calendar and the pages, which `planner/itinerary` and `planner/pages` hold
 - the rules of a booking, which `bookings/list`, the component that checks and orders a trip's
   bookings, holds with the components of each kind of booking
+- the rules of a checklist, which `planner/checklists`, the component that holds checklists and
+  templates, holds
+- a traveller's templates, which `planner/library` holds outside any trip
 - accepting a change made with no connection, or merging changes made while apart (ADR-0004, a trip
   is read-only offline)
 - merging two travellers' edits to one page, which is future work
@@ -63,15 +66,18 @@ may show.
 |---|---|---|
 | `POST /api/trips` | `{ "name": ..., "first": ..., "last": ..., "countries": [ ... ] }` | `{ "trip": ... }`, the new trip's identifier, with status 201 (§4.2) |
 | `GET /api/trips` | None | `{ "trips": [ { "trip": ..., "name": ..., "dates": { "first": ..., "last": ... } } ] }`: each trip the account is on (§4.2) |
-| `POST /api/trips/{trip}/changes` | `{ "target": "calendar" \| "pages" \| "grants" \| "bookings", "change": ..., "agreed": ... }` | `{ "sequence": ... }` (§4.3) |
+| `POST /api/trips/{trip}/changes` | `{ "target": "calendar" \| "pages" \| "grants" \| "bookings" \| "checklists", "change": ..., "agreed": ... }` | `{ "sequence": ... }` (§4.3) |
 | `POST /api/trips/{trip}/sync` | `{ "since": ..., "holdsCalendar": ... }` | What the device may hold that changed since (§4.4) |
 | `POST /api/trips/{trip}/pages` | `{ "pages": [ ... ] }` | `{ "pages": [ ... ] }`: the text form of each page named that the traveller may see (§4.4) |
 | `POST /api/trips/{trip}/bookings` | `{ "bookings": [ ... ] }` | `{ "bookings": [ ... ] }`: the text form of each booking named that the traveller may see (§4.4) |
+| `POST /api/trips/{trip}/checklists` | `{ "id": ..., "title": ... }`, or `{ "id": ..., "from": ... }` | `{ "sequence": ... }`, with status 201 (§4.8) |
+| `DELETE /api/trips/{trip}/checklists/{id}` | None | `{ "sequence": ... }` (§4.8) |
 | `GET /api/trips/{trip}/buried/{page}` | None | `{ "page": ... }`: a page in the graveyard, in its text form, to an admin (§4.6) |
 | `GET /api/trips/{trip}/live` | None | A WebSocket that is told of each change (§4.5) |
 
 A `change` is written in the text form of its package: the itinerary's for `calendar`, the pages'
-for `pages`, the permissions' for `grants`, and the bookings' for `bookings`. `countries` is a list of country codes, from the
+for `pages`, the permissions' for `grants`, the bookings' for `bookings`, and the checklists' for
+`checklists`. `from` is a checklist or a template, in the checklists' text form. `countries` is a list of country codes, from the
 itinerary's list of countries. `agreed`, where present, is the number of travellers the traveller
 agreed would come to see a moved page.
 
@@ -83,9 +89,14 @@ agreed would come to see a moved page.
 | `membership-only` | 403 | An `add` or a `remove` grant sent by a device. Only `access/membership` sends them |
 | `unknown-traveller` | 409 | A booking naming a traveller who is not on the trip. `details.traveller` names them |
 | `agree-first` | 409 | A move that would let more travellers see a page than `agreed` says. `details.count` gives how many |
+| `unknown-checklist` | 404 | A change or a delete naming a checklist the traveller does not hold on the trip, whether or not another traveller holds one of that identifier |
+| `not-yours` | 403 | A `from` whose owner is not the traveller who sent it |
+| `duplicate-checklist` | 409 | A new checklist whose identifier the traveller already holds on the trip |
+| `checklists-full` | 409 | A new checklist for a traveller who holds 50 on the trip |
 | `malformed` | 400 | A body not in the forms above |
 
-Every refusal from `access/permissions`, `planner/itinerary`, `planner/pages` and `bookings/list` is
+Every refusal from `access/permissions`, `planner/itinerary`, `planner/pages`, `bookings/list` and
+`planner/checklists` is
 returned with its own code and details unchanged, such as `no-edit`, `stale` or `cycle`. A refusal for missing
 access has status 403, and any other has status 409.
 
@@ -102,8 +113,11 @@ type Member = Who & { creator: boolean };        // the Worker gives it (§4)
 class TripHost {
   create(trip: string, creator: Member, name: string, first: string, last: string,
          countries: readonly string[]): Promise<Result<true>>;
-  change(who: Member, target: "calendar" | "pages" | "grants" | "bookings", change: string,
-         agreed?: number): Promise<Result<{ sequence: number }>>;
+  change(who: Member, target: "calendar" | "pages" | "grants" | "bookings" | "checklists",
+         change: string, agreed?: number): Promise<Result<{ sequence: number }>>;
+  addChecklist(who: Member, id: string, start: { title: string } | { from: string })
+         : Promise<Result<{ sequence: number }>>;
+  deleteChecklist(who: Member, id: string): Promise<Result<{ sequence: number }>>;
   sync(who: Member, since: number | undefined, holdsCalendar: boolean): Promise<Result<Sync>>;
   pages(who: Member, ids: readonly string[]): Promise<Result<readonly string[]>>;
   bookings(who: Member, ids: readonly string[]): Promise<Result<readonly string[]>>;
@@ -142,9 +156,9 @@ Behaviour crossing every operation:
   (`spec/access/membership.md` §4.5).
 - **Every change and every read is checked first.** The trip host asks `access/permissions`'
   `authorise`, with the trip's grants, pages and member (ACC-NFR1), apart from the checks §4.3
-  names that it makes itself: who may set the trip's name and each traveller's dates, and the grant
-  changes only `access/membership` sends. A refusal is returned unchanged, and nothing is read or
-  written.
+  names that it makes itself: who may set the trip's name and each traveller's dates, the grant
+  changes only `access/membership` sends, and every request about a checklist. A refusal is
+  returned unchanged, and nothing is read or written.
 - **One request at a time.** A Durable Object handles one request at a time. Each change is
   checked, applied and stored in one transaction of its database, so no change sees another half
   done.
@@ -153,7 +167,7 @@ Behaviour crossing every operation:
 
 ### 4.1 What the Durable Object stores
 
-*Plumbing:* each trip's Durable Object holds five tables:
+*Plumbing:* each trip's Durable Object holds six tables:
 
 | Table | Holds |
 |---|---|
@@ -162,6 +176,7 @@ Behaviour crossing every operation:
 | `grants` | One row: the trip's grants, in the permissions' text form |
 | `bookings` | One row for each booking, keyed by its identifier, in the bookings' text form, with its `changed` and the travellers it names, so that a catch-up works out which bookings a traveller may see without reading every booking's text |
 | `creator` | One row: the creator's account |
+| `checklists` | One row for each checklist, keyed by its owner and its identifier, with its `changed`, its `order`, and its text form in the checklists' text form, so that a catch-up reads only the rows of the traveller asking |
 
 The trip host reads a page's text only where it gives or writes that text: for a page a request
 names, or for a page a catch-up gives because it changed since the device's last one. Every request
@@ -219,16 +234,20 @@ one's name and dates, from its `summary`.
    `change-booking` naming `before`, where `before` names anyone, and for one naming `after`, where
    `after` names anyone. Each traveller of `after` must be held in the grants, or named in `before`,
    or the change is refused with `unknown-traveller` (`PLN:HOST-F9`). A booking therefore keeps a
-   traveller removed from the trip, and a change cannot add one.
+   traveller removed from the trip, and a change cannot add one. For `checklists`, the trip host
+   reads the checklist the change's `checklist` names among the traveller's own, and refuses with
+   `unknown-checklist` where they hold none of that identifier, whatever their access (§4.8).
 2. **A move that widens who may see a page** (`PLN:HOST-F4`). For a `move`, the trip host asks
    `access/permissions`'s `widens`. Where it gives more than 0, and more than `agreed`, the change
    is refused with `agree-first`, with the count in `details.count`.
 3. **The change itself.** The change is applied with its package's `apply`: the itinerary's, the
-   pages', `applyGrant`, or the bookings', given the booking held. Any refusal is returned
+   pages', `applyGrant`, the bookings', given the booking held, or the checklists', given the
+   checklist held. Any refusal is returned
    unchanged, such as the pages' `stale`, which holds the page's text as it stands (`PLN:HOST-F3`).
 
 Where every check passes, the trip host raises the `sequence`, and stores each record the change
-wrote: the trip, the one page `apply` wrote, the grants, or the one booking `apply` gave. A removed
+wrote: the trip, the one page `apply` wrote, the grants, the one booking `apply` gave, or the one
+checklist, with its `order`. A removed
 booking's row is deleted. It raises the sequence and stores or deletes the records in one
 transaction. It then tells every open socket of the new sequence (§4.5), and gives
 `{ "sequence": ... }`.
@@ -246,7 +265,9 @@ stopped part way by sending the same change again:
 
 A `remove` also applies to the calendar a `traveller-dates` change with no `dates` for the
 traveller, in the same transaction, so that their own dates leave with them
-(`spec/planner/itinerary.md` §4.9).
+(`spec/planner/itinerary.md` §4.9). A `remove` leaves the traveller's checklists in place. No
+device is given them while the grants do not hold the traveller, and an `add` for the same account
+gives them back, as the section on checklists below gives.
 
 `touch`, from `access/membership`, raises the `sequence`, tells every open socket of it, and writes
 nothing else (`PLN:HOST-F6`). `access/membership` calls it when a member is made an admin, which
@@ -268,6 +289,7 @@ the trip's members (`spec/web/trip-store.md` §4.2), and so marks the new admin 
 | `pages` | For each page of `seen`, from `access/permissions`, its identifier and its `changed`. A page whose `changed` is after `since` also holds its text form |
 | `graveyard` | For each page the pages' `graveyard` lists whose `seenBy` holds the traveller, or for every one to an admin: its identifier, its title, and the number of pages that went with it |
 | `bookings` | For each booking whose `bookingLevel` for the traveller is view or edit, its identifier and its `changed`. A booking whose `changed` is after `since` also holds its text form |
+| `checklists` | For each checklist the traveller owns on the trip, in the order the checklists' `ordered` gives, its identifier and its `changed`. A checklist whose `changed` is after `since` also holds its text form. Another traveller's checklist is never listed, an admin's catch-up included |
 
 A `since` that is absent counts as 0, so every page holds its text form. The device then:
 
@@ -280,6 +302,7 @@ A `since` that is absent counts as 0, so every page holds its text form. The dev
   may no longer see it (`PLN:HOST-F9`)
 - fetches, with `POST /api/trips/{trip}/bookings`, each booking `bookings` lists without its text
   that the device does not hold, such as every booking of a trip once its traveller is made an admin
+- drops each checklist it holds that `checklists` does not list, since its traveller deleted it
 
 `pages(who, ids)` gives the text form of each page named that `seen` holds, and leaves out any
 other, without saying why. `bookings(who, ids)` does the same for each booking named whose
@@ -338,7 +361,8 @@ runs it from anywhere in the repository.
   applied once, with its own sequence.
 - **Leak tests** catch up, as a traveller hidden from part of a trip, from every sequence the trip
   has held, and confirm nothing given names a page, a stretch, a grant or a booking that traveller
-  may not see (`PLN:HOST-NFR1`).
+  may not see (`PLN:HOST-NFR1`). They do the same as an admin, and confirm nothing given names
+  another traveller's checklist.
 - **Cost tests** count the requests, the rows read and written, and the storage of the day of
   `PLN:HOST-NFR2`, and confirm they are within the free plan's limits. They run thirty minutes of
   the day, and multiply each count by eight for its four hours. They also measure the processor time
@@ -355,6 +379,44 @@ runs it from anywhere in the repository.
   there the cost tests report each time and do not fail on it. The budget is held on a developer's
   machine.
 
+### 4.8 Checklists
+
+*Porcelain:* the trip host holds each traveller's checklists on the trip, and checks every request
+about one itself, without asking `access/permissions` (`PLN:HOST-F10`). A checklist is its
+traveller's alone, so the only check is whose it is (ADR-0024, a traveller's checklists are their
+own):
+
+- **Who may.** Any traveller the grants hold may add, change and delete their own checklists,
+  whatever their access to the trip. Being an admin changes nothing.
+- **Which checklist.** A request names a checklist among the traveller's own, by the pair of their
+  account and its identifier. One the traveller does not hold is refused with `unknown-checklist`,
+  the same way whether another traveller holds that identifier or nobody does.
+
+`addChecklist(who, id, start)` reads the identifier and `order` of every checklist the traveller
+holds on the trip. It refuses with `checklists-full` a traveller who holds 50, and with
+`duplicate-checklist` an identifier they already hold. It then makes the checklist with
+`planner/checklists`, on the trip, given those checklists as its list, so the new one sorts last:
+
+- **With a title**, with `newChecklist`, owned by the traveller's account.
+- **With `from`**, with `copyChecklist`, once `checklistFromText` has read `from`. A `from` whose
+  `owner` is not the traveller's account is refused with `not-yours`. `from` may be a template, or a
+  checklist on any trip.
+
+A device starts a checklist from a template by sending the template as `from`, from its own copy
+of the traveller's library. The trip host never asks `planner/library` for it. The template is the
+traveller's own, so a device that sends altered text alters only its own traveller's checklist.
+
+`deleteChecklist(who, id)` deletes the traveller's checklist for good. A change to a checklist is a
+`checklists` change, applied as §4.3 gives. A move among the traveller's checklists is a `place`
+change, which the device works out with `placeAfter` from its own copy of the trip. Each of the
+three raises the `sequence`, and tells every open socket of it (§4.5). A device whose traveller's
+checklists did not change is given nothing by its catch-up, so the message tells it nothing.
+
+A removed traveller's checklists stay in the `checklists` table. While the grants do not hold the
+traveller, every request of theirs is refused with `not-a-member`, so nothing reaches the
+checklists. A traveller who rejoins has the same account, and so owns the same rows. Their device
+holds no copy of the trip, so its first catch-up has no `since`, and is given each checklist whole.
+
 ## 5. Resources
 
 | Resource | Path | Owned by |
@@ -369,7 +431,7 @@ runs it from anywhere in the repository.
 | The recipe | `test-online`, in the `justfile` at the repository root | Whoever keeps the planner's roadmap |
 
 The Worker's runtime dependencies are `@itinero/itinerary`, `@itinero/pages`,
-`@itinero/permissions`, `@itinero/bookings` and `@itinero/trip-time`. Nothing deletes a trip's
+`@itinero/permissions`, `@itinero/bookings`, `@itinero/checklists` and `@itinero/trip-time`. Nothing deletes a trip's
 database, since a trip cannot be deleted yet (`ACC-NR4`).
 
 ## 6. Quality attributes
@@ -377,7 +439,9 @@ database, since a trip cannot be deleted yet (`ACC-NR4`).
 - **One change at a time** (`PLN:HOST-F2`). A Durable Object handles one request at a time, and
   stores each change in one transaction.
 - **Nothing leaks** (`PLN:HOST-NFR1`). Every read goes through `seen`, `bookingLevel` or
-  `authorise`, and only an admin is given another traveller's grant. Every refusal for a trip the
+  `authorise`, and only an admin is given another traveller's grant. Every read of a checklist
+  names the account asking as its owner, so no traveller, an admin included, is given another's
+  (§4.8). Every refusal for a trip the
   account is not on is the same, and a socket carries only a sequence.
 - **Grants and members agree, or nobody gets in.** A grant with no member is never reached, and a
   member with no grant is refused with `not-a-member`. `grant` is safe to repeat, so either is put
@@ -405,6 +469,9 @@ database, since a trip cannot be deleted yet (`ACC-NR4`).
 | [PLN:HOST-F7](../../requirements/planner/trip-host.md#^pln-host-f7) | `grant`, safe to repeat, in §4.3, and `not-a-member` on catching up, in §4.4. |
 | [PLN:HOST-F8](../../requirements/planner/trip-host.md#^pln-host-f8) | `buried`, and the `restore` change, in §4.6. |
 | [ACC-F10](../../requirements/access/access.md#^acc-f10) | `seenBy`, recorded at each delete, and the `graveyard` of the catch-up (§4.4, §4.6). Refusing to open or restore a page to a traveller who is not an admin is `access/permissions`. |
+| [PLN:HOST-F10](../../requirements/planner/trip-host.md#^pln-host-f10) | The `checklists` table of §4.1, `addChecklist` and `deleteChecklist`, the checks of §4.8, a `remove` that keeps a traveller's checklists (§4.3), and `checklists` in the catch-up of §4.4. |
+| [ACC-F14](../../requirements/access/access.md#^acc-f14) | Each checklist given only to its owner, whatever the grants hold, and the checks of §4.8 made without `access/permissions`. A traveller's templates are `planner/library`. |
+| [PLN-F18](../../requirements/planner/planner.md#^pln-f18) | Each traveller's checklists on a trip, given to their devices alone, and kept while they are away from the trip (§4.8). The checklists themselves are `planner/checklists`. |
 | [PLN:HOST-F9](../../requirements/planner/trip-host.md#^pln-host-f9) | The `bookings` table of §4.1, the checks of a booking change in §4.3, and `bookings` in the catch-up of §4.4. |
 | [PLN:HOST-NFR1](../../requirements/planner/trip-host.md#^pln-host-nfr1) | `seen` for every read, `you` holding only the traveller's own grant, `grants` given to an admin alone, and sockets carrying only a sequence (§4.4, §4.5). |
 | [PLN:HOST-NFR2](../../requirements/planner/trip-host.md#^pln-host-nfr2) | One request for each change and each catch-up, and hibernating sockets (§6). |
@@ -415,7 +482,7 @@ database, since a trip cannot be deleted yet (`ACC-NR4`).
 | [ACC-F9](../../requirements/access/access.md#^acc-f9) | The `agree-first` refusal, with the count (§4.3). |
 | [ACC-F11](../../requirements/access/access.md#^acc-f11) | `grant` applying each removal, and a device deleting its copy on `not-a-member` (§4.3, §4.4). |
 | [ACC-F12](../../requirements/access/access.md#^acc-f12) | Catching each device up on what `seen` gives (§4.4). |
-| [ACC-NFR1](../../requirements/access/access.md#^acc-nfr1) | Asking `authorise` before every change and every read (§4). |
+| [ACC-NFR1](../../requirements/access/access.md#^acc-nfr1) | Asking `authorise` before every change and every read (§4), and naming the traveller asking as the owner of every checklist read or changed (§4.8). |
 | [ACC-F6](../../requirements/access/access.md#^acc-f6) | Giving each device only the bookings whose `bookingLevel` is view or edit, and checking each change to a booking against its travellers before and after (§4.3, §4.4). |
 | [BKG-F1](../../requirements/bookings/bookings.md#^bkg-f1) | Applying an added booking once `authorise` allows it, and the `unknown-traveller` refusal (§4.3). The booking's checks are `bookings/list`. |
 | [BKG-F5](../../requirements/bookings/bookings.md#^bkg-f5) | Checking a change or a removal against the travellers the booking names before and after it (§4.3). The `stale` refusal is `bookings/list`. |

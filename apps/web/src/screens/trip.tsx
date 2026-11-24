@@ -16,6 +16,8 @@ import { go, Link, useLocation } from "./router.tsx";
 import { useCanChange, useNow, useOnline, useShellState, useStyle } from "./state.ts";
 import { Button, Empty, Field, Group, Refused, Row } from "./ui.tsx";
 import { datesWords, momentWords } from "./words.ts";
+import { checklistPath, progressWords } from "./checklists.tsx";
+import { progress } from "@itinero/checklists";
 
 /** A traveller's name, with a former member marked (§4.7). */
 export function nameOf(copy: Copy, account: string): string {
@@ -48,6 +50,7 @@ const BAR = [
   { rest: "/calendar", label: "Calendar", icon: "M4 6h16v14H4zM4 10h16M8 3v5M16 3v5M8 14h2M14 14h2M8 17h2" },
   { rest: "/bookings", label: "Bookings", icon: "M4 7h16v12H4zM8 4v6M16 4v6M4 11h16" },
   { rest: "/pages", label: "Pages", icon: "M6 3h9l4 4v14H6zM15 3v4h4M9 12h7M9 16h7" },
+  { rest: "/checklists", label: "Checklists", icon: "M4 6.5l1.6 1.6L8.5 5M4 12.5l1.6 1.6 2.9-3.1M4 18.5l1.6 1.6 2.9-3.1M11 7h9M11 13h9M11 19h9" },
   { rest: "/members", label: "Members", icon: "M9 11a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7zM3 20c.8-3.5 3-5.5 6-5.5s5.2 2 6 5.5M16 4.5a3.2 3.2 0 0 1 0 6.3M17.5 14.6c1.8.7 3 2.4 3.5 5.4" },
 ] as const;
 
@@ -111,7 +114,7 @@ export function TripFrame({ id, children }: { id: string; children: (copy: Copy)
   );
 }
 
-/** A trip's menu: the trip's settings, the list of trips, and signing out (WEB:SCREENS-F9). */
+/** A trip's menu: the trip's settings, the library, the list of trips, and signing out (WEB:SCREENS-F9, WEB:SCREENS-F12). */
 export function TripMenu({ id }: { id: string }) {
   const [open, setOpen] = useState(false);
   return (
@@ -127,6 +130,9 @@ export function TripMenu({ id }: { id: string }) {
         <div class="menu-list" role="menu">
           <Link role="menuitem" href={tripPath(id, "/settings")}>
             Settings
+          </Link>
+          <Link role="menuitem" href="/library">
+            Your templates
           </Link>
           <Link role="menuitem" href="/">
             All trips
@@ -281,6 +287,24 @@ function Dates({ copy, account }: { copy: Copy; account: string }) {
   );
 }
 
+/** Before the traveller's first date, their checklists with an item not yet ticked (§4.3, WEB:SCREENS-F13). */
+function NotDone({ copy }: { copy: Copy }) {
+  const left = copy.checklists.filter((c) => {
+    const { ticked, of } = progress(c);
+    return of > 0 && ticked < of;
+  });
+  if (left.length === 0) return null;
+  return (
+    <Group heading="Before you go">
+      {left.map((c) => (
+        <Row key={c.id} href={checklistPath(copy.id, c.id)} detail={progressWords(c)}>
+          <span data-not-done={c.id}>{c.title}</span>
+        </Row>
+      ))}
+    </Group>
+  );
+}
+
 /** A trip's home page, for the traveller looking (§4.3, WEB:SCREENS-F2). */
 export function Home({ copy, account }: { copy: Copy; account: string }) {
   const now = useNow();
@@ -315,6 +339,7 @@ export function Home({ copy, account }: { copy: Copy; account: string }) {
           ))}
         </Group>
       ) : null}
+      {today < copy.mine.first ? <NotDone copy={copy} /> : null}
       <Country copy={copy} />
       <Dates copy={copy} account={account} />
       {copy.bookings.length === 0 && copy.pages.pages.length === 0 ? <Empty>Nothing in this trip yet.</Empty> : null}

@@ -7,6 +7,7 @@ import { changeToText as bookingChange, type Booking } from "@itinero/bookings";
 import { changeToText as calendarChange, type Change as CalendarChange } from "@itinero/itinerary";
 import { changeToText as pageChange, pageFromText, type Change as PageChange } from "@itinero/pages";
 import { grantChangeToText, type GrantChange } from "@itinero/permissions";
+import { apply as applyToChecklist, changeToText as checklistChange, checklistFromText, checklistToText, newChecklist, type Change as ChecklistChange, type Checklist } from "@itinero/checklists";
 import { describe, expect, test } from "vitest";
 import type { Sync } from "../src/trip-core.ts";
 import { api, expectRefused, json, signIn, type SignedIn } from "./helpers.ts";
@@ -634,5 +635,150 @@ describe("PLN:HOST-NFR1 — nothing leaves the trip host that the traveller aski
     const none = await refusal(await syncResponse(crypto.randomUUID(), outsider));
     expect(real).toEqual(none);
     expect(real).toMatchObject({ status: 404, code: "not-a-member" });
+  });
+});
+
+// §4.8 Checklists: each traveller's own, given to them alone, an admin included.
+
+/** A template of the traveller's own, Before leaving, as their device holds it in their library. */
+function beforeLeaving(owner: string): string {
+  const made = newChecklist("before-leaving", owner, "Before leaving", []);
+  if (!made.ok) throw new Error(made.refusal.message);
+  let template: Checklist = made.value;
+  let after: string | undefined;
+  for (const [n, text] of ["Passport valid for six months", "Copies of documents", "Travel insurance"].entries()) {
+    const change: ChecklistChange = { op: "add", checklist: template.id, item: `i${n + 1}`, text };
+    if (after !== undefined) change.after = after;
+    after = change.item;
+    const next = applyToChecklist(template, change);
+    if (!next.ok) throw new Error(next.refusal.message);
+    template = next.value;
+  }
+  return checklistToText(template);
+}
+
+const startChecklist = (trip: string, by: SignedIn, body: Record<string, unknown>) =>
+  api(`/api/trips/${trip}/checklists`, { method: "POST", session: by.session, body });
+const tickOf = (trip: string, by: SignedIn, change: ChecklistChange) =>
+  api(`/api/trips/${trip}/changes`, { method: "POST", session: by.session, body: { target: "checklists", change: checklistChange(change) } });
+const deleteChecklist = (trip: string, by: SignedIn, id: string) => api(`/api/trips/${trip}/checklists/${id}`, { method: "DELETE", session: by.session });
+
+function checklistOf(text: string): Checklist {
+  const read = checklistFromText(text);
+  if (!read.ok) throw new Error(read.refusal.message);
+  return read.value;
+}
+
+describe("PLN:HOST-F10, PLN-F18, ACC-F14 — the trip host holds each traveller's checklists on a trip, and gives them to that traveller alone", () => {
+  async function setUp() {
+    const ana = await traveller("Ana");
+    const sam = await traveller("Sam");
+    const trip = await createTrip(ana);
+    await join(trip, ana, sam, { trip: "view", calendar: "none" });
+    return { ana, sam, trip };
+  }
+
+  test("a traveller with view access starts a checklist from their template, and ticks it, each raising the sequence", async () => {
+    const { sam, trip } = await setUp();
+    const before = (await sync(trip, sam)).sequence;
+    const started = await startChecklist(trip, sam, { id: "mine", from: beforeLeaving(sam.account) });
+    expect(started.status).toBe(201);
+    expect((await json<{ sequence: number }>(started)).sequence).toBe(before + 1);
+    const ticked = await tickOf(trip, sam, { op: "tick", checklist: "mine", item: "i1", ticked: true });
+    expect(ticked.status).toBe(200);
+    expect((await json<{ sequence: number }>(ticked)).sequence).toBe(before + 2);
+    const held = (await sync(trip, sam)).checklists;
+    expect(held).toHaveLength(1);
+    const checklist = checklistOf(held[0]!.text!);
+    expect(checklist.trip).toBe(trip);
+    expect(checklist.items.map((i) => i.ticked === true)).toEqual([true, false, false]);
+  });
+
+  test("the creator, an admin, is given nothing of it, and their tick and delete are refused as for a checklist nobody holds", async () => {
+    const { ana, sam, trip } = await setUp();
+    expect((await startChecklist(trip, sam, { id: "mine", from: beforeLeaving(sam.account) })).status).toBe(201);
+    const admin = await sync(trip, ana);
+    expect(admin.checklists).toEqual([]);
+    expect(JSON.stringify(admin)).not.toContain("Before leaving");
+    const nobody = await refusal(await tickOf(trip, ana, { op: "tick", checklist: "nowhere", item: "i1", ticked: true }));
+    expect(nobody).toMatchObject({ status: 404, code: "unknown-checklist" });
+    expect(await refusal(await tickOf(trip, ana, { op: "tick", checklist: "mine", item: "i1", ticked: true }))).toEqual(nobody);
+    expect(await refusal(await deleteChecklist(trip, ana, "mine"))).toEqual(await refusal(await deleteChecklist(trip, ana, "nowhere")));
+    expect((await sync(trip, sam)).checklists).toHaveLength(1);
+  });
+
+  test("a checklist started from another traveller's template is refused, with the reason", async () => {
+    const { ana, sam, trip } = await setUp();
+    await expectRefused(await startChecklist(trip, sam, { id: "theirs", from: beforeLeaving(ana.account) }), 403, "not-yours");
+  });
+
+  test("a traveller removed and invited back is given their checklist again, with its tick", async () => {
+    const { ana, sam, trip } = await setUp();
+    expect((await startChecklist(trip, sam, { id: "mine", from: beforeLeaving(sam.account) })).status).toBe(201);
+    await tickOf(trip, sam, { op: "tick", checklist: "mine", item: "i2", ticked: true });
+    expect((await api(`/api/trips/${trip}/members/${sam.account}`, { method: "DELETE", session: ana.session })).status).toBeLessThan(300);
+    await expectRefused(await syncResponse(trip, sam), 404, "not-a-member");
+    await join(trip, ana, sam, { trip: "view", calendar: "none" });
+    const back = (await sync(trip, sam)).checklists;
+    expect(back).toHaveLength(1);
+    expect(checklistOf(back[0]!.text!).items.map((i) => i.ticked === true)).toEqual([false, true, false]);
+  });
+
+  test("a deleted checklist is no longer listed, and a device holding it drops it", async () => {
+    const { sam, trip } = await setUp();
+    expect((await startChecklist(trip, sam, { id: "mine", title: "Packing" })).status).toBe(201);
+    const held = await sync(trip, sam);
+    expect((await deleteChecklist(trip, sam, "mine")).status).toBe(200);
+    const after = await sync(trip, sam, held.sequence);
+    expect(after.checklists).toEqual([]);
+    await expectRefused(await deleteChecklist(trip, sam, "mine"), 404, "unknown-checklist");
+  });
+
+  test("the 51st checklist is refused, with the reason", async () => {
+    const { sam, trip } = await setUp();
+    for (let n = 0; n < 50; n++) expect((await startChecklist(trip, sam, { id: `c${n}`, title: `List ${n}` })).status).toBe(201);
+    expect(await expectRefused(await startChecklist(trip, sam, { id: "c50", title: "One more" }), 409, "checklists-full")).toMatch(/50/);
+  });
+
+  test("a catch-up lists the traveller's checklists in their order, with the text of only those changed since", async () => {
+    const { sam, trip } = await setUp();
+    for (const [id, title] of [["a", "Before leaving"], ["b", "Packing"], ["c", "Last day"]]) {
+      expect((await startChecklist(trip, sam, { id, title })).status).toBe(201);
+    }
+    const first = await sync(trip, sam);
+    expect(first.checklists.map((c) => checklistOf(c.text!).title)).toEqual(["Before leaving", "Packing", "Last day"]);
+    await tickOf(trip, sam, { op: "place", checklist: "c", order: "0V" });
+    const later = await sync(trip, sam, first.sequence);
+    expect(later.checklists.map((c) => [c.id, c.text !== undefined])).toEqual([["c", true], ["a", false], ["b", false]]);
+  });
+
+  test("the refusals of §3.2 for checklists", async () => {
+    const { sam, trip } = await setUp();
+    for (const body of [{}, { id: "x" }, { id: "x", title: "X", from: "{}" }, { id: "x", title: 1 }, { id: "x", title: "X", extra: true }]) {
+      await expectRefused(await startChecklist(trip, sam, body), 400, "malformed");
+    }
+    expect((await startChecklist(trip, sam, { id: "x", title: "X" })).status).toBe(201);
+    await expectRefused(await startChecklist(trip, sam, { id: "x", title: "Again" }), 409, "duplicate-checklist");
+    await expectRefused(await startChecklist(trip, sam, { id: "y", title: "  " }), 409, "bad-title");
+    await expectRefused(await tickOf(trip, sam, { op: "tick", checklist: "x", item: "nowhere", ticked: true }), 409, "unknown-item");
+  });
+});
+
+describe("PLN:HOST-NFR1, ACC-NFR1 — no traveller is given another's checklist, an admin included", () => {
+  test("an admin's catch-up from every sequence names no other traveller's checklist", async () => {
+    const ana = await traveller("Ana");
+    const sam = await traveller("Sam");
+    const trip = await createTrip(ana);
+    await join(trip, ana, sam, { trip: "edit", calendar: "view" });
+    expect((await startChecklist(trip, sam, { id: "sams-secret", title: "Surprise for Ana" })).status).toBe(201);
+    await tickOf(trip, sam, { op: "add", checklist: "sams-secret", item: "gift", text: "Wrap the gift" });
+    expect((await startChecklist(trip, ana, { id: "anas", title: "Ana's own" })).status).toBe(201);
+    const latest = (await sync(trip, ana)).sequence;
+    for (let since = 0; since <= latest; since++) {
+      const text = JSON.stringify(await sync(trip, ana, since));
+      for (const hidden of ["sams-secret", "Surprise", "Wrap the gift"]) expect(text, `a catch-up from ${since} names ${hidden}`).not.toContain(hidden);
+    }
+    const own = await sync(trip, sam);
+    expect(own.checklists.map((c) => c.id)).toEqual(["sams-secret"]);
   });
 });

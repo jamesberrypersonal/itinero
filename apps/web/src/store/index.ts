@@ -4,7 +4,7 @@
 import * as shell from "../shell/index.ts";
 import { createStore } from "./store.ts";
 
-export type { Copy, Invitation, Member, Result, Summary, Target } from "./types.ts";
+export type { Copy, Invitation, Library, Member, Result, Start, Summary, Target } from "./types.ts";
 
 /** Every 60 seconds while the device is offline, the trip store tries again, to learn it is back (§4.2). */
 const RETRY_OFFLINE = 60_000;
@@ -52,4 +52,11 @@ export const {
   makeAdmin,
   remove,
   buried,
+  library,
+  onLibrary,
+  addChecklist,
+  deleteChecklist,
+  addTemplate,
+  changeTemplate,
+  deleteTemplate,
 } = store;

@@ -5,12 +5,51 @@
 The planner holds each trip: the calendar a traveller pencils it in on, the dates that are fixed,
 and the pages where travellers write up their research. Phase 0 designs it: the requirements and
 specifications for the planner and its components, before any of it is built. Phase 1 builds it,
-one component at a time, starting from the components that depend on no other.
+one component at a time, starting from the components that depend on no other. Phase 2 designs and
+builds each traveller's checklists, and the library of templates they start from.
 
 This roadmap also plans `shared/trip-time`, the component that holds the local dates and times of
 the planner's itinerary. The planner is the first system that needs that component.
 
 ## Completed
+
+### Phase 2 — Checklists
+
+#### Milestone Planner-2.2 — Checklists built
+
+- `planner/checklists` is built as `@itinero/checklists`, in `packages/checklists/`, as its
+  specification gives it. It imports only types from `@itinero/trip-time`, and has no runtime
+  dependency.
+- Its test suite proves each requirement of `planner/checklists` by the verification it carries,
+  except the checks of `PLN:CHECKLISTS-NFR1` that need a phone.
+- `planner/library` is in the Worker of the online side, as its specification gives it. Each
+  traveller's library is two tables of its D1 database, made by the migration
+  `0003_library.sql`.
+- Its test suite proves each requirement of `planner/library` by the verification it carries,
+  inside Wrangler, with ten travellers' day of `PLN:LIBRARY-NFR2` within the free plan.
+- `planner/trip-host` holds each traveller's checklists on a trip, in a table of each trip's
+  Durable Object, and gives each traveller only their own, an admin included. A removed
+  traveller's checklists are kept, and given back if they rejoin.
+- The online side's suite proves `PLN:HOST-F10`, and the checks of `PLN:HOST-NFR1` and `ACC-F14`
+  that need only the online side. A day of ten devices still reads about 2 million rows, within the
+  free plan's 5 million.
+
+#### Milestone Planner-2.1 — The design of checklists
+
+- A traveller's checklists are their own, and start from templates kept outside any trip. Only that
+  traveller sees or ticks them, an admin included. A copy of a template stands apart from it, and a
+  delete is for good (ADR-0024, a traveller's checklists are their own).
+- The planner system's requirements promise each traveller's templates and their checklists on a
+  trip (`PLN-F17`, `PLN-F18`).
+- `planner/checklists` has its requirements and its specification. Each checklist is one record,
+  holding its items, and a traveller's checklists keep the order they give.
+- `planner/library` has its requirements and its specification. Each traveller's library is kept in
+  the online side's D1 database, one row for each template.
+- `planner/trip-host` holds each traveller's checklists on a trip, and gives them to that traveller
+  alone (`PLN:HOST-F10`). The access system promises that no traveller sees another's checklists
+  (`ACC-F14`).
+- The web app's trip store keeps the library and each trip's checklists on the device, and its
+  screens show them in screens of their own (`WEB:STORE-F8`, `WEB:SCREENS-F11`).
 
 ### Phase 1 — Build
 

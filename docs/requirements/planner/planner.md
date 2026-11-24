@@ -1,8 +1,8 @@
 # The planner
 
 What the planner system promises to travellers. The planner holds each trip: a calendar the
-traveller pencils the trip in on, the dates that are fixed, and the pages where travellers write up
-their research. The component registry, `components.md`, gives it the prefix `PLN`.
+traveller pencils the trip in on, the dates that are fixed, the pages where travellers write up
+their research, and each traveller's own checklists. The component registry, `components.md`, gives it the prefix `PLN`.
 
 Two roles appear below, the traveller and the admin, which `requirements/README.md` defines. Which
 traveller may see or change each part of a trip is promised by the access system, the system that
@@ -19,6 +19,8 @@ A trip is built from these parts:
 | **Booking** | Something booked, fixed to a date, for the travellers it names | A booked flight from Paris to New York on 5 June, leaving at 10:00 |
 | **Page** | Research a traveller writes by hand, belonging to one trip | Notes on where to eat in Lyon |
 | **Graveyard** | The pages travellers have deleted from a trip, kept so that they can be restored | A city's notes, deleted with the city |
+| **Checklist** | A title and a list of items, each ticked or not, belonging to one traveller on one trip | Before leaving: passport valid for six months, copies of documents, travel insurance |
+| **Template** | A checklist a traveller keeps for themselves, outside any trip, to start a trip's checklists from | The same Before leaving, kept for every trip |
 
 A trip's calendar holds pencilled stretches and firm items. A trip's bookings have a page of their
 own, and the calendar shows them too (ADR-0013). A day of a trip is one calendar date. A firm item's
@@ -359,6 +361,73 @@ as it now stands, for them to combine and save again. ^pln-f16
 > **Why not combine the two texts automatically?** It is a larger design, and future work
 > (`PLN-NR8`).
 
+### PLN-F17 — A traveller keeps checklist templates of their own, outside any trip
+
+A traveller keeps any number of templates, each a checklist with a title and items in the order
+they give. A template belongs to the traveller and to no trip. Only that traveller sees it or
+changes it. A traveller can also save a checklist of a trip as a new template. They arrange their
+templates in the order they choose, and delete one for good once they confirm. ^pln-f17
+
+- **Verification:** on a running system, with a traveller on two trips, and another traveller who
+  is an admin of both,
+    - add a template titled "Before leaving", with the items "Passport valid for six months",
+      "Copies of documents" and "Travel insurance", and confirm it reads back with its items in that
+      order
+    - open each trip in turn, and confirm the template can be started on each
+    - sign in as the admin, and confirm the template is shown on neither trip
+    - on one trip, save a checklist as a template, and confirm the new template holds its title and
+      items, none ticked, at the end of the library
+    - move the new template above Before leaving, and confirm the library lists it first
+    - delete the new template, confirm the traveller is asked first, and confirm it is then gone
+    - on a phone with no connection, confirm the library reads as it was last changed
+
+> **What does this buy?** A traveller writes a list they keep for every trip once, rather than once
+> for each trip.
+
+> **Can a template hold anything but a checklist?** No. A template holds a title and a list of
+> items. A page still belongs to one trip (`PLN-NR4`).
+
+### PLN-F18 — A traveller starts checklists of their own on a trip, and ticks their items
+
+A traveller adds any number of checklists to a trip, each empty or copied from one of their
+templates, with no item ticked. They tick and untick each item, and add, change, reorder and
+remove items. They arrange their checklists on the trip in the order they choose, and delete one
+for good once they confirm. A checklist and the template it was copied from change apart from each
+other. A checklist is its traveller's alone, and no other traveller on the trip sees it, an admin
+included. A traveller who leaves a trip and rejoins it finds their checklists as they left
+them. ^pln-f18
+
+- **Verification:** on a running system, with the template of `PLN-F17`'s verification, and a trip
+  with two travellers, the second an admin,
+    - as the first traveller, start a checklist on the trip from Before leaving, and confirm it
+      holds the template's three items, none ticked
+    - tick Passport valid for six months, and confirm the checklist shows one of its three items
+      ticked
+    - add the item "Order pesos" to the checklist, and confirm the template still holds three items
+    - remove Travel insurance from the template, and confirm the checklist still holds it
+    - sign in as the admin, and confirm the trip shows them none of the first traveller's
+      checklists
+    - as the admin, remove the first traveller from the trip, then invite them back, and confirm
+      they find the checklist as they left it
+    - as the first traveller, delete the checklist, confirm they are asked first, and confirm it is
+      then gone
+    - on the first traveller's phone with no connection, confirm the checklist reads as it was last
+      ticked
+
+> **What does this buy?** Each traveller keeps track of what they themselves must do before and
+> during a trip, such as checking their own passport, starting from the list they keep rather than
+> from nothing.
+
+> **Why does an admin not see a traveller's checklists?** A checklist holds what one traveller has
+> to do, and how far they have got. It is theirs, like a list kept in a pocket (ADR-0024, a
+> traveller's checklists are their own).
+
+> **Can a traveller tick an item with no connection?** No. A trip changes only while the traveller
+> is online, and a tick is a change (`PLN-NR2`).
+
+> **Where does a list the travellers share go?** On a page, in Markdown, where each traveller who
+> may see the page sees the same ticks (`PLN-F7`).
+
 ---
 
 ## Non-functional requirements
@@ -381,5 +450,6 @@ phone (ADR-0004, a trip is read-only offline).
 | **PLN-NR6** | Hold facts about a country, such as its entry rules or emergency numbers | A country is a name on a stretch, for now (ADR-0013, a trip's calendar is pencilled in, and its bookings have a page of their own) |
 | **PLN-NR7** | Find the city a traveller is in | Finding the city needs a list of places held on the phone. It is future work |
 | **PLN-NR8** | Combine two travellers' edits to one page automatically | Merging edits as they are typed is future work |
+| **PLN-NR9** | Share a checklist or a template with another traveller | A traveller's checklists are their own (ADR-0024, a traveller's checklists are their own) |
 
 ^pln-nr
