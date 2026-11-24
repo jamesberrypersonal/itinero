@@ -24,6 +24,7 @@
   },
   "dependencies": {
     "@itinero/bookings": "0.1.0",
+    "@itinero/checklists": "0.1.0",
     "@itinero/itinerary": "0.1.0",
     "@itinero/pages": "0.1.0",
     "@itinero/permissions": "0.1.0",

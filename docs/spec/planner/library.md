@@ -106,8 +106,9 @@ Behaviour crossing every operation:
   `sequence` is still the one read. The batch raises the `sequence` last, so either every statement
   holds or none does. Where none holds, another request changed the library in between, and the
   request reads again and retries. A third failure is refused with `busy`, and nothing is written.
-- **A library is made on first use.** The first request of an account makes its row of `libraries`,
-  with a `sequence` of 0 and no template.
+- **A library is made by the first change.** The first request of an account that changes its
+  library makes its row of `libraries`, with a `sequence` of 0 and no template. A catch-up of an
+  account with no row gives a `sequence` of 0 and no template, and writes nothing.
 
 ### 4.1 What the library stores
 
@@ -116,7 +117,7 @@ Behaviour crossing every operation:
 | Table | Holds |
 |---|---|
 | `libraries` | One row for each account that has used its library: the account, and its `sequence` |
-| `templates` | One row for each template: the account, its identifier, its `changed`, its `order`, and its text form |
+| `templates` | One row for each template: the account, its identifier, its `changed`, its `order` in the column `ord`, and its text form |
 
 The pair of the account and the identifier is unique among templates, so two travellers' templates
 may share an identifier. Each template's `order` is also held in its text form. The column lets the

@@ -20,8 +20,9 @@ rules, and `tools/doc-scaffold` starts new documents as skeletons that pass it.
   `packages/permissions/` (`@itinero/permissions`) uses pages, and decides what each traveller may
   see and change. `package.json` at the root declares the npm workspace.
 - `services/online/` (`@itinero/online`) is the Worker of the online side, on Cloudflare, with its
-  D1 database. It holds `access/accounts` and `access/membership`, and `planner/trip-host`: a
-  Durable Object for each trip, `TripHost`, whose logic is in `src/trip-core.ts`.
+  D1 database. It holds `access/accounts`, `access/membership`, `planner/library`, whose logic is
+  in `src/library.ts`, and `planner/trip-host`: a Durable Object for each trip, `TripHost`, whose
+  logic is in `src/trip-core.ts`.
 - `apps/web/` (`@itinero/web`) is the web app, built with Preact and Vite, and served by the Worker
   as its static files. It holds `web/shell`, `web/places`, `web/trip-store` and `web/screens`.
   `npm run build-borders` builds the map of country borders into

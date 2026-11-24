@@ -22,6 +22,11 @@ the planner's itinerary. The planner is the first system that needs that compone
   dependency.
 - Its test suite proves each requirement of `planner/checklists` by the verification it carries,
   except the checks of `PLN:CHECKLISTS-NFR1` that need a phone.
+- `planner/library` is in the Worker of the online side, as its specification gives it. Each
+  traveller's library is two tables of its D1 database, made by the migration
+  `0003_library.sql`.
+- Its test suite proves each requirement of `planner/library` by the verification it carries,
+  inside Wrangler, with ten travellers' day of `PLN:LIBRARY-NFR2` within the free plan.
 
 #### Milestone Planner-2.1 — The design of checklists
 
@@ -160,7 +165,5 @@ roadmap.
 
 #### Milestone Planner-2.2 — Checklists built
 
-- Build `planner/library` in the Worker of the online side, with the migration that makes its two
-  tables, and prove each requirement it claims in the online side's suite.
 - Add checklists to `planner/trip-host`, as its specification gives them, and prove `PLN:HOST-F10`
   and the checks of `PLN:HOST-NFR1` and `ACC-F14` that need only the online side.
