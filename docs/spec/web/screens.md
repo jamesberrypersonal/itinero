@@ -396,9 +396,12 @@ item keeps its place, with its box ticked and its text struck through and dimmed
 template has no box. A traveller edits in place:
 
 - tapping the title renames the checklist, with a `rename` change
-- holding an item's text, or choosing Edit on a computer, rewrites it, with a `write` change
-- Add item, at the foot, adds an item after the last, with an `add` change
-- dragging an item moves it, with a `move` change
+- holding an item's text for half a second, or choosing Edit in the item's menu, rewrites it, with a
+  `write` change
+- Add item, at the foot, adds an item after the last, with an `add` change. The field clears as the
+  item is sent, so the next can be typed at once, and a refused item's text comes back
+- dragging an item by its handle moves it, with a `move` change. Dropped on an item above, it goes
+  before that item, and dropped on one below, after it
 - each item's menu removes it, with a `remove` change, asking nothing first, since an item is put
   back by adding it again
 

@@ -23,6 +23,12 @@ Each part of a system is named by its address, the system and the part's own nam
   and a device holding version 1 catches every trip up from the start once upgraded.
 - Its unit tests prove `WEB:STORE-F8` and `WEB:STORE-F9`, and that signing out deletes the library
   too, against the stand-in for the online side.
+- `web/screens` shows a trip's checklists and the traveller's library in screens of their own, as
+  its specification gives them. The trip's bar has a sixth entry, Checklists, and the home page
+  lists the checklists not yet done until the traveller's first date.
+- Its browser tests prove `WEB:SCREENS-F11`, `WEB:SCREENS-F12` and `WEB:SCREENS-F13`, the
+  checklists and templates of `WEB:SCREENS-F8`, and the checks of `PLN-F17` and `PLN-F18` that
+  need the screens, in all three engines.
 
 #### Milestone Web-1.5 — The calendar, and the screens an admin manages a trip on
 
@@ -171,15 +177,6 @@ Each part of a system is named by its address, the system and the part's own nam
 ## Pending
 
 ### Phase 1 — Build
-
-#### Milestone Web-1.6 — Checklists
-
-**Waits on:** Milestone Planner-2.2
-
-- Show a trip's checklists and the library in `web/screens`, as its specification gives them, with
-  the sixth entry of the trip's bar and the home page's checklists not yet done. Prove
-  `WEB:SCREENS-F11`, `WEB:SCREENS-F12` and `WEB:SCREENS-F13`, and the checks of `PLN-F17` and
-  `PLN-F18` that need the screens.
 
 #### Milestone Web-1.7 — Checks waiting on the iPhone and the next IANA release
 
