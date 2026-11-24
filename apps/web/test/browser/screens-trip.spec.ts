@@ -532,6 +532,8 @@ test("WEB:SCREENS-F6, WEB:SCREENS-F8, ACC-F9 — an admin manages the members an
   // A page beneath one hidden from Sam cannot be opened to him first: the screen names the page above.
   await ana.page.locator('select[name="page-hidden"]').selectOption("none");
   await expect(ana.page.locator('select[name="page-hidden"]')).toHaveValue("none");
+  // Notes takes its level from Surprise once the trip holds the change, not just once the list shows it.
+  await expect(ana.page.locator('select[name="page-notes"] option[value=""]')).toHaveText("As above (no access)");
   await ana.page.locator('select[name="page-notes"]').selectOption("view");
   await expect(ana.page.locator('[data-screen="member"] .refused')).toContainText('Give them access to "Surprise" first');
 

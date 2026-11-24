@@ -1,7 +1,7 @@
 // The trip's members, by name, with the creator and the admins marked, and for an admin the open
 // invitations and each member's access (docs/spec/web/screens.md §4.7, WEB:SCREENS-F6).
 
-import { useMemo, useState } from "preact/hooks";
+import { useMemo, useRef, useState } from "preact/hooks";
 import { tree, type Branch } from "@itinero/pages";
 import { grantChangeToText, pageLevel, type Grant, type GrantChange, type Level, type TripLevel } from "@itinero/permissions";
 import * as store from "../store/index.ts";
@@ -177,6 +177,9 @@ export function Member({ copy, account, id }: { copy: Copy; account: string; id:
   const canChange = useCanChange();
   const [asking, setAsking] = useState(false);
   const [error, setError] = useState<string>();
+  // The number of the latest grant change sent, so that an older change answered late never
+  // clears the refusal of a newer one.
+  const latest = useRef(0);
   const pages = useMemo(() => flatten(tree(copy.pages)), [copy]);
   const member = copy.members.find((m) => m.account === id && !m.removed);
   const held: Grant | undefined = copy.grants?.grants.find((g) => g.traveller === id);
@@ -191,7 +194,12 @@ export function Member({ copy, account, id }: { copy: Copy; account: string; id:
   }
   const grants = copy.grants;
   const exceptions = new Map(held.pages.map((e) => [e.page, e.level]));
-  const run = async (change: GrantChange) => setError(await grant(copy, change));
+  const run = async (change: GrantChange) => {
+    const mine = ++latest.current;
+    const refusal = await grant(copy, change);
+    // A refusal always shows. A change accepted clears the message only if no change was sent after it.
+    if (refusal !== undefined || mine === latest.current) setError(refusal);
+  };
 
   return (
     <main class="screen" data-screen="member">
