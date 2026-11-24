@@ -1,18 +1,27 @@
 // Every check in the verification of each requirement planner/library claims, each refusal of
-// docs/spec/planner/library.md §3.2, and its isolation, race and cost tests (§4.6).
+// docs/spec/planner/library.md §3.2, and its isolation, race and cost tests (§4.7).
 
 import { afterEach, describe, expect, test } from "vitest";
 import { apply, changeToText, checklistFromText, checklistToText, copyChecklist, newChecklist, placeAfter, type Change, type Checklist } from "@itinero/checklists";
+import { DEFAULT_TEMPLATES } from "../src/defaults.ts";
 import { MAX_TEMPLATES, setMeter } from "../src/library.ts";
 import { api, expectRefused, json, rows, signIn, type SignedIn } from "./helpers.ts";
 
 type Synced = { sequence: number; templates: { id: string; changed: number; template?: string }[] };
 
 let count = 0;
-async function traveller(name: string): Promise<SignedIn> {
+/** A traveller just signed in, whose library has not been made. */
+async function newcomer(name: string): Promise<SignedIn> {
   count++;
   return signIn({ sub: `library-${count}`, email: `${name.toLowerCase()}${count}@example.com`, name, emailVerified: true });
 }
+/** A traveller whose library has been made and emptied of its default templates. */
+async function traveller(name: string): Promise<SignedIn> {
+  const t = await newcomer(name);
+  for (const { id } of DEFAULT_TEMPLATES) expect((await remove(t, id)).status).toBe(200);
+  return t;
+}
+const defaultTitles = DEFAULT_TEMPLATES.map((t) => t.title);
 
 const add = (who: SignedIn, body: unknown) => api("/api/library/templates", { method: "POST", session: who.session, body });
 const change = (who: SignedIn, c: Change | string) =>
@@ -165,10 +174,12 @@ describe("PLN:LIBRARY-F4 — each of a traveller's devices catches up on every t
     expect(third.templates).toHaveLength(3);
   });
 
-  test("a traveller with no library is given a sequence of 0 and no template, and nothing is written", async () => {
-    const t = await traveller("Ana");
-    expect(await syncOf(t)).toEqual({ sequence: 0, templates: [] });
-    expect(await rows(`libraries WHERE account = '${t.account}'`)).toBe(0);
+  test("a traveller's first catch-up makes their library, with the default templates", async () => {
+    const t = await newcomer("Ana");
+    const first = await syncOf(t);
+    expect(first.sequence).toBe(1);
+    expect(first.templates.every((x) => x.changed === 1 && x.template !== undefined)).toBe(true);
+    expect(await rows(`libraries WHERE account = '${t.account}'`)).toBe(1);
   });
 });
 
@@ -182,12 +193,53 @@ describe("PLN:LIBRARY-F5 — a traveller's library holds at most 100 templates",
   });
 });
 
+describe("PLN:LIBRARY-F6 — a traveller's library starts with default templates, given once", () => {
+  test("a new library holds Before leaving and Packing, each with its items, none ticked", async () => {
+    const t = await newcomer("Ana");
+    const held = await library(t);
+    expect(held.map((x) => x.title)).toEqual(defaultTitles);
+    expect(held.map((x) => x.items.map((i) => i.text))).toEqual(DEFAULT_TEMPLATES.map((x) => x.items));
+    expect(held.every((x) => x.owner === t.account && x.trip === undefined && x.items.every((i) => i.ticked === undefined))).toBe(true);
+  });
+
+  test("a traveller's first change makes the library with the defaults, before it", async () => {
+    const t = await newcomer("Ana");
+    await made(await add(t, { id: "flying", title: "Flying" }));
+    expect(await titles(t)).toEqual([...defaultTitles, "Flying"]);
+  });
+
+  test("a default is changed and deleted as any template, and a deleted one never comes back", async () => {
+    const t = await newcomer("Ana");
+    expect((await change(t, { op: "rename", checklist: "default-packing", title: "Packing for Chile" })).status).toBe(200);
+    expect((await remove(t, "default-before-leaving")).status).toBe(200);
+    expect(await titles(t)).toEqual(["Packing for Chile"]);
+    expect((await remove(t, "default-packing")).status).toBe(200);
+    expect(await titles(t)).toEqual([]);
+    await made(await add(t, { id: "flying", title: "Flying" }));
+    expect(await titles(t)).toEqual(["Flying"]);
+  });
+
+  test("two devices catching up at once for the first time give the library its defaults once", async () => {
+    const t = await newcomer("Ana");
+    const both = await Promise.all([syncOf(t), syncOf(t)]);
+    for (const s of both) expect(s.templates.map((x) => x.id)).toEqual(DEFAULT_TEMPLATES.map((x) => x.id));
+    expect(await rows(`templates WHERE account = '${t.account}'`)).toBe(DEFAULT_TEMPLATES.length);
+    expect((await syncOf(t)).sequence).toBe(1);
+  });
+
+  test("another traveller's library is untouched by this one's defaults", async () => {
+    const a = await traveller("Ana");
+    await newcomer("Ben").then(syncOf);
+    expect(await titles(a)).toEqual([]);
+  });
+});
+
 describe("PLN:LIBRARY-NFR1 — nothing of a library leaves the library except to its traveller", () => {
   test("a traveller with an empty library is given nothing of another's, and every request about it is refused as for nobody's", async () => {
     const owner = await traveller("Ana");
     await made(await add(owner, { id: "before", title: "Before leaving" }));
     const other = await traveller("Ben");
-    expect(await syncOf(other)).toEqual({ sequence: 0, templates: [] });
+    expect((await syncOf(other)).templates).toEqual([]);
     const nobody = await expectRefused(await remove(other, "nowhere"), 404, "unknown-template");
     expect(await expectRefused(await change(other, { op: "rename", checklist: "before", title: "X" }), 404, "unknown-template")).toBe(nobody);
     expect(await expectRefused(await remove(other, "before"), 404, "unknown-template")).toBe(nobody);
@@ -231,10 +283,11 @@ describe("the refusals of §3.2", () => {
   });
 });
 
-describe("races (§4.6)", () => {
+describe("races (§4.7)", () => {
   test("twenty changes sent at once to one library are each applied, with a sequence of its own", async () => {
     const t = await traveller("Ana");
     await made(await add(t, { id: "before", title: "Before leaving" }));
+    const start = (await syncOf(t)).sequence;
     const responses = await Promise.all(
       Array.from({ length: 20 }, (_, n) => change(t, { op: "add", checklist: "before", item: `i${n}`, text: `Item ${n}` })),
     );
@@ -245,7 +298,7 @@ describe("races (§4.6)", () => {
     }
     expect(new Set(sequences).size).toBe(sequences.length);
     expect((await template(t, "before")).items).toHaveLength(sequences.length);
-    expect((await syncOf(t)).sequence).toBe(1 + sequences.length);
+    expect((await syncOf(t)).sequence).toBe(start + sequences.length);
   });
 });
 

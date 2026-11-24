@@ -5,6 +5,7 @@
 import { env } from "cloudflare:workers";
 import { apply, changeFromText, checklistFromText, checklistToText, copyChecklist, newChecklist, ordered, type Checklist } from "@itinero/checklists";
 import type { AccountId } from "./accounts.ts";
+import { defaultTemplates } from "./defaults.ts";
 import { accept, type Refusal, type Result } from "./result.ts";
 
 /** A library holds at most this many templates (PLN:LIBRARY-F5). */
@@ -18,7 +19,7 @@ const refuse = <T>(code: string, message: string): Result<T> => ({ ok: false, re
 const unknown = <T>() => refuse<T>("unknown-template", "Your library holds no such template.");
 const passOn = <T>(refusal: Refusal): Result<T> => ({ ok: false, refusal: { code: refusal.code, message: refusal.message } });
 
-/** What D1 reports for each statement, for the cost tests of §4.6. Unset outside them. */
+/** What D1 reports for each statement, for the cost tests of §4.7. Unset outside them. */
 let meter: ((meta: D1Meta) => void) | undefined;
 export function setMeter(next: ((meta: D1Meta) => void) | undefined): void {
   meter = next;
@@ -33,15 +34,35 @@ const sequenceOf = (account: AccountId) => env.DB.prepare("SELECT sequence FROM 
 const still = (n: number) => `(SELECT sequence FROM libraries WHERE account = ?1) = ?${n}`;
 
 /**
+ * Makes the account's library, holding the default templates, with a sequence of 1 (§4.6). The
+ * batch inserts the templates only while the library is still missing, then makes its row, so two
+ * requests making it at once give it the defaults once.
+ */
+async function make(account: AccountId): Promise<void> {
+  const missing = "NOT EXISTS (SELECT 1 FROM libraries WHERE account = ?1)";
+  metered(
+    await env.DB.batch([
+      ...defaultTemplates(account).map((t) =>
+        env.DB.prepare(`INSERT INTO templates (account, id, changed, ord, text) SELECT ?1, ?2, 1, ?3, ?4 WHERE ${missing}`)
+          .bind(account, t.id, t.order, checklistToText(t)),
+      ),
+      env.DB.prepare("INSERT OR IGNORE INTO libraries (account, sequence) VALUES (?1, 1)").bind(account),
+    ]),
+  );
+}
+
+/**
  * Reads the library, plans a write guarded by the sequence read, and runs it in one batch that
  * raises the sequence last (§4). Where the sequence moved in between, it reads again.
  */
 async function write(account: AccountId, plan: (sequence: number) => Promise<Result<D1PreparedStatement[]>>): Promise<Result<{ sequence: number }>> {
-  // A library is made by the first request that changes it (§4).
-  const made = await env.DB.prepare("INSERT OR IGNORE INTO libraries (account, sequence) VALUES (?1, 0)").bind(account).run();
-  meter?.(made.meta);
   for (let attempt = 0; attempt < TRIES; attempt++) {
-    const read = await sequenceOf(account).first<{ sequence: number }>();
+    let read = await sequenceOf(account).first<{ sequence: number }>();
+    // A library is made by the first request that uses it (§4).
+    if (read === null) {
+      await make(account);
+      read = await sequenceOf(account).first<{ sequence: number }>();
+    }
     const sequence = read!.sequence;
     const planned = await plan(sequence);
     if (!planned.ok) return planned;
@@ -130,12 +151,19 @@ export async function deleteTemplate(account: AccountId, id: string): Promise<Re
 
 export async function sync(account: AccountId, since: number | undefined): Promise<Synced> {
   const after = since ?? 0;
-  const [sequence, rows] = metered(
-    await env.DB.batch<Record<string, unknown>>([
-      sequenceOf(account),
-      env.DB.prepare('SELECT id, changed, ord AS "order", CASE WHEN changed > ?2 THEN text END AS text FROM templates WHERE account = ?1').bind(account, after),
-    ]),
-  );
+  const read = async () =>
+    metered(
+      await env.DB.batch<Record<string, unknown>>([
+        sequenceOf(account),
+        env.DB.prepare('SELECT id, changed, ord AS "order", CASE WHEN changed > ?2 THEN text END AS text FROM templates WHERE account = ?1').bind(account, after),
+      ]),
+    );
+  let [sequence, rows] = await read();
+  // A library is made by the first request that uses it, a catch-up included (§4).
+  if (sequence!.results.length === 0) {
+    await make(account);
+    [sequence, rows] = await read();
+  }
   const listed = ordered((rows!.results as { id: string; changed: number; order: string; text: string | null }[]).map((r) => ({ ...r })));
   return {
     sequence: (sequence!.results[0] as { sequence: number } | undefined)?.sequence ?? 0,

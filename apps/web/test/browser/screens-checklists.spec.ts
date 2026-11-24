@@ -35,12 +35,26 @@ test.afterAll(async () => {
 type Traveller = { context: BrowserContext; page: Page; account: string; email: string };
 let count = 0;
 
-async function traveller(browser: Browser, name: string, kind: "phone" | "computer" = "phone"): Promise<Traveller> {
+/** The identifiers of the templates each library starts with (PLN:LIBRARY-F6). */
+const DEFAULTS = ["default-before-leaving", "default-packing"];
+
+/**
+ * A traveller signed in on a device of their own. Their library is emptied of its default
+ * templates, through the online side, unless `defaults` keeps them.
+ */
+async function traveller(browser: Browser, name: string, kind: "phone" | "computer" = "phone", defaults = false): Promise<Traveller> {
   count++;
   const email = `${name.toLowerCase()}${count}@example.com`;
   const context = await device(browser, kind);
   const page = await newTraveller(context, online, { sub: `${engine}-checklists-${name}-${count}`, email, name }, name);
   const account = await page.evaluate(async () => (await (window as unknown as { itineroStore: { open(): Promise<{ account?: string }> } }).itineroStore.open()).account!);
+  if (!defaults) {
+    const statuses = await page.evaluate(async (ids) => {
+      await fetch("/api/library/sync", { method: "POST", headers: { "content-type": "application/json", "Itinero-Api": "1" }, body: "{}" });
+      return Promise.all(ids.map(async (id) => (await fetch(`/api/library/templates/${id}`, { method: "DELETE", headers: { "Itinero-Api": "1" } })).status));
+    }, DEFAULTS);
+    expect(statuses).toEqual(DEFAULTS.map(() => 200));
+  }
   return { context, page, account, email };
 }
 
@@ -142,6 +156,17 @@ test("WEB:SCREENS-F11, PLN-F18 — a trip's checklists have a screen of their ow
   await ana.page.locator(".item-text").nth(2).click();
   await expect(ana.page.locator(".lead[data-progress]")).toHaveText("1 of 5 done");
   await ana.context.setOffline(false);
+  await ana.context.close();
+});
+
+test("PLN:LIBRARY-F6 — a new traveller's library lists the default templates, each with its items", async ({ browser }) => {
+  const ana = await traveller(browser, "Ana", "phone", true);
+  await screen(ana.page, "/library", "library");
+  await expect(ana.page.locator("[data-checklist]")).toHaveCount(2);
+  for (const [n, [title, count]] of [["Before leaving", 7], ["Packing", 7]].entries()) {
+    await expect(ana.page.locator("[data-checklist]").nth(n)).toContainText(title as string);
+    await expect(ana.page.locator("[data-checklist]").nth(n).locator("[data-progress]")).toHaveText(`${count} items`);
+  }
   await ana.context.close();
 });
 
