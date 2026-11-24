@@ -172,3 +172,15 @@ Each part of a system is named by its address, the system and the part's own nam
   cannot be accepted, and says which address it was sent to, on the iPhone.
 - Prove the checks of `WEB-F8` and `SHR:TRIP-TIME-NFR1` that a device takes newer time-zone rules,
   online and then offline, with the deploy that carries the next IANA release.
+
+#### Milestone Web-1.6 — Checklists
+
+**Waits on:** Milestone Planner-2.2
+
+- Keep each traveller's library and their checklists on each trip in `web/trip-store`, as its
+  specification gives them, with the upgrade of its database to version 2. Prove `WEB:STORE-F8` and
+  `WEB:STORE-F9`.
+- Show a trip's checklists and the library in `web/screens`, as its specification gives them, with
+  the sixth entry of the trip's bar and the home page's checklists not yet done. Prove
+  `WEB:SCREENS-F11`, `WEB:SCREENS-F12` and `WEB:SCREENS-F13`, and the checks of `PLN-F17` and
+  `PLN-F18` that need the screens.

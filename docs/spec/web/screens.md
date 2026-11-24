@@ -12,8 +12,9 @@ phone itself.
 ## 2. Scope
 
 The screens cover signing in and out, the list of trips, creating a trip, a trip's home page, its
-calendar, its bookings, its pages and graveyard, its members and their access, the traveller's
-choice of clock and date order, and finding the phone's country.
+calendar, its bookings, its pages and graveyard, the traveller's checklists and their library of
+templates, its members and their access, the traveller's choice of clock and date order, and
+finding the phone's country.
 
 Three things act on them:
 
@@ -38,7 +39,9 @@ The screens are written in TypeScript with Preact, built with Vite as part of `@
 follows each traveller's own dates, and finds the country on the phone (ADR-0014, a trip opens on a
 home page for each traveller). The calendar is shown only to a traveller an admin grants it, and
 bookings have a page of their own (ADR-0013, a trip's bookings have a page of their own, and its
-calendar is seen only by the travellers an admin chooses).
+calendar is seen only by the travellers an admin chooses). A traveller's checklists, and their
+templates, are their own, and have screens of their own apart from the pages (ADR-0024, a
+traveller's checklists are their own).
 
 ## 3. Interface
 
@@ -56,14 +59,18 @@ Each screen has an address in the web app, so a traveller can return to it, and 
 | `/trips/{trip}/pages` and `/trips/{trip}/pages/{page}` | The tree of pages, and one page (§4.6) |
 | `/trips/{trip}/search` | Searching the pages (§4.6) |
 | `/trips/{trip}/graveyard` | The deleted pages the traveller could see (§4.6) |
+| `/trips/{trip}/checklists` and `/trips/{trip}/checklists/{checklist}` | The traveller's checklists on the trip, and one checklist (§4.10) |
 | `/trips/{trip}/members` | The members, and for an admin their access and the invitations (§4.7) |
+| `/library` and `/library/{template}` | The traveller's library of templates, and one template (§4.10) |
 | `/settings` | The traveller's name, the clock and date order, and signing out (§4.8) |
 | `/name` | Choosing a name, at the first sign-in (§4.1) |
 | `/invitations/{invitation}` | Accepting an invitation, from its email (§4.7) |
 
 Every screen of a trip has a bar along its foot on a phone, and down its side on a computer, linking
-to the home page, the calendar where the traveller is granted it, the bookings, the pages and the
-members. Each also has a menu, holding the settings, the list of trips and signing out. A screen
+to the home page, the calendar where the traveller is granted it, the bookings, the pages, the
+checklists and the members. On a phone each entry is an icon above a label of one short word, so
+that six fit a screen 360 pixels wide. Each screen also has a menu, holding the settings, the
+library, the list of trips and signing out. A screen
 wider than 720 pixels lays itself out for a computer.
 
 ### 3.2 Application interface
@@ -104,7 +111,8 @@ Behaviour crossing every screen:
   every screen shows the shell's quiet notice of a new version waiting at its top, above the
   offline bar. It leaves every control as it is (`WEB:SHELL-F6`, `spec/web/shell.md` §4.8).
 - **What to offer.** A control that changes something is shown only where `access/permissions`'
-  `authorise` allows it. It is asked of the copy's grants, its pages and `you`, the traveller's own
+  `authorise` allows it. A checklist or a template is the traveller's own, so every control that
+  changes one is shown whenever the device is online, whatever the traveller's access. It is asked of the copy's grants, its pages and `you`, the traveller's own
   roles and grant (`spec/web/trip-store.md` §3.3). Where the copy held online still refuses a
   change, the screen shows the refusal's message.
 - **Revisions.** A page, a firm item and a booking each carry a `revision`, which each change to it
@@ -114,7 +122,7 @@ Behaviour crossing every screen:
 - **Times.** Every time is written with trip-time's `format`, and every duration with
   `formatDuration`, in the traveller's style: their choice of clock and date order, in §4.8
   (`WEB:SCREENS-F7`).
-- **Asking first.** A delete or a removal opens a dialog, drawn by the web app rather than the
+- **Asking first.** A delete or a removal, of a checklist and a template included, opens a dialog, drawn by the web app rather than the
   browser's own, saying what will go, with Cancel as its first choice (`WEB:SCREENS-F8`).
 
 ### 4.1 Signing in and out
@@ -154,7 +162,8 @@ draws no list first. With no `last`, the list shows. Every screen of a trip call
 `opened` once it holds the trip's copy. The list's links within Itinero, such as All trips in a
 trip's menu, still open the list (`WEB-NFR1`).
 
-The list shows each trip of the trip store's `trips`, with its name and dates, newest first. While
+The list shows each trip of the trip store's `trips`, with its name and dates, newest first, and
+links to the library. While
 `web/shell`'s `suggestInstall` is true, it shows the notice that says how to add Itinero to the home
 screen.
 
@@ -183,6 +192,12 @@ borders (§5.1), and links to the pages' `countryPage` for it, where the copy ho
 traveller has allowed the position, the screen finds the country each time the home page opens. That
 the traveller allowed it is kept in the browser's `localStorage` as `itinero-find-country`. The
 position and the country are held only in the page's memory, and never stored or sent (`WEB-F6`).
+
+Before the first of the traveller's own dates, from the copy's `mine`, the home page also lists
+their checklists not yet done: each of the copy's `checklists` whose `progress` gives `ticked` less
+than `of`, in their order, each with its count, such as `2 of 5`, and each opening that checklist
+(`WEB:SCREENS-F13`). A checklist with no items is not listed. From the traveller's first date on,
+the home page lists no checklist.
 
 A traveller sets their own dates from the home page, within the trip's, as a `traveller-dates`
 change, and the trip's creator changes the trip's dates there, as a `trip-dates` change. A refusal
@@ -335,7 +350,8 @@ of any trip.
 
 The screens' tests run in the suite of `apps/web/`, which `spec/web/shell.md` §4.5 describes.
 
-- **Unit tests** cover the home page's day, the calendar's order of firm items and bookings, the
+- **Unit tests** cover the home page's day, its checklists not yet done before and after the
+  traveller's first date, the calendar's order of firm items and bookings, the
   default style, writing dates, finding a country, at positions inside, outside and near the border
   of each of a sample of countries, and the map's size.
 - **Browser tests**, with Playwright, run every verification of `requirements/web/screens.md` that
@@ -353,6 +369,47 @@ The screens' tests run in the suite of `apps/web/`, which `spec/web/shell.md` §
 - **Timing tests** draw the home page of a trip of 500 pages and 300 bookings, and fail above 500
   milliseconds on the machine running them. The check on a phone of `WEB:SCREENS-NFR1` is made by
   hand before each release.
+
+### 4.10 Checklists and the library
+
+*Invoked from:* the checklists in a trip's bar, a checklist on the home page, and the library in
+the menu, on the list of trips and on the checklists of a trip.
+
+The checklists of a trip are the copy's `checklists`, which hold the traveller's own alone, in their
+order (`WEB:SCREENS-F11`). Each is listed with its title and its count from the checklists'
+`progress`, such as `1 of 4`. The library is the trip store's `library`, listed in the same way,
+with each template's number of items, such as `4 items` (`WEB:SCREENS-F12`). The library is drawn
+from the trip store's `onLibrary`, and the checklists from the open trip's copy, so a change made on
+another device is shown once the trip store takes it.
+
+New checklist opens a list of choices: Empty, then each template of the library, in its order. Empty
+asks for a title. Either calls the trip store's `addChecklist`, with the title, or with the template
+chosen as `from`, and opens the new checklist. New template, in the library, asks for a title and
+calls `addTemplate`. Save as template, on a checklist of a trip, calls `addTemplate` with the
+checklist as `from`, and says the library now holds it. A traveller arranges checklists, and
+templates, by dragging one. The screen sends the `place` change that the checklists' `placeAfter`
+gives, with the trip store's `send` for a trip's checklist, and `changeTemplate` for a template.
+
+A checklist, or a template, shows its title, then its items in their order. Each item of a trip's
+checklist has a box to tick. Tapping the box, or the item's text, sends a `tick` change. A ticked
+item keeps its place, with its box ticked and its text struck through and dimmed. An item of a
+template has no box. A traveller edits in place:
+
+- tapping the title renames the checklist, with a `rename` change
+- holding an item's text, or choosing Edit on a computer, rewrites it, with a `write` change
+- Add item, at the foot, adds an item after the last, with an `add` change
+- dragging an item moves it, with a `move` change
+- each item's menu removes it, with a `remove` change, asking nothing first, since an item is put
+  back by adding it again
+
+Each item's identifier is made with `crypto.randomUUID()`. Each change is written with the
+checklists' `changeToText`, and refused as §4 gives, with the refusal's message shown. Delete, in a
+checklist's menu, asks first, saying the checklist and its items go for good, and calls
+`deleteChecklist` or `deleteTemplate`. A traveller whose library is full, or whose trip holds 50 of
+their checklists, is shown the refusal's message.
+
+While the device is offline, the checklists and the library are shown as the copy holds them, with
+no box to tick and no control that changes them (`WEB:SCREENS-F1`).
 
 ## 5. Resources
 
@@ -420,6 +477,11 @@ and the packages of the trip's parts, which `spec/web/shell.md` §5 lists.
 | [WEB:SCREENS-F7](../../requirements/web/screens.md#^web-screens-f7) | The style of §4.8, used for every time (§4). |
 | [WEB:SCREENS-F8](../../requirements/web/screens.md#^web-screens-f8) | Asking first, in §4. |
 | [WEB:SCREENS-F9](../../requirements/web/screens.md#^web-screens-f9) | Signing in and out, in §4.1. |
+| [WEB:SCREENS-F11](../../requirements/web/screens.md#^web-screens-f11) | The checklists of a trip, the trip's bar, and ticking in place, in §3.1 and §4.10. |
+| [WEB:SCREENS-F12](../../requirements/web/screens.md#^web-screens-f12) | The library, linked from every menu and from the list of trips, in §3.1, §4.2 and §4.10. |
+| [WEB:SCREENS-F13](../../requirements/web/screens.md#^web-screens-f13) | The checklists not yet done on the home page, before the traveller's first date (§4.3). |
+| [PLN-F17](../../requirements/planner/planner.md#^pln-f17) | The library, its templates, saving a checklist as a template, and asking before a delete (§4, §4.10). Keeping the library is `web/trip-store`. |
+| [PLN-F18](../../requirements/planner/planner.md#^pln-f18) | Starting a checklist from a template, ticking, arranging and asking before a delete (§4, §4.10). |
 | [WEB:SCREENS-F10](../../requirements/web/screens.md#^web-screens-f10) | `/name` at the first sign-in, before an invitation is accepted (§4.1, §4.7), and changing the name in the settings (§4.8). |
 | [ACC-F13](../../requirements/access/access.md#^acc-f13) | Asking for a name at the first sign-in, and changing it later (§4.1, §4.8). |
 | [WEB:SHELL-F5](../../requirements/web/shell.md#^web-shell-f5) | The bar and its button, and no control that changes a trip while a new version is required (§4). |

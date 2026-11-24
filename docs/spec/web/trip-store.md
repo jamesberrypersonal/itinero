@@ -7,8 +7,9 @@
 The trip store is the part of the web app that keeps each trip's copy on a device. It catches each
 copy up with `planner/trip-host`, the component that holds each trip online, listens for changes
 while a trip is open, sends each change a traveller makes, and deletes every copy on sign-out. It
-also carries every other request a traveller makes about a trip, such as creating one or inviting a
-traveller. It
+keeps a copy of the traveller's library of checklist templates beside the trips, which it catches up
+with `planner/library`, the component that holds each library online. It also carries every other
+request a traveller makes about a trip, such as creating one or inviting a traveller. It
 gives `web/screens` each trip as values of the planner's, the access system's and the bookings
 system's packages, ready to show.
 
@@ -16,19 +17,21 @@ system's packages, ready to show.
 
 The trip store covers the device's copy of each trip, catching it up, the live connection to an
 open trip, sending changes, whether the device is online, signing out, and sharing the copy between
-windows. It also covers creating a trip, the requests about a trip's members and invitations, and
-reading a page in the graveyard.
+windows. It also covers the copy of the traveller's library, creating a trip, the requests about a
+trip's members and invitations, the requests about checklists and templates, and reading a page in
+the graveyard.
 
 Two things act on it:
 
-- **`web/screens`** reads trips, watches the one open, sends changes, makes the requests of §4.8
-  and signs out (§3.3).
-- **`planner/trip-host`**, **`access/accounts`** and **`access/membership`**, on the online side,
-  answer its requests (§3.4).
+- **`web/screens`** reads trips and the library, watches the trip open, sends changes, makes the
+  requests of §4.8 and §4.9, and signs out (§3.3).
+- **`planner/trip-host`**, **`planner/library`**, **`access/accounts`** and **`access/membership`**,
+  on the online side, answer its requests (§3.4).
 
 Deliberately absent:
 
-- deciding what a copy may hold, which `planner/trip-host` decides, with `access/permissions`
+- deciding what a copy may hold, which `planner/trip-host` decides, with `access/permissions`, and
+  `planner/library` decides for the library
 - keeping a change made with no connection (ADR-0004, a trip can be read without a connection, but
   changed only with one)
 - protecting a copy beyond the device's own lock (ADR-0017, a trip's copy on a device is protected
@@ -55,6 +58,7 @@ import type { Trip, Dates } from "@itinero/itinerary";
 import type { Page, Pages } from "@itinero/pages";
 import type { Booking } from "@itinero/bookings";
 import type { Grant, Grants, Level, TripLevel } from "@itinero/permissions";
+import type { Checklist } from "@itinero/checklists";
 import type { Result } from "@itinero/trip-time";
 
 type Member = { account: string; name: string; admin: boolean; creator: boolean; joined: string;
@@ -69,12 +73,16 @@ type Copy = {
   pages: Pages; graveyard: readonly { id: string; title: string;
                                        went: number }[];   // went: how many pages went with it
   bookings: readonly Booking[]; members: readonly Member[];
+  checklists: readonly Checklist[];                       // the traveller's own, in their order
   grants?: Grants;                                        // an admin's copy alone: everyone's access
   invitations?: readonly Invitation[];                    // an admin's copy alone: those still open
   sequence: number; caughtUp: number;                     // caughtUp: milliseconds since 1970 UTC
 };
 type Summary = { id: string; name: string; dates: Dates; caughtUp: number };
-type Target = "calendar" | "pages" | "grants" | "bookings";
+type Target = "calendar" | "pages" | "grants" | "bookings" | "checklists";
+type Library = { templates: readonly Checklist[];           // in the traveller's order
+                 sequence: number; caughtUp: number };
+type Start = { title: string } | { from: Checklist };      // from: a template, or a checklist
 
 function open(): Promise<{ account?: string; last?: string }>;   // undefined: signed out
 function opened(id: string): Promise<void>;
@@ -99,6 +107,14 @@ function withdraw(id: string, invitation: string): Promise<Result<true>>;
 function makeAdmin(id: string, account: string): Promise<Result<true>>;
 function remove(id: string, account: string): Promise<Result<true>>;
 function buried(id: string, page: string): Promise<Result<Page>>;
+
+function library(): Promise<Library>;
+function onLibrary(listener: (library: Library) => void): () => void;
+function addChecklist(id: string, start: Start): Promise<Result<{ checklist: string }>>;
+function deleteChecklist(id: string, checklist: string): Promise<Result<true>>;
+function addTemplate(start: Start): Promise<Result<{ template: string }>>;
+function changeTemplate(change: string): Promise<Result<true>>;
+function deleteTemplate(template: string): Promise<Result<true>>;
 ```
 
 `open` opens the device's database as the web app starts, and gives the account signed in on the
@@ -112,7 +128,9 @@ tells its listener once this window or another has signed out, or the session ha
 `web/screens` shows the sign-in screen (§4.6). `send`
 returns every refusal from the online side unchanged, and refuses with its own code `offline`,
 whose message says the device has no connection, where it sends nothing. The seven functions from
-`create` to `buried` refuse in the same ways. Once the online side has refused this version of the
+`create` to `buried`, and the five from `addChecklist` to `deleteTemplate`, refuse in the same
+ways. `library` gives an empty library, with a `sequence` of 0, to a device that has never caught
+it up. Once the online side has refused this version of the
 web app, each of them, `send` included, refuses with `update-first` (§4).
 
 ### 3.4 Systems this drives
@@ -131,12 +149,15 @@ on its own:
 | `POST /api/auth/sign-out` | `access/accounts` | Ending the session (§4.5) |
 | `POST /api/trips` | `planner/trip-host` | Creating a trip (§4.8) |
 | `GET /api/trips/{trip}/buried/{page}` | `planner/trip-host` | Reading a page in the graveyard (§4.8) |
+| `POST /api/trips/{trip}/checklists`, `DELETE /api/trips/{trip}/checklists/{id}` | `planner/trip-host` | Starting a checklist on a trip, and deleting one (§4.9) |
+| `POST /api/library/sync` | `planner/library` | Catching the library up (§4.2) |
+| `POST /api/library/templates`, `POST /api/library/changes`, `DELETE /api/library/templates/{id}` | `planner/library` | Adding, changing and deleting a template (§4.9) |
 | `POST /api/invitations/{invitation}/accept` | `access/membership` | Accepting an invitation (§4.8) |
 | `POST /api/trips/{trip}/invitations`, `DELETE /api/trips/{trip}/invitations/{invitation}` | `access/membership` | Inviting a traveller, and withdrawing an invitation (§4.8) |
 | `POST /api/trips/{trip}/admins`, `DELETE /api/trips/{trip}/members/{account}` | `access/membership` | Making a member an admin, and removing one (§4.8) |
 
-`spec/planner/trip-host.md`, `spec/access/membership.md` and `spec/access/accounts.md` give each
-request's body and refusals.
+`spec/planner/trip-host.md`, `spec/planner/library.md`, `spec/access/membership.md` and
+`spec/access/accounts.md` give each request's body and refusals.
 
 It stores the copy in IndexedDB, the browser's database for a site's own data, which other sites
 cannot read. An IndexedDB database holds object stores, each a set of records under keys, and every
@@ -164,18 +185,25 @@ Behaviour crossing every operation:
 
 ### 4.1 What the device stores
 
-*Plumbing:* the trip store keeps one IndexedDB database, `itinero`, at version 1, with four object
-stores:
+*Plumbing:* the trip store keeps one IndexedDB database, `itinero`, at version 2, with six object
+stores. A database at version 1 is upgraded by adding the `checklists` and `templates` object
+stores, empty, and keeping the rest. Each trip's `sequence` was written while the device held none
+of its checklists, so a catch-up from it would leave out every checklist that changed before. The
+trip store therefore catches every trip up from the start after the upgrade.
 
 | Object store | Key | Holds |
 |---|---|---|
-| `account` | `"me"` | The account signed in, the trip it last opened as `last`, and `signOutOwed` where the session is still to be ended (§4.5) |
+| `account` | `"me"` | The account signed in, the trip it last opened as `last`, `signOutOwed` where the session is still to be ended (§4.5), and the library's `sequence` and `caughtUp` |
 | `trips` | The trip's identifier | The trip's name, its dates, the traveller's own, `you`, the calendar in the itinerary's text form or `null`, the graveyard's titles, the members, `sequence` and `caughtUp`. For an admin, also the trip's grants in the permissions' text form, and the open invitations |
 | `pages` | The trip's identifier and the page's | The page in the pages' text form, and its `changed` |
 | `bookings` | The trip's identifier and the booking's | The booking in the bookings' text form, and its `changed` |
+| `checklists` | The trip's identifier and the checklist's | One of the traveller's checklists on the trip, in the checklists' text form, and its `changed` |
+| `templates` | The template's identifier | One of the traveller's templates, in the checklists' text form, and its `changed` |
 
 `trip(id)` reads a trip's records in one transaction, and builds its `Copy` with each package's
-`FromText` function. A record a package refuses to read is left out of the `Copy`, and the trip is
+`FromText` function. It gives the checklists in the order the checklists' `ordered` gives.
+`library()` reads the `templates` object store and the `account` record in one transaction, in the
+same way. A record a package refuses to read is left out of the `Copy`, and the trip is
 caught up from the start the next time the device is online.
 
 ### 4.2 Catching up
@@ -189,8 +217,8 @@ caught up from the start the next time the device is online.
   again only by a request answered
 
 It first asks `GET /api/trips`. It deletes each trip it holds that the answer does not list, and
-adds each that it lists and the device does not hold. It then catches each trip up in turn, and
-tells `web/shell` the device is online. Where no traveller is signed in, the trip store catches
+adds each that it lists and the device does not hold. It then catches the library up, catches each
+trip up in turn, and tells `web/shell` the device is online. Where no traveller is signed in, the trip store catches
 nothing up, and still tells `web/shell` the device is online, so that the shell takes newer
 time-zone rules. Only one catch-up of every trip runs at a time, and a trip is never caught up by
 two at once.
@@ -207,6 +235,15 @@ To catch one trip up, the trip store:
 4. in one transaction, writes the trip's record, with the grants and the invitations where the
    answers hold them, writes every page and booking it was given, deletes every page and booking
    the answer did not list, and sets `sequence` and `caughtUp`
+
+A trip's catch-up writes every checklist the answer gives with its text, and deletes every
+checklist the answer does not list, in the same transaction (`WEB:STORE-F2`).
+
+To catch the library up, the trip store sends `POST /api/library/sync`, with `since` set to the
+library's `sequence`, or absent for a device that has never caught it up (`WEB:STORE-F8`). In one
+transaction, it writes every template given with its text, deletes every template the answer does
+not list, and sets the library's `sequence` and `caughtUp`. A template a package refuses to read is
+left out of the `Library`, and the library is caught up from the start the next time, as for a trip.
 
 `caughtUp` is the device's clock when the transaction is written. A catch-up refused with
 `not-a-member` deletes the trip. A catch-up that fails part way, such as on a lost connection,
@@ -251,8 +288,8 @@ session ended each write the `account` record afresh, without `last`.
 `signOut()` (`WEB:STORE-F5`):
 
 1. closes every socket, and tells every other window, which closes its own
-2. deletes the `itinero` database, and makes it again with only the `account` record, holding no
-   account and `signOutOwed` set
+2. deletes the `itinero` database, with every trip and the library, and makes it again with only
+   the `account` record, holding no account and `signOutOwed` set
 3. sends `POST /api/auth/sign-out`, and clears `signOutOwed` once it is answered
 
 Where the device is offline, `signOutOwed` stays set. The trip store sends `POST /api/auth/sign-out`
@@ -268,7 +305,9 @@ owed.
 
 *Porcelain:* every window of Itinero on a device opens the same database (`WEB:STORE-F6`). After
 each write, the window that wrote sends `{ "trip": ..., "sequence": ... }` on a BroadcastChannel
-named `itinero`, and a window that receives it reads the trip again and tells its listeners. A
+named `itinero`, and a window that receives it reads the trip again and tells its listeners. After
+each write of the library, it sends `{ "library": ... }`, holding the library's sequence, and a
+window that receives it reads the library again and tells the listeners of `onLibrary`. A
 sign-out sends `{ "signedOut": true }`, and every window shows the sign-in screen.
 
 ### 4.7 The test suite
@@ -294,6 +333,10 @@ The trip store's tests run in the suite of `apps/web/`, which `spec/web/shell.md
   to English and London time and one to Turkish and Tokyo time. They make the checks of
   `PLN:ITINERARY-NFR1`, `PLN:PAGES-NFR1` and `ACC:PERMISSIONS-NFR1` on the copy, and confirm both
   devices and Node.js give the same results.
+- **Checklist tests**, with the same stand-in, which runs the library's logic beside the trip
+  host's, cover each function of §4.9, the catch-up of the library in §4.2, and the upgrade from
+  version 1 of §4.1 (`WEB:STORE-F8`, `WEB:STORE-F9`). Cut tests fail the stand-in during the
+  library's catch-up, and confirm the library's copy is unchanged.
 - **Timing tests** read a trip of 500 pages and 300 bookings ten times, and fail where a read takes
   over one second on the machine running them. The check on a phone of `WEB:STORE-NFR1` is made by
   hand before each release.
@@ -322,6 +365,30 @@ An admin's copy holds the trip's `grants` and its open `invitations`, which each
 whole. A copy whose traveller is no longer an admin is given neither, and the catch-up deletes
 both.
 
+### 4.9 Checklists and the library
+
+*Porcelain:* five functions carry the requests a traveller makes about their checklists and
+templates (`WEB:STORE-F9`). Each refuses with `offline` where `isOnline()` is false, as `send` does,
+and sends nothing. Otherwise each sends one request, and returns a refusal unchanged. A change to a
+checklist on a trip, such as a tick, is sent with `send`, with the target `checklists`.
+
+| Function | Sends | Once it is answered |
+|---|---|---|
+| `addChecklist` | `POST /api/trips/{trip}/checklists` | Catches the trip up, and gives the new checklist's identifier |
+| `deleteChecklist` | `DELETE /api/trips/{trip}/checklists/{id}` | Catches the trip up |
+| `addTemplate` | `POST /api/library/templates` | Catches the library up, and gives the new template's identifier |
+| `changeTemplate` | `POST /api/library/changes` | Catches the library up |
+| `deleteTemplate` | `DELETE /api/library/templates/{id}` | Catches the library up |
+
+`addChecklist` and `addTemplate` make the new identifier with `crypto.randomUUID()`. A `Start`
+holding a title sends `{ "id": ..., "title": ... }`. One holding `from` sends
+`{ "id": ..., "from": ... }`, with `from` in the checklists' text form, from the device's own copy. A checklist on a trip
+is therefore started from a template, and a template saved from a trip's checklist, with what the
+device holds, and the online side asks no other component for it.
+
+Each function returns only once its catch-up is written, so the copy holds what the request did. A
+change to a checklist sent with `send` is caught up in the same way (§4.4).
+
 ## 5. Resources
 
 | Resource | Path | Owned by |
@@ -342,8 +409,9 @@ and seats. It is protected by the device's own lock, and deleted on sign-out (AD
   and a sign-out owed is sent on the next connection.
 - **Quick to read** (`WEB:STORE-NFR1`). A trip is read in one transaction, with one record for each
   page and booking.
-- **Costs little online** (`PLN:HOST-NFR2`). Catching one trip up is two requests, with more only
-  for pages and bookings newly seen, and catching every trip up adds one `GET /api/trips`. Each
+- **Costs little online** (`PLN:HOST-NFR2`, `PLN:LIBRARY-NFR2`). Catching one trip up is two
+  requests, with more only for pages and bookings newly seen. Catching every trip up adds one
+  `GET /api/trips`, and one `POST /api/library/sync`. Each
   window holds one socket for each trip it shows.
 
 ## 7. Requirements this satisfies
@@ -357,6 +425,12 @@ and seats. It is protected by the device's own lock, and deleted on sign-out (AD
 | [WEB:STORE-F5](../../requirements/web/trip-store.md#^web-store-f5) | `signOut`, `signOutOwed` and the session ended, in §4.5. |
 | [WEB:STORE-F6](../../requirements/web/trip-store.md#^web-store-f6) | The BroadcastChannel of §4.6. |
 | [WEB:STORE-F7](../../requirements/web/trip-store.md#^web-store-f7) | The seven functions of §4.8, and the grants and invitations of an admin's copy, in §4.1 and §4.2. |
+| [WEB:STORE-F8](../../requirements/web/trip-store.md#^web-store-f8) | The `templates` object store, `library`, and catching the library up, in one transaction, in §4.1 and §4.2. |
+| [WEB:STORE-F9](../../requirements/web/trip-store.md#^web-store-f9) | The five functions of §4.9, and `send` with the target `checklists`. |
+| [PLN:LIBRARY-F4](../../requirements/planner/library.md#^pln-library-f4) | Keeping each template given, and dropping each the catch-up does not list (§4.2). |
+| [PLN:CHECKLISTS-NFR1](../../requirements/planner/checklists.md#^pln-checklists-nfr1) | Keeping the traveller's checklists and templates on the phone (§4.1). |
+| [PLN-F17](../../requirements/planner/planner.md#^pln-f17) | A copy of the library, read with no connection (§4.1, §4.2). Showing it is `web/screens`. |
+| [PLN-F18](../../requirements/planner/planner.md#^pln-f18) | The traveller's checklists in each trip's copy, read with no connection, and the requests of §4.9. Showing them is `web/screens`. |
 | [WEB:STORE-NFR1](../../requirements/web/trip-store.md#^web-store-nfr1) | One transaction for each trip read (§4.1, §6). |
 | [WEB:SHELL-F5](../../requirements/web/shell.md#^web-shell-f5) | Sending `API` with every request, and stopping on `update-first` with every copy kept (§4). |
 | [WEB-F2](../../requirements/web/web.md#^web-f2) | Every trip given offline, with `caughtUp` and `isOnline` (§4.1, §4.4). Saying so on every screen, and offering no change offline, is `web/screens`. |

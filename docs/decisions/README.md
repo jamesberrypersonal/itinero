@@ -48,6 +48,7 @@ keeps:
 | [0021](0021-a-deleted-page-is-restored-only-to-its-old-place.md) | A deleted page is restored only to its old place | planner | Accepted |
 | [0022](0022-each-tree-index-defines-its-shared-words.md) | Each tree's index defines the words its documents share | workspace | Accepted |
 | [0023](0023-continuous-integration-runs-on-each-pull-request-and-each-push-to-main.md) | Continuous integration runs on each pull request and each push to main | workspace | Accepted |
+| [0024](0024-checklists-are-each-travellers-own.md) | A traveller's checklists are their own, and start from templates kept outside any trip | planner, access | Accepted |
 
 ## By subject
 
@@ -74,6 +75,7 @@ keeps:
 | [0014](0014-a-trip-opens-on-a-home-page.md) | A trip opens on a home page for each traveller, with their own dates and the country they are in | Accepted |
 | [0015](0015-the-online-side-runs-on-cloudflare.md) | Itinero's online side runs on Cloudflare's free plan, and travellers sign in with Google alone | Accepted |
 | [0021](0021-a-deleted-page-is-restored-only-to-its-old-place.md) | A deleted page is restored only to its old place | Accepted |
+| [0024](0024-checklists-are-each-travellers-own.md) | A traveller's checklists are their own, and start from templates kept outside any trip | Accepted |
 
 ### access
 
@@ -83,6 +85,7 @@ keeps:
 | [0012](0012-access-passes-down-the-tree.md) | Access to a page passes down to the pages beneath it | Accepted |
 | [0013](0013-bookings-have-a-page-of-their-own.md) | A trip's bookings have a page of their own, and its calendar is seen only by the travellers an admin chooses | Accepted |
 | [0015](0015-the-online-side-runs-on-cloudflare.md) | Itinero's online side runs on Cloudflare's free plan, and travellers sign in with Google alone | Accepted |
+| [0024](0024-checklists-are-each-travellers-own.md) | A traveller's checklists are their own, and start from templates kept outside any trip | Accepted |
 
 ### web
 

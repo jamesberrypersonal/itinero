@@ -5,12 +5,32 @@
 The planner holds each trip: the calendar a traveller pencils it in on, the dates that are fixed,
 and the pages where travellers write up their research. Phase 0 designs it: the requirements and
 specifications for the planner and its components, before any of it is built. Phase 1 builds it,
-one component at a time, starting from the components that depend on no other.
+one component at a time, starting from the components that depend on no other. Phase 2 designs and
+builds each traveller's checklists, and the library of templates they start from.
 
 This roadmap also plans `shared/trip-time`, the component that holds the local dates and times of
 the planner's itinerary. The planner is the first system that needs that component.
 
 ## Completed
+
+### Phase 2 — Checklists
+
+#### Milestone Planner-2.1 — The design of checklists
+
+- A traveller's checklists are their own, and start from templates kept outside any trip. Only that
+  traveller sees or ticks them, an admin included. A copy of a template stands apart from it, and a
+  delete is for good (ADR-0024, a traveller's checklists are their own).
+- The planner system's requirements promise each traveller's templates and their checklists on a
+  trip (`PLN-F17`, `PLN-F18`).
+- `planner/checklists` has its requirements and its specification. Each checklist is one record,
+  holding its items, and a traveller's checklists keep the order they give.
+- `planner/library` has its requirements and its specification. Each traveller's library is kept in
+  the online side's D1 database, one row for each template.
+- `planner/trip-host` holds each traveller's checklists on a trip, and gives them to that traveller
+  alone (`PLN:HOST-F10`). The access system promises that no traveller sees another's checklists
+  (`ACC-F14`).
+- The web app's trip store keeps the library and each trip's checklists on the device, and its
+  screens show them in screens of their own (`WEB:STORE-F8`, `WEB:SCREENS-F11`).
 
 ### Phase 1 — Build
 
@@ -125,5 +145,17 @@ the planner's itinerary. The planner is the first system that needs that compone
 
 ## Pending
 
-Nothing is pending. The checks of the planner's requirements that need a phone or the screens
-wait in the web app's roadmap.
+The checks of the planner's requirements that need a phone or the screens wait in the web app's
+roadmap.
+
+### Phase 2 — Checklists
+
+#### Milestone Planner-2.2 — Checklists built
+
+- Build `planner/checklists` as `@itinero/checklists`, in `packages/checklists/`, as its
+  specification gives it, with its test suite proving each requirement it claims, except the checks
+  of `PLN:CHECKLISTS-NFR1` that need a phone.
+- Build `planner/library` in the Worker of the online side, with the migration that makes its two
+  tables, and prove each requirement it claims in the online side's suite.
+- Add checklists to `planner/trip-host`, as its specification gives them, and prove `PLN:HOST-F10`
+  and the checks of `PLN:HOST-NFR1` and `ACC-F14` that need only the online side.

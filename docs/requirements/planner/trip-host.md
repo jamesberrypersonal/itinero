@@ -2,7 +2,8 @@
 
 What the component `planner/trip-host` promises to the components that use it, and through them to
 travellers. The trip host holds the one copy of each trip online, which every change is applied to.
-It holds the trip's calendar, its pages, its grants of access and its bookings, applies each
+It holds the trip's calendar, its pages, its grants of access, its bookings and each traveller's
+checklists, applies each
 change a traveller makes once the change is allowed, and keeps each traveller's devices up to date
 with what they may see. The component registry, `components.md`, gives it the prefix `PLN:HOST`.
 
@@ -18,10 +19,12 @@ The parts of a trip are those the planner's requirements define, in
   calendar.
 - **The bookings** hold what the trip's travellers have booked, such as flights and stays, each
   naming the travellers it is for. `requirements/bookings/bookings.md` defines them.
+- **The checklists** hold each traveller's own checklists on the trip, which no other traveller
+  sees, an admin included. `requirements/planner/checklists.md` defines them.
 
 A change is one edit to any of these, such as moving a stretch, rewriting a page or giving a
 traveller access to the calendar. A trip's sequence counts every change applied to it, across all
-four.
+five.
 
 ---
 
@@ -177,6 +180,42 @@ traveller may see. ^pln-host-f9
 > does (ADR-0016, a trip's bookings are entered by hand, as one of four kinds, and kept with the
 > trip online).
 
+### PLN:HOST-F10 — The trip host holds each traveller's checklists on a trip, and gives them to that traveller alone
+
+The trip host holds each traveller's checklists beside the rest of the trip. It adds a checklist,
+empty or copied from one of the traveller's own templates or checklists, applies each change to
+it, and deletes it for good, each only for the traveller it belongs to. A traveller on the trip may
+keep checklists whatever their access to the trip. A device is given only its own traveller's
+checklists, and an admin's device is given no one else's. A traveller removed from the trip keeps
+their checklists on it, and is given them again if they rejoin. A traveller holds at most 50
+checklists on one trip. ^pln-host-f10
+
+- **Verification:** on the trip of `PLN:HOST-F1`, with a second traveller holding view access to the
+  trip, and a template Before leaving in their library,
+    - as the second traveller, start a checklist from Before leaving, tick one item, and confirm
+      each is accepted, and the sequence rises by one each time
+    - as the creator, an admin, catch up from the start, and confirm nothing given names the
+      checklist
+    - as the creator, tick an item of it by its identifier, and delete it, and confirm each is
+      refused in the same way as for a checklist nobody holds
+    - as the second traveller, start a checklist from a template whose owner is the creator, and
+      confirm it is refused, with the reason
+    - remove the second traveller, invite them back, have them accept, and confirm their device is
+      given the checklist, with its tick
+    - delete the checklist, catch the device up, and confirm it no longer holds it
+    - give the second traveller 50 checklists on the trip, add one more, and confirm it is refused,
+      with the reason
+
+> **What does this buy?** Each traveller keeps their own checklists with the trip they are for, and
+> nobody else on the trip sees them (`PLN-F18`, ADR-0024, a traveller's checklists are their own).
+
+> **Why may a traveller with view access keep checklists?** A checklist changes nothing any other
+> traveller sees. Access to the trip governs what the travellers share.
+
+> **Does a change to a traveller's checklist tell the other devices on the trip?** Each open device
+> is told of the new sequence, as for every change, and catches up. It is given nothing, since
+> nothing it may hold changed. The message names no part of the trip (`PLN:HOST-F6`).
+
 ---
 
 ## Non-functional requirements
@@ -184,8 +223,8 @@ traveller may see. ^pln-host-f9
 ### PLN:HOST-NFR1 — Nothing leaves the trip host that the traveller asking may not see
 
 The trip host gives a traveller's device nothing of a trip that the traveller may not see: no page,
-no title and no part of the calendar. It gives another traveller's grants only to an admin. That
-holds whatever the device asks for. ^pln-host-nfr1
+no title and no part of the calendar. It gives another traveller's grants only to an admin, and
+another traveller's checklists to nobody. That holds whatever the device asks for. ^pln-host-nfr1
 
 - **Verification:** with a device altered to send any request, as a traveller with no access to the
   page Argentina or to the calendar,
@@ -193,7 +232,8 @@ holds whatever the device asks for. ^pln-host-nfr1
     - ask for the calendar, and confirm it is refused
     - catch up from the start, and confirm nothing given names Argentina, a stretch, or another
       traveller's access
-    - catch up as an admin, and confirm every traveller's grants are given
+    - catch up as an admin, and confirm every traveller's grants are given, and no other
+      traveller's checklists
 
 > **What does this buy?** Access means nothing if one request can get round it (`ACC-NFR1`).
 

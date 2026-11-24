@@ -17,6 +17,8 @@ are the bookings system's:
   shows them too, to a traveller who may see it. Each booking names the travellers it is for
   (ADR-0013, a trip's bookings have a page of their own, and its calendar is seen only by the
   travellers an admin chooses).
+- **A traveller's checklists**, on a trip or kept as templates outside any trip, are their own
+  (ADR-0024, a traveller's checklists are their own).
 
 Access to a page is one of three levels: edit access, view access, or none. A traveller with edit
 access to a page may also see it. Access passes down the tree, from the trip as its root (ADR-0012,
@@ -278,14 +280,37 @@ account, and they may keep it or change it. A traveller changes their name at an
 > **Does a traveller's name show on every trip?** Yes. A traveller has one name, which every trip
 > they are on shows.
 
+### ACC-F14 — No traveller sees another traveller's checklists or templates, an admin included
+
+A traveller sees only their own checklists on a trip, and only their own templates. No other
+traveller sees them, whatever their access to the trip, and an admin is no exception. No grant an
+admin makes changes this. ^acc-f14
+
+- **Verification:** on a running system, on a trip with an admin and a second traveller holding
+  edit access to the trip, where the second traveller keeps a checklist on the trip and a template
+  Before leaving,
+    - as the admin, confirm the trip shows them no checklist of the second traveller's, and their
+      library holds no Before leaving
+    - give the second traveller view access to the calendar, and an exception for a page, and
+      confirm the admin still sees neither
+    - as the second traveller, confirm they see both
+
+> **What does this buy?** A traveller keeps track of their own documents and what they have left to
+> do, without anyone on the trip watching (`PLN-F17`, `PLN-F18`).
+
+> **Why is an admin not given them, when an admin is given everything else?** An admin manages
+> what the travellers share. A checklist is shared with nobody, so there is nothing of it to manage
+> (ADR-0024).
+
 ---
 
 ## Non-functional requirements
 
-### ACC-NFR1 — No traveller obtains a trip, a page, a booking or a calendar they may not see, whatever their device sends
+### ACC-NFR1 — No traveller obtains a trip, a page, a booking, a calendar or a checklist they may not see, whatever their device sends
 
-A traveller never obtains a trip they are not on, or a page, a booking or a calendar they may not
-see, and never changes one they may not edit, whatever their device asks for. ^acc-nfr1
+A traveller never obtains a trip they are not on, or a page, a booking, a calendar, a checklist or a
+template they may not see, and never changes one they may not edit, whatever their device asks
+for. ^acc-nfr1
 
 - **Verification:** on a running system, with a device altered to send any request,
     - ask for a page the traveller may not see, by its identifier, and confirm it is refused
@@ -294,6 +319,8 @@ see, and never changes one they may not edit, whatever their device asks for. ^a
       refused
     - send a change to a page the traveller may only view, and confirm it is refused, and the page
       unchanged
+    - as an admin, ask for another traveller's checklist and template by their identifiers, and
+      confirm each is refused
 
 > **What does this buy?** Access means nothing if a traveller can get round it by changing the app
 > on their own phone.
