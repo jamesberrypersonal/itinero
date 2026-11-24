@@ -532,7 +532,9 @@ failed this way, and a pull request's run fails with them.
 drawn after a catch-up. On 2026-11-24, in Firefox, the list of trips never showed after a new
 traveller chose their name, in `screens-trip.spec.ts`. Earlier runs failed the same way in
 `screens-account.spec.ts` and `screens-checklists.spec.ts`, in each of the three engines, and once
-on the shell's timing test. Run locally ten times in Firefox, the booking test failed once.
+on the shell's timing test. The same day's rerun failed instead in Chromium, where the trip's home
+page, opened with no connection, was drawn twice, not once (`WEB-NFR1`). Run locally ten times in
+Firefox, the booking test failed once.
 
 *Proposal:* Find what each failing test waits on that is not yet there, and wait on the state the
 screen depends on instead. Until then, a failed run of `test-packages` is rerun before it is read as
