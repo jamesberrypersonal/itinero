@@ -106,9 +106,9 @@ Behaviour crossing every operation:
   `sequence` is still the one read. The batch raises the `sequence` last, so either every statement
   holds or none does. Where none holds, another request changed the library in between, and the
   request reads again and retries. A third failure is refused with `busy`, and nothing is written.
-- **A library is made by the first change.** The first request of an account that changes its
-  library makes its row of `libraries`, with a `sequence` of 0 and no template. A catch-up of an
-  account with no row gives a `sequence` of 0 and no template, and writes nothing.
+- **A library is made by the first request that uses it.** The first catch-up or change of an
+  account with no row of `libraries` makes its library, holding the default templates, with a
+  `sequence` of 1 (§4.6). The request then goes on as for a library already made.
 
 ### 4.1 What the library stores
 
@@ -183,7 +183,25 @@ refused with `unknown-template`, so a second delete of the same template is refu
 drops the template at its next catch-up. A checklist on a trip copied from the template holds no
 reference to it, and is unchanged.
 
-### 4.6 The test suite
+### 4.6 The default templates
+
+*Plumbing:* a library is made holding two default templates, Before leaving, then Packing
+(`PLN:LIBRARY-F6`). `services/online/src/defaults.ts` holds each one's
+identifier, title and items, and makes each with `planner/checklists`, owned by the account, with
+no trip and no item ticked. Each identifier starts with `default-`, and each item's is `item-` and
+its place, so none meets an identifier a device makes, which is a random UUID.
+
+One batch makes the library. It inserts each default with a `changed` of 1, each only where the
+account still has no row of `libraries`, then makes that row, with a `sequence` of 1. Two requests
+making the same library at once are run one batch at a time, so the second finds the row and
+inserts nothing. A library already made is never given the defaults again, so a default the
+traveller deletes stays deleted, and a library made before the defaults existed is unchanged.
+
+A catch-up that finds no library makes it, then reads it again, so the device is given the
+defaults with their text. Only an account's first request does this, so it adds nothing to the
+day of `PLN:LIBRARY-NFR2`.
+
+### 4.7 The test suite
 
 The suite runs with the online side's, through `just test-online`, in Vitest with Cloudflare's
 integration, which runs each test file in the Workers runtime with a local D1 database of its own.
@@ -198,6 +216,9 @@ integration, which runs each test file in the Workers runtime with a local D1 da
 - **Cost tests** count the rows each request reads and writes, through what D1 reports for each
   statement, and confirm the day of `PLN:LIBRARY-NFR2`'s verification stays within the free plan
   (§6).
+- **Default tests** make a library by a catch-up, by a change, and by two catch-ups at once, and
+  confirm it holds each default once (`PLN:LIBRARY-F6`). Every other test starts from a library
+  emptied of its defaults.
 
 ## 5. Resources
 
@@ -213,6 +234,7 @@ The library stores two kinds of record, each a table of the online side's D1 dat
 | The tables `libraries` and `templates` | The online side's D1 database, made by a migration in `services/online/migrations/` | Whoever keeps the planner's roadmap |
 | The library's logic | `services/online/src/library.ts` | Whoever keeps the planner's roadmap |
 | The requests of §3.2 | `services/online/src/library-routes.ts` | Whoever keeps the planner's roadmap |
+| The default templates | `services/online/src/defaults.ts` | Whoever keeps the planner's roadmap |
 
 The Worker gains `@itinero/checklists` as a runtime dependency.
 
@@ -241,6 +263,7 @@ The Worker gains `@itinero/checklists` as a runtime dependency.
 | [PLN:LIBRARY-F3](../../requirements/planner/library.md#^pln-library-f3) | `DELETE /api/library/templates/{id}` (§4.5). Asking the traveller first is `web/screens`. |
 | [PLN:LIBRARY-F4](../../requirements/planner/library.md#^pln-library-f4) | `POST /api/library/sync`, and the `sequence` and `changed` of §4 (§4.4). Keeping the copy on the device is `web/trip-store`. |
 | [PLN:LIBRARY-F5](../../requirements/planner/library.md#^pln-library-f5) | The `library-full` refusal (§4.2). |
+| [PLN:LIBRARY-F6](../../requirements/planner/library.md#^pln-library-f6) | A library made holding the default templates, once, by its first catch-up or change (§4, §4.6). |
 | [PLN:LIBRARY-NFR1](../../requirements/planner/library.md#^pln-library-nfr1) | Every request working on the account `whoSent` gives alone, and one refusal for any template the traveller does not hold (§4, §6). |
 | [PLN:LIBRARY-NFR2](../../requirements/planner/library.md#^pln-library-nfr2) | The `order` column, and a catch-up that reads the text of only the templates changed (§4.1, §4.4, §6). |
 | [ACC-F14](../../requirements/access/access.md#^acc-f14) | Each library worked on only for the account `whoSent` gives, so no traveller, an admin included, is given another's templates (§4). A trip's checklists are `planner/trip-host`. |

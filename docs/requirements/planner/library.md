@@ -101,6 +101,30 @@ The library refuses a template added to a library that holds 100, and says why. 
 > **What does this buy?** A library whose every template holds its largest checklist stays small
 > enough for a phone to keep a copy of.
 
+### PLN:LIBRARY-F6 — A traveller's library starts with two default templates, given once
+
+A traveller's library starts with two templates: Before leaving, then Packing, each with items to
+start from and no item ticked. The library gives them once, when it makes
+the library. The traveller changes and deletes each as any other template, and a deleted one never
+comes back. ^pln-library-f6
+
+- **Verification:** on a running system, as a traveller signed in for the first time,
+    - catch up, and confirm the library holds Before leaving, then Packing, each with its items, none
+      ticked
+    - as another new traveller, add the template Flying, and confirm the library holds the two
+      defaults, then Flying
+    - with two devices catching up at once for the first time, confirm the library holds each
+      default once
+    - rename Packing and delete Before leaving, and confirm the library holds only the renamed
+      Packing
+    - delete Packing, add a template, and confirm the library holds only the one added
+
+> **What does this buy?** A new traveller starts a trip's checklists from lists already written,
+> rather than from an empty library (`PLN-F17`).
+
+> **Why are the defaults given only once?** A traveller who deletes one has chosen not to keep it.
+> Giving it again would undo that choice.
+
 ---
 
 ## Non-functional requirements

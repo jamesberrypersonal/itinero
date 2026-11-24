@@ -3,7 +3,7 @@
 What needs active work, and what waits on a decision. `documentation-system.md` gives the list's
 rules. When an item is done, it leaves this list for `CHANGELOG.md` in the commit that finishes it.
 
-*Next free:* TODO-41
+*Next free:* TODO-42
 
 ## Tags
 
@@ -516,5 +516,28 @@ the bookings page or a page of research.
 *Proposal:* Decide what the sheet holds for each traveller, from what that traveller may see,
 including whether it takes the trip's country pages whole. Then add the requirements to the web
 app's screens.
+
+*Releases:* Nothing is planned for it yet.
+
+### TODO-41 — Make the web app's browser tests pass every run
+
+*Tags:* ci, web
+*Written:* 2026-11-24
+
+*Problem:* The browser tests of `test-packages` fail now and then, on a different test each time,
+with no change that explains it. Three of the runs on `main` between 2026-11-21 and 2026-11-24
+failed this way, and a pull request's run fails with them.
+
+*Reason:* The failures seen are of tests that sign a new traveller in, or that wait on a screen
+drawn after a catch-up. On 2026-11-24, in Firefox, the list of trips never showed after a new
+traveller chose their name, in `screens-trip.spec.ts`. Earlier runs failed the same way in
+`screens-account.spec.ts` and `screens-checklists.spec.ts`, in each of the three engines, and once
+on the shell's timing test. The same day's rerun failed instead in Chromium, where the trip's home
+page, opened with no connection, was drawn twice, not once (`WEB-NFR1`). Run locally ten times in
+Firefox, the booking test failed once.
+
+*Proposal:* Find what each failing test waits on that is not yet there, and wait on the state the
+screen depends on instead. Until then, a failed run of `test-packages` is rerun before it is read as
+a fault.
 
 *Releases:* Nothing is planned for it yet.
