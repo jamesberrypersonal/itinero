@@ -733,11 +733,13 @@ country and city they research.
 
 *Reason:* The pages component starts each country's page with no text (`PLN:PAGES-F6`), and the
 form for a new page starts empty too. The pages component imposes no structure on a page's text
-(`PLN:PAGES-F2`), which headings a traveller can rewrite or delete still keep.
+(`PLN:PAGES-F2`), which headings a traveller can rewrite or delete still keep. A heading for
+emergency information still leaves the facts to the travellers, as `PLN-NR6` keeps them.
 
 *Proposal:* Start each new trip's country pages, and every page added from the form, with the
 headings General Info, Getting Around, Things to Do, Places to See, Food to Eat, with Dishes to Try
-and Where to Eat beneath it, and Nightlife. Add the requirements to `planner/pages` and the web
-app's screens.
+and Where to Eat beneath it, and Nightlife. Give the country pages one more, Emergency Info, for
+the embassy's contacts and the local emergency numbers, and add the requirements to `planner/pages`
+and the web app's screens.
 
 *Releases:* Milestone Planner-3.1.
