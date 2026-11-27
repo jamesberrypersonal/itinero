@@ -5,7 +5,8 @@
 The web app is what travellers use on a computer or a phone, including reading a trip with no
 connection. Phase 0 designs it: its requirements, its components and their specifications, before
 any of it is built. It ends with a trial on a real phone, of what the design cannot settle on paper.
-Phase 1 builds it, one component at a time.
+Phase 1 builds it, one component at a time. Phase 2 acts on what the first beta testers found, in
+the screens and in the tests.
 
 The web app shows what the planner holds and what the access system allows. Its design follows the
 planner's, made in Milestone Planner-0.2, and the access system's, made in Milestone Access-0.1.
@@ -176,16 +177,33 @@ Each part of a system is named by its address, the system and the part's own nam
 
 ## Pending
 
-### Phase 1 — Build
+### Phase 2 — The first beta
 
-#### Milestone Web-1.7 — Checks waiting on the iPhone and the next IANA release
+#### Milestone Web-2.1 — Browser tests that pass every run
 
-**Waits on:** Milestone Access-1.4
+- Make each browser test wait on the state its screen depends on. Do TODO-41.
 
-The two items below were Milestone Web-1.5's. They moved here when Milestone Web-1.6 started, since
-each waits on something outside the web app.
+#### Milestone Web-2.2 — Moving through the pages
 
-- Prove the check of `ACC-F3` that an invitation opened by an account holding another address
-  cannot be accepted, and says which address it was sent to, on the iPhone.
-- Prove the checks of `WEB-F8` and `SHR:TRIP-TIME-NFR1` that a device takes newer time-zone rules,
-  online and then offline, with the deploy that carries the next IANA release.
+- Let a page be dropped between two of its siblings in the tree. Do TODO-42.
+- List under a page's text the pages beneath it. Do TODO-43.
+- Keep open the branches of the tree a traveller opened. Do TODO-44.
+
+#### Milestone Web-2.3 — A firm item's form
+
+- Show a refused firm item's error beside the field at fault, in plain words. Do TODO-46.
+- Make the time field's clock easy to see, in each of the three engines. Do TODO-47.
+- Name the choice of a start and an end for what it does, and label both. Do TODO-49.
+
+#### Milestone Web-2.4 — Where a firm item happens
+
+**Waits on:** Milestone Planner-3.1
+
+- Show a firm item's address on its form and its card, as Milestone Planner-3.1 specifies it.
+- Fill in the time zone of a firm item that is not travel, from what Milestone Planner-3.1
+  decides. Do TODO-45.
+
+#### Milestone Web-2.5 — A sheet to print
+
+- Decide what the sheet holds for each traveller, and add its requirements. Do TODO-40.
+- Build the sheet in `web/screens`, and prove its requirements in the three engines.

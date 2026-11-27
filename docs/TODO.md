@@ -3,7 +3,7 @@
 What needs active work, and what waits on a decision. `documentation-system.md` gives the list's
 rules. When an item is done, it leaves this list for `CHANGELOG.md` in the commit that finishes it.
 
-*Next free:* TODO-51
+*Next free:* TODO-52
 
 ## Tags
 
@@ -517,7 +517,7 @@ the bookings page or a page of research.
 including whether it takes the trip's country pages whole. Then add the requirements to the web
 app's screens.
 
-*Releases:* Nothing is planned for it yet.
+*Releases:* Milestone Web-2.5.
 
 ### TODO-41 — Make the web app's browser tests pass every run
 
@@ -540,7 +540,7 @@ Firefox, the booking test failed once.
 screen depends on instead. Until then, a failed run of `test-packages` is rerun before it is read as
 a fault.
 
-*Releases:* Nothing is planned for it yet.
+*Releases:* Milestone Web-2.1.
 
 ### TODO-42 — Reorder pages among their siblings by dragging
 
@@ -558,7 +558,7 @@ give them (`PLN:PAGES-F1`). A beta tester reported it on 2026-11-26, in
 *Proposal:* Let a page be dropped between two rows as well as onto one, as the checklists screen
 lets an item be, and test it on a phone and a computer.
 
-*Releases:* Nothing is planned for it yet.
+*Releases:* Milestone Web-2.2.
 
 ### TODO-43 — List a page's pages beneath it, under its text
 
@@ -576,7 +576,7 @@ page view was built with no list of the pages under it. A beta tester reported i
 *Proposal:* Show under a page's text a link to each page beneath it, in the tree's order. Decide
 whether a page also links to its siblings, or to the one before and after it.
 
-*Releases:* Nothing is planned for it yet.
+*Releases:* Milestone Web-2.2.
 
 ### TODO-44 — Keep open the branches of the tree a traveller opened
 
@@ -592,7 +592,7 @@ it on 2026-11-26, in [issue 28](https://github.com/jamesberrypersonal/itinero/is
 *Proposal:* Keep the open branches for each trip on the device. Decide whether they stay open after
 the app is closed, or only while it runs.
 
-*Releases:* Nothing is planned for it yet.
+*Releases:* Milestone Web-2.2.
 
 ### TODO-45 — Fill in the time zone of a firm item that is not travel
 
@@ -611,7 +611,7 @@ on 2026-11-26, in [issue 30](https://github.com/jamesberrypersonal/itinero/issue
 day falls in, or the page the item names. Then add the requirement to the web app, with the
 traveller still free to choose another zone.
 
-*Releases:* Nothing is planned for it yet.
+*Releases:* Milestone Web-2.4.
 
 ### TODO-46 — Show a refused firm item's error beside the field at fault, in plain words
 
@@ -629,7 +629,7 @@ title is empty, does not say what is missing. A beta tester reported it on 2026-
 *Proposal:* Show each refusal beside its field, in the error colour, and move the focus there, with
 words a traveller would use. Decide whether the zone field accepts only a zone from its suggestions.
 
-*Releases:* Nothing is planned for it yet.
+*Releases:* Milestone Web-2.3.
 
 ### TODO-47 — Make the time field's clock easy to see
 
@@ -646,7 +646,7 @@ page's `color-scheme`. A beta tester reported it on 2026-11-26, in
 *Proposal:* Draw the clock in a colour that meets the contrast the rest of the screens keep, and
 give the field a clear border and focus. Check it in each of the three engines.
 
-*Releases:* Nothing is planned for it yet.
+*Releases:* Milestone Web-2.3.
 
 ### TODO-48 — Give a firm item an address
 
@@ -664,7 +664,7 @@ item of travel holds a place. A beta tester asked for it on 2026-11-26, in
 maps app, and whether that address fills in its zone, which would also do TODO-45. Then add the
 requirements to the itinerary and the screens.
 
-*Releases:* Nothing is planned for it yet.
+*Releases:* Milestone Planner-3.1.
 
 ### TODO-49 — Make clear that a firm item between two times can span days
 
@@ -681,7 +681,7 @@ for a two-day hike, did not find that "Between" gives them, in
 *Proposal:* Name the choice for what it does, such as "From … to …", and label its two dates and
 times as the start and the end.
 
-*Releases:* Nothing is planned for it yet.
+*Releases:* Milestone Web-2.3.
 
 ### TODO-50 — Decide whether a traveller can share a checklist with the trip
 
@@ -700,5 +700,24 @@ tester asked for it on 2026-11-26, in
 *Proposal:* Decide whether a traveller can share a checklist with the trip, off by default, and
 whether others can only read it or also copy it into their own, as `PLN:CHECKLISTS-F4` copies one.
 Record it in a decision record that supersedes ADR-0024.
+
+*Releases:* Nothing is planned for it yet.
+
+### TODO-51 — Prove the checks Phase 1 of the web app left for the iPhone and new time-zone rules
+
+*Tags:* web, access/membership, shared/trip-time
+*Written:* 2026-11-26
+
+*Problem:* Two checks of the web app's Phase 1 are not yet proved: that an invitation opened on the
+iPhone by an account holding another address cannot be accepted, and says which address it was sent
+to (`ACC-F3`), and that a device takes newer time-zone rules, online and then offline (`WEB-F8`,
+`SHR:TRIP-TIME-NFR1`).
+
+*Reason:* Milestone Web-1.5's checks by hand, from 2026-11-18 to 2026-11-21, left both. The second
+needs a deploy carrying the next IANA release, which had not come out. Neither is needed before a
+first trip with the app, so they wait here rather than in a milestone.
+
+*Proposal:* Make both checks by hand on the iPhone against the deploy at useitinero.ca, the second
+with the deploy that carries the next IANA release.
 
 *Releases:* Nothing is planned for it yet.
