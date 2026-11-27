@@ -227,3 +227,41 @@ request.
 runs `just test-docs`, then `just check-docs --summary "$GITHUB_STEP_SUMMARY"`. A pull request with
 findings fails its check. `.github/workflows/test-packages.yml` runs `npm ci`, installs Playwright's
 three engines, and runs `npm test` with Node.js 24, on the same events.
+
+## GitHub pull requests
+
+### Title
+
+Write the title as `type(component): Title`, for example `docs(workspace): A finished item leaves the live list in the commit that finishes it`.
+
+### Description
+
+Whenever you create or edit a GitHub pull request description (for example with `gh pr create`, `gh pr edit`, or the GitHub API), give it two parts:
+
+1. A `# Summary` heading, followed by a short summary of the pull request: one or two sentences, three at most.
+2. Below the summary, a collapsible `<details>` block that holds the full description. The `<summary>` of the block must be the name of the model that wrote it.
+
+```markdown
+# Summary
+
+One to three sentences that say what the pull request did.
+
+<details>
+  <summary>Claude Opus 5.5</summary>
+
+  ...the full PR description goes here...
+</details>
+```
+
+- Replace `Claude Opus 5.5` with the name of the model you are actually running as (for example `Claude Sonnet 5.5` or `Claude Fable 5.2`).
+- Put nothing outside the summary and the `<details>` block. Any attribution line (such as "Generated with Claude Code") goes inside the `<details>` block, at the end.
+- Leave a blank line after `<summary>...</summary>` so GitHub renders the Markdown inside the block.
+- Write the whole description, the summary and the full description alike, in the past tense: say what the pull request did ("Added the skill", "Fixed the guide"), not what it does or will do ("Adds the skill"). The title keeps its own form, above.
+
+### Assignee and labels
+
+- Set the assignee to the user's GitHub account (for example `gh pr create --assignee jamesberrypersonal`, or `gh pr edit --add-assignee jamesberrypersonal`).
+- Add the repository label that matches the `type` in the title. For example, a pull request titled `docs(workspace): ...` gets the `docs` label (`--label docs`). Check the labels with `gh label list` first. If no label matches, do not create one: tell me instead.
+- Add any other existing repository labels that clearly apply.
+
+Example: https://github.com/jamesberrypersonal/itinero/pull/8
