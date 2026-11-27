@@ -54,6 +54,9 @@ async function traveller(browser: Browser, name: string, kind: "phone" | "comput
       return Promise.all(ids.map(async (id) => (await fetch(`/api/library/templates/${id}`, { method: "DELETE", headers: { "Itinero-Api": "1" } })).status));
     }, DEFAULTS);
     expect(statuses).toEqual(DEFAULTS.map(() => 200));
+    // The device catches up now, rather than while a test presses the library's screen: emptied
+    // then, the screen moves its buttons beneath the pointer.
+    await page.evaluate(() => (window as unknown as { itineroStore: { catchUpAll(): Promise<void> } }).itineroStore.catchUpAll());
   }
   return { context, page, account, email };
 }
@@ -269,7 +272,9 @@ test("WEB:SCREENS-F13 — until their trip starts, the home page lists the trave
       await expect(items(sam.page)).toHaveCount(n);
     }
     for (let n = 0; n < ticked; n++) {
-      await sam.page.locator('[data-action="tick"]').nth(n).check();
+      // A tick shows once the trip holds it, and a screen drawn meanwhile clears the box again, so
+      // the test waits on the item rather than on the box.
+      await sam.page.locator('[data-action="tick"]').nth(n).click();
       await expect(sam.page.locator("[data-item]").nth(n)).toHaveAttribute("data-ticked", "yes");
     }
   }

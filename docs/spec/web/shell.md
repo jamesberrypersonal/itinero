@@ -216,8 +216,9 @@ in the repository. It covers all four of the web app's components.
   (`WEB:SHELL-F6`). With no connection, they confirm that trip-time writes, orders and measures
   times with the rules the shell kept (`SHR:TRIP-TIME-NFR1`).
 - **Timing tests** measure the time from opening to `start` resolving, and fail above 300
-  milliseconds on the machine running them. The check on a phone of `WEB:SHELL-NFR1` is made by
-  hand before each release.
+  milliseconds on the machine running them. They run once every other browser test has passed,
+  one engine at a time, so no other test shares the machine. The check on a phone of
+  `WEB:SHELL-NFR1` is made by hand before each release.
 
 The browser tests build each version they publish once, before they run, with a hook through which
 they reach the shell, the places, the trip store, trip-time and the trip's packages. The shell's own

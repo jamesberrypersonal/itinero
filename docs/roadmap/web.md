@@ -15,6 +15,18 @@ Each part of a system is named by its address, the system and the part's own nam
 
 ## Completed
 
+### Phase 2 — Before a first trip
+
+#### Milestone Web-2.1 — Browser tests that pass every run
+
+- Each browser test of the web app waits on the state its screen depends on. A new traveller's name
+  is sent with Enter from its field, a checklist's tick is awaited on its item, the settings' name
+  field is changed once it holds the name read, and a new traveller's library is caught up before
+  its screen is used.
+- The check that Itinero opens at the trip last opened confirms no list is drawn first, as
+  `web/screens` specifies, and the timing test of `WEB:SHELL-NFR1` runs alone, after every other
+  browser test.
+
 ### Phase 1 — Build
 
 #### Milestone Web-1.6 — Checklists
@@ -178,10 +190,6 @@ Each part of a system is named by its address, the system and the part's own nam
 ## Pending
 
 ### Phase 2 — Before a first trip
-
-#### Milestone Web-2.1 — Browser tests that pass every run
-
-- Make each browser test wait on the state its screen depends on. Do TODO-41.
 
 #### Milestone Web-2.2 — Moving through the pages
 

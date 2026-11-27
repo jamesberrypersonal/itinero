@@ -4,6 +4,18 @@ What has been done, newest first. The live work list, `TODO.md`, numbers each pi
 owed, such as TODO-9. An entry that finishes one of those items names it, so a reader can find what
 became of its number. `documentation-system.md` sets the rules.
 
+## 2026-11-27 — TODO-41, the web app's browser tests pass every run
+
+*By:* James Berry, with Claude
+
+The browser tests of `test-packages` wait on the state each screen depends on, rather than on a
+screen that may not hold it yet. A new traveller's name is sent with Enter from its field, since
+Firefox now and then loses the first press on a new page. A checklist's tick is awaited on its item,
+which shows it once the trip holds it. The settings' name field is changed only once it holds the
+name read. A new traveller's library is caught up before a test presses its screen. Itinero opened
+at the trip last opened is shown to draw no list first, rather than to draw the home page once. The
+timing test of `WEB:SHELL-NFR1` runs alone, once every other browser test has passed.
+
 ## 2026-11-23 — TODO-39, a trip's checklists start from templates
 
 *By:* James Berry, with Claude

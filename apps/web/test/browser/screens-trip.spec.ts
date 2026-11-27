@@ -654,11 +654,21 @@ test("WEB-NFR1 — Itinero opens at the trip last opened, also with no connectio
 
   await ana.context.setOffline(true);
   await ana.page.close();
+  // Every screen the new window draws is recorded, to show it draws no list before the home page
+  // (spec/web/screens.md §4.2). The home page may draw again as the shell's state settles.
+  await ana.context.addInitScript(() => {
+    const drawn: string[] = [];
+    (window as unknown as { itineroDrawn: string[] }).itineroDrawn = drawn;
+    new MutationObserver(() => {
+      const showing = document.querySelector("[data-screen]")?.getAttribute("data-screen");
+      if (showing && drawn.at(-1) !== showing) drawn.push(showing);
+    }).observe(document, { subtree: true, childList: true });
+  });
   const page = await ana.context.newPage();
   await screen(page, "/", "home");
   expect(new URL(page.url()).pathname).toBe(`/trips/${lisbon}`);
   await expect(page.locator("h1")).toContainText("Lisbon");
-  expect(await page.evaluate(() => performance.getEntriesByName("itinero-home-drawn").length)).toBe(1);
+  expect(await page.evaluate(() => (window as unknown as { itineroDrawn: string[] }).itineroDrawn)).toEqual(["home"]);
 
   await page.locator('[data-action="trip-menu"]').click();
   await page.getByRole("menuitem", { name: "All trips" }).click();
