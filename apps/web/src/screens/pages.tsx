@@ -1,10 +1,12 @@
-// A trip's pages: their tree, one page drawn from its Markdown, the editor, search, and the
-// graveyard (docs/spec/web/screens.md §4.6, WEB:SCREENS-F5, WEB:SCREENS-F8).
+// A trip's pages: their tree, one page drawn from its Markdown with the pages beneath and beside it,
+// the editor, search, and the graveyard (docs/spec/web/screens.md §4.6, WEB:SCREENS-F5,
+// WEB:SCREENS-F8, WEB:SCREENS-F14, WEB:SCREENS-F16, WEB:SCREENS-F17, WEB:SCREENS-F18).
 
 import { useLayoutEffect, useMemo, useRef, useState } from "preact/hooks";
-import { beneath, changeToText, forPhone, linkTarget, search, tree, type Branch, type Page, type Where } from "@itinero/pages";
+import { beneath, changeToText, forPhone, linkTarget, search, startingText, tree, type Branch, type Page, type Where } from "@itinero/pages";
 import * as store from "../store/index.ts";
 import { allows } from "./access.ts";
+import { keepOpenBranches, openBranches } from "./branches.ts";
 import type { Copy } from "../store/index.ts";
 import { toHtml } from "./markdown.ts";
 import { go, Link } from "./router.tsx";
@@ -20,21 +22,33 @@ function allowed(copy: Copy, account: string, change: Parameters<typeof changeTo
   return allows(copy, account, { kind: "change-page", change });
 }
 
-/** Dragging a page in the tree: the page held, and the page it would go beneath ("" for the top). */
+/**
+ * Where a page held over the tree would drop: before a row, after it, or beneath it, which the
+ * row's top quarter, bottom quarter and middle give. The top of the tree is the row "" (§4.6).
+ */
+type Over = { id: string; zone: "before" | "into" | "after" };
+
+/** Dragging a page in the tree: the page held, and where it would drop. */
 type Drag = {
   /** Whether the traveller may move this page. */
   may: (id: string) => boolean;
   held: string | undefined;
-  over: string | undefined;
+  over: Over | undefined;
   pointer: (event: PointerEvent, id: string, phase: "down" | "move" | "up" | "cancel") => void;
 };
+
+/** The class a row takes while a page is held over it. */
+function dropClass(over: Over | undefined, id: string): string {
+  if (over?.id !== id) return "";
+  return over.zone === "into" ? " drop-target" : ` drop-${over.zone}`;
+}
 
 function Branches({ copy, branches, open, toggle, drag }: { copy: Copy; branches: readonly Branch[]; open: Set<string>; toggle: (id: string) => void; drag: Drag }) {
   return (
     <ul class="tree" role="group">
       {branches.map(({ page, under }) => (
         <li key={page.id} role="treeitem" aria-expanded={under.length ? open.has(page.id) : undefined}>
-          <div class={`tree-row${drag.over === page.id ? " drop-target" : ""}${drag.held === page.id ? " dragging" : ""}`} data-drop={page.id}>
+          <div class={`tree-row${dropClass(drag.over, page.id)}${drag.held === page.id ? " dragging" : ""}`} data-drop={page.id}>
             {under.length ? (
               <button type="button" class="fold" aria-label={open.has(page.id) ? `Fold ${page.title}` : `Open ${page.title}`} onClick={() => toggle(page.id)}>
                 <svg aria-hidden="true" viewBox="0 0 10 10" width="10" height="10" class={open.has(page.id) ? "folded-open" : ""}>
@@ -88,11 +102,69 @@ function findBranch(branches: readonly Branch[], id: string): Branch | undefined
   return undefined;
 }
 
+/** The page above a page in the tree, if any, and the pages beside it there, in order. */
+function findPlace(branches: readonly Branch[], id: string, parent?: string): { parent?: string; siblings: readonly Branch[] } | undefined {
+  if (branches.some((b) => b.page.id === id)) return { ...(parent ? { parent } : {}), siblings: branches };
+  for (const branch of branches) {
+    const found = findPlace(branch.under, id, branch.page.id);
+    if (found) return found;
+  }
+  return undefined;
+}
+
+/**
+ * Where a page dropped goes, or undefined where it would stay as it is. Dropped before a row, it
+ * goes before that page, among its siblings. Dropped after a row, it goes after that page, or first
+ * beneath it where the row's branch is open, since its pages then show directly below it.
+ */
+function dropWhere(branches: readonly Branch[], open: ReadonlySet<string>, moving: string, over: Over): Where | undefined {
+  if (over.id === moving) return undefined;
+  const now = findPlace(branches, moving);
+  if (over.zone === "into") return (now?.parent ?? "") === over.id ? undefined : dropAt(branches, over.id, moving);
+  const target = findBranch(branches, over.id);
+  const place = findPlace(branches, over.id);
+  if (!target || !place) return undefined;
+  let to: Where;
+  if (over.zone === "after" && target.under.length && open.has(target.page.id)) {
+    to = { parent: target.page.id };
+  } else if (over.zone === "after") {
+    to = { ...(place.parent ? { parent: place.parent } : {}), after: target.page.id };
+  } else {
+    const at = place.siblings.findIndex((b) => b.page.id === target.page.id);
+    const before = place.siblings.slice(0, at).filter((b) => b.page.id !== moving).at(-1);
+    to = { ...(place.parent ? { parent: place.parent } : {}), ...(before ? { after: before.page.id } : {}) };
+  }
+  if (now && now.parent === to.parent) {
+    const at = now.siblings.findIndex((b) => b.page.id === moving);
+    if (now.siblings[at - 1]?.page.id === to.after) return undefined;
+  }
+  return to;
+}
+
+/** Where on the tree a pointer is: the row under it, and which part of that row. */
+function overAt(x: number, y: number): Over | undefined {
+  const row = document.elementFromPoint(x, y)?.closest<HTMLElement>("[data-drop]");
+  const id = row?.dataset["drop"];
+  if (!row || id === undefined) return undefined;
+  if (id === "") return { id, zone: "into" };
+  const box = row.getBoundingClientRect();
+  const down = (y - box.top) / box.height;
+  return { id, zone: down < 0.25 ? "before" : down > 0.75 ? "after" : "into" };
+}
+
 /** The tree of pages, each branch folded or open, with search and the graveyard. */
 export function PageTree({ copy, account }: { copy: Copy; account: string }) {
   const canChange = useCanChange();
   const branches = useMemo(() => tree(copy.pages), [copy]);
-  const [open, setOpen] = useState<Set<string>>(() => new Set());
+  // The branches the traveller opened stay open on the device, for each trip, until they sign out
+  // (WEB:SCREENS-F18).
+  const [open, setOpenNow] = useState<Set<string>>(() => openBranches(copy.id));
+  const setOpen = (next: Set<string>) => {
+    const pages = new Set(copy.pages.pages.map((p) => p.id));
+    const kept = new Set([...next].filter((id) => pages.has(id)));
+    keepOpenBranches(copy.id, kept);
+    setOpenNow(kept);
+  };
   const toggle = (id: string) => {
     const next = new Set(open);
     if (next.has(id)) next.delete(id);
@@ -100,7 +172,7 @@ export function PageTree({ copy, account }: { copy: Copy; account: string }) {
     setOpen(next);
   };
   const [held, setHeld] = useState<string>();
-  const [over, setOver] = useState<string>();
+  const [over, setOver] = useState<Over>();
   const [agreeing, setAgreeing] = useState<{ id: string; to: Where; count: number; message: string }>();
   const [error, setError] = useState<string>();
 
@@ -133,17 +205,16 @@ export function PageTree({ copy, account }: { copy: Copy; account: string }) {
         return;
       }
       if (held !== id) return;
-      const target = document.elementFromPoint(event.clientX, event.clientY)?.closest<HTMLElement>("[data-drop]")?.dataset["drop"];
+      const target = overAt(event.clientX, event.clientY);
       if (phase === "move") {
-        if (target !== over) setOver(target);
+        if (target?.id !== over?.id || target?.zone !== over?.zone) setOver(target);
         return;
       }
       setHeld(undefined);
       setOver(undefined);
-      if (phase === "cancel" || target === undefined || target === id) return;
-      const moving = copy.pages.pages.find((p) => p.id === id);
-      if ((moving?.parent ?? "") === target) return;
-      void move(id, dropAt(branches, target, id));
+      if (phase === "cancel" || target === undefined) return;
+      const to = dropWhere(branches, open, id, target);
+      if (to) void move(id, to);
     },
   };
   return (
@@ -160,7 +231,7 @@ export function PageTree({ copy, account }: { copy: Copy; account: string }) {
         <div class="group tree-group" aria-label="Pages" role="tree">
           <Branches copy={copy} branches={branches} open={open} toggle={toggle} drag={drag} />
           {held ? (
-            <div class={`tree-row tree-top${over === "" ? " drop-target" : ""}`} data-drop="">
+            <div class={`tree-row tree-top${over?.id === "" ? " drop-target" : ""}`} data-drop="">
               To the top of the tree
             </div>
           ) : null}
@@ -265,6 +336,12 @@ export function PageView({ copy, account, id }: { copy: Copy; account: string; i
   }
   const parent = page.parent ? copy.pages.pages.find((p) => p.id === page.parent) : undefined;
   const going = beneath(copy.pages, page.id) + 1;
+  const branches = tree(copy.pages);
+  const under = findBranch(branches, page.id)?.under ?? [];
+  const siblings = findPlace(branches, page.id)?.siblings ?? [];
+  const at = siblings.findIndex((b) => b.page.id === page.id);
+  const before = siblings[at - 1]?.page;
+  const after = siblings[at + 1]?.page;
   const may = (change: Parameters<typeof changeToText>[0]) => canChange && allowed(copy, account, change);
   return (
     <main class="screen" data-screen="page">
@@ -281,6 +358,39 @@ export function PageView({ copy, account, id }: { copy: Copy; account: string; i
         {page.title}
       </Title>
       {page.text.trim() ? <Drawn copy={copy} text={page.text} /> : <Empty>Nothing written here yet.</Empty>}
+      {under.length ? (
+        <section class="group beneath" aria-label={`Pages beneath ${page.title}`}>
+          <h2 class="group-heading">Pages beneath</h2>
+          <div class="group-rows">
+            {under.map(({ page: child }) => (
+              <Link key={child.id} class="row row-link" href={pagePath(copy, child.id)} data-beneath={child.id}>
+                <span class="row-main">{child.title}</span>
+                <svg class="chevron" aria-hidden="true" viewBox="0 0 8 14" width="7" height="12">
+                  <path d="M1.5 1.5L6.5 7l-5 5.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+              </Link>
+            ))}
+          </div>
+        </section>
+      ) : null}
+      {before || after ? (
+        <nav class="neighbours" aria-label="Pages beside this one">
+          {before ? (
+            <Link class="neighbour" href={pagePath(copy, before.id)} data-neighbour="before">
+              <span class="neighbour-label">Previous</span>
+              <span class="neighbour-title">{before.title}</span>
+            </Link>
+          ) : (
+            <span />
+          )}
+          {after ? (
+            <Link class="neighbour neighbour-after" href={pagePath(copy, after.id)} data-neighbour="after">
+              <span class="neighbour-label">Next</span>
+              <span class="neighbour-title">{after.title}</span>
+            </Link>
+          ) : null}
+        </nav>
+      ) : null}
       <div class="actions">
         {may({ op: "add", id: "new", title: "New", at: { parent: id } }) ? (
           <Button kind="plain" onClick={() => go(`${tripPath(copy.id, "/pages/new")}?parent=${encodeURIComponent(id)}`)}>
@@ -324,7 +434,8 @@ export function PageEditor({ copy, id, parent }: { copy: Copy; id?: string; pare
   const canChange = useCanChange();
   const existing: Page | undefined = id ? copy.pages.pages.find((p) => p.id === id) : undefined;
   const [title, setTitle] = useState(existing?.title ?? "");
-  const [text, setText] = useState(existing?.text ?? "");
+  // A new page starts with the headings a traveller researches under (WEB:SCREENS-F14).
+  const [text, setText] = useState(existing?.text ?? (id ? "" : startingText("page")));
   const [base, setBase] = useState(existing?.revision ?? 0);
   const [theirs, setTheirs] = useState<string>();
   const [tab, setTab] = useState<"write" | "see">("write");

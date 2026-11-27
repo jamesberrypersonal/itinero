@@ -17,6 +17,18 @@ Each part of a system is named by its address, the system and the part's own nam
 
 ### Phase 2 — Before a first trip
 
+#### Milestone Web-2.2 — Moving through the pages
+
+- A page dragged in the tree goes before, after or beneath the page it is dropped on, by where on
+  its row it is let go (`WEB:SCREENS-F16`).
+- A page lists the pages beneath it under its text, and links to the pages before and after it
+  (`WEB:SCREENS-F17`).
+- The tree keeps open the branches a traveller opened, for each trip, on the device, until they
+  sign out (`WEB:SCREENS-F18`).
+- The form of a new page starts with the headings `@itinero/pages` gives (`WEB:SCREENS-F14`).
+- The browser tests prove `WEB:SCREENS-F14`, `WEB:SCREENS-F16`, `WEB:SCREENS-F17` and
+  `WEB:SCREENS-F18` by the verification each carries, in all three engines.
+
 #### Milestone Web-2.1 — Browser tests that pass every run
 
 - Each browser test of the web app waits on the state its screen depends on. A new traveller's name
@@ -190,15 +202,6 @@ Each part of a system is named by its address, the system and the part's own nam
 ## Pending
 
 ### Phase 2 — Before a first trip
-
-#### Milestone Web-2.2 — Moving through the pages
-
-**Waits on:** Milestone Planner-3.1
-
-- Let a page be dropped between two of its siblings in the tree. Do TODO-42.
-- List under a page's text the pages beneath it. Do TODO-43.
-- Keep open the branches of the tree a traveller opened. Do TODO-44.
-- Start the form of a new page with the starting headings, as Milestone Planner-3.1 specifies them.
 
 #### Milestone Web-2.3 — A firm item's form
 

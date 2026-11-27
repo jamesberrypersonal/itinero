@@ -442,7 +442,8 @@ test("PLN-F8 — a trip's pages form a tree, which a traveller rearranges freely
   await send(ana.page, trip, "pages", pageChange({ op: "add", id: "w-trek", title: "W trek", at: { parent: "country-cl" } }));
   await send(ana.page, trip, "pages", pageChange({ op: "move", id: "santiago", to: { parent: "country-cl" } }));
   await screen(ana.page, `/trips/${trip}/pages`, "pages");
-  await ana.page.getByRole("button", { name: "Open Chile" }).click();
+  // The tree keeps open the branches opened above (WEB:SCREENS-F18), and opens any other.
+  await openTree(ana.page);
   const underChile = ana.page.locator('[role="treeitem"]:has(> .tree-row[data-drop="country-cl"]) > .tree > li > .tree-row .tree-title');
   await expect(underChile).toHaveText(["Santiago", "W trek"]);
 

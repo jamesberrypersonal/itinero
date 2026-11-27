@@ -856,6 +856,45 @@ fieldset {
   overflow-wrap: anywhere;
 }
 
+/* --- A page's pages beneath it, and the pages before and after it (§4.6) --- */
+
+.beneath {
+  margin-top: 1.5rem;
+}
+
+.neighbours {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+  margin: 0 0 1.5rem;
+}
+
+.neighbour {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 44px;
+  min-width: 0;
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius);
+  background: var(--group-bg);
+  box-shadow: 0 0 0 0.5px var(--separator);
+  color: var(--text);
+}
+
+.neighbour-after {
+  text-align: right;
+}
+
+.neighbour-label {
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+}
+
+.neighbour-title {
+  overflow-wrap: anywhere;
+}
+
 .prose {
   font-size: 1.0625rem;
   line-height: 1.55;
@@ -1046,6 +1085,30 @@ fieldset {
   border-radius: 8px;
   background: color-mix(in srgb, var(--accent) 16%, transparent);
   box-shadow: inset 0 0 0 1.5px var(--accent);
+}
+
+/* A page held over a row's top or bottom quarter goes before or after it: a line shows where. */
+.tree-row {
+  position: relative;
+}
+
+.tree-row:is(.drop-before, .drop-after)::after {
+  content: "";
+  position: absolute;
+  left: 36px;
+  right: 0.5rem;
+  height: 2px;
+  border-radius: 1px;
+  background: var(--accent);
+  pointer-events: none;
+}
+
+.tree-row.drop-before::after {
+  top: -1px;
+}
+
+.tree-row.drop-after::after {
+  bottom: -1px;
 }
 
 .tree-top {
