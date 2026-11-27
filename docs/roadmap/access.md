@@ -4,7 +4,8 @@
 
 The access system holds accounts, invitations to a trip, and who may see and change each of its
 pages. Phase 0 designs it: its requirements, its components and their specifications, before any
-of it is built. Phase 1 builds it, one component at a time.
+of it is built. Phase 1 builds it, one component at a time. Phase 2 readies it for a first trip
+with the app.
 
 Access is set page by page, so its design follows the planner's pages, in Milestone Planner-0.2.
 
@@ -69,5 +70,15 @@ Access is set page by page, so its design follows the planner's pages, in Milest
 
 ## Pending
 
-Nothing is pending. The checks of the access system's requirements that need a phone or the
-screens wait in the web app's roadmap.
+The checks of the access system's requirements that need a phone or the screens wait in the web
+app's roadmap.
+
+### Phase 2 — Before a first trip
+
+#### Milestone Access-2.1 — A traveller's insurance
+
+- Decide which fields of a traveller's insurance their account holds, and that every member of
+  their trips sees them. Add the requirements to the access system, its components and the web app.
+  Do TODO-54.
+- Build the fields in `access/accounts`, and give them with each member's name in
+  `GET /api/trips/{trip}/members`. Prove their requirements in the online side's suite.

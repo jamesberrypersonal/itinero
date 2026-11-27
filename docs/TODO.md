@@ -3,7 +3,7 @@
 What needs active work, and what waits on a decision. `documentation-system.md` gives the list's
 rules. When an item is done, it leaves this list for `CHANGELOG.md` in the commit that finishes it.
 
-*Next free:* TODO-42
+*Next free:* TODO-56
 
 ## Tags
 
@@ -517,7 +517,7 @@ the bookings page or a page of research.
 including whether it takes the trip's country pages whole. Then add the requirements to the web
 app's screens.
 
-*Releases:* Nothing is planned for it yet.
+*Releases:* Milestone Web-2.5.
 
 ### TODO-41 — Make the web app's browser tests pass every run
 
@@ -540,4 +540,261 @@ Firefox, the booking test failed once.
 screen depends on instead. Until then, a failed run of `test-packages` is rerun before it is read as
 a fault.
 
+*Releases:* Milestone Web-2.1.
+
+### TODO-42 — Reorder pages among their siblings by dragging
+
+*Tags:* web/screens, planner/pages
+*Written:* 2026-11-26
+
+*Problem:* A page dragged in the tree goes beneath the page it is dropped on, after the last page
+already there, so a traveller cannot put one city before another in the same country.
+
+*Reason:* The pages screen offers one drop for each row, which nests the page, and never sends the
+`after` that a move between two siblings needs. The pages themselves keep whatever order the changes
+give them (`PLN:PAGES-F1`). A beta tester reported it on 2026-11-26, in
+[issue 26](https://github.com/jamesberrypersonal/itinero/issues/26).
+
+*Proposal:* Let a page be dropped between two rows as well as onto one, as the checklists screen
+lets an item be, and test it on a phone and a computer.
+
+*Releases:* Milestone Web-2.2.
+
+### TODO-43 — List a page's pages beneath it, under its text
+
+*Tags:* web/screens
+*Written:* 2026-11-26
+
+*Problem:* A page shows only its own title and text, so a traveller going from one city to the next
+goes back twice, through the country page to the tree.
+
+*Reason:* The pages screen shows the tree and each page apart (`spec/web/screens.md` §4.6), and the
+page view was built with no list of the pages under it. A beta tester reported it on 2026-11-26, in
+[issue 27](https://github.com/jamesberrypersonal/itinero/issues/27) and
+[issue 29](https://github.com/jamesberrypersonal/itinero/issues/29).
+
+*Proposal:* Show under a page's text a link to each page beneath it, in the tree's order. Decide
+whether a page also links to its siblings, or to the one before and after it.
+
+*Releases:* Milestone Web-2.2.
+
+### TODO-44 — Keep open the branches of the tree a traveller opened
+
+*Tags:* web/screens
+*Written:* 2026-11-26
+
+*Problem:* Every branch of the pages tree folds again whenever the tree is shown, so a traveller
+working through one country's cities opens the country again each time.
+
+*Reason:* The tree keeps which branches are open only while it is on screen. A beta tester reported
+it on 2026-11-26, in [issue 28](https://github.com/jamesberrypersonal/itinero/issues/28).
+
+*Proposal:* Keep the open branches for each trip on the device. Decide whether they stay open after
+the app is closed, or only while it runs.
+
+*Releases:* Milestone Web-2.2.
+
+### TODO-45 — Fill in the time zone of a firm item that is not travel
+
+*Tags:* web/screens, web/places
+*Written:* 2026-11-26
+
+*Problem:* A firm item at a time, such as a hike at three, starts with its time zone empty, so the
+traveller chooses a zone by hand for every one.
+
+*Reason:* The zone is filled in from a place the traveller enters (ADR-0019, a place's time zone is
+filled in from a list of places, kept on the phone one country at a time). A firm item of travel
+asks for a place at each end, but any other firm item asks for no place. A beta tester reported it
+on 2026-11-26, in [issue 30](https://github.com/jamesberrypersonal/itinero/issues/30).
+
+*Proposal:* Decide where the zone comes from when the item names no place, such as the stretch the
+day falls in, or the page the item names. Then add the requirement to the web app, with the
+traveller still free to choose another zone.
+
+*Releases:* Milestone Web-2.4.
+
+### TODO-46 — Show a refused firm item's error beside the field at fault, in plain words
+
+*Tags:* web/screens, shared/trip-time
+*Written:* 2026-11-26
+
+*Problem:* A firm item with a zone that does not exist, such as `local`, is refused with a faint
+line at the foot of the form, worded as trip-time words it, so on a phone the button seems to do
+nothing.
+
+*Reason:* The form shows trip-time's refusal as it is, below every field: "The time zone local is
+not one the time-zone rules name." The zone field takes any text, and the Add button, dimmed while
+the title is empty, does not say what is missing. A beta tester reported it on 2026-11-26, in
+[issue 31](https://github.com/jamesberrypersonal/itinero/issues/31).
+
+*Proposal:* Show each refusal beside its field, in the error colour, and move the focus there, with
+words a traveller would use. Decide whether the zone field accepts only a zone from its suggestions.
+
+*Releases:* Milestone Web-2.3.
+
+### TODO-47 — Make the time field's clock easy to see
+
+*Tags:* web/screens
+*Written:* 2026-11-26
+
+*Problem:* The clock that opens the time picker, at the right of a time field, is small and faint on
+the dark background, so a traveller can miss that it is there.
+
+*Reason:* The screens leave the browser's own time field as it draws it, and its icon follows the
+page's `color-scheme`. A beta tester reported it on 2026-11-26, in
+[issue 32](https://github.com/jamesberrypersonal/itinero/issues/32).
+
+*Proposal:* Draw the clock in a colour that meets the contrast the rest of the screens keep, and
+give the field a clear border and focus. Check it in each of the three engines.
+
+*Releases:* Milestone Web-2.3.
+
+### TODO-48 — Give a firm item an address
+
+*Tags:* planner/itinerary, web/screens
+*Written:* 2026-11-26
+
+*Problem:* A firm item cannot say where it happens, such as a trailhead or a restaurant, unless it
+names a page that does.
+
+*Reason:* A firm item holds a title, a time, whether it is travel, and the page it names. Only a
+firm item of travel holds a place. A beta tester asked for it on 2026-11-26, in
+[issue 33](https://github.com/jamesberrypersonal/itinero/issues/33).
+
+*Proposal:* Decide whether a firm item holds an address of one line, shown on its card and opening a
+maps app, and whether that address fills in its zone, which would also do TODO-45. Then add the
+requirements to the itinerary and the screens.
+
+*Releases:* Milestone Planner-3.2.
+
+### TODO-49 — Make clear that a firm item between two times can span days
+
+*Tags:* web/screens
+*Written:* 2026-11-26
+
+*Problem:* The "Between" choice of a firm item's form takes a start and an end on any two dates, but
+its name reads as two times on one day.
+
+*Reason:* The form names each precision as trip-time does. A beta tester, wanting a start and an end
+for a two-day hike, did not find that "Between" gives them, in
+[issue 34](https://github.com/jamesberrypersonal/itinero/issues/34).
+
+*Proposal:* Name the choice for what it does, such as "From … to …", and label its two dates and
+times as the start and the end.
+
+*Releases:* Milestone Web-2.3.
+
+### TODO-50 — Decide whether a traveller can share a checklist with the trip
+
+*Tags:* planner/checklists, web/screens
+*Written:* 2026-11-26
+
+*Problem:* No other traveller on a trip can see a traveller's checklist, so a traveller cannot show
+the group what they check before leaving.
+
+*Reason:* Each traveller's checklists are their own, and no other traveller sees them, admins
+included (ADR-0024, a traveller's checklists are their own, and start from templates kept outside
+any trip). A page can hold a checklist in Markdown, but every member ticks the same one. A beta
+tester asked for it on 2026-11-26, in
+[issue 35](https://github.com/jamesberrypersonal/itinero/issues/35).
+
+*Proposal:* Decide whether a traveller can share a checklist with the trip, off by default, and
+whether others can only read it or also copy it into their own, as `PLN:CHECKLISTS-F4` copies one.
+Record it in a decision record that supersedes ADR-0024.
+
 *Releases:* Nothing is planned for it yet.
+
+### TODO-51 — Prove the checks Phase 1 of the web app left for the iPhone and new time-zone rules
+
+*Tags:* web, access/membership, shared/trip-time
+*Written:* 2026-11-26
+
+*Problem:* Two checks of the web app's Phase 1 are not yet proved: that an invitation opened on the
+iPhone by an account holding another address cannot be accepted, and says which address it was sent
+to (`ACC-F3`), and that a device takes newer time-zone rules, online and then offline (`WEB-F8`,
+`SHR:TRIP-TIME-NFR1`).
+
+*Reason:* Milestone Web-1.5's checks by hand, from 2026-11-18 to 2026-11-21, left both. The second
+needs a deploy carrying the next IANA release, which had not come out. Neither is needed before a
+first trip with the app, so they wait here rather than in a milestone.
+
+*Proposal:* Make both checks by hand on the iPhone against the deploy at useitinero.ca, the second
+with the deploy that carries the next IANA release.
+
+*Releases:* Nothing is planned for it yet.
+
+### TODO-52 — Start every new page with the headings a traveller researches under
+
+*Tags:* planner/pages, web/screens
+*Written:* 2026-11-26
+
+*Problem:* Every new page starts empty, so a traveller lays out the same headings again for each
+country and city they research.
+
+*Reason:* The pages component starts each country's page with no text (`PLN:PAGES-F6`), and the
+form for a new page starts empty too. The pages component imposes no structure on a page's text
+(`PLN:PAGES-F2`), which headings a traveller can rewrite or delete still keep. A heading for
+emergency information still leaves the facts to the travellers, as `PLN-NR6` keeps them.
+
+*Proposal:* Start each new trip's country pages, and every page added from the form, with the
+headings General Info, Getting Around, Things to Do, Places to See, Food to Eat, with Dishes to Try
+and Where to Eat beneath it, and Nightlife. Give the country pages one more, Emergency Info, for
+the embassy's contacts and the local emergency numbers, and add the requirements to `planner/pages`
+and the web app's screens.
+
+*Releases:* Milestone Planner-3.1.
+
+### TODO-53 — Add a screen of travel advice, the same on every trip
+
+*Tags:* web/screens
+*Written:* 2026-11-26
+
+*Problem:* Advice a traveller needs on every trip, such as the apps and sites that help and what to
+do about a lost passport, has nowhere to live but a page copied into each trip.
+
+*Reason:* Every page belongs to one trip (`PLN-NR4`). Outside a trip, the screens show only the list
+of trips, the traveller's library of templates and their settings (`spec/web/screens.md` §3.1).
+
+*Proposal:* Add a screen, reached from each screen's menu as the library is, showing advice written
+in Markdown in the repository and served with each version, so that it reads with no connection.
+James Berry writes the advice itself.
+
+*Releases:* Milestone Web-2.6.
+
+### TODO-54 — Let each traveller give their travel insurance, for everyone on their trips to see
+
+*Tags:* access/accounts, access/permissions, web/screens
+*Written:* 2026-11-26
+
+*Problem:* When a traveller is hurt or ill, another traveller on the trip has no way to find their
+insurer and policy number to give a hospital.
+
+*Reason:* An account holds only its traveller's address and the name other travellers see them by
+(`ACC-F13`). A traveller could write their insurance on a page, but a page belongs to one trip, and
+an admin chooses who sees it.
+
+*Proposal:* Let each traveller fill in, only if they choose, preset fields with no free text: their
+insurer, their policy number, the insurer's emergency line and the dates the cover runs. Keep them
+with the account, as its name is, and show them to every member of each trip the traveller is on,
+whatever their grants and with no connection, deciding it in a decision record scoped `access`.
+
+*Releases:* Milestone Access-2.1 and Milestone Web-2.7.
+
+### TODO-55 — Colour the calendar's days by the country each is in
+
+*Tags:* web/screens
+*Written:* 2026-11-26
+
+*Problem:* A traveller reading the calendar cannot see at a glance which stretch of the trip is in
+which country, since each day names its countries only in a line of text.
+
+*Reason:* The calendar shows each day's countries as their names (`PLN-F2`), and draws every
+stretch alike, as a band with a dashed edge (`spec/web/screens.md` §4.4). A traveller with edit
+access to the calendar already sets each country's stretch, such as France from 1 to 5 June.
+
+*Proposal:* Give each country of a trip a colour of its own, chosen by the web app from the order
+the countries come in, so it is the same on every device. Tint each day with the colours of the
+countries covering it, a day in two countries showing both, and keep the names beside the colours,
+in both themes.
+
+*Releases:* Milestone Web-2.8.
