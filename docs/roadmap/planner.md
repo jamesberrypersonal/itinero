@@ -14,6 +14,16 @@ the planner's itinerary. The planner is the first system that needs that compone
 
 ## Completed
 
+### Phase 3 — Before a first trip
+
+#### Milestone Planner-3.1 — A page's starting headings
+
+- `planner/pages` and the web app's screens have the requirements for the headings every new page
+  starts with: General Info, Getting Around, Things to Do, Places to See, Food to Eat, with Dishes
+  to Try and Where to Eat beneath it, and Nightlife. A country's page holds Emergency Info too.
+- `@itinero/pages` gives the starting text, and starts each new trip's country pages with it. Its
+  test suite proves `PLN:PAGES-F11` by the verification it carries.
+
 ### Phase 2 — Checklists
 
 #### Milestone Planner-2.2 — Checklists built
@@ -169,13 +179,6 @@ The checks of the planner's requirements that need a phone or the screens wait i
 roadmap.
 
 ### Phase 3 — Before a first trip
-
-#### Milestone Planner-3.1 — A page's starting headings
-
-- Add the requirements for the headings every new page starts with to `planner/pages` and to the
-  web app's screens. Do TODO-52.
-- Build them in `@itinero/pages`, for a new trip's country pages, and prove their requirements by
-  their verification.
 
 #### Milestone Planner-3.2 — A firm item's address
 

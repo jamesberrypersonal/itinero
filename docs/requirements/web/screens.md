@@ -255,6 +255,24 @@ each opening that checklist. From their first date on, the home page lists no ch
 > **Why not once the trip has started?** On the road the home page is about the day: its bookings
 > and the country. A checklist is still a tap away in the trip's bar.
 
+### WEB:SCREENS-F14 — The form for a new page starts with the headings a traveller researches under
+
+The form for a new page, at the top of the trip or beneath another page, opens with its text
+holding the headings the pages component gives a new page (`PLN:PAGES-F11`). The traveller writes
+beneath them, rewrites them or deletes them before saving, and the page saved holds the text as
+the traveller left it. ^web-screens-f14
+
+- **Verification:** on a trip with the page Chile,
+    - open the form for a new page at the top of the trip, and confirm its text holds General Info,
+      Getting Around, Things to Do, Places to See, Food to Eat, with Dishes to Try and Where to Eat
+      beneath it, and Nightlife, and not Emergency Info
+    - open the form for a new page beneath Chile, and confirm its text holds the same headings
+    - delete Nightlife, write a line under Getting Around, save, and confirm the page shows the
+      headings and the line as left
+
+> **What does this buy?** Every city and every place a traveller adds starts laid out like the
+> trip's country pages, so the research is in the same place on each (`PLN-F7`).
+
 ---
 
 ## Non-functional requirements

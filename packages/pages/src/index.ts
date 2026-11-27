@@ -4,6 +4,7 @@
 export type { Applied, Around, Branch, Buried, Change, Hit, Id, Page, Pages, Refusal, Result, State, Where } from "./types.ts";
 
 export { newPages, apply } from "./apply.ts";
+export { startingText } from "./starting.ts";
 export { tree, state, page, beneath, graveyard, forPhone, countryPage } from "./tree.ts";
 export { pageLink, linkTarget } from "./links.ts";
 export { search } from "./search.ts";

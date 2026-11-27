@@ -16,6 +16,7 @@ import {
   pageLink,
   pageToText,
   search,
+  startingText,
   state,
   type Change,
 } from "../src/index.ts";
@@ -297,5 +298,45 @@ describe("PLN:PAGES-F10 — a rewrite made from an older version is refused, wit
   test("a rewrite from the second version is accepted", () => {
     const p = applyAll(one(), { op: "write", id: "p", text: "A", base: 1 }, { op: "write", id: "p", text: "B", base: 2 });
     assert.equal(page(p, "p")!.text, "B");
+  });
+});
+
+describe("PLN:PAGES-F11 — a new page starts with the headings a traveller researches under", () => {
+  /** The headings of a page's Markdown, as a reader of Markdown such as GitHub's shows them: each with its level. */
+  const headings = (markdown: string) =>
+    markdown
+      .split("\n")
+      .filter((line) => line.startsWith("#"))
+      .map((line) => {
+        const heading = /^(#{1,6}) (\S.*)$/.exec(line);
+        assert.ok(heading, `${JSON.stringify(line)} is not a heading`);
+        return `${heading[1]!.length} ${heading[2]}`;
+      });
+  const forAPage = ["2 General Info", "2 Getting Around", "2 Things to Do", "2 Places to See", "2 Food to Eat", "3 Dishes to Try", "3 Where to Eat", "2 Nightlife"];
+  const start = () => ok(newPages("trip-1", [{ id: "cl", title: "Chile", country: "CL" }]));
+
+  test("a trip's pages started with Chile: Chile holds every heading, Dishes to Try and Where to Eat beneath Food to Eat, then Emergency Info", () => {
+    assert.deepEqual(headings(page(start(), "cl")!.text), [...forAPage, "2 Emergency Info"]);
+  });
+
+  test("the text for a new page holds the same headings, without Emergency Info", () => {
+    assert.deepEqual(headings(startingText("page")), forAPage);
+    assert.deepEqual(headings(startingText("country")), [...forAPage, "2 Emergency Info"]);
+  });
+
+  test("each heading stands apart from the next, so every reader of Markdown shows it as a heading", () => {
+    for (const text of [startingText("page"), startingText("country")]) {
+      assert.match(text, /^## General Info\n\n## Getting Around\n\n/);
+      assert.ok(text.endsWith("\n") && !text.endsWith("\n\n"));
+      assert.equal(text.split("\n\n").length, headings(text).length);
+    }
+  });
+
+  test("Chile's text rewritten with Nightlife deleted is accepted, and reads back unchanged", () => {
+    const text = page(start(), "cl")!.text.replace("## Nightlife\n\n", "");
+    const p = applyAll(start(), { op: "write", id: "cl", text, base: 1 });
+    assert.equal(page(p, "cl")!.text, text);
+    assert.equal(ok(pageFromText(pageToText(page(p, "cl")!))).text, text);
+    assert.ok(!headings(text).includes("2 Nightlife"));
   });
 });

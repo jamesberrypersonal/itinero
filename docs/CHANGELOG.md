@@ -4,6 +4,17 @@ What has been done, newest first. The live work list, `TODO.md`, numbers each pi
 owed, such as TODO-9. An entry that finishes one of those items names it, so a reader can find what
 became of its number. `documentation-system.md` sets the rules.
 
+## 2026-11-27 — TODO-52, a new page starts with the headings a traveller researches under
+
+*By:* James Berry, with Claude
+
+Every new page starts with the headings General Info, Getting Around, Things to Do, Places to See,
+Food to Eat, with Dishes to Try and Where to Eat beneath it, and Nightlife (`PLN:PAGES-F11`). A new
+trip's country pages hold Emergency Info too, last, for the embassy's contacts and the local
+emergency numbers. The headings are ordinary text, which a traveller rewrites or deletes.
+`@itinero/pages` gives the text, and starts each country page with it. The form for a new page
+offers it (`WEB:SCREENS-F14`), once Milestone Web-2.2 builds the form.
+
 ## 2026-11-27 — TODO-41, the web app's browser tests pass every run
 
 *By:* James Berry, with Claude

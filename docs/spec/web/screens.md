@@ -296,6 +296,11 @@ opened from. A `stale` refusal shows the traveller's text and the page's text as
 by side, from `details.text`, and the traveller saves again from the revision `details.revision`
 gives (`PLN-F16`).
 
+The editor for a new page, at the top of the trip or beneath another page, opens with its text box
+holding the pages' `startingText("page")` (`WEB:SCREENS-F14`). Saving sends an `add` with the text
+as the traveller left it, headings deleted or not. A new trip's country pages already hold their
+own headings, from the copy held online.
+
 Search runs the pages' `search` over the copy, with or without a connection, and lists each page
 found with the words around each match (`PLN-F12`). The graveyard lists the titles of the copy's
 `graveyard`, each with the number of pages that went with it. An admin, online, opens a page there
@@ -483,6 +488,7 @@ and the packages of the trip's parts, which `spec/web/shell.md` §5 lists.
 | [WEB:SCREENS-F11](../../requirements/web/screens.md#^web-screens-f11) | The checklists of a trip, the trip's bar, and ticking in place, in §3.1 and §4.10. |
 | [WEB:SCREENS-F12](../../requirements/web/screens.md#^web-screens-f12) | The library, linked from every menu and from the list of trips, in §3.1, §4.2 and §4.10. |
 | [WEB:SCREENS-F13](../../requirements/web/screens.md#^web-screens-f13) | The checklists not yet done on the home page, before the traveller's first date (§4.3). |
+| [WEB:SCREENS-F14](../../requirements/web/screens.md#^web-screens-f14) | The editor for a new page, opened with the starting headings (§4.6). The headings are `planner/pages`. |
 | [PLN-F17](../../requirements/planner/planner.md#^pln-f17) | The library, its templates, saving a checklist as a template, and asking before a delete (§4, §4.10). Keeping the library is `web/trip-store`. |
 | [PLN-F18](../../requirements/planner/planner.md#^pln-f18) | Starting a checklist from a template, ticking, arranging and asking before a delete (§4, §4.10). |
 | [WEB:SCREENS-F10](../../requirements/web/screens.md#^web-screens-f10) | `/name` at the first sign-in, before an invitation is accepted (§4.1, §4.7), and changing the name in the settings (§4.8). |
