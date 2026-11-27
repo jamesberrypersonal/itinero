@@ -268,7 +268,7 @@ test.describe("WEB:SHELL-F5 — a version too old for the online side says so, a
     });
     await first.locator("#editor").fill("Half a page about Torres del Paine");
 
-    online.publish(versionDir("three"), 2);
+    online.publish(versionDir("three"), 3);
     expect(await reachOnline(first)).toBe(426);
     const notice = first.locator('[data-shell="update-required"]');
     await expect(notice).toBeVisible();
@@ -368,7 +368,7 @@ test.describe("WEB:SHELL-F6 — a new version waiting says so, and starts when t
 
   test("a version too old shows only its own notice", async ({ context }) => {
     const page = await openReady(context, online.url);
-    online.publish(versionDir("three"), 2);
+    online.publish(versionDir("three"), 3);
     expect(await reachOnline(page)).toBe(426);
     await untilUpdateWaiting(page);
     await expect(page.locator('[data-shell="update-required"]')).toBeVisible();

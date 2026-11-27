@@ -75,7 +75,7 @@ export function buildDay(date: unknown): Day {
  * gave, or from their text form.
  */
 export function buildFirm(value: unknown, readWhen: (value: unknown, what: string) => When): FirmItem {
-  const r = fields(value, "firm item", ["id", "revision", "title", "when"], ["travel", "page"]);
+  const r = fields(value, "firm item", ["id", "revision", "title", "when"], ["travel", "page", "address"]);
   const item: FirmItem = {
     id: text(r.id, "firm item's identifier"),
     revision: wholeNumber(r.revision, "firm item's revision"),
@@ -91,6 +91,8 @@ export function buildFirm(value: unknown, readWhen: (value: unknown, what: strin
   }
   const page = optionalText(r, "page", "firm item's page");
   if (page !== undefined) item.page = page;
+  const address = optionalText(r, "address", "firm item's address");
+  if (address !== undefined) item.address = address;
   return Object.freeze(item);
 }
 

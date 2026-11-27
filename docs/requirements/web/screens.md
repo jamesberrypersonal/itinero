@@ -273,6 +273,25 @@ the traveller left it. ^web-screens-f14
 > **What does this buy?** Every city and every place a traveller adds starts laid out like the
 > trip's country pages, so the research is in the same place on each (`PLN-F7`).
 
+### WEB:SCREENS-F15 — A firm item's address shows on its card, and opens the device's maps app
+
+The form of a firm item, travel or not, offers an address of one line, which the traveller may
+leave empty. The calendar shows a firm item's address on its card. A tap on the address opens the
+device's maps app, searching for the address as written. With no connection, the address still
+shows, and the traveller can copy it (ADR-0025, a firm item may hold an address). ^web-screens-f15
+
+- **Verification:** on a trip with Chile pencilled from 1 to 10 December,
+    - add a hike on 4 December with the address "Hotel Las Torres, Torres del Paine", and confirm
+      its card shows the address
+    - add a dinner on 4 December with the address left empty, and confirm its card shows none
+    - on an iPhone, tap the hike's address, and confirm Apple Maps opens, searching for it
+    - on a computer that is not a Mac, tap it, and confirm Google Maps opens, searching for it
+    - with no connection, confirm the hike's card still shows its address
+    - change the hike's address, save, and confirm the card shows the new one
+
+> **What does this buy?** On the day, a traveller reaches the trailhead or the restaurant from the
+> item itself, with no page written for it (`PLN-F3`).
+
 ---
 
 ## Non-functional requirements

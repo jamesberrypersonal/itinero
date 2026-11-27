@@ -49,6 +49,7 @@ keeps:
 | [0022](0022-each-tree-index-defines-its-shared-words.md) | Each tree's index defines the words its documents share | workspace | Accepted |
 | [0023](0023-continuous-integration-runs-on-each-pull-request-and-each-push-to-main.md) | Continuous integration runs on each pull request and each push to main | workspace | Accepted |
 | [0024](0024-checklists-are-each-travellers-own.md) | A traveller's checklists are their own, and start from templates kept outside any trip | planner, access | Accepted |
+| [0025](0025-a-firm-item-may-hold-an-address.md) | A firm item may hold an address, kept as written, and takes its time zone from the stretch | planner, web | Accepted |
 
 ## By subject
 
@@ -76,6 +77,7 @@ keeps:
 | [0015](0015-the-online-side-runs-on-cloudflare.md) | Itinero's online side runs on Cloudflare's free plan, and travellers sign in with Google alone | Accepted |
 | [0021](0021-a-deleted-page-is-restored-only-to-its-old-place.md) | A deleted page is restored only to its old place | Accepted |
 | [0024](0024-checklists-are-each-travellers-own.md) | A traveller's checklists are their own, and start from templates kept outside any trip | Accepted |
+| [0025](0025-a-firm-item-may-hold-an-address.md) | A firm item may hold an address, kept as written, and takes its time zone from the stretch | Accepted |
 
 ### access
 
@@ -97,6 +99,7 @@ keeps:
 | [0017](0017-a-device-copy-is-protected-by-its-lock.md) | A trip's copy on a device is protected by the device's own lock, and deleted when its traveller signs out | Accepted |
 | [0018](0018-the-web-app-is-built-with-preact.md) | The web app is built with Preact, and served by Itinero's own Worker | Accepted |
 | [0019](0019-a-place-time-zone-comes-from-a-list.md) | A place's time zone is filled in from a list of places, kept on the phone one country at a time | Accepted |
+| [0025](0025-a-firm-item-may-hold-an-address.md) | A firm item may hold an address, kept as written, and takes its time zone from the stretch | Accepted |
 
 ### bookings
 

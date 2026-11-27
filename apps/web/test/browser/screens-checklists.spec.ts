@@ -50,8 +50,8 @@ async function traveller(browser: Browser, name: string, kind: "phone" | "comput
   const account = await page.evaluate(async () => (await (window as unknown as { itineroStore: { open(): Promise<{ account?: string }> } }).itineroStore.open()).account!);
   if (!defaults) {
     const statuses = await page.evaluate(async (ids) => {
-      await fetch("/api/library/sync", { method: "POST", headers: { "content-type": "application/json", "Itinero-Api": "1" }, body: "{}" });
-      return Promise.all(ids.map(async (id) => (await fetch(`/api/library/templates/${id}`, { method: "DELETE", headers: { "Itinero-Api": "1" } })).status));
+      await fetch("/api/library/sync", { method: "POST", headers: { "content-type": "application/json", "Itinero-Api": "2" }, body: "{}" });
+      return Promise.all(ids.map(async (id) => (await fetch(`/api/library/templates/${id}`, { method: "DELETE", headers: { "Itinero-Api": "2" } })).status));
     }, DEFAULTS);
     expect(statuses).toEqual(DEFAULTS.map(() => 200));
     // The device catches up now, rather than while a test presses the library's screen: emptied

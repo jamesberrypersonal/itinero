@@ -584,9 +584,9 @@ filled in from a list of places, kept on the phone one country at a time). A fir
 asks for a place at each end, but any other firm item asks for no place. A beta tester reported it
 on 2026-11-26, in [issue 30](https://github.com/jamesberrypersonal/itinero/issues/30).
 
-*Proposal:* Decide where the zone comes from when the item names no place, such as the stretch the
-day falls in, or the page the item names. Then add the requirement to the web app, with the
-traveller still free to choose another zone.
+*Proposal:* Fill the zone in from the stretch the day falls in, as ADR-0025 decides (a firm item
+may hold an address). Add the requirement to the web app, with the traveller still free to choose
+another zone.
 
 *Releases:* Milestone Web-2.4.
 
@@ -625,24 +625,6 @@ page's `color-scheme`. A beta tester reported it on 2026-11-26, in
 give the field a clear border and focus. Check it in each of the three engines.
 
 *Releases:* Milestone Web-2.3.
-
-### TODO-48 — Give a firm item an address
-
-*Tags:* planner/itinerary, web/screens
-*Written:* 2026-11-26
-
-*Problem:* A firm item cannot say where it happens, such as a trailhead or a restaurant, unless it
-names a page that does.
-
-*Reason:* A firm item holds a title, a time, whether it is travel, and the page it names. Only a
-firm item of travel holds a place. A beta tester asked for it on 2026-11-26, in
-[issue 33](https://github.com/jamesberrypersonal/itinero/issues/33).
-
-*Proposal:* Decide whether a firm item holds an address of one line, shown on its card and opening a
-maps app, and whether that address fills in its zone, which would also do TODO-45. Then add the
-requirements to the itinerary and the screens.
-
-*Releases:* Milestone Planner-3.2.
 
 ### TODO-49 — Make clear that a firm item between two times can span days
 

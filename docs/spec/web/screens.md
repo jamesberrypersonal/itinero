@@ -239,6 +239,21 @@ was opened from. A `stale` refusal shows the item as it now stands, from `detail
 traveller's own, to start again from (`PLN:ITINERARY-F11`). A traveller with no calendar in their
 copy has no calendar in their bar, and its address opens the home page.
 
+A firm item's form, travel or not, has a field for its address, of one line, at most 200
+characters, which a line end cannot be typed into (`WEB:SCREENS-F15`). An empty field sends the
+item with no `address`, and the itinerary keeps an address as typed (`PLN:ITINERARY-F12`). A firm
+item's card shows its address below its title, as a link that opens in a new tab, with no referrer.
+The link searches for the address as written, put in the address of the link with
+`encodeURIComponent`:
+
+- on an Apple device, one whose `navigator.userAgent` names an iPhone, an iPad or a Mac, it is
+  `https://maps.apple.com/?q=` and the address, which the system opens in Apple Maps
+- on any other device it is `https://www.google.com/maps/search/?api=1&query=` and the address,
+  which Android opens in Google Maps, and a computer in the browser
+
+The address is sent to the maps app only when the traveller taps it (ADR-0025, a firm item may hold
+an address). With no connection the card still shows the address, and a long press selects it.
+
 ### 4.5 The bookings
 
 *Invoked from:* the bookings in a trip's bar, and a booking on the home page or the calendar.
@@ -489,6 +504,7 @@ and the packages of the trip's parts, which `spec/web/shell.md` §5 lists.
 | [WEB:SCREENS-F12](../../requirements/web/screens.md#^web-screens-f12) | The library, linked from every menu and from the list of trips, in §3.1, §4.2 and §4.10. |
 | [WEB:SCREENS-F13](../../requirements/web/screens.md#^web-screens-f13) | The checklists not yet done on the home page, before the traveller's first date (§4.3). |
 | [WEB:SCREENS-F14](../../requirements/web/screens.md#^web-screens-f14) | The editor for a new page, opened with the starting headings (§4.6). The headings are `planner/pages`. |
+| [WEB:SCREENS-F15](../../requirements/web/screens.md#^web-screens-f15) | A firm item's address on its form and its card, and the link to the device's maps app (§4.4). Holding the address is `planner/itinerary`. |
 | [PLN-F17](../../requirements/planner/planner.md#^pln-f17) | The library, its templates, saving a checklist as a template, and asking before a delete (§4, §4.10). Keeping the library is `web/trip-store`. |
 | [PLN-F18](../../requirements/planner/planner.md#^pln-f18) | Starting a checklist from a template, ticking, arranging and asking before a delete (§4, §4.10). |
 | [WEB:SCREENS-F10](../../requirements/web/screens.md#^web-screens-f10) | `/name` at the first sign-in, before an invitation is accepted (§4.1, §4.7), and changing the name in the settings (§4.8). |

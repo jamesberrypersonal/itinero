@@ -284,7 +284,7 @@ describe("The refusals of §3.2", () => {
   });
 
   test("a request with no Itinero-Api, or a number lower than the oldest answered, is refused with update-first", async () => {
-    for (const version of [undefined, "0", "one"]) {
+    for (const version of [undefined, "0", "1", "one"]) {
       const headers: Record<string, string> = version === undefined ? {} : { "Itinero-Api": version };
       const request = new Request("https://itinero.test/api/auth/nonce", { method: "POST", headers });
       await expectRefused(await answer(request), 426, "update-first");

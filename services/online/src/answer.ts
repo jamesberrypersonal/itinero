@@ -13,7 +13,7 @@ import type { Route } from "./route.ts";
 import { clearSession, sessionOf, setSession } from "./session.ts";
 
 /** The oldest number in `Itinero-Api` the online side answers (§4.7). It changes only with a deploy. */
-export const OLDEST_API = 1;
+export const OLDEST_API = 2;
 
 const accountRoutes: Route[] = [
   {

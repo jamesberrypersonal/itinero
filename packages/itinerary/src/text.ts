@@ -44,6 +44,7 @@ export function firmToJson(item: FirmItem): Json {
     json.travel = travel;
   }
   if (item.page !== undefined) json.page = item.page;
+  if (item.address !== undefined) json.address = item.address;
   return json;
 }
 

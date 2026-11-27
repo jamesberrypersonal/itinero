@@ -4,6 +4,18 @@ What has been done, newest first. The live work list, `TODO.md`, numbers each pi
 owed, such as TODO-9. An entry that finishes one of those items names it, so a reader can find what
 became of its number. `documentation-system.md` sets the rules.
 
+## 2026-11-27 — TODO-48, a firm item may hold an address
+
+*By:* James Berry, with Claude
+
+A firm item, travel or not, may hold an address of one line, such as the trailhead of a hike or
+the restaurant of a dinner (ADR-0025, a firm item may hold an address). The itinerary keeps it as
+written, and never looks it up (`PLN:ITINERARY-F12`). The calendar shows it on the item's card, and
+a tap opens the device's maps app (`WEB:SCREENS-F15`), once Milestone Web-2.4 builds it. A firm
+item that is not travel takes its time zone from the stretch the day falls in, which TODO-45 builds.
+The web app and the online side now read and send records at `API` 2, so an older version updates
+before it meets an address.
+
 ## 2026-11-27 — TODO-52, a new page starts with the headings a traveller researches under
 
 *By:* James Berry, with Claude

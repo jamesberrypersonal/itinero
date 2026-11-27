@@ -291,7 +291,7 @@ test("ACC-F6 — a traveller sees only the bookings that name them", async ({ br
   await expect(ana.page.getByText("LA 98")).toBeVisible();
   // Kim asking for the flight by its identifier is given nothing.
   const asked = await kim.page.evaluate(async (trip) => {
-    const answer = await fetch(`/api/trips/${trip}/bookings`, { method: "POST", headers: { "Itinero-Api": "1", "Content-Type": "application/json" }, body: JSON.stringify({ bookings: ["flight"] }) });
+    const answer = await fetch(`/api/trips/${trip}/bookings`, { method: "POST", headers: { "Itinero-Api": "2", "Content-Type": "application/json" }, body: JSON.stringify({ bookings: ["flight"] }) });
     return { status: answer.status, text: await answer.text() };
   }, trip);
   expect(asked.text).not.toContain("LA 98");
