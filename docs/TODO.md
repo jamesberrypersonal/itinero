@@ -792,9 +792,9 @@ which country, since each day names its countries only in a line of text.
 stretch alike, as a band with a dashed edge (`spec/web/screens.md` §4.4). A traveller with edit
 access to the calendar already sets each country's stretch, such as France from 1 to 5 June.
 
-*Proposal:* Give each country of a trip a colour of its own, the same on every device, and tint
-each day with the colours of the countries covering it, a day in two countries showing both.
-Decide whether the colours are chosen from the order the countries come in, or by a traveller,
-and keep the names beside the colours, in both themes.
+*Proposal:* Give each country of a trip a colour of its own, chosen by the web app from the order
+the countries come in, so it is the same on every device. Tint each day with the colours of the
+countries covering it, a day in two countries showing both, and keep the names beside the colours,
+in both themes.
 
 *Releases:* Milestone Web-2.8.
