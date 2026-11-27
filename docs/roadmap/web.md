@@ -223,3 +223,7 @@ Each part of a system is named by its address, the system and the part's own nam
 
 - Keep each member's insurance in the trip's copy on the device, and show it on the members screen,
   with a form in the settings for the traveller's own. Prove its requirements in the three engines.
+
+#### Milestone Web-2.8 — A calendar coloured by country
+
+- Tint each day of the calendar with the colours of the countries covering it. Do TODO-55.

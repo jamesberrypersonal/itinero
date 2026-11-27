@@ -3,7 +3,7 @@
 What needs active work, and what waits on a decision. `documentation-system.md` gives the list's
 rules. When an item is done, it leaves this list for `CHANGELOG.md` in the commit that finishes it.
 
-*Next free:* TODO-55
+*Next free:* TODO-56
 
 ## Tags
 
@@ -779,3 +779,22 @@ with the account, as its name is, and show them to every member of each trip the
 whatever their grants and with no connection, deciding it in a decision record scoped `access`.
 
 *Releases:* Milestone Access-2.1 and Milestone Web-2.7.
+
+### TODO-55 — Colour the calendar's days by the country each is in
+
+*Tags:* web/screens
+*Written:* 2026-11-26
+
+*Problem:* A traveller reading the calendar cannot see at a glance which stretch of the trip is in
+which country, since each day names its countries only in a line of text.
+
+*Reason:* The calendar shows each day's countries as their names (`PLN-F2`), and draws every
+stretch alike, as a band with a dashed edge (`spec/web/screens.md` §4.4). A traveller with edit
+access to the calendar already sets each country's stretch, such as France from 1 to 5 June.
+
+*Proposal:* Give each country of a trip a colour of its own, the same on every device, and tint
+each day with the colours of the countries covering it, a day in two countries showing both.
+Decide whether the colours are chosen from the order the countries come in, or by a traveller,
+and keep the names beside the colours, in both themes.
+
+*Releases:* Milestone Web-2.8.
