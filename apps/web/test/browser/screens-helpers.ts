@@ -49,11 +49,17 @@ export async function signIn(page: Page, person: Person): Promise<void> {
   expect(error).toBeUndefined();
 }
 
-/** Chooses a name on the name screen. */
+/**
+ * Chooses a name on the name screen, submitted with Enter from the field. The name screen is the
+ * first a new page is pressed on, and Firefox now and then loses the first press on a new page:
+ * Continue receives the mouse's release but never its press, so nothing is sent.
+ */
 export async function chooseName(page: Page, name: string): Promise<void> {
   await expect(page.locator('[data-screen="name"]')).toBeVisible();
-  await page.locator('input[name="name"]').fill(name);
-  await page.getByRole("button", { name: "Continue" }).click();
+  const field = page.locator('input[name="name"]');
+  await field.fill(name);
+  await expect(page.getByRole("button", { name: "Continue" })).toBeEnabled();
+  await field.press("Enter");
 }
 
 /** Signs a new traveller in on a device, and has them choose their name. */

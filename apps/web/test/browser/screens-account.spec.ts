@@ -84,6 +84,8 @@ test("WEB:SCREENS-F10 — a traveller signing in for the first time chooses thei
 
   // In the settings, Sam changes their name, and every screen shows it.
   await sam.goto(new URL("/settings", online.url).href);
+  // The field is filled with the name once it is read: typing before then is added to it.
+  await expect(sam.locator('input[name="name"]').first()).toHaveValue("Sam");
   await sam.locator('input[name="name"]').first().fill("Sam T");
   await sam.getByRole("button", { name: "Save" }).first().click();
   await expect(sam.getByRole("status").filter({ hasText: "Saved." })).toBeVisible();
