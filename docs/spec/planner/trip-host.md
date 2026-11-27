@@ -192,8 +192,10 @@ of §4.7 give it Node's, so that they time the code the Durable Object runs.
 
 The itinerary and the bookings need the world's time-zone rules, which `shared/trip-time` loads
 from a rules file. The Worker carries the rules file as one of its files. The Durable Object loads
-it the first time a change to the calendar or to a booking needs it, and not as it starts, so
-that catching a device up never waits on it. A change checked against these rules stands, whatever
+it as it starts, before it answers any request, as ADR-0008 says a server does. Reading a stored
+trip parses each of its times, so every request needs the rules, a catch-up and the list of trips
+included. The rules are held by the isolate, so a Durable Object that starts in an isolate where
+another has loaded them finds them loaded. A change checked against these rules stands, whatever
 rules a device holds (`PLN:ITINERARY-F6`).
 
 ### 4.2 Creating a trip
@@ -357,6 +359,9 @@ runs it from anywhere in the repository.
 
 - **Unit tests** cover each refusal of §3.2, and every check in the verification of each
   requirement the trip host claims.
+- **Wake tests** start a trip host in an isolate where no rules are loaded, and confirm it has
+  loaded them before its first request. They then confirm a trip holding an item at a time is
+  listed and caught up.
 - **Order tests** send changes to one trip from several connections at once, and confirm each is
   applied once, with its own sequence.
 - **Leak tests** catch up, as a traveller hidden from part of a trip, from every sequence the trip
@@ -371,8 +376,8 @@ runs it from anywhere in the repository.
   budget. The free plan holds a Worker to 10 milliseconds of processor time, and a Durable Object
   to none: Milestone Web-0.2's trial ran a Durable Object request of 374 milliseconds on the free
   plan, and loaded the rules file in 6 to 23 milliseconds. The budget keeps every request far
-  inside what the free plan allows. Loading the rules file is not counted, since it happens once
-  each time the Durable Object wakes, for a change that needs it. The cost tests run the trip host's
+  inside what the free plan allows. Loading the rules file is not counted, since it happens at most
+  once each time the Durable Object wakes, before its first request. The cost tests run the trip host's
   logic on Node.js, with Node's SQLite, with `node --test` after the rest of the suite. The Workers
   runtime keeps its clock still while code runs, so no test inside it can time code. Continuous
   integration runs on shared machines several times slower than a developer's or Cloudflare's, so
