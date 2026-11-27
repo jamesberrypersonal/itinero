@@ -210,3 +210,9 @@ Each part of a system is named by its address, the system and the part's own nam
 
 - Decide what the sheet holds for each traveller, and add its requirements. Do TODO-40.
 - Build the sheet in `web/screens`, and prove its requirements in the three engines.
+
+#### Milestone Web-2.6 — Travel advice
+
+- Add a screen of travel advice, the same on every trip, and its requirements. Do TODO-53.
+- Write the advice: the points to keep in mind on any trip, the apps and sites that help, and what
+  to do about a lost passport.

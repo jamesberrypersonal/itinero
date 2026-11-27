@@ -3,7 +3,7 @@
 What needs active work, and what waits on a decision. `documentation-system.md` gives the list's
 rules. When an item is done, it leaves this list for `CHANGELOG.md` in the commit that finishes it.
 
-*Next free:* TODO-53
+*Next free:* TODO-54
 
 ## Tags
 
@@ -743,3 +743,20 @@ the embassy's contacts and the local emergency numbers, and add the requirements
 and the web app's screens.
 
 *Releases:* Milestone Planner-3.1.
+
+### TODO-53 — Add a screen of travel advice, the same on every trip
+
+*Tags:* web/screens
+*Written:* 2026-11-26
+
+*Problem:* Advice a traveller needs on every trip, such as the apps and sites that help and what to
+do about a lost passport, has nowhere to live but a page copied into each trip.
+
+*Reason:* Every page belongs to one trip (`PLN-NR4`). Outside a trip, the screens show only the list
+of trips, the traveller's library of templates and their settings (`spec/web/screens.md` §3.1).
+
+*Proposal:* Add a screen, reached from each screen's menu as the library is, showing advice written
+in Markdown in the repository and served with each version, so that it reads with no connection.
+James Berry writes the advice itself.
+
+*Releases:* Milestone Web-2.6.
