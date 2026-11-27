@@ -6,8 +6,8 @@ The planner holds each trip: the calendar a traveller pencils it in on, the date
 and the pages where travellers write up their research. Phase 0 designs it: the requirements and
 specifications for the planner and its components, before any of it is built. Phase 1 builds it,
 one component at a time, starting from the components that depend on no other. Phase 2 designs and
-builds each traveller's checklists, and the library of templates they start from. Phase 3 acts on
-what the first beta testers found in the itinerary.
+builds each traveller's checklists, and the library of templates they start from. Phase 3 readies
+the pages and the itinerary for a first trip with the app.
 
 This roadmap also plans `shared/trip-time`, the component that holds the local dates and times of
 the planner's itinerary. The planner is the first system that needs that component.
@@ -168,9 +168,16 @@ the planner's itinerary. The planner is the first system that needs that compone
 The checks of the planner's requirements that need a phone or the screens wait in the web app's
 roadmap.
 
-### Phase 3 — The first beta
+### Phase 3 — Before a first trip
 
-#### Milestone Planner-3.1 — A firm item's address
+#### Milestone Planner-3.1 — A page's starting headings
+
+- Add the requirements for the headings every new page starts with to `planner/pages` and to the
+  web app's screens. Do TODO-52.
+- Build them in `@itinero/pages`, for a new trip's country pages, and prove their requirements by
+  their verification.
+
+#### Milestone Planner-3.2 — A firm item's address
 
 - Decide whether a firm item holds an address, and whether it fills in the item's time zone. Add
   the requirements to `planner/itinerary` and to the web app's screens. Do TODO-48.

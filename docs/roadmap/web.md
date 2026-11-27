@@ -5,8 +5,8 @@
 The web app is what travellers use on a computer or a phone, including reading a trip with no
 connection. Phase 0 designs it: its requirements, its components and their specifications, before
 any of it is built. It ends with a trial on a real phone, of what the design cannot settle on paper.
-Phase 1 builds it, one component at a time. Phase 2 acts on what the first beta testers found, in
-the screens and in the tests.
+Phase 1 builds it, one component at a time. Phase 2 readies the screens and the tests for a first
+trip with the app.
 
 The web app shows what the planner holds and what the access system allows. Its design follows the
 planner's, made in Milestone Planner-0.2, and the access system's, made in Milestone Access-0.1.
@@ -177,7 +177,7 @@ Each part of a system is named by its address, the system and the part's own nam
 
 ## Pending
 
-### Phase 2 — The first beta
+### Phase 2 — Before a first trip
 
 #### Milestone Web-2.1 — Browser tests that pass every run
 
@@ -185,9 +185,12 @@ Each part of a system is named by its address, the system and the part's own nam
 
 #### Milestone Web-2.2 — Moving through the pages
 
+**Waits on:** Milestone Planner-3.1
+
 - Let a page be dropped between two of its siblings in the tree. Do TODO-42.
 - List under a page's text the pages beneath it. Do TODO-43.
 - Keep open the branches of the tree a traveller opened. Do TODO-44.
+- Start the form of a new page with the starting headings, as Milestone Planner-3.1 specifies them.
 
 #### Milestone Web-2.3 — A firm item's form
 
@@ -197,10 +200,10 @@ Each part of a system is named by its address, the system and the part's own nam
 
 #### Milestone Web-2.4 — Where a firm item happens
 
-**Waits on:** Milestone Planner-3.1
+**Waits on:** Milestone Planner-3.2
 
-- Show a firm item's address on its form and its card, as Milestone Planner-3.1 specifies it.
-- Fill in the time zone of a firm item that is not travel, from what Milestone Planner-3.1
+- Show a firm item's address on its form and its card, as Milestone Planner-3.2 specifies it.
+- Fill in the time zone of a firm item that is not travel, from what Milestone Planner-3.2
   decides. Do TODO-45.
 
 #### Milestone Web-2.5 — A sheet to print
