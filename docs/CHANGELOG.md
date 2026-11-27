@@ -4,6 +4,32 @@ What has been done, newest first. The live work list, `TODO.md`, numbers each pi
 owed, such as TODO-9. An entry that finishes one of those items names it, so a reader can find what
 became of its number. `documentation-system.md` sets the rules.
 
+## 2026-11-27 — TODO-44, the tree keeps open the branches a traveller opened
+
+*By:* James Berry, with Claude
+
+The tree of a trip's pages opens with each branch the traveller left open on that device, after
+they leave the tree and after Itinero is closed (`WEB:SCREENS-F18`). Each trip keeps its own, and
+signing out forgets them all, as it does the trips.
+
+## 2026-11-27 — TODO-43, a page lists the pages beneath it, and those beside it
+
+*By:* James Berry, with Claude
+
+Under its text, a page lists the pages directly beneath it, in the tree's order, and then links to
+the page before it and the page after it among its siblings (`WEB:SCREENS-F17`). A traveller goes
+from one city to the next in one tap. A page the traveller may not see is neither listed nor
+linked.
+
+## 2026-11-27 — TODO-42, a page dropped in the tree goes before, after or beneath another
+
+*By:* James Berry, with Claude
+
+A page dragged in the tree goes before the page it is dropped on when let go on the top quarter of
+its row, after it on the bottom quarter, and beneath it in the middle (`WEB:SCREENS-F16`). A line
+or a highlight shows where it would go while it is held. The form of a new page now starts with the
+headings `@itinero/pages` gives (`WEB:SCREENS-F14`), which completes Milestone Web-2.2.
+
 ## 2026-11-27 — TODO-48, a firm item may hold an address
 
 *By:* James Berry, with Claude

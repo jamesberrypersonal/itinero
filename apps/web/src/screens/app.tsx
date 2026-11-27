@@ -6,6 +6,7 @@ import { UpdateRequired, UpdateWaiting } from "../shell/notices.tsx";
 import * as store from "../store/index.ts";
 import { ChooseName, Invitation, SignIn } from "./account.tsx";
 import { forgetNameOwed, nameOwed } from "./auth.ts";
+import { forgetOpenBranches } from "./branches.ts";
 import { BookingForm, Bookings, BookingView } from "./bookings.tsx";
 import { Calendar } from "./calendar.tsx";
 import { ChecklistScreen, Checklists, Library, TemplateScreen } from "./checklists.tsx";
@@ -32,6 +33,7 @@ export function App({ initialAccount }: { initialAccount: string | undefined }) 
     () =>
       store.onSignedOut(() => {
         forgetNameOwed();
+        forgetOpenBranches();
         setAccount(undefined);
         go("/sign-in", true);
       }),
@@ -104,7 +106,7 @@ function route(path: string, _search: URLSearchParams, account: string | undefin
           if (screen === "checklists") return item ? <ChecklistScreen copy={copy} id={item} /> : <Checklists copy={copy} />;
           if (screen === "graveyard") return <Graveyard copy={copy} />;
           if (screen === "pages") {
-            if (!item) return <PageTree copy={copy} account={account} />;
+            if (!item) return <PageTree key={copy.id} copy={copy} account={account} />;
             if (item === "new") return parent ? <PageEditor copy={copy} parent={parent} /> : <PageEditor copy={copy} />;
             if (action === "edit") return <PageEditor copy={copy} id={item} />;
             return <PageView copy={copy} account={account} id={item} />;

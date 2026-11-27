@@ -292,6 +292,69 @@ shows, and the traveller can copy it (ADR-0025, a firm item may hold an address)
 > **What does this buy?** On the day, a traveller reaches the trailhead or the restaurant from the
 > item itself, with no page written for it (`PLN-F3`).
 
+### WEB:SCREENS-F16 — A page dragged in the tree goes before, after or beneath the page it is dropped on
+
+A traveller who may move a page drags it in the tree onto another page's row. Dropped on the top
+of the row, the page goes before that page, among its siblings. Dropped on the bottom, it goes
+after that page. Dropped on the middle, it goes beneath that page, after the last page there. While
+the page is held, the tree shows where it would go. ^web-screens-f16
+
+- **Verification:** on a trip whose page Chile holds Santiago, Puerto Natales and Punta Arenas, in
+  that order, on a phone and on a computer,
+    - drag Punta Arenas onto the top of Santiago's row, and confirm Chile holds Punta Arenas,
+      Santiago and Puerto Natales, in that order
+    - drag Punta Arenas onto the bottom of Puerto Natales's row, and confirm it is last again
+    - drag Puerto Natales onto the middle of Santiago's row, and confirm it is beneath Santiago
+
+> **What does this buy?** A traveller puts a country's cities in the order they visit them, with
+> one gesture (`PLN-F8`).
+
+> **What of the bottom of a row whose branch is open?** The pages beneath it show directly below
+> it, so a page dropped there goes first beneath it, where the tree shows the line.
+
+### WEB:SCREENS-F17 — A page lists the pages beneath it, and links to the pages before and after it
+
+Under its text, a page lists the pages directly beneath it, in the tree's order, each opening that
+page. It then links to the page before it and the page after it, among the pages beside it in the
+tree, where it has them. A page the traveller may not see is neither listed nor linked. ^web-screens-f17
+
+- **Verification:** on a trip whose page Chile holds Santiago, Puerto Natales and Punta Arenas, in
+  that order,
+    - open Chile, and confirm it lists Santiago, Puerto Natales and Punta Arenas beneath its text
+    - tap Puerto Natales, and confirm it opens, linking to Santiago before it and Punta Arenas
+      after it
+    - tap Punta Arenas, and confirm it opens
+    - open Santiago, and confirm it links to Puerto Natales after it, and to no page before it
+    - as a traveller who may not see Puerto Natales, confirm Chile lists Santiago and Punta Arenas
+      alone, and Santiago links to Punta Arenas after it
+
+> **What does this buy?** A traveller goes from one city to the next in one tap, without going back
+> through the country's page or the tree (`PLN-F8`).
+
+> **Why the pages before and after, and not every page beside it?** A country of many cities would
+> repeat its whole list on each city. The page above already lists them, one tap back.
+
+### WEB:SCREENS-F18 — The tree keeps open the branches a traveller opened, on that device, until they sign out
+
+The tree of a trip's pages opens with each branch the traveller left open on that device. It keeps
+them after they leave the tree, and after Itinero is closed and opened again. Each trip keeps its
+own. Signing out forgets them. ^web-screens-f18
+
+- **Verification:** on two trips, each with a page Chile holding Santiago,
+    - on the first trip, open Chile's branch, open Santiago, go back to the tree, and confirm
+      Chile's branch is open
+    - open the second trip's tree, and confirm its Chile is folded
+    - close Itinero, open the first trip's tree again, and confirm Chile's branch is open
+    - fold Chile, open the tree again, and confirm Chile is folded
+    - open Chile's branch, sign out and back in, and confirm Chile is folded
+
+> **What does this buy?** A traveller working through one country's cities opens the country once
+> (`PLN-F8`).
+
+> **Why keep them after Itinero closes?** A phone closes an app in the background whenever it needs
+> the memory, so a traveller reading between two cities would find the tree folded again. The
+> branches hold nothing of the trip but which pages are open, and go with the trips on signing out.
+
 ---
 
 ## Non-functional requirements

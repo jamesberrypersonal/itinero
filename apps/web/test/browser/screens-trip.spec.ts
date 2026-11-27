@@ -15,10 +15,12 @@ import {
   invite,
   newTraveller,
   noSidewaysScroll,
+  open,
   pageChange,
   send,
   signIn,
 } from "./screens-helpers.ts";
+import { startingText } from "@itinero/pages";
 import { versionDir } from "./versions.ts";
 import { startWrangler, type Wrangler } from "./wrangler.ts";
 
@@ -322,6 +324,153 @@ test("WEB:SCREENS-F5 — pages show their text formatted, open the pages they li
   for (const t of [ana, sam]) await t.context.close();
 });
 
+/** Chile, with Santiago, Puerto Natales and Punta Arenas beneath it, in that order. */
+async function chileCities(page: Page, trip: string): Promise<void> {
+  await send(page, trip, "pages", pageChange({ op: "add", id: "santiago", title: "Santiago", at: { parent: "country-cl" } }));
+  await send(page, trip, "pages", pageChange({ op: "add", id: "natales", title: "Puerto Natales", at: { parent: "country-cl", after: "santiago" } }));
+  await send(page, trip, "pages", pageChange({ op: "add", id: "arenas", title: "Punta Arenas", at: { parent: "country-cl", after: "natales" } }));
+}
+
+/** The titles of the pages directly beneath a page, in the tree. */
+const underInTree = (page: Page, id: string) => page.locator(`[role="treeitem"]:has(> .tree-row[data-drop="${id}"]) > .tree > li > .tree-row .tree-title`);
+
+test("WEB:SCREENS-F14 — the form for a new page starts with the headings a traveller researches under", async ({ browser }) => {
+  const ana = await traveller(browser, "Ana", "computer");
+  const trip = await createTrip(ana.page, "Patagonia", "2026-12-01", "2026-12-20", ["CL"]);
+  const headings = ["General Info", "Getting Around", "Things to Do", "Places to See", "Food to Eat", "Dishes to Try", "Where to Eat", "Nightlife"];
+  const text = ana.page.locator('textarea[name="text"]');
+
+  await screen(ana.page, `/trips/${trip}/pages`, "pages");
+  await ana.page.locator('[data-action="new-page"]').click();
+  await expect(ana.page.locator('[data-screen="page-editor"]')).toBeVisible();
+  await expect(text).toHaveValue(startingText("page"));
+  for (const heading of headings) await expect(text).toHaveValue(new RegExp(`^#{2,3} ${heading}$`, "m"));
+  await expect(text).not.toHaveValue(/Emergency Info/);
+
+  await screen(ana.page, `/trips/${trip}/pages/country-cl`, "page");
+  await ana.page.getByRole("button", { name: "Add a page beneath" }).click();
+  await expect(ana.page.locator('[data-screen="page-editor"]')).toBeVisible();
+  await expect(text).toHaveValue(startingText("page"));
+
+  // Nightlife deleted and a line written under Getting Around are saved as left.
+  await ana.page.locator('input[name="title"]').fill("Puerto Natales");
+  await text.fill(startingText("page").replace("## Nightlife\n", "").replace("## Getting Around\n", "## Getting Around\n\nThe bus from Punta Arenas takes three hours.\n"));
+  await ana.page.locator('[data-action="save-page"]').click();
+  await expect(ana.page.locator('[data-screen="page"] .title')).toHaveText("Puerto Natales");
+  await expect(ana.page.locator(".prose h2")).toHaveText(["General Info", "Getting Around", "Things to Do", "Places to See", "Food to Eat"]);
+  await expect(ana.page.locator(".prose h3")).toHaveText(["Dishes to Try", "Where to Eat"]);
+  await expect(ana.page.locator(".prose p")).toHaveText("The bus from Punta Arenas takes three hours.");
+  await ana.context.close();
+});
+
+test("WEB:SCREENS-F16 — a page dragged in the tree goes before, after or beneath the page it is dropped on, on a phone and a computer", async ({ browser }) => {
+  for (const kind of ["phone", "computer"] as const) {
+    const ana = await traveller(browser, "Ana", kind);
+    const trip = await createTrip(ana.page, "Patagonia", "2026-12-01", "2026-12-20", ["CL"]);
+    await chileCities(ana.page, trip);
+    await screen(ana.page, `/trips/${trip}/pages`, "pages");
+    await ana.page.getByRole("button", { name: "Open Chile" }).click();
+    const handle = (id: string) => ana.page.locator(`[data-action="move-page"][data-page="${id}"]`);
+    const row = (id: string) => ana.page.locator(`.tree-row[data-drop="${id}"]`);
+
+    // Punta Arenas dropped on the top of Santiago's row goes before it.
+    await dragTo(ana.page, handle("arenas"), row("santiago"), 0.1);
+    await expect(underInTree(ana.page, "country-cl")).toHaveText(["Punta Arenas", "Santiago", "Puerto Natales"]);
+
+    // Dropped on the bottom of Puerto Natales's row, it goes after it, last.
+    await dragTo(ana.page, handle("arenas"), row("natales"), 0.9);
+    await expect(underInTree(ana.page, "country-cl")).toHaveText(["Santiago", "Puerto Natales", "Punta Arenas"]);
+
+    // Puerto Natales dropped on the middle of Santiago's row goes beneath it.
+    await dragTo(ana.page, handle("natales"), row("santiago"), 0.5);
+    await expect(underInTree(ana.page, "country-cl")).toHaveText(["Santiago", "Punta Arenas"]);
+    await expect(underInTree(ana.page, "santiago")).toHaveText(["Puerto Natales"]);
+    expect((await held(ana.page, trip)).pages.pages.find((p) => p.id === "natales")!.parent).toBe("santiago");
+    await ana.context.close();
+  }
+});
+
+test("WEB:SCREENS-F17 — a page lists the pages beneath it, and links to the pages before and after it", async ({ browser }) => {
+  const ana = await traveller(browser, "Ana", "phone");
+  const sam = await traveller(browser, "Sam", "phone");
+  const trip = await createTrip(ana.page, "Patagonia", "2026-12-01", "2026-12-20", ["CL"]);
+  await chileCities(ana.page, trip);
+  await join(ana, sam, trip);
+
+  await screen(ana.page, `/trips/${trip}/pages/country-cl`, "page");
+  await expect(ana.page.locator("[data-beneath]")).toHaveText(["Santiago", "Puerto Natales", "Punta Arenas"]);
+  await ana.page.locator('[data-beneath="natales"]').click();
+  await expect(ana.page.locator('[data-screen="page"] .title')).toHaveText("Puerto Natales");
+  await expect(ana.page.locator('[data-neighbour="before"]')).toContainText("Santiago");
+  await expect(ana.page.locator('[data-neighbour="after"]')).toContainText("Punta Arenas");
+  await expect(ana.page.locator("[data-beneath]")).toHaveCount(0);
+  await ana.page.locator('[data-neighbour="after"]').click();
+  await expect(ana.page.locator('[data-screen="page"] .title')).toHaveText("Punta Arenas");
+
+  await screen(ana.page, `/trips/${trip}/pages/santiago`, "page");
+  await expect(ana.page.locator('[data-neighbour="after"]')).toContainText("Puerto Natales");
+  await expect(ana.page.locator('[data-neighbour="before"]')).toHaveCount(0);
+  await noSidewaysScroll(ana.page);
+
+  // A traveller who may not see Puerto Natales is neither shown it beneath Chile nor beside Santiago.
+  await send(ana.page, trip, "grants", JSON.stringify({ op: "page", page: "natales", level: "none", traveller: sam.account }));
+  await catchUp(sam.page);
+  await screen(sam.page, `/trips/${trip}/pages/country-cl`, "page");
+  await expect(sam.page.locator("[data-beneath]")).toHaveText(["Santiago", "Punta Arenas"]);
+  await screen(sam.page, `/trips/${trip}/pages/santiago`, "page");
+  await expect(sam.page.locator('[data-neighbour="after"]')).toContainText("Punta Arenas");
+  await expect(sam.page.locator('[data-screen="page"]')).not.toContainText("Puerto Natales");
+  for (const t of [ana, sam]) await t.context.close();
+});
+
+test("WEB:SCREENS-F18 — the tree keeps open the branches a traveller opened, on the device, until they sign out", async ({ browser }) => {
+  const ana = await traveller(browser, "Ana", "computer");
+  const trip = await createTrip(ana.page, "Patagonia", "2026-12-01", "2026-12-20", ["CL"]);
+  const other = await createTrip(ana.page, "Atacama", "2027-03-01", "2027-03-10", ["CL"]);
+  for (const id of [trip, other]) await send(ana.page, id, "pages", pageChange({ op: "add", id: "santiago", title: "Santiago", at: { parent: "country-cl" } }));
+  const opened = (page: Page) => page.getByRole("button", { name: "Fold Chile" });
+  const folded = (page: Page) => page.getByRole("button", { name: "Open Chile" });
+
+  // Chile opened, then Santiago opened, and the tree is open at Chile again.
+  await screen(ana.page, `/trips/${trip}/pages`, "pages");
+  await folded(ana.page).click();
+  await ana.page.locator(".tree-title", { hasText: "Santiago" }).click();
+  await expect(ana.page.locator('[data-screen="page"] .title')).toHaveText("Santiago");
+  await ana.page.locator('[data-screen="page"] .back').click();
+  await expect(ana.page.locator('[data-screen="page"] .title')).toHaveText("Chile");
+  await ana.page.locator('[data-screen="page"] .back').click();
+  await expect(ana.page.locator('[data-screen="pages"]')).toBeVisible();
+  await expect(opened(ana.page)).toBeVisible();
+
+  // The other trip keeps its own.
+  await screen(ana.page, `/trips/${other}/pages`, "pages");
+  await expect(folded(ana.page)).toBeVisible();
+
+  // Itinero closed and opened again opens the tree with Chile open.
+  await ana.page.close();
+  const page = await open(ana.context, online, `/trips/${trip}/pages`);
+  await expect(page.locator('[data-screen="pages"]')).toBeVisible();
+  await expect(opened(page)).toBeVisible();
+
+  // Folded, it stays folded.
+  await opened(page).click();
+  await screen(page, `/trips/${trip}/pages`, "pages");
+  await expect(folded(page)).toBeVisible();
+
+  // Signing out forgets every branch opened.
+  await folded(page).click();
+  await expect(opened(page)).toBeVisible();
+  await screen(page, "/settings", "settings");
+  await page.locator('[data-action="sign-out"]').click();
+  await expect(page.locator('[data-screen="sign-in"]')).toBeVisible();
+  expect(await page.evaluate(() => localStorage.getItem("itinero-open-branches"))).toBeNull();
+  await signIn(page, { sub: `${engine}-Ana-${count}`, email: ana.email, name: "Ana" });
+  await expect(page.locator('[data-screen="trips"]')).toBeVisible();
+  await screen(page, `/trips/${trip}/pages`, "pages");
+  await expect(folded(page)).toBeVisible();
+  await ana.context.close();
+});
+
 test("WEB:SCREENS-F7 — every time is written in the clock the traveller chooses, which stays after signing out", async ({ browser }) => {
   const ana = await traveller(browser, "Ana", "phone");
   const trip = await createTrip(ana.page, "Patagonia", "2026-12-01", "2026-12-20", ["CL"]);
@@ -387,6 +536,17 @@ async function drag(page: Page, from: ReturnType<Page["locator"]>, to: ReturnTyp
   await page.mouse.down();
   const b = (await to.boundingBox())!;
   await page.mouse.move(b.x + b.width / 2, b.y + b.height / 2, { steps: 12 });
+  await page.mouse.up();
+}
+
+/** Drags an element onto another, letting go at a fraction of the way down it, as a finger or a mouse would. */
+async function dragTo(page: Page, from: ReturnType<Page["locator"]>, to: ReturnType<Page["locator"]>, down: number): Promise<void> {
+  await from.scrollIntoViewIfNeeded();
+  const start = (await from.boundingBox())!;
+  await page.mouse.move(start.x + start.width / 2, start.y + start.height / 2);
+  await page.mouse.down();
+  const b = (await to.boundingBox())!;
+  await page.mouse.move(b.x + b.width / 2, b.y + b.height * down, { steps: 12 });
   await page.mouse.up();
 }
 

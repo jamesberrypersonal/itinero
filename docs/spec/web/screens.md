@@ -286,8 +286,29 @@ an `add`, or a `change` with the revision the screen was opened from, as the boo
 
 *Invoked from:* the pages in a trip's bar, a link, a search, and the home page's country.
 
-The tree of pages is the pages' `tree` of the copy, each branch folded or open. A traveller with
-edit access drags a page to move it. The move is sent with no `agreed`. Where the copy held online
+The tree of pages is the pages' `tree` of the copy, each branch folded or open. The branches a
+traveller opens are kept for each trip, in `localStorage`, as a list of the pages whose branches are
+open, and the tree opens with them. Folding a branch takes its page from the list. Each time the
+list is written, it drops any page the copy no longer holds. Signing out deletes every trip's list,
+as it does the trips (`WEB:SCREENS-F18`). A move that puts a page beneath another opens that page's
+branch.
+
+A traveller with edit access drags a page by its handle to move it. Where it drops follows the row
+under the pointer as it is let go (`WEB:SCREENS-F16`):
+
+- **The row's top quarter** puts the page before that row's page: after the sibling above it, or
+  first among its siblings where none is. A line above the row shows it while the page is held.
+- **The row's bottom quarter** puts the page after that row's page. Where that row's branch is
+  open and holds pages, it puts the page first beneath it, since those pages show directly below
+  it. A line below the row shows it.
+- **The middle** puts the page beneath that row's page, after the last page already there, and the
+  row is highlighted.
+- **The top of the tree**, a row shown only while a page is held, puts it at the top of the trip,
+  after the last page there.
+
+The screen sends the `move` with the `parent` and the `after` these give. It sends nothing where
+the page would keep its place, and the copy held online refuses a page moved beneath itself, with
+the refusal's message shown. The move is sent with no `agreed`. Where the copy held online
 refuses it with `agree-first`, the screen says how many more travellers will see the page, from
 `details.count`. It sends the move again, with `agreed` set to that number, once the traveller
 confirms (`ACC-F9`). The device never counts them itself, because a copy holds only its own
@@ -304,6 +325,12 @@ micromark gives the page as HTML, and the screens then go through its links. Whe
 trip. It opens that page where the page is in the copy's tree. It shows Page deleted where the
 copy's `graveyard` lists the page, which the traveller could see as it was deleted, and otherwise
 Page not available, without a title (`PLN-F9`, `ACC-F8`). Every other link opens in a new tab, with no referrer.
+
+Under its text, a page lists the pages directly beneath it in the copy's tree, under the heading
+Pages beneath, in order, each opening its page. Below that, Previous and Next link to the pages
+before and after it among its siblings in the tree, where it has them. The copy's tree holds only
+the pages the traveller may see, so a page they may not see is neither listed nor linked
+(`WEB:SCREENS-F17`).
 
 A page is edited as its Markdown text, in a plain text box, with the formatted page beside it on a
 computer and a tab to switch on a phone. Saving sends a `write` with the revision the editor was
@@ -471,6 +498,7 @@ the country that holds it.
 | The traveller's style | `localStorage`, `itinero-style` | The device's browser |
 | Finding the country on opening | `localStorage`, `itinero-find-country` | The device's browser |
 | A name not yet chosen | `localStorage`, `itinero-name-owed`, deleted once the name is chosen or on signing out | The device's browser |
+| The open branches of each trip's tree | `localStorage`, `itinero-open-branches`, deleted on signing out | The device's browser |
 
 The screens' runtime dependencies are Preact, micromark and its extension for GitHub's Markdown,
 and the packages of the trip's parts, which `spec/web/shell.md` §5 lists.
@@ -505,6 +533,9 @@ and the packages of the trip's parts, which `spec/web/shell.md` §5 lists.
 | [WEB:SCREENS-F13](../../requirements/web/screens.md#^web-screens-f13) | The checklists not yet done on the home page, before the traveller's first date (§4.3). |
 | [WEB:SCREENS-F14](../../requirements/web/screens.md#^web-screens-f14) | The editor for a new page, opened with the starting headings (§4.6). The headings are `planner/pages`. |
 | [WEB:SCREENS-F15](../../requirements/web/screens.md#^web-screens-f15) | A firm item's address on its form and its card, and the link to the device's maps app (§4.4). Holding the address is `planner/itinerary`. |
+| [WEB:SCREENS-F16](../../requirements/web/screens.md#^web-screens-f16) | Dropping a page before, after or beneath a row, by where on the row it is let go (§4.6). Keeping the order given is `planner/pages`. |
+| [WEB:SCREENS-F17](../../requirements/web/screens.md#^web-screens-f17) | Pages beneath, and Previous and Next, under a page's text, from the copy's tree (§4.6). |
+| [WEB:SCREENS-F18](../../requirements/web/screens.md#^web-screens-f18) | The open branches kept for each trip, and deleted on signing out (§4.6, §5.2). |
 | [PLN-F17](../../requirements/planner/planner.md#^pln-f17) | The library, its templates, saving a checklist as a template, and asking before a delete (§4, §4.10). Keeping the library is `web/trip-store`. |
 | [PLN-F18](../../requirements/planner/planner.md#^pln-f18) | Starting a checklist from a template, ticking, arranging and asking before a delete (§4, §4.10). |
 | [WEB:SCREENS-F10](../../requirements/web/screens.md#^web-screens-f10) | `/name` at the first sign-in, before an invitation is accepted (§4.1, §4.7), and changing the name in the settings (§4.8). |

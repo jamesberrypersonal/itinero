@@ -519,58 +519,6 @@ app's screens.
 
 *Releases:* Milestone Web-2.5.
 
-### TODO-42 — Reorder pages among their siblings by dragging
-
-*Tags:* web/screens, planner/pages
-*Written:* 2026-11-26
-
-*Problem:* A page dragged in the tree goes beneath the page it is dropped on, after the last page
-already there, so a traveller cannot put one city before another in the same country.
-
-*Reason:* The pages screen offers one drop for each row, which nests the page, and never sends the
-`after` that a move between two siblings needs. The pages themselves keep whatever order the changes
-give them (`PLN:PAGES-F1`). A beta tester reported it on 2026-11-26, in
-[issue 26](https://github.com/jamesberrypersonal/itinero/issues/26).
-
-*Proposal:* Let a page be dropped between two rows as well as onto one, as the checklists screen
-lets an item be, and test it on a phone and a computer.
-
-*Releases:* Milestone Web-2.2.
-
-### TODO-43 — List a page's pages beneath it, under its text
-
-*Tags:* web/screens
-*Written:* 2026-11-26
-
-*Problem:* A page shows only its own title and text, so a traveller going from one city to the next
-goes back twice, through the country page to the tree.
-
-*Reason:* The pages screen shows the tree and each page apart (`spec/web/screens.md` §4.6), and the
-page view was built with no list of the pages under it. A beta tester reported it on 2026-11-26, in
-[issue 27](https://github.com/jamesberrypersonal/itinero/issues/27) and
-[issue 29](https://github.com/jamesberrypersonal/itinero/issues/29).
-
-*Proposal:* Show under a page's text a link to each page beneath it, in the tree's order. Decide
-whether a page also links to its siblings, or to the one before and after it.
-
-*Releases:* Milestone Web-2.2.
-
-### TODO-44 — Keep open the branches of the tree a traveller opened
-
-*Tags:* web/screens
-*Written:* 2026-11-26
-
-*Problem:* Every branch of the pages tree folds again whenever the tree is shown, so a traveller
-working through one country's cities opens the country again each time.
-
-*Reason:* The tree keeps which branches are open only while it is on screen. A beta tester reported
-it on 2026-11-26, in [issue 28](https://github.com/jamesberrypersonal/itinero/issues/28).
-
-*Proposal:* Keep the open branches for each trip on the device. Decide whether they stay open after
-the app is closed, or only while it runs.
-
-*Releases:* Milestone Web-2.2.
-
 ### TODO-45 — Fill in the time zone of a firm item that is not travel
 
 *Tags:* web/screens, web/places
