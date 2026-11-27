@@ -255,6 +255,43 @@ each opening that checklist. From their first date on, the home page lists no ch
 > **Why not once the trip has started?** On the road the home page is about the day: its bookings
 > and the country. A checklist is still a tap away in the trip's bar.
 
+### WEB:SCREENS-F14 — The form for a new page starts with the headings a traveller researches under
+
+The form for a new page, at the top of the trip or beneath another page, opens with its text
+holding the headings the pages component gives a new page (`PLN:PAGES-F11`). The traveller writes
+beneath them, rewrites them or deletes them before saving, and the page saved holds the text as
+the traveller left it. ^web-screens-f14
+
+- **Verification:** on a trip with the page Chile,
+    - open the form for a new page at the top of the trip, and confirm its text holds General Info,
+      Getting Around, Things to Do, Places to See, Food to Eat, with Dishes to Try and Where to Eat
+      beneath it, and Nightlife, and not Emergency Info
+    - open the form for a new page beneath Chile, and confirm its text holds the same headings
+    - delete Nightlife, write a line under Getting Around, save, and confirm the page shows the
+      headings and the line as left
+
+> **What does this buy?** Every city and every place a traveller adds starts laid out like the
+> trip's country pages, so the research is in the same place on each (`PLN-F7`).
+
+### WEB:SCREENS-F15 — A firm item's address shows on its card, and opens the device's maps app
+
+The form of a firm item, travel or not, offers an address of one line, which the traveller may
+leave empty. The calendar shows a firm item's address on its card. A tap on the address opens the
+device's maps app, searching for the address as written. With no connection, the address still
+shows, and the traveller can copy it (ADR-0025, a firm item may hold an address). ^web-screens-f15
+
+- **Verification:** on a trip with Chile pencilled from 1 to 10 December,
+    - add a hike on 4 December with the address "Hotel Las Torres, Torres del Paine", and confirm
+      its card shows the address
+    - add a dinner on 4 December with the address left empty, and confirm its card shows none
+    - on an iPhone, tap the hike's address, and confirm Apple Maps opens, searching for it
+    - on a computer that is not a Mac, tap it, and confirm Google Maps opens, searching for it
+    - with no connection, confirm the hike's card still shows its address
+    - change the hike's address, save, and confirm the card shows the new one
+
+> **What does this buy?** On the day, a traveller reaches the trailhead or the restaurant from the
+> item itself, with no page written for it (`PLN-F3`).
+
 ---
 
 ## Non-functional requirements

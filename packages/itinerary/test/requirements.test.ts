@@ -12,6 +12,7 @@ import {
   tripFromText,
   tripToText,
   type Change,
+  type FirmItem,
   type Trip,
 } from "../src/index.ts";
 import { NEW_YORK, PARIS, addFirm, applyAll, day, exact, item, loadFixture, loadNewestRules, ok, pencil, refusal, stretch, time, trip } from "./helpers.ts";
@@ -369,5 +370,57 @@ describe("PLN:ITINERARY-F11 — a change to a firm item made from an older versi
     const second: Change = { op: "move", id: "france", first: june(3), last: june(7) };
     const result = ok(apply(seen, second));
     assert.deepEqual([result.stretches[0]!.first, result.stretches[0]!.last], [june(3), june(7)]);
+  });
+});
+
+describe("PLN:ITINERARY-F12 — a firm item may hold an address of one line, kept as written", () => {
+  const PUNTA_ARENAS = "America/Punta_Arenas";
+  const address = "Hotel Las Torres, Torres del Paine";
+  const hike = (extra: Partial<FirmItem> = { address }) => item("hike", "Hike to Base Torres", exact(PUNTA_ARENAS, june(4), "08:00"), extra);
+  const start = () => applyAll(trip(), addFirm(hike()));
+
+  test("a hike at 08:00 Punta Arenas time, with its address, reads back unchanged, with its time zone as given", () => {
+    const t = start();
+    assert.deepEqual(t.firm[0], { ...hike(), revision: 1 });
+    assert.equal(t.firm[0]!.address, address);
+    assert.equal(t.firm[0]!.when.kind === "exact" && t.firm[0]!.when.zone, PUNTA_ARENAS);
+  });
+
+  test("a dinner with no address reads back with none", () => {
+    const t = applyAll(trip(), addFirm(item("dinner", "Dinner", exact(PUNTA_ARENAS, june(4), "20:00"))));
+    assert.equal("address" in t.firm[0]!, false);
+  });
+
+  test("the hike changed to have no address reads back with none", () => {
+    const t = applyAll(start(), { op: "change-firm", item: hike({}), base: 1 });
+    assert.equal("address" in t.firm[0]!, false);
+  });
+
+  test("an address of spaces alone, of 201 characters, or holding a line end is refused, with the reason, and the trip is unchanged", () => {
+    const t = start();
+    for (const [bad, reason] of [
+      ["   ", /address is empty/],
+      ["x".repeat(201), /address is longer than 200 characters/],
+      ["Hotel Las Torres\nTorres del Paine", /address holds a line end/],
+      ["Hotel Las Torres\r", /address holds a line end/],
+    ] as const) {
+      const refused = refusal(apply(t, addFirm(item("other", "Other", exact(PUNTA_ARENAS, june(5), "08:00"), { address: bad }))));
+      assert.equal(refused.code, "bad-text");
+      assert.match(refused.message, reason);
+    }
+    assert.equal(tripToText(t), tripToText(start()));
+    ok(apply(t, addFirm(item("other", "Other", exact(PUNTA_ARENAS, june(5), "08:00"), { address: "x".repeat(200) }))));
+  });
+
+  test("an address is kept exactly as given, with nothing trimmed", () => {
+    const t = applyAll(trip(), addFirm(hike({ address: "  Muelle Prat, Valparaíso " })));
+    assert.equal(t.firm[0]!.address, "  Muelle Prat, Valparaíso ");
+  });
+
+  test("the trip written as text and read back keeps the hike's address unchanged", () => {
+    const t = start();
+    const text = tripToText(t);
+    assert.match(text, /"address":"Hotel Las Torres, Torres del Paine"/);
+    assert.deepEqual(ok(tripFromText(text)), t);
   });
 });

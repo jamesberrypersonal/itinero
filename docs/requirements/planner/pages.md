@@ -223,6 +223,34 @@ now stands, so that neither text is lost. ^pln-pages-f10
 > **Does a rename or a move need the version too?** No. A title is short, and a later rename or
 > move simply stands.
 
+### PLN:PAGES-F11 — A new page starts with the headings a traveller researches under
+
+The pages component gives the text a new page starts with, for a caller to offer. It holds a
+heading for each of General Info, Getting Around, Things to Do, Places to See, Food to Eat and
+Nightlife, in that order, with Dishes to Try and Where to Eat beneath Food to Eat. The text for a
+country's page holds one more heading, Emergency Info, last. Each page a new trip's pages start with
+for a country holds the text for a country's page. The headings are ordinary text, which a
+traveller rewrites or deletes like any other. ^pln-pages-f11
+
+- **Verification:**
+    - start a trip's pages with Chile, and confirm the page Chile holds the headings General Info,
+      Getting Around, Things to Do, Places to See, Food to Eat, with Dishes to Try and Where to Eat
+      beneath it, Nightlife, then Emergency Info
+    - take the text for a new page, and confirm it holds the same headings, without Emergency Info
+    - confirm each heading shows as a heading in a Markdown reader, such as GitHub's
+    - rewrite Chile's text with Nightlife deleted, and confirm it is accepted, and reads back
+      unchanged
+
+> **What does this buy?** A traveller finds each country's and each city's research laid out the
+> same way, and never types the same headings again for each (`PLN-F7`, `PLN-F10`).
+
+> **Why does only a country's page hold Emergency Info?** The embassy and the emergency numbers
+> are the country's, so a city's page beneath it would repeat them. The travellers fill them in,
+> since the planner holds no facts about a country (`PLN-NR6`).
+
+> **Does this give a page a structure?** No. A page's text is still kept exactly as written
+> (`PLN:PAGES-F2`), so a traveller who deletes every heading keeps a page with none.
+
 ---
 
 ## Non-functional requirements

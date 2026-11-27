@@ -8,7 +8,7 @@
 /** Set only by the browser tests, to build a version newer than the one in the source. */
 declare const __ITINERO_API__: number | undefined;
 
-export const API: number = typeof __ITINERO_API__ === "number" ? __ITINERO_API__ : 1;
+export const API: number = typeof __ITINERO_API__ === "number" ? __ITINERO_API__ : 2;
 
 /** The header every request to the online side carries `API` in. */
 export const API_HEADER = "Itinero-Api";

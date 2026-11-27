@@ -256,6 +256,29 @@ since, the itinerary refuses the change, and gives the item as it now stands. ^p
 > A firm item's form changes every value at once, so a second form saved over the first would undo
 > changes its traveller never saw.
 
+### PLN:ITINERARY-F12 — A firm item may hold an address of one line, kept as written
+
+A firm item, travel or not, may hold an address, or hold none. The itinerary keeps an address
+exactly as the caller gives it, character for character. It refuses an address that is empty once
+trimmed, that is longer than 200 characters, or that holds a line end, and says why. It never
+looks an address up, or finds a time zone from it (ADR-0025, a firm item may hold an address). ^pln-itinerary-f12
+
+- **Verification:** on a new trip,
+    - add a hike on 4 June 2026, at 08:00 Punta Arenas time, with the address "Hotel Las Torres,
+      Torres del Paine", and confirm it reads back unchanged, with its time zone as given
+    - add a dinner with no address, and confirm it reads back with none
+    - change the hike to have no address, and confirm it reads back with none
+    - add a firm item whose address is spaces alone, one of 201 characters, and one holding a line
+      end, and confirm each is refused, with the reason, and the trip is unchanged
+    - write the trip as text, read it back, and confirm the hike's address is unchanged
+
+> **What does this buy?** A traveller finds where a hike starts or a dinner is booked on the item
+> itself, with no page written for it (`PLN-F3`).
+
+> **Why not fill in the zone from the address?** Finding where an address is needs a service and a
+> connection. The planner works with no connection, so the zone comes from the stretch the day
+> falls in, which the web app gives (ADR-0025).
+
 ---
 
 ## Non-functional requirements

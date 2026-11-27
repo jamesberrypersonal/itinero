@@ -80,7 +80,8 @@ type Way = "flight" | "train" | "bus" | "ferry" | "car" | "other";
 type Travel = { from: Place; to: Place; by: Way; arrive?: When };
 
 type FirmItem = { id: Id; revision: number;      // set by apply (§4.2)
-                  title: string; when: When; travel?: Travel; page?: PageId };
+                  title: string; when: When; travel?: Travel; page?: PageId;
+                  address?: string };            // one line, kept as written (§4.4)
 
 type Dates = { first: LocalDate; last: LocalDate };
 type Trip = { format: 1; id: Id; name: string; revision: number; dates?: Dates;
@@ -126,7 +127,7 @@ show it to the traveller.
 |---|---|---|
 | `malformed` | every function returning a `Result` | The fields or the text are not in the form §3.3 or §5.1 gives |
 | `bad-id` | `newTrip`, `apply` | An identifier outside the form of `Id` |
-| `bad-text` | `newTrip`, `apply` | A name or title that is empty once trimmed, or longer than 200 characters |
+| `bad-text` | `newTrip`, `apply` | A name, a title or an address that is empty once trimmed, or longer than 200 characters, or an address holding a line end |
 | `invalid-date` | `apply`, `layout` | A `LocalDate` that does not exist, or falls outside 1970-01-01 to 9999-12-31 |
 | `stretch-order` | `apply` | A stretch whose last day is before its first |
 | `stretch-length` | `apply` | A stretch of more than 366 days |
@@ -222,6 +223,8 @@ accepted (ADR-0013).
 
 - its title is checked with `bad-text`
 - its `page`, where present, has the form of an `Id`, or it is refused with `bad-id`
+- its `address`, where present, is checked as a title is, and is also refused with `bad-text`
+  where it holds a line feed or a carriage return (`PLN:ITINERARY-F12`)
 - a `when` or an `arrive` of kind `day` has a real date in range, or is refused with
   `invalid-date`
 - a `when` or an `arrive` of trip-time's kind `date` or `tbd` is refused with `date-only`
@@ -236,6 +239,10 @@ Travel certainly arrives before it leaves when:
 - both `when` and `arrive` are trip-time values, and trip-time's `span(when, arrive)` refuses with
   `span-order`
 - either is a `Day`, and the last local date of `arrive` is before the local date of `when`
+
+An address is kept exactly as the caller gives it, with nothing trimmed. Nothing looks it up, and
+nothing finds a time zone from it (ADR-0025, a firm item may hold an address). A caller leaves the
+field out for a firm item with no address, and a `change-firm` leaving it out removes it.
 
 `travelDuration(item)` gives trip-time's `duration` of the span from `when` to `arrive`. It gives
 `undefined` for an item that is not travel, has no `arrive`, or has a `Day` at either end.
@@ -344,7 +351,14 @@ between tokens. The example below is spread over lines only to be read.
       },
       "when": "2026-06-05T10:00[Europe/Paris]"
     },
-    { "id": "c9d0", "revision": 1, "title": "Move on from Lyon", "when": { "day": "2026-06-03" } }
+    { "id": "c9d0", "revision": 1, "title": "Move on from Lyon", "when": { "day": "2026-06-03" } },
+    {
+      "address": "Place Bellecour, Lyon",
+      "id": "d4e2",
+      "revision": 1,
+      "title": "Walking tour",
+      "when": "2026-06-02T10:00[Europe/Paris]"
+    }
   ],
   "format": 1,
   "id": "6f1e",
@@ -407,6 +421,7 @@ TypeScript and Node's type definitions.
 | [PLN:ITINERARY-F7](../../requirements/planner/itinerary.md#^pln-itinerary-f7) | Every check made before anything is changed, in §4.2. |
 | [PLN:ITINERARY-F8](../../requirements/planner/itinerary.md#^pln-itinerary-f8) | The text form of §4.7 and §5.1. |
 | [PLN:ITINERARY-F11](../../requirements/planner/itinerary.md#^pln-itinerary-f11) | A firm item's `revision`, the `base` of a `change-firm`, and the `stale` refusal, in §3.3 and §4.2. |
+| [PLN:ITINERARY-F12](../../requirements/planner/itinerary.md#^pln-itinerary-f12) | A firm item's `address`, its checks in §4.4, and its text form in §5.1. Showing it, and filling in the zone, is `web/screens`. |
 | [PLN:ITINERARY-F10](../../requirements/planner/itinerary.md#^pln-itinerary-f10) | The `trip-dates` and `traveller-dates` changes, and `travellerDates`, in §4.9. |
 | [PLN-F14](../../requirements/planner/planner.md#^pln-f14) | A trip's dates and each traveller's, with their refusals (§4.9). Setting them is `web/screens`, and letting only the creator set the trip's is `planner/trip-host`. |
 | [PLN:ITINERARY-F9](../../requirements/planner/itinerary.md#^pln-itinerary-f9) | The `page` field of `Stretch` and `FirmItem` in §3.3, kept unchecked (§2). Whether the page is in the tree or the graveyard is `planner/pages`, in §4.6 of `spec/planner/pages.md`. |

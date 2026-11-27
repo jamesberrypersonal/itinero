@@ -40,7 +40,7 @@ export type Online = {
 
 export async function startOnline(dir: string): Promise<Online> {
   let served = dir;
-  let oldestApi = 1;
+  let oldestApi = 2;
   let published = new Map<string, string>();
   let up = true;
   const requests: string[] = [];
@@ -83,7 +83,7 @@ export async function startOnline(dir: string): Promise<Online> {
   return {
     // localhost, not 127.0.0.1: every engine treats it as a secure origin, as service workers need.
     url: `http://localhost:${port}`,
-    publish(next, oldest = 1) {
+    publish(next, oldest = 2) {
       served = next;
       oldestApi = oldest;
       published = new Map();

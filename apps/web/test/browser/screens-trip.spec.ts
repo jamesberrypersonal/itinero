@@ -686,7 +686,7 @@ test("WEB:SHELL-F5 — while a new version is required, every trip opens, no scr
 
   // Meanwhile Sam renames Chile. Then a version is deployed whose online side answers nothing older.
   await send(sam.page, trip, "pages", pageChange({ op: "rename", id: "country-cl", title: "Chile, renamed meanwhile" }));
-  await online.publish(versionDir("three"), { OLDEST_API: "2" });
+  await online.publish(versionDir("three"), { OLDEST_API: "3" });
   await catchUp(ana.page);
   await expect(ana.page.locator('[data-shell="update-required"]')).toBeVisible();
   for (const id of [trip, other]) {
@@ -709,7 +709,7 @@ test("WEB:SHELL-F5 — while a new version is required, every trip opens, no scr
   await expect(ana.page.locator('[data-shell="update-required"]')).toHaveCount(0);
   await screen(ana.page, `/trips/${trip}/pages`, "pages");
   await expect(ana.page.getByText("Chile, renamed meanwhile")).toBeVisible({ timeout: 10_000 });
-  await online.publish(versionDir("one"), { OLDEST_API: "1" });
+  await online.publish(versionDir("one"), { OLDEST_API: "2" });
   for (const t of [ana, sam]) await t.context.close();
 });
 
@@ -729,7 +729,7 @@ test("WEB:SCREENS-NFR1, BKG-NFR1, BKG:LIST-NFR2 — a trip of 500 pages and 300 
   await ana.page.evaluate(async ({ trip, changes }) => {
     for (let at = 0; at < changes.length; at += 8) {
       await Promise.all(
-        changes.slice(at, at + 8).map((c) => fetch(`/api/trips/${trip}/changes`, { method: "POST", headers: { "Itinero-Api": "1", "Content-Type": "application/json" }, body: JSON.stringify(c) })),
+        changes.slice(at, at + 8).map((c) => fetch(`/api/trips/${trip}/changes`, { method: "POST", headers: { "Itinero-Api": "2", "Content-Type": "application/json" }, body: JSON.stringify(c) })),
       );
     }
   }, { trip, changes });

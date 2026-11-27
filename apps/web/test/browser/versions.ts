@@ -15,7 +15,7 @@ export const versionsDir = join(appRoot, "test-results", "versions");
 export const VERSIONS = {
   one: { mark: "one" },
   two: { mark: "two" },
-  three: { mark: "three", api: "2" },
+  three: { mark: "three", api: "3" },
 } as const;
 
 export type VersionName = keyof typeof VERSIONS;

@@ -83,6 +83,10 @@ export function checkFirm(item: FirmItem): void {
   checkId(item.id, "firm item's identifier");
   checkText(item.title, "firm item's title");
   if (item.page !== undefined) checkId(item.page, "firm item's page");
+  if (item.address !== undefined) {
+    checkText(item.address, "firm item's address");
+    if (/[\n\r]/.test(item.address)) fail("bad-text", "The firm item's address holds a line end, and an address is one line.");
+  }
   const travel = item.travel;
   if (!travel) return;
   checkPlace(travel.from);

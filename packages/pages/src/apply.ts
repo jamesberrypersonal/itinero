@@ -1,6 +1,7 @@
 // newPages (spec §4.1) and apply (§4.2 to §4.5).
 
 import { between } from "./order.ts";
+import { startingText } from "./starting.ts";
 import { Index } from "./tree.ts";
 import { attempt, fail, type Applied, type Change, type Id, type Page, type Pages, type Result, type Where } from "./types.ts";
 
@@ -98,7 +99,7 @@ export function newPages(trip: Id, countries: readonly { id: Id; title: string; 
       if (made.some((p) => p.id === id)) duplicate(id);
       const title = checkTitle(text(r.title, "page's title"));
       order = between(order, undefined);
-      made.push(makePage({ id, trip, revision: 1, order, title, text: "", country: text(r.country, "page's country") }));
+      made.push(makePage({ id, trip, revision: 1, order, title, text: startingText("country"), country: text(r.country, "page's country") }));
     }
     return makePages(trip, made);
   });

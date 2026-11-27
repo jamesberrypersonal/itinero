@@ -584,9 +584,9 @@ filled in from a list of places, kept on the phone one country at a time). A fir
 asks for a place at each end, but any other firm item asks for no place. A beta tester reported it
 on 2026-11-26, in [issue 30](https://github.com/jamesberrypersonal/itinero/issues/30).
 
-*Proposal:* Decide where the zone comes from when the item names no place, such as the stretch the
-day falls in, or the page the item names. Then add the requirement to the web app, with the
-traveller still free to choose another zone.
+*Proposal:* Fill the zone in from the stretch the day falls in, as ADR-0025 decides (a firm item
+may hold an address). Add the requirement to the web app, with the traveller still free to choose
+another zone.
 
 *Releases:* Milestone Web-2.4.
 
@@ -625,24 +625,6 @@ page's `color-scheme`. A beta tester reported it on 2026-11-26, in
 give the field a clear border and focus. Check it in each of the three engines.
 
 *Releases:* Milestone Web-2.3.
-
-### TODO-48 — Give a firm item an address
-
-*Tags:* planner/itinerary, web/screens
-*Written:* 2026-11-26
-
-*Problem:* A firm item cannot say where it happens, such as a trailhead or a restaurant, unless it
-names a page that does.
-
-*Reason:* A firm item holds a title, a time, whether it is travel, and the page it names. Only a
-firm item of travel holds a place. A beta tester asked for it on 2026-11-26, in
-[issue 33](https://github.com/jamesberrypersonal/itinero/issues/33).
-
-*Proposal:* Decide whether a firm item holds an address of one line, shown on its card and opening a
-maps app, and whether that address fills in its zone, which would also do TODO-45. Then add the
-requirements to the itinerary and the screens.
-
-*Releases:* Milestone Planner-3.2.
 
 ### TODO-49 — Make clear that a firm item between two times can span days
 
@@ -699,27 +681,6 @@ first trip with the app, so they wait here rather than in a milestone.
 with the deploy that carries the next IANA release.
 
 *Releases:* Nothing is planned for it yet.
-
-### TODO-52 — Start every new page with the headings a traveller researches under
-
-*Tags:* planner/pages, web/screens
-*Written:* 2026-11-26
-
-*Problem:* Every new page starts empty, so a traveller lays out the same headings again for each
-country and city they research.
-
-*Reason:* The pages component starts each country's page with no text (`PLN:PAGES-F6`), and the
-form for a new page starts empty too. The pages component imposes no structure on a page's text
-(`PLN:PAGES-F2`), which headings a traveller can rewrite or delete still keep. A heading for
-emergency information still leaves the facts to the travellers, as `PLN-NR6` keeps them.
-
-*Proposal:* Start each new trip's country pages, and every page added from the form, with the
-headings General Info, Getting Around, Things to Do, Places to See, Food to Eat, with Dishes to Try
-and Where to Eat beneath it, and Nightlife. Give the country pages one more, Emergency Info, for
-the embassy's contacts and the local emergency numbers, and add the requirements to `planner/pages`
-and the web app's screens.
-
-*Releases:* Milestone Planner-3.1.
 
 ### TODO-53 — Add a screen of travel advice, the same on every trip
 

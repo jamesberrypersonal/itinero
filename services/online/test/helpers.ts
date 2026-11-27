@@ -12,7 +12,7 @@ export type Call = { method?: string; body?: unknown; session?: string; headers?
 
 /** Sends a request to the Worker, as the web app of the current version would. */
 export async function api(path: string, call: Call = {}): Promise<Response> {
-  const headers = new Headers({ "Itinero-Api": "1", ...call.headers });
+  const headers = new Headers({ "Itinero-Api": "2", ...call.headers });
   if (call.session !== undefined) headers.set("Cookie", `itinero_session=${call.session}`);
   const init: RequestInit = { method: call.method ?? "GET", headers };
   if (call.body !== undefined) {

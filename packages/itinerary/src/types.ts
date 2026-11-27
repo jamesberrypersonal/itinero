@@ -22,7 +22,8 @@ export type When = Day | TripTime;
 export type Way = "flight" | "train" | "bus" | "ferry" | "car" | "other";
 export type Travel = { from: Place; to: Place; by: Way; arrive?: When };
 
-export type FirmItem = { id: Id; revision: number; title: string; when: When; travel?: Travel; page?: PageId };
+/** A firm item. `address` is one line, kept as written, and never looked up (spec §4.4). */
+export type FirmItem = { id: Id; revision: number; title: string; when: When; travel?: Travel; page?: PageId; address?: string };
 
 export type Dates = { first: LocalDate; last: LocalDate };
 export type TravellerDates = { traveller: Id; dates: Dates };

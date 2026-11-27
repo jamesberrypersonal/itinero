@@ -14,6 +14,26 @@ the planner's itinerary. The planner is the first system that needs that compone
 
 ## Completed
 
+### Phase 3 — Before a first trip
+
+#### Milestone Planner-3.2 — A firm item's address
+
+- A firm item may hold an address of one line, kept as written, and a firm item that is not travel
+  takes its time zone from the stretch the day falls in (ADR-0025, a firm item may hold an
+  address). `planner/itinerary` and the web app's screens have its requirements.
+- `@itinero/itinerary` holds the address. Its test suite proves `PLN:ITINERARY-F12` by the
+  verification it carries.
+- The web app and the online side read and send records at `API` 2, so an older version is asked
+  to update before it meets an address.
+
+#### Milestone Planner-3.1 — A page's starting headings
+
+- `planner/pages` and the web app's screens have the requirements for the headings every new page
+  starts with: General Info, Getting Around, Things to Do, Places to See, Food to Eat, with Dishes
+  to Try and Where to Eat beneath it, and Nightlife. A country's page holds Emergency Info too.
+- `@itinero/pages` gives the starting text, and starts each new trip's country pages with it. Its
+  test suite proves `PLN:PAGES-F11` by the verification it carries.
+
 ### Phase 2 — Checklists
 
 #### Milestone Planner-2.2 — Checklists built
@@ -167,18 +187,3 @@ the planner's itinerary. The planner is the first system that needs that compone
 
 The checks of the planner's requirements that need a phone or the screens wait in the web app's
 roadmap.
-
-### Phase 3 — Before a first trip
-
-#### Milestone Planner-3.1 — A page's starting headings
-
-- Add the requirements for the headings every new page starts with to `planner/pages` and to the
-  web app's screens. Do TODO-52.
-- Build them in `@itinero/pages`, for a new trip's country pages, and prove their requirements by
-  their verification.
-
-#### Milestone Planner-3.2 — A firm item's address
-
-- Decide whether a firm item holds an address, and whether it fills in the item's time zone. Add
-  the requirements to `planner/itinerary` and to the web app's screens. Do TODO-48.
-- Build the address in `@itinero/itinerary`, and prove its requirements by their verification.

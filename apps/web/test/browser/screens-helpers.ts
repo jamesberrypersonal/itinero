@@ -37,7 +37,7 @@ export async function open(context: BrowserContext, online: Wrangler, path = "/"
 export async function signIn(page: Page, person: Person): Promise<void> {
   await expect(page.locator('[data-screen="sign-in"]')).toBeVisible();
   const nonce = await page.evaluate(async () => {
-    const answer = await fetch("/api/auth/nonce", { method: "POST", headers: { "Itinero-Api": "1" } });
+    const answer = await fetch("/api/auth/nonce", { method: "POST", headers: { "Itinero-Api": "2" } });
     return ((await answer.json()) as { nonce: string }).nonce;
   });
   const token = await idToken(person, nonce);

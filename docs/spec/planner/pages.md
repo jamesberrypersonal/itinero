@@ -93,6 +93,7 @@ type Hit = { page: Page; around: readonly { before: string; match: string; after
 
 function newPages(trip: Id,
                   countries: readonly { id: Id; title: string; country: string }[]): Result<Pages>;
+function startingText(kind: "page" | "country"): string;
 function apply(pages: Pages, change: Change): Result<Applied>;
 
 function tree(pages: Pages): readonly Branch[];
@@ -160,15 +161,43 @@ Behaviour crossing every operation:
 ### 4.1 newPages
 
 *Porcelain:* `newPages(trip, countries)` gives a trip's pages, with one page at the top for each
-country given, in the order given, each with no text (`PLN:PAGES-F6`). With no countries, it gives
-no pages. The caller makes each identifier, as `crypto.randomUUID()` does, and takes each title from
-the itinerary's `countries()`, which `spec/planner/itinerary.md` §5.2 gives.
+country given, in the order given, each with the text `startingText("country")` gives
+(`PLN:PAGES-F6`, `PLN:PAGES-F11`). With no countries, it gives no pages. The caller makes each
+identifier, as `crypto.randomUUID()` does, and takes each title from the itinerary's `countries()`,
+which `spec/planner/itinerary.md` §5.2 gives.
 
 Each page made for a country keeps that country's code in `country`. No change sets or clears it,
 so it stays through a rename and a move (ADR-0014, a trip opens on a home page for each traveller).
 `countryPage(pages, country)` gives the page in the tree whose `country` is the code given, or
 `undefined` where there is none. Where two pages share a code, it gives the first in the order of
 the tree. The home page calls it with the country the phone is in.
+
+`startingText(kind)` gives the Markdown a new page starts with (`PLN:PAGES-F11`). For `"page"` it
+is these headings, each on a line of its own, with one empty line between each and the next:
+
+```markdown
+## General Info
+
+## Getting Around
+
+## Things to Do
+
+## Places to See
+
+## Food to Eat
+
+### Dishes to Try
+
+### Where to Eat
+
+## Nightlife
+```
+
+For `"country"` it is the same, with `## Emergency Info` after Nightlife. Each text ends with one
+line end. The headings start at the second level, because the web app shows the page's title above
+its text as the first. The empty line before each heading makes every Markdown reader take it for
+a heading. An `add` with no text still gives a page with no text (§4.2), so the web app's form for
+a new page offers `startingText("page")` itself.
 
 ### 4.2 apply
 
@@ -407,6 +436,7 @@ development dependencies are `@itinero/trip-time`, TypeScript and Node's type de
 | [PLN:PAGES-F7](../../requirements/planner/pages.md#^pln-pages-f7) | `search` and its folding, in §4.7. |
 | [PLN:PAGES-F8](../../requirements/planner/pages.md#^pln-pages-f8) | The text form of §4.8 and §5.1, and `forPhone`. |
 | [PLN:PAGES-F10](../../requirements/planner/pages.md#^pln-pages-f10) | The `base` of a `write`, and the `stale` refusal, in §3.3 and §4.2. |
+| [PLN:PAGES-F11](../../requirements/planner/pages.md#^pln-pages-f11) | `startingText`, and the text of each page `newPages` makes, in §4.1. Offering it in the form for a new page is `web/screens`. |
 | [PLN-F16](../../requirements/planner/planner.md#^pln-f16) | The `stale` refusal, with the text as it stands (§4.2). Showing both texts is `web/screens`. |
 | [PLN:PAGES-F9](../../requirements/planner/pages.md#^pln-pages-f9) | `apply`, with every check made before anything is changed, in §4.2. Applying each change to the copy held online is `planner/trip-host`. |
 | [PLN:PAGES-NFR1](../../requirements/planner/pages.md#^pln-pages-nfr1) | No network code, and never reading the device (§4, §6). Keeping a copy on the phone is `web/trip-store`. |
