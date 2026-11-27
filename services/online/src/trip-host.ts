@@ -13,8 +13,9 @@ export const ACCOUNT_HEADER = "Itinero-Account";
 export const REMOVED = 4403;
 
 /**
- * Loads the time-zone rules the Worker carries into trip-time, the first time a change needs them,
- * and not as the Durable Object starts, so that catching a device up never waits on them (§4.1).
+ * Loads the time-zone rules the Worker carries into trip-time, as the Durable Object starts (§4.1).
+ * Reading a stored trip parses its times, so every request needs them, a catch-up included. The
+ * rules are the isolate's: once one Durable Object in it has loaded them, the rest find them loaded.
  */
 async function ensureRules(): Promise<void> {
   if (rulesVersion() !== undefined) return;
@@ -34,15 +35,14 @@ export class TripHost extends DurableObject<Cloudflare.Env> {
       transaction: (run) => storage.transactionSync(run),
     };
     this.core = new TripCore(sql);
+    void ctx.blockConcurrencyWhile(ensureRules);
   }
 
-  async create(trip: string, creator: Member, name: string, first: string, last: string, countries: readonly string[]): Promise<Result<true>> {
-    await ensureRules();
+  create(trip: string, creator: Member, name: string, first: string, last: string, countries: readonly string[]): Result<true> {
     return this.core.create(trip, creator, name, first, last, countries);
   }
 
-  async change(who: Member, target: Target, change: string, agreed?: number): Promise<Result<{ sequence: number }>> {
-    if (target === "calendar" || target === "bookings") await ensureRules();
+  change(who: Member, target: Target, change: string, agreed?: number): Result<{ sequence: number }> {
     const result = this.core.change(who, target, change, agreed);
     if (result.ok) this.tell(result.value.sequence);
     return result;
@@ -79,8 +79,7 @@ export class TripHost extends DurableObject<Cloudflare.Env> {
   }
 
   /** An `add` or a `remove` from access/membership (§4.3). A removed traveller's sockets are closed. */
-  async grant(change: GrantChange): Promise<Result<{ sequence: number }>> {
-    await ensureRules();
+  grant(change: GrantChange): Result<{ sequence: number }> {
     const result = this.core.grant(change);
     if (!result.ok) return result;
     const { sequence, removed } = result.value;
