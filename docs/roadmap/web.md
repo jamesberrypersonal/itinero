@@ -216,3 +216,10 @@ Each part of a system is named by its address, the system and the part's own nam
 - Add a screen of travel advice, the same on every trip, and its requirements. Do TODO-53.
 - Write the advice: the points to keep in mind on any trip, the apps and sites that help, and what
   to do about a lost passport.
+
+#### Milestone Web-2.7 — A traveller's insurance
+
+**Waits on:** Milestone Access-2.1
+
+- Keep each member's insurance in the trip's copy on the device, and show it on the members screen,
+  with a form in the settings for the traveller's own. Prove its requirements in the three engines.

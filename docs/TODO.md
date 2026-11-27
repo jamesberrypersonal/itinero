@@ -3,7 +3,7 @@
 What needs active work, and what waits on a decision. `documentation-system.md` gives the list's
 rules. When an item is done, it leaves this list for `CHANGELOG.md` in the commit that finishes it.
 
-*Next free:* TODO-54
+*Next free:* TODO-55
 
 ## Tags
 
@@ -760,3 +760,22 @@ in Markdown in the repository and served with each version, so that it reads wit
 James Berry writes the advice itself.
 
 *Releases:* Milestone Web-2.6.
+
+### TODO-54 — Let each traveller give their travel insurance, for everyone on their trips to see
+
+*Tags:* access/accounts, access/permissions, web/screens
+*Written:* 2026-11-26
+
+*Problem:* When a traveller is hurt or ill, another traveller on the trip has no way to find their
+insurer and policy number to give a hospital.
+
+*Reason:* An account holds only its traveller's address and the name other travellers see them by
+(`ACC-F13`). A traveller could write their insurance on a page, but a page belongs to one trip, and
+an admin chooses who sees it.
+
+*Proposal:* Let each traveller fill in, only if they choose, preset fields with no free text: their
+insurer, their policy number, the insurer's emergency line and the dates the cover runs. Keep them
+with the account, as its name is, and show them to every member of each trip the traveller is on,
+whatever their grants and with no connection, deciding it in a decision record scoped `access`.
+
+*Releases:* Milestone Access-2.1 and Milestone Web-2.7.
